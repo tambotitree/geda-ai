@@ -1,0 +1,1244 @@
+==============================================
+ 'gschem and Friends' Electronic Design Suite
+==============================================
+
+Copyright (C) 1998-2020 gEDA Developers
+
+This file documents important user-visible changes in gEDA/gaf.  For
+more information, please consult the `ChangeLog' file.
+
+
+Notable changes in gEDA/gaf 1.10.2
+==================================
+
+* Re-added support for Guile 2.0 and some older library versions
+
+
+Notable changes in gEDA/gaf 1.10.1
+==================================
+
+* Migrated to Guile 2.2.
+
+* Duplicate symbols in a library are now only considered an error if
+  one of the symbols has been referenced.
+
+* Fixed handling of packages and nets in multi-page subschematics.
+
+* gnetlist ignores the `--report-gui' option and falls back to console
+  output if the Python GTK bindings are missing.
+
+* Added power symbols based on the newer netname= convention to the
+  standard symbol library.
+
+* Moved visibility columns in the attribute editor to the left side.
+
+* When promoting an attribute manually in the attribute editor, the
+  new attribute is now visible by default.
+
+* After pasting objects, the newly-pasted objects are selected.
+
+* Page size and orientation can be changed in the print dialog.
+
+* Removed the option `bus-ripper-rotation'; both symmetric and
+  non-symmetric bus rippers are now placed correctly.
+
+* Fixed bugs:
+  - lp-1878401  Geda* Will Not Compile On Fedora 32
+  - lp-1853617  incorrectly placing the component attribute on the printout
+  - lp-1849621  Fix 'parentheses around assignment used as truth value' war...
+  - lp-1848838  Some Guile tests fail in geda 1.10.0
+  - lp-1848837  geda 1.10.0 fails to build
+  - lp-1783027  Install fails if INSTALL doesn't specify full path of insta...
+  ...and several more which never made it to the bugtracker.
+
+
+Notable changes in gEDA/gaf 1.10.0
+==================================
+
+General changes
+---------------
+
+* Added the library "xornstorage" and the Python package "gaf" as a
+  (currently quite minimal) way to access gEDA/gaf functionality from
+  outside of gschem.  These are on the long term intended to replace
+  libgeda, making the core gEDA/gaf functionality available as a
+  library to both gschem and other applications.
+
+* Added command-line tool `xorn' for low-level schematic and symbol
+  file manipulation.
+
+* Added experimental XML file format (currently only supported by
+  gnetlist and the `xorn' command line utility).
+
+* Objects colors are limited to 21 (up to and including FREESTYLE4).
+  More recent colors added for GUI purposes can be set in colormaps
+  but aren't automatically added to the file format specification.
+
+* The symbol directories "gnetman", "verilog", and "vhdl" are now
+  installed to the new location PREFIX/share/gEDA/extra-sym/.  This
+  allows adding the default library with "component-library-search".
+
+* The directory to which gEDA programs write log transcripts can be
+  changed by setting the environment variable `GEDALOG' (the default
+  being ~/.gEDA/logs/).
+
+* All tests now use the parallel test harness, speeding up `make
+  check' runs considerably when used with multiple jobs (-jN).
+
+* Fixed bugs:
+  - lp-698501   gschem file preview function renders files twice
+  - lp-698524   gnetlist ignores duplicate inout-symbols
+  - lp-698768   No ordering requirement for attribute attach/detach
+  - lp-701637   gschem "Scheme Interaction" window
+  - lp-1266316  gschem exits on color value < 0
+  - lp-1367462  undo messes with the view even though undo panzoom is disabled
+  - lp-1492834  These docked dialogs should remember their size
+  - lp-1496899  gschem: dock window wishlist
+  - lp-1497659  gnetlist -v -g spice-sdb generates bad verbose netlist
+  - lp-1514209  gschem: multiattrib Value textview improvements
+  - lp-1532794  Build fails on missing colors.h
+  - lp-1576918  Memory and file handle leak in libgeda
+  - lp-1590757  partlist3 yields wrong netlist in some cases
+  - lp-1625474  xorn does not build on FreeBSD
+  - lp-1661961  "format not a string literal and no format arguments" warning
+  ...and a lot more which never made it to the bugtracker.
+
+
+gschem changes
+--------------
+
+* Tool windows are now "dockable", i.e., they can be either used as
+  modal/non-modal dialogs or docked to the edges of the main window.
+
+* The action mechanism used for menu items, tool buttons, and key
+  bindings has been redesigned, making several improvements possbile:
+
+  - Actions can now be used interchangeably in the main menu, toolbar,
+    context menu, and keymap.  They are defined in a single place
+    ("actions.c" for C actions and "builtins.scm" for Guile actions),
+    including metadata like name, icon, and tooltip.
+
+  - Menu items and tool buttons representing options have a little
+    check or radio box beside them indicating their current state.
+
+  - Menu items and tool buttons are greyed out while they can't be
+    used.
+
+  - Toolbar and context menu are customizable.
+
+  - Menu and toolbar definitions are simple Scheme variables, allowing
+    users to add actions to the menu without having to copy the menu
+    definition.  Actions are represented in Scheme code as applicable
+    SMOBs, allowing them to be called like procedures while retaining
+    the action information necessary for rendering the menus/toolbar.
+
+  - "Repeat Last Action" (usually bound to ".") uses the same logic as
+    the middle mouse button repeat action does, i.e., only actions
+    that "make sense" qualify for repeating.
+
+* The menus, toolbar, and keymap have been revamped to more closely
+  resemble the "standards" for a desktop application.  Some actions
+  have been assigned more accessible or memorable keys.
+
+* Added a command-line option "--control-fd=stdin|FD" which allows
+  remote-controlling gschem via a file descriptor.  This is intended
+  for project managers like Igor2's "genxproj".
+
+* File operations have been consolidated: opening, saving, closing a
+  file and so on should now behave identical regardless of how the
+  operation was initiated.  Related improvements:
+
+  - When opening multiple files, the first one (instead of the last
+    one) is initially shown.
+
+  - The symversion= mismatch dialog is shown whenever a symversion=
+    mismatch is detected while opening a file, not just for files
+    specified on the command line.
+
+  - gschem now keeps track of which files are untitled, listing them
+    as "untitled page" instead of assigning them a temporary filename.
+    The Scheme procedure `page-filename' returns #f for untitled
+    pages.
+
+  - "Save all" used to produce spurious "untitled_1.sch" files.  This
+    was due to three issues working together, which have been fixed:
+
+    - When gschem is invoked without specifying filenames on the
+      command line, an untitled page is created.  This page wasn't
+      removed when opening files, staying invisibly in the background.
+
+    - "Save all" didn't check which files needed saving but just
+      unconditionally saved anything.
+
+    - "Save all" didn't behave like the interactive "Save", asking for
+      a filename for untitled pages, but just saved each page to its
+      internally stored filename.
+
+  - The file chooser dialog on "Open" and "Save As" is now always
+    opened in the current directory.
+
+  - When opening a file which is already open but has since been
+    changed on disk, the user is asked whether to reload the file.
+
+  - When the currently edited file has been modified on disk, a
+    notification is shown offering the user to reload the file.
+
+  - If the user enters a filename with an unusual extension while
+    saving, a confirmation dialog is shown.
+
+  - When trying to open a file or descend into a subschematic which
+    doesn't exist, gschem now offers to create a new file with that
+    name.
+
+* Some improvements have been made to the multi-attribute editor:
+
+  - Editing a single attribute invokes the multi-attribute editor.
+
+  - Trying to edit an inherited attribute edits the attached attribute
+    with the same name if it exists, or promotes the attribute and
+    edits its value if it doesn't exist yet.
+
+  - Attributes are shown in the order in which they are listed in the
+    configuration (via "attribute-name").
+
+* Attaching and detaching attributes now work as expected:
+
+  - "Attributes / Attach Attributes" used to depend on the order in
+    which objects were selected, taking the first selected object as
+    the base object to attach attributes to, regardless of its type.
+    Now, the selected objects are searched for a base object of
+    suitable type, and only if exactly one is found, the attributes
+    are attached to it.
+
+  - "Attributes / Detach Attributes" used to work on selected
+    components and nets, detaching all attributes from these objects.
+    It now works on the selected *attributes*, allowing the user to
+    selectively detach specific attributes while leaving the rest
+    attached.
+
+* "Lock Component" used to lock components as well as non-component
+  objects, bringing the latter into an invalid state that would last
+  until the next "Undo" (or until the page was saved and loaded back
+  from file manually).
+
+  This has been fixed: "Lock Component" and "Unlock Component" now
+  only operate on components, changing the color of attached
+  attributes as they used to do with any selected text.
+
+* The "Light Color Scheme" (V L) selected from the menu now has a
+  truly white background.  For compatibility, selecting the "lightbg"
+  colormap in gschemrc loads the old, light-gray color scheme; the new
+  color scheme can be selected as "whitebg".
+
+* The library window has been made fit to be used as a dock window:
+
+  - When the dialog is resized to be taller than a certain aspect
+    ratio, it switches automatically to a stacked layout where the
+    preview and attribute panes are located below the symbol selector.
+
+  - While in stacked layout, the bottom panes can be expanded and
+    collapsed to give more room to the symbol selector.
+
+  - The window is automatically refreshed on library updates.
+
+* Symbol editing has been improved:
+
+  - The page can now be scrolled to negative coordinates, making it
+    feasible to edit symbols without moving them away from the origin,
+    then translating them back.  This also allows to consciously
+    choose something that makes sense for the symbol as the location
+    of the origin.
+
+  - The coordinate origin is now indicated with slightly darker grid
+    lines.  (This can be enabled/disabled via "View / Show Origin".)
+
+  - The "Symbol Translate" action has been replaced with "Place
+    Origin" which lets the user select the position of the origin
+    interactively.
+
+* Added support for back-annotation from pcb-rnd.
+
+* Double-clicking a subschematic component enters the subschematic.
+
+* Right-clicking in path mode works as expected.
+
+* Pins are allowed to have zero length.
+
+* "File / Revert" only asks for confirmation if the file has been
+  modified.
+
+* The "repeat" function of the middle mouse button now evaluates
+  actions at the current mouse position.
+
+* Mouse gestures work properly again.
+
+* libstroke has been merged into gEDA/gaf.  This removes the
+  dependency on libstroke and makes mouse gestures always available.
+
+* Added new mouse gestures for page navigation:
+  - swiping left goes to the previous, swiping right to the next page
+  - swiping right and then down enters a subschmatic
+  - swiping left and then down enters a symbol
+  - swiping up and sideways (in any combination) goes back to the
+    parent schematic
+
+* The coordinate dialog has been replaced with an option to display
+  the coordinates in the status bar.
+
+* Added further menu items:
+
+  - "Add / Last Component" (A C)
+
+  - "Object / Toggle Text Overbar" (T O)
+
+  - "View / Show Menubar" (V M)
+  - "View / Show Toolbar" (V T)
+  - "View / Show Scrollbars" (V S)
+
+  - "Tools / Select Locked Objects" (T L)
+
+* Fixed various issues related to undo/redo:
+
+  - The menu items "Edit / Undo" and "Edit / Redo" now show the name
+    of the action that will be undone/redone.
+
+  - The current viewport used to be restored on undo/redo regardless
+    of the "undo-panzoom" setting (which prevents pan and zoom
+    operations from being recorded in the undo history).  This turned
+    out to confuse users, so if the setting is enabled, undo/redo now
+    doesn't change the viewport at all.
+
+  - The default mode ("undo-panzoom" disabled) now works correctly.
+
+  - After undoing the first action which changed a page, the page will
+    be considered "unchanged" again.
+
+  - Adding an attribute, changing the slot of a component, replacing
+    the contents of a picture, and selecting "Pan" from the menu used
+    not to be correctly un-doable.  This has been fixed.
+
+  - Selecting a picture to be added doesn't cause the page to be
+    treated as changed any more.
+
+  - "Object / Update Symbol" can't be undone with the current undo/
+    redo system, so it isn't listed as something that can be undone
+    any more.
+
+  - Several actions (attach/detach attribute, text actions, embed/
+    unembed, lock/unlock component, show/hide specific text) changed
+    the undo history even in the case that they didn't have any
+    effect.  This has been fixed.
+
+  - Several actions (attach/detach, embed/unembed) didn't update the
+    "changed" flag correctly; this has been fixed.
+
+
+gnetlist changes
+----------------
+
+* Refactored gnetlist:
+
+  - gnetlist is now part of the Python package "gaf" and uses the new
+    libraries instead of libgeda to work with gEDA files.
+
+  - Netlist backends can also be written in Python.
+
+  - When reading broken schematics and/or symbols, gnetlist doesn't
+    silently fail or produce bad output any more.  Conversely, this
+    means gnetlist has become more picky about input files: whenever
+    it occurs something that is likely to result in bad output, it
+    issues a warning or an error.
+
+  - In case there should be any problems with the refactored codebase,
+    the "old" gnetlist is still available as "gnetlist-legacy".
+
+* If gnetlist is invoked with the `pcbfwd' backend or the new option
+  `--report-gui', errors and warnings are displayed in a GUI dialog
+  instead of printing them to stderr.
+
+* There are new semantics for power and I/O port symbols:
+
+  - Power symbols can now use a netname=NET instead of a net=NET:1
+    attribute.  This allows using the attribute value as a visible
+    label, removing the need for power symbols for individual rails.
+
+  - I/O port symbols in subschematics can now use a portname=PORT
+    instead of a refdes=PORT attribute to distinguish them from
+    regular components.  This allows checking that unconnected port
+    symbols aren't silently included in the netlist as components.
+
+* Hierarchical schematics can now use a simple form of parametrization
+  where the instantiating component contains an attribute of the form
+  `param=NAME=VALUE' and some attribute value in the subschematic
+  contains the pattern `$(NAME)', which will be replaced with `VALUE'.
+  This only works with regular attribute lookup from netlist backends
+  and won't affect special attributes like slot= or netname=, though.
+
+* The netlisting options "hierarchy-traversal", "net-naming-priority",
+  "unnamed-netname", and "unnamed-busname" are once again configured
+  via gnetlistrc, making them consistent with the refdes=, net=, and
+  netname= mangling options.
+
+* Duplicate I/O ports in subschematics and duplicate I/O pins in
+  subschematic symbols are now treated correctly.
+
+* Added a netlist backend for pcb-rnd's tEDAx format.
+
+* Added backends which dump the netlist in various generic formats
+  (dumpindent, dumpjson, dumplihata, dumptext, dumpxml).
+
+
+Notable changes in gEDA/gaf 1.9.2.1p
+====================================
+
+* The gEDA/gaf source tarball no longer includes libintl.  When
+  building gEDA/gaf with internationalisation support, a GNU
+  gettext-compatible libintl is now required.
+
+* A new Scheme API function, `log!`, has been added to the `(geda
+  log)` module.  It allows Scheme code to emit log messages in the
+  same way that the tools' C code does.
+
+
+Notable changes in gEDA/gaf 1.9.2
+=================================
+* Build system changes:
+
+  - Guile 2.0 or newer is now required.
+
+  - top-level control file allowing continuous integration using
+    Travis CI has been added.
+
+* Nullor expansion has been fixed in the `spice' and `spice-sdb'
+  backends.
+
+  - Element name prefix "E_" has been substituted for "E-" to prevent
+    errors output by some simulators (e.g. ngspice).
+
+  - A default gain value has been added in the nullor expansion code.
+
+* Two obsolete scripts verilog2vhdl.sh and script.sed have been
+  removed.
+
+* Undocumented and ambiguous feature of the `spice-sdb' backend for
+  gnetlist consisting in the possibility of using the "value="
+  attribute instead of "file=" only for include blocks and only in
+  embedding mode has been removed.
+
+* The following scripts and programs have been moved from the `utils'
+  directory to a new `contrib' directory and are no longer installed
+  by default:
+
+         smash_megafile          olib
+         gmk_sym                 convert_sym
+         sarlacc_schem           sarlacc_sym
+         pads_backannotate       sw2asc
+         gnet_hier_verilog.sh
+
+* `gpstoimage' has been removed from the distribution; equivalent
+  functionality is provided by the `gaf' command.
+
+* `convert_sym.awk' has been removed from the distribution; equivalent
+  functionality is provided by the `convert_sym' command.
+
+* gnetlist now supports output of netlists to the standard output.
+
+* New Scheme procedures and hooks have been added.  Please see the
+  "geda-scheme" info manual for more details.
+
+  - `set-component-with-transform!' is a modified version of
+    `set-component!', which applies all the specified transformations
+    to a component and immediately updates it.
+
+  - `auto-refdes-reset!' resets components' refdeses
+
+  - `copy-objects-hook' is called whenever an object is copied, it can
+    be used, for example, to reset component's refdes on copy.
+
+* The following gschem configuration items have been added:
+
+  - `third-button-cancel' cancels draw actions by the third mouse
+    button in mousepan mode.
+
+  - `grid-mode' sets default grid mode.
+
+* Fixes/updates to the *BSD, Mac OS X, and MinGW builds.
+
+* Changes in the gschem UI event state machine:
+
+  - New drawing modes apply immediately.
+
+  - Indication of an action being in progress has been added.
+
+  - Mirror action can now be used during an object placement.
+
+  - Show/hide text function is now enabled during other actions.
+
+  - RMB panning is now enabled during placing or drawing.
+
+* Some gschem dialog have been merged, made non-modal, and placed in
+  sidebar:
+
+  - Color, line, fill and pin type dialogs have been merged into one
+    non-modal object properties dialog with widgets applying values
+    immediately.
+
+  - Text properties dialog.
+
+  - Options to control the magnetic net mode and the net rubber band
+    mode as well as grid mode and grid snap mode have been merged into
+    one options dialog.
+
+* The following dialogs/windows have been converted into an info bar
+  and are now placed in bottom notebook:
+
+  - Log (status) window.
+
+  - Find text dialog.
+
+* The following dialogs are now popup & docked the same way as the
+  execute script dialog:
+
+  - Show and hide text dialogs.
+
+  - Translate dialog.
+
+* Other gschem GUI changes:
+
+  - Hotkeys and menu items to show/hide the sidebar and status window
+    have been added.
+
+  - Swatch for fill types has been added.
+
+  - Slot edit dialog now displays number of slots.
+
+  - Library folder structure in gschem is now displayed as tree.
+
+  - Indication of page change has been added in gschem main window's
+    title.
+
+* Improved find text functionality:
+
+  - When searching for text, gschem now descends all files specified
+    in the comma separated list of the source attribute.
+
+  - There is now a widget that lists all occurences of the text
+    objects that contain the search string.
+
+  - The find text operation does not switch the current schematic in
+    the view or interfere with the most recent page up.
+
+  - The find text operation also searches all open pages instead of
+    the current one.
+
+  - The behavior of the find text operation works with multiple
+    toplevel windows open while running concurrent find text
+    operations.
+
+  - The find text operation can now use either a substring, pattern,
+    or regex. The pattern style uses * and ?. The regex uses glib,
+    which adheres to perl compatible regular expressions.
+
+* Several symbols have been fixed/improved.
+
+* gschemdoc has been enhanced to search in the user documentation
+  directory.
+
+* Several translations have been added/updated.
+
+* Man pages for gsymcheck and gschlas have been updated.
+
+* Switches --help and -h have been added for most of gEDA utilities.
+
+* Fixed the following bugs:
+
+  -  900122: Gschem crashes on ctrl-x.
+  - 1258834: spice-sdb crashes on non-existing files.
+  - 1463178: Gsch2pcb crashes when using `m4-pcbdir' option.
+  - 1478760: Gschem segmentation fault during find text.
+  - Gschem crashes on pressing the third mouse button.
+  - SVG output bug in `gaf export'.
+  - Several other bugs.
+
+
+Notable changes in gEDA/gaf 1.9.1
+=================================
+
+* Unbalanced overbar markers are now rendered correctly.
+
+* Most tools now no longer set the GEDADATA or GEDADATARC environment
+  variables (they still obey them though).
+
+* `gschem' now provides a path drawing tool, accessed using <A H> or
+  the "Add Path" menu item.
+
+  - Add a cusp node by left-clicking.
+
+  - Add a Bezier curve node by left-dragging from the node point to
+    the control point.
+
+  - End the path by clicking on the same node point twice, or clicking
+    on the start node to close the path.
+
+* On desktops that reparent menu bars (e.g. Ubuntu Unity) it is once
+  again possible to paste the clipboard using the menus.
+
+* A number of `gschem' editing behaviour changes were made:
+
+  - Double-clicking on an entry in the "In Use" tab of the component
+    selector now behaves the same way as double-clicking in the
+    "Libraries" tab.
+
+  - When new attributes are attached to a net, they are placed at a 50
+    unit offset.
+
+  - The text color is now used as the default color for `pinlabel='
+    attributes.
+
+  - Pin attributes are no longer automatically replaced when rotating
+    or mirroring pins.
+
+  - It is possible to edit a text object even when other non-text
+    objects are selected.
+
+  - Control grips are now always drawn at the same on-screen size.
+
+* The multi-attribute editor dialog in `gschem' has been extended to
+  support more cases:
+
+  - It now supports editing attributes of multiple selected
+    objects. These are aggregated into the dialog's attribute list.
+
+    Multiple attributes with the same name attached to any given
+    object are still shown in separate rows, but identically named
+    attributes from multiple selected objects will share a row. If a
+    row has differing values between objects, its value shows the text
+    "<various>" in a muted colour.
+
+  - Where an attribute is present in some, but not all selected
+    objects its name in the list is shown in red. A new popup menu
+    option allows copying such attributes to all selected objects.
+
+  - If no complex, placeholder, pin, net or bus objects are selected,
+    the dialog now falls back to editing any selected attribute text.
+
+    This allows editing of unattached or floating attributes in
+    symbols, or any attributes seleccted independantly of their owning
+    object. In this fallback mode, all attributes with the same name
+    shown in separate rows, and the "add attribute" functionality is
+    disabled.
+
+* `gschem' has new icons for many editing commands.
+
+* Several bugs were fixed in `gnetlist':
+
+  - Invalid attributes are ignored.
+
+  - Correct detection of graphical symbols.
+
+  - Components with no `refdes=' attribute are reported.
+
+  - Crash fixes for `drc' and `switcap' backends.
+
+* `gaf export' now accepts a `--scale' option.
+
+* The `--size', `--margins' and `--align' options to `gaf export' can
+  now accept their multiple arguments separated with a space ` ', a
+  colon `:' or a semicolon `;'.
+
+* `gaf config' now handles the `-p' option properly.
+
+* `gnetlist', `gsymcheck' and `gaf' now output internationalised
+  messages.
+
+* New Scheme procedures were added. Please see the "geda-scheme" info
+  manual for more details.
+
+  - The (gschem action) module contains procedures for working with
+    user editing actions (i.e. commands accessed via the menus or
+    keybindings).
+
+  - Two new hooks were added: `bind-keys-hook' is called whenever
+    keymap bindings are changed; `action-property-hook' is called when
+    action properties are changed.
+
+
+Notable changes in gEDA/gaf 1.9.0
+=================================
+
+* A new schematic renderer library, `libgedacairo' has been added, and
+  all tools have been updated to use it.  Related changes:
+
+  - The following configuration functions have been removed:
+
+         output-capstyle         paper-sizes
+         output-color            postscript-prolog
+         output-orientation      print-command
+         output-type             setpagedevice-orientation
+         paper-size              setpagedevice-pagesize
+
+  - The following `gschem' configuration items have been added:
+
+         print-paper             print-color
+         print-orientation
+
+  - `gschem' now generates PDF files rather than PostScript or EPS
+    files.
+
+  - `gschem' now uses a standard GTK print dialog (with printer
+    selection, print preview, etc.)
+
+* A new `gaf' command-line utility has been added.  It provides a
+  number of subcommands:
+
+  - `gaf export' can be used to convert schematic files to PNG, SVG,
+    PDF, PS and EPS, with detailed control of paper size and margins.
+    It supports multi-page PDF and PS output.
+
+  - `gaf config' can be used to manipulate the project, user, and
+    system configuration stores (see below).
+
+  - `gaf shell' provides a Scheme REPL for batch manipulation of
+    schematic and symbol files.
+
+* New project, user and system configuration stores have been added,
+  using a format similar to .desktop files.  They can be manipulated
+  using the `gaf config' tool.  Configuration parameters for most
+  tools will be converted to use this mechanism in future releases.
+
+* The changes to highlighting of dangling net ends in gEDA/gaf 1.8.0
+  have been reverted.  All dangling ends are once again flagged with a
+  brightly-coloured square.
+
+* When editing a component with the `gschem' multi-attribute editor,
+  the dialog will now show the symbol name in its title.
+
+* When using "Down Schematic" command in `gschem', an error message
+  will now be displayed if the subcircuit schematic cannot be loaded.
+
+* Printing now uses a light background color map by default.
+
+* Objects can now have the line end "cap style" adjusted in `gschem'.
+
+* `gnetlist' now accepts the `-i' and `-g' command-line arguments
+  together.  If you specify both `-i' and `-g', `gnetlist' will enter
+  the Scheme REPL after loading the requested backend but before
+  executing it.
+
+* `gattrib' now has translations for the user interface and various
+  messages.
+
+Notable changes in gEDA/gaf 1.8.2
+=================================
+
+Bugfix release.
+
+* [994361] Fixed a libgeda crash bug involving nets inside symbols.
+
+* [1226246] Fixed a gnetlist data corruption bug when using refdes
+  containing the string "POWER".
+
+* Updates to build system to allow compilation from git on systems
+  with Automake >= 1.13.0.
+
+Notable changes in gEDA/gaf 1.8.1
+=================================
+
+Bugfix release with correct dynamic version information for libgeda.
+
+Notable changes in gEDA/gaf 1.8.0
+=================================
+
+* `gschem' and `gnetlist' have updated and rewritten user guides.
+
+* All tools now give more informative error messages if they are
+  unable to load schematic or symbol files due to syntax errors.
+
+* All tools now correctly handle schematic and symbol files with `\r',
+  `\n', or `\r\n` line endings, or a mixture.
+
+* Unconnected pin ends and net ends are now all drawn with the same
+  box marker in `gschem' and printed output.
+
+* Net segments with at least two connections (including indirect
+  connections via `netname=' attributes) are now drawn with arrowheads
+  rather than box markers on dangling ends in `gschem' and printed
+  output.
+
+Notable changes in gEDA/gaf 1.7.2
+=================================
+
+* `geda-gaf' now requires GTK+ 2.16.0 or later.
+
+* A greatly expanded Scheme API has been added to gEDA/gaf for use by
+  extension authors.  See the `geda-scheme' Info manual for more
+  details.  Existing extensions may need to be modified to load the
+  `(geda deprecated)' or `(gschem deprecated)' modules.
+
+* The `component-library-search' function for `gafrc' files now skips
+  directories without symbols, and searches for libraries recursively.
+
+* `gschem' keybinding improvements:
+
+  - Keybindings are now unaffected by Caps Lock.
+
+  - Keystrokes are displayed using the same characters as on keycaps
+    (e.g. `:' instead of `colon').
+
+  - Keystrokes may use extended modifiers (Super, Hyper and Meta).
+
+  - Key bindings can be modified in any rc file or interactively using
+    the `global-set-key' function.  See notes in `system-gschemrc' for
+    examples.
+
+* `gschem' now displays help files and component documentation on all
+  platforms, including Windows.  The `locate' tool is no longer used
+  to search for component documentation files.
+
+* The `schdiff' tool for generating visual diffs of schematics and
+  symbols has been added.  It can be used with most version control
+  systems.  See `man schdiff' for more details.
+
+* The `bom' and `bom2' backends to `gnetlist' now give error messages
+  if no attribute file can be found.  The `-O attrib_file=FILE' and
+  `-O attribs=ATTRIB,ATTRIB...' options have also been added.
+
+* A new `ewnet' backend has been added to `gnetlist'.  This outputs
+  netlists for use with the National Instruments ULTIboard layout
+  tool.
+
+* The `verilog' backend to `gnetlist' now supports concatenated net
+  naming like "{a,b,c[3:0]}".
+
+* `gsch2pcb' no longer supports the `m4_command' parameter in project
+  files.
+
+* The `--m4-pcbdir' and `--m4-file' arguments to `gsch2pcb' now work
+  again.
+
+* `gsymfix.pl' has been renamed to `gsymfix'.
+
+* Man pages are now available for all programs installed as part of
+  gEDA/gaf.
+
+* The undocumented programs `gnet_hier_verilog', `gsymupdate', `gschupdate'
+  and `sch2eaglepos.sh' are no longer installed to ${prefix}/bin.
+
+Notable changes in gEDA/gaf 1.7.1
+=================================
+
+* gEDA is now compatible with Guile 2.0.
+
+* gEDA/gaf applications no longer complain when trying to load an rc
+  file twice, or when an rc file doesn't exist.
+
+* `gschem' allows objects to be moved by dragging without having to
+  select them first.
+
+* `gschem' now supports keybindings with more than one modifier key,
+  and "Deselect" is bound to <Control Shift A> by default.
+
+* `gnetlist' correctly handles multiple renames of the same net.  This
+  resolves some long-standing bugs with multipage schematics.
+
+* The `spice-sdb' backend for `gnetlist' now has built-in support for
+  `SUBCKT_NMOS' and `SUBCKT_PMOS' devices.
+
+* A new `makedepend' backend has been added to `gnetlist'.  It
+  generates Makefile code for SPICE simulation dependencies.
+
+* Visibility of embedded component attributes are now preserved by
+  `gattrib'.
+
+* `gsch2pcb' correctly handles footprint names with hyphens (`-').
+
+* `gsch2pcb' project files support quoting and escaping in
+  `schematics' entries.
+
+* Considerable enhancements to Unicode support when printing
+  schematics or exporting PostScript.
+
+Notable changes in gEDA/gaf 1.7.0
+=================================
+
+* All gEDA/gaf applications now handle configuration files much more
+  strictly, and provide much more useful feedback when an error
+  occurs.
+
+* Several changes to `gschem' command-line options:
+
+  - The `-t' option is no longer supported.
+
+  - Several command-line options now support a long-form alternative.
+
+  - The `-s' option can now be used to run multiple Scheme scripts
+    during `gschem' startup.
+
+  - A new `-c' option is available, which runs a Scheme expression
+    during `gschem' startup.
+
+  - A new `-L' option is available, which adds a directory to the
+    Scheme load path.
+
+  - A new `-V' or `--version' option is available, which displays
+    version information.
+
+* `gschem' now provides a "Select All" function, which is bound to
+  <Control a> by default, along with a corresponding "Deselect"
+  function.
+
+* In the `gschem' "Add component" dialog, filtering the component
+  library will expand matching libraries.  If the filter is cancelled,
+  all libraries are collapsed.  Components can now be selected by
+  double-clicking on them in the component list.
+
+* The `gschem' "Edit Text Properties" dialog now has an easier to use
+  "Alignment" menu.
+
+* Printed text size now better matches on-screen text size in
+  `gschem'.
+
+* Special characters, including commas, are now escaped or quoted
+  appropriately in `gattrib' CSV output.
+
+* Several changes to `gnetlist' command-line options:
+
+  - Four command-line options specific to the `spice-sdb' backend have
+    been removed.  They can be replaced with `-O <option>' according
+    to the following table:
+
+        -e, --embedd              -O embedd_mode
+        -I, --include             -O include_mode
+        -n, --nomunge             -O nomunge_mode
+        -s, --sort                -O sort_mode
+
+  - The list of available backends is now obtained using a new
+    `--list-backends' option.  `-g help' no longer outputs a list of
+    backends.
+
+  - A new `-L' option is available, which adds a directory to the
+    Scheme load path.
+
+  - A new `-V' or `--version' option is available, which displays
+    version information.
+
+  - When run with invalid command-line arguments, `gnetlist' now exits
+    with non-zero exit status.
+
+* Several `gnetlist' backends have now been fixed so that it should no
+  longer be necessary to set an expanded Guile stack in gEDA's config
+  files.
+
+* The `spice-sdb' backend for `gnetlist' now supports probes
+  (`TESTPOINT' devices).
+
+* The undocumented `mk_verilog_syms' program is no longer installed.
+  The symbols it creates are still installed to
+  `${prefix}/share/gEDA/sym/verilog'.
+
+Notable changes in gEDA/gaf 1.6.2
+=================================
+
+ * PNG export from `gschem' will now be cropped correctly.
+
+ * The `partlist' backends for `gnetlist' now handle hierarchical
+   refdes correctly.
+
+ * On Windows, `gschem' and `gattrib' will no longer launch with a
+   command window visible.
+
+ * `gnetlist-arg' is no longer valid in `gsch2pcb' project files.
+
+Several other bugs were fixed, including a major crash bug in
+gnetlist.
+
+Notable changes in gEDA/gaf 1.6.1
+=================================
+
+* Added accelerator mnemonics for root menus in gschem
+
+* Lots of updated and new language translations in libgeda, gschem, and
+  gattrib.  (Courtesy of language translators and Launchpad)
+
+* Updated the shipped documentation from the official gEDA wiki
+
+* Fixed the following bugs:
+
+  - 2876373: Fix rendering with zoomed out dashed lines
+  - 2901183: Fix for some manpage issues
+  - 2904715: Don't update page connectivity from o_place_rotate()
+  - 2949232: Fix slot editing routines to not edit inherited attributes
+  - Cherry picked some other bug fixes from master that should be in
+    this release
+
+Notable changes in gEDA/gaf 1.6.0
+=================================
+
+* Fixed the GtkItemEntry code inside of gattrib code so that it builds
+  using gtk+ > 2.16.x.
+
+* In gschem, rubberband pin to pin connections by adding nets.
+
+* Cleanup of the slot handling code in libgeda.
+
+* Fixes/updates to the MinGW port.
+
+* Updated the shipped documentation from the online wiki.
+
+Notable changes in gEDA/gaf 1.5.3/1.5.4
+=======================================
+
+* NOTE: gEDA/gaf 1.5.3 was released with some critical bugs, so
+        it was withdrawn before it was widely distributed.
+
+* Text rendering using native system fonts:
+
+  - The various programs in gEDA/gaf no longer uses its own built-in
+    line font.
+
+  - Native system fonts are used for rendering, giving support for a
+    wider range of symbols, and better looking schematics.
+
+* Always use PostScript fonts in gschem's PostScript output.  The
+  "output-text", "text-output" and "output-vector-threshold" config
+  functions have been removed.
+
+* Image rendering in 'gschem' uses cairo instead of GDK.
+
+* Numerous build system changes:
+
+  - gEDA/gaf is now distributed as a single source archive, called
+    gEDA-<version>.tar.gz.
+
+  - GTK+ 2.10 or newer and Guile 1.8 or newer are now required.
+
+  - `intltool' is no longer required.
+
+  - Documentation is now installed to ${docdir} (usually
+    ${prefix}/share/doc/gEDA).
+
+* The attribute edit dialog in `gschem' now has completion of most
+  common attribute names.
+
+* The multi-attribute edit dialog in `gschem' now shows unpromoted
+  symbol attributes.
+
+* Menu items in `gschem' now have icons and properly aligned key
+  bindings. They also support accelerator keys.
+
+* The `gschem2pcb' and `PCBboard' netlist backends have been removed.
+  It is recommended to use `gsch2pcb' instead.
+
+* Check for and reject non-footprint PCB files in 'gsch2pcb'.
+
+* Removed unimplemented "File->Open" feature in 'gattrib'.
+
+* Added --disable-gattrib command line flag to ./configure to disable the
+  building of 'gattrib'.  This is useful if you are building against
+  gtk+ 2.17.x which breaks 'gattrib'.
+
+* 'gnetlist' does not recommend drc2 every time it runs.  The drc2
+  backend is only useful in certain circumstances.
+
+* Assign shortcuts "vd" and "vl" for changing between color schemes
+  in 'gschem'.
+
+* Fix problem with attached net attribute not being honored in 'gnetlist'.
+
+* Focus the "save" button in the close confirmation dialog in 'gattrib' and
+  'gschem'.
+
+* Accept empty attributes in the src file in 'tragesym'.
+
+* Cleaned up the slot dialog box in 'gschem'.
+
+* Changed the grip size rendering in 'gschem' to be reasonably sized when
+  zoomed in a lot.
+
+* Introduction of a new attribute searching API in 'libgeda' and 'gschem'.
+
+* Improvements and cleanup to the 'gnetlist' and 'gsymcheck' test suites.
+
+* Fixed the following bugs:
+
+  - 1758673: Combine source tarballs
+  - 2058707: gschem, gattrib: Dangerous button focus in "Save changes"
+             dialog at quit
+  - 2430369: gschem: Deselect invisible attribs with their parent object.
+  - 2449060: Graphic state left inconsistent cancelling from net mode
+  - 2460301: libgeda: Make o_complex_promote_attribs() respect keep_invisible
+             and libgeda: Make o_complex_copy() actually copy.
+  - 2455061: Gnetlist output changed, and tests fail with recent GLib
+  - 2655088: autogen.sh: Make sure to exit if autopoint fails.
+  - 2823703: gnet-pcbpins.scm: Quote pins names if they contain comma
+             or close parenthesis.
+  - 2823755: gnetlist: Fix DEBUG builds.
+  - 2836109: build-sys: Add check for groff html driver.
+
+* Spanish translation were updated.
+
+* Lots of code, infrastructure, and doxygen documentation cleanup and
+  refactoring.
+
+Notable changes in gEDA/gaf 1.5.2
+=================================
+
+* `gschem' now uses Cairo for all rendering.  This allows for
+  everything to be rendered anti-aliased.
+
+* `gschem' now uses a mesh grid instead of dots by default.
+
+* Net junction cues in `gschem' are drawn smaller now.
+
+* Copy and paste now works between different `gschem' instances (using
+  the X selection).
+
+* Recent files are no longer opened in a new `gschem' window.
+
+* Major, *backwards-incompatible* changes to color handling in
+  `libgeda' and `gschem'.
+
+  - All colors are specified using hexadecimal `#RRGGBB' or
+    `#RRGGBBAA' syntax.
+
+  - The print and display color maps are now separate.
+
+  - A new Scheme syntax is used to inspect and modify color maps.
+
+  - If you wish to use a light background in `gschem', add the line:
+
+      (load (build-path geda-rc-path "gschem-colormap-lightbg"))
+
+    to your personal or project gschemrc file.
+
+* Attributes of embedded objects are now shown in the right color.
+
+* Bus pins are now supported by `gschem' and `libgeda', but are *not*
+  properly supported by the netlister.  The pin type can be modified
+  by selecting a pin, then right-clicking it and selecting `Edit pin
+  type...'.
+
+* All of the symbols were modified to use overbar markup tags ("like
+  \_this\_") instead of separate lines.
+
+* Log files are now saved to $HOME/.gEDA/logs rather than being
+  dropped in the current directory.
+
+Notable changes in gEDA/gaf 1.5.1
+=================================
+
+* GTK+ version 2.8.x or later is now required.
+
+* The selection behaviour in `gschem' was changed.
+
+  - Lines, unfilled boxes, unfilled circles, arcs, pins, nets, and
+    buses must be selected by clicking on the drawn path itself.
+
+  - Filled boxes, circles, text, and components, may be selected by
+    clicking anywhere in the bounding box.
+
+  - The default mouse click distance required to select an element was
+    increased to 10 pixels.
+
+  - Double-clicking on a net segment selects all connected net
+    segments.
+
+* The percentage step in or out while zooming the display in `gschem'
+  is now configurable with the `zoom-gain' gschemrc parameter.  The
+  default value is 20%.
+
+* The size of steps when panning with the mouse wheel or with a
+  trackpad in `gschem' is now adjustable with the `scrollpan-steps'
+  gschemrc parameter.  The default setting scrolls in steps of 1/8 of
+  a screen.
+
+* A number of improvements were made to the `gschem' component
+  selection dialog.
+
+  - The dialog now shows a table of top-level attributes in the
+    selected symbol.
+
+  - It is now possible to expand/collapse a library by clicking
+    anywhere on its row.
+
+* Changes to fill- and line-styles in `gschem' can now be undone.
+
+* Arcs can now be adjusted in `gschem' using an arc angle dialog.  It
+  can be accessed by selecting an arc and selecting Edit->Edit.
+
+* It is now possible to rotate objects while placing them in `gschem'.
+
+* Support for arbitrary filled and unfilled paths, using a subset of
+  the SVG path syntax.  For more information, please see the file
+  format specification.
+  <http://wiki.geda-project.org/geda:file_format_spec>
+
+  - `gschem' does not yet provide a GUI for creating or editing path
+    elements.  However, it does support rendering them.  They can also
+    be printed.
+
+  - Some of the symbols in the component library were updated to use
+    paths.
+
+* A Scheme evaluation prompt was added to `gschem'.  It can be
+  accessed by typing `:'.
+
+* Improved algorithm for drawing hatched fills both on screen and in
+  PostScript output.
+
+* Color selection dialogs and menus in `gschem' now show the actual
+  color as well as the description.  Color names are now translatable.
+
+* `gattrib' now prompts to save changes.
+
+* All of the unimplemented menu items and pages in `gattrib' were
+  removed.
+
+* The `always-promote-attributes' gafrc parameter now takes a list of
+  strings as an argument.  The space-delimited string syntax is
+  deprecated.
+
+* Some optimisations were made to the `gnetlist' connection traversal
+  algorithm to speed up netlisting large designs.
+
+* A new netlist backend was added to support Liquid PCB.
+  <http://www.liquidpcb.org/>
+
+* The `bom2' netlist backend now generates a `qty' column.
+
+* Several improvements and fixes were made to the `systemc' backend.
+
+* The `--gnetlist-arg' option to gsch2pcb can now be used to pass
+  extra `gnetlist' arguments.
+
+* `gsch2pcb' now emits files with the latest `pcb' file format.
+
+* The `gxyrs' pick-and-place tool was added.
+
+Notable changes in gEDA/gaf 1.5.0
+=================================
+
+* Magnetic net mode in `gschem'. Magnetic mode lets you draw nets and
+  automatically connect to valid end points (such as pins and other
+  nets).  The `magnetic-net-mode' gschemrc parameter can be used to
+  enable/disable this feature.
+
+* Rotating a component while moving it in `gschem' now rotates around
+  the current mouse location.
+
+* The `verilog' and `vhdl' backends now work again.
+
+* Embedded components can now be mirrored.
+
+* The `pads' netlist backend now uses CRLF line endings.
+
+Older versions
+==============
+
+Release notes for older versions of gEDA/gaf are available on the gEDA
+website.  <http://www.gpleda.org/news/index.html>
+
+..
+   Local Variables:
+   mode: text
+   End:

@@ -1,0 +1,301 @@
+==============================================
+ 'gschem and Friends' Electronic Design Suite
+==============================================
+
+Copyright (C) 1998-2020 gEDA Developers
+
+Introduction
+============
+
+The GPL Electronic Design Automation (gEDA) project has produced and
+continues working on a full GPL'd suite and toolkit of Electronic
+Design Automation tools. These tools are used for electrical circuit
+design, schematic capture, simulation, prototyping, and
+production. Currently, the gEDA project offers a mature suite of free
+software applications for electronics design, including schematic
+capture, attribute management, bill of materials (BOM) generation,
+netlisting into over 20 netlist formats, analog and digital
+simulation, and printed circuit board (PCB) layout.
+
+The gEDA project was started because of the lack of free EDA tools for
+POSIX systems with the primary purpose of advancing the state of free
+hardware or open source hardware. The suite is mainly being developed
+on the GNU/Linux platform with some development effort going into
+making sure the tools run on other platforms as well.
+
+The gEDA/gaf suite (this package) provides schematic capture,
+netlisting, bill of materials generation, and many other features.
+
+Tools in the gEDA suite
+=======================
+
+The major components of the gEDA suite are:
+
+`libgeda'
+  A library of functions for manipulating gEDA schematics and symbols.
+
+`gschem'
+  A schematic editor.
+
+`gattrib'
+  A spreadsheet-like program for bulk editing of component attributes.
+
+`gnetlist'
+  A highly-flexible, hierarchy-aware utility which parses schematics
+  to generate a number of outputs, including netlists for a wide
+  variety of PCB layout tools.  It can also generate bills of
+  materials and DRC reports for your schematics.
+
+`gsch2pcb'
+  A command-line utility for streamlining the workflow where `PCB'
+  <http://pcb.geda-project.org/> and `gschem' are used together.
+
+`gsymcheck'
+  A utility for checking for common errors in schematic symbol files.
+
+`gaf'
+  A utility for interactive and batch mode working with gEDA Scheme
+  API, exporting schematics into various formats, and
+  configuring all the programs of the suite.
+
+`xorn'
+  A commmand-line utility working with the new Python API which
+  converts gEDA files between formats and extracts embedded symbols
+  and pixmaps from a schematic.
+
+Installation
+============
+
+The information in this section is intended to supplement the
+information in the `INSTALL' file.
+
+Dependencies
+------------
+
+Note: `xxx >= y is used as a shorthand for `xxx, version y or later'.
+
+In order to compile gEDA from the distributed source archives, you
+*must* have the following tools installed:
+
+ - A C/C++ compiler and standard library (GCC >= 8.3.0 and glibc >=
+   2.28 are recommended, but clang >= 7.0.1 should work, as well).
+
+ - The `make' tool (GNU Make >= 4.2.1 is recommended).
+   <https://www.gnu.org/software/make/>
+
+ - The `pkg-config' tool for managing shared libraries >= 0.29.
+   <https://www.freedesktop.org/wiki/Software/pkg-config/>
+
+ - GNU `gettext' >= 0.19.8 <https://www.gnu.org/software/gettext/>
+
+ - The `lex' tool for generating lexical scanners.  The `flex'
+   implementation >= 2.6.4 is recommended.
+   <https://github.com/westes/flex/releases>
+
+ - The `awk' tool for data processing.  GNU Awk (`gawk') >= 4.2.1 or
+   mawk >= 1.3.3 are recommended.  <https://www.gnu.org/software/gawk/>
+
+You *must* also have the following libraries installed, including
+their development files:
+
+ - Guile 2.x ("GNU's Ubiquitous Intelligent Language for Extensions")
+   >= 2.0.10 <https://www.gnu.org/software/guile/>
+
+ - GLib 2.0 >= 2.41.1 <https://www.gtk.org/>
+
+ - GTK+ 2.0 (the Gimp Toolkit) >= 2.18.0 <https://www.gtk.org/>
+
+ - GDK Pixbuf 2.0 >= 2.18.0 <https://www.gtk.org/>
+
+ - Pango >= 1.23.0 <https://pango.gnome.org/>
+
+ - Cairo >= 1.8.0 <https://cairographics.org/>
+
+ - CPython 2.7 >= 2.7.16 <https://www.python.org/downloads/>
+
+ - libexpat1 >= 2.2.6 <https://libexpat.github.io/>
+
+ - libpng >= 1.6.36 <http://libpng.org/pub/png/libpng.html>
+
+The following tools and libraries are *highly recommended*:
+
+ - The FAM or Gamin daemon and corresponding `libfam' or `libgamin'
+   client library (Gamin >= 0.1.10 is recommended).  If this is
+   available, gschem will detect if files have been changed on disk by
+   another application.  <https://people.gnome.org/~veillard/gamin/>
+
+ - pygtk >= 2.24.0, the Python 2.7 bindings for GTK+.  Without this
+   package, netlisting errors are reported to the terminal where users
+   probably won't see them. <http://www.pygtk.org/>
+
+ - GNU `troff' (`groff') >= 1.22.4.  This is package `groff' in Debian;
+   the default `groff' executable provided by the package `groff-base'
+   is lacking HTML support.  <https://www.gnu.org/software/groff/>
+
+ - The freedesktop.org MIME info database >= 1.10
+   <https://freedesktop.org/wiki/Software/shared-mime-info/>
+
+ - The freedesktop.org utilities for manipulating .desktop files >= 0.23
+   <https://www.freedesktop.org/software/desktop-file-utils/>
+
+The following tools and libraries are optional:
+
+ - The `doxygen' API documentation tool >= 1.8.13.  This is required for
+   building the gEDA developer API documentation, not for the regular
+   user documentation.  <http://www.stack.nl/~dimitri/doxygen/>
+
+ - `Inkscape' >= 0.92.4 or `ImageMagick' >= 6.9.10 for svg to png or
+   pdf conversion.  This is required for building the gEDA developer
+   API documentation, not for the regular user documentation.
+   <https://inkscape.org/>
+   <https://www.imagemagick.org/script/index.php>
+
+ - `Graphviz' >= 2.40.1 for drawing directed graphs.
+   This is required for building the gEDA developer API documentation,
+   not for the regular user documentation.
+   <https://www.graphviz.org/>
+
+Troubleshooting dependencies
+----------------------------
+
+  "I've installed the `libfoo' library, but `./configure' isn't
+  picking it up!"
+
+Many modern operating system distributions split a library into two
+packages:
+
+1. a `libfoo' package, which contains the files necessary to
+   *run* programs which use `libfoo'.
+
+2. a `libfoo-dev' or `libfoo-devel' package, which contains the files
+   necessary to *compile* programs which use `libfoo'.
+
+If you're having problems, make sure that you have all of the
+necessary `dev' or `devel' packages installed.
+
+Installation from a source archive
+----------------------------------
+
+First extract the archive to a sensible place:
+
+  tar -xzvf gEDA-gaf-<version>.tar.gz && cd gEDA-gaf-<version>
+
+Run the configuration script.  You'll probably want to specify silent
+rules and a custom directory to install gEDA to, for example:
+
+  ./configure --prefix=$HOME/geda --enable-silent-rules
+
+You can then compile gEDA:
+
+  make
+
+And install it (if you used a `--prefix' outside your $HOME directory,
+you may need to run this as root):
+
+  make install
+
+For more information on installing gEDA, see the `INSTALL' document.
+
+Installation from the git repository
+------------------------------------
+
+gEDA uses the `git' version control system.  If you wish to try out
+the very latest version of gEDA, you will need to install some extra
+tools *in addition to* the ones listed above:
+
+  - The `git' version control tool. <https://git-scm.com/>
+
+  - GNU Automake >= 1.16.1 <https://www.gnu.org/software/automake/>
+
+  - GNU Autoconf >= 2.69 <https://www.gnu.org/software/autoconf/>
+
+  - GNU Libtool >= 2.4.6 <https://www.gnu.org/software/libtool/>
+
+  - GNU Texinfo documentation system >= 6.5.0
+    <https://www.gnu.org/software/texinfo/>
+
+    Note that on some distributions the TeX support for Texinfo is
+    packaged separately.
+
+Once you have these installed, you need to clone the gEDA `git'
+repository:
+
+  git clone git://git.geda-project.org/geda-gaf.git
+
+To generate the configure script, run:
+
+  ./autogen.sh
+
+You can then procede to configure and build gEDA as described above.
+For more information on working with the gEDA `git' repository, see
+<http://wiki.geda-project.org/geda:scm>.
+
+Building gEDA developer API documentation
+=========================================
+
+Several of the gEDA libraries and applications have doxygen API
+documentation available.  To generate the API documentation from the
+source code, install doxygen (see `Dependencies' above).  Next, add
+`--enable-doxygen' to your configure command line, i.e.:
+
+  ./configure --enable-doxygen
+
+To compile the documentation (quite a slow process), run:
+
+  make doxygen
+
+The documentation can then be found in:
+
+  */docs/html/index.html
+
+The PDF version of the documentation isn't generated by default.
+If you want it, you have to build it explicitly, e.g.:
+
+  cd $(srcdir)/libgeda/docs/latex && make
+
+Getting help
+============
+
+There are several ways to get help with installing and using gEDA:
+
+ - The gEDA website <http://www.geda-project.org> has more extensive
+   information on the gEDA tools, and links to some successful
+   projects which use gEDA.
+
+ - The gEDA documentation wiki contains a large amount of helpful
+   information.  A static copy is included with this distribution; see
+   the `docs/wiki/index.html' file.  The wiki is accessible online at
+   <http://wiki.geda-project.org/>.
+
+ - If the resources above didn't help you resolve your problem, or you
+   are having a *design* problem that you want to get help with,
+   consider subscribing to and posting your question to the
+   `geda-user' mailing list.
+   <http://wiki.geda-project.org/geda:mailinglists>
+
+ - Alternatively, you can add your question to the gEDA Answers page
+   on Launchpad. <https://answers.launchpad.net/geda>
+
+ - If you have discovered a bug, have a feature request, or have
+   written a patch to gEDA, please create an item on the gEDA Bugs
+   page on Launchpad. <https://bugs.launchpad.net/geda>
+
+License
+=======
+
+gEDA/gaf (this package) is freely distributable under the GNU Public
+License (GPL) version 2.0 or (at your option) any later version.  See
+the `COPYING' file for the full text of the license.
+
+The programs and associated files are:
+
+  Copyright (C) 1998-2013 by Ales Hvezda and the respective original
+  authors.
+
+See the `AUTHORS' file for a more extensive list of contributors to
+gEDA.
+
+..
+   Local Variables:
+   mode: text
+   End:

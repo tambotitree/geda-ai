@@ -1,0 +1,81 @@
+/* gEDA - GPL Electronic Design Automation
+ * gschem - gEDA Schematic Capture
+ * Copyright (C) 1998-2010 Ales Hvezda
+ * Copyright (C) 1998-2020 gEDA Contributors (see ChangeLog for details)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+#include <config.h>
+
+#include <stdio.h>
+#include <string.h>
+
+#include "gschem.h"
+
+
+/*! \todo Finish function documentation!!!
+ *  \brief
+ *  \par Function Description
+ *
+ */
+void o_copy_start(GschemToplevel *w_current, int w_x, int w_y)
+{
+  GList *s_current;
+
+  GschemPageView *page_view = gschem_toplevel_get_current_page_view (w_current);
+  g_return_if_fail (page_view != NULL);
+
+  PAGE *page = gschem_page_view_get_page (page_view);
+  g_return_if_fail (page != NULL);
+
+  /* Copy the objects into the buffer at their current position,
+   * with future motion relative to the mouse origin, (w_x, w_y). */
+
+  w_current->first_wx = w_x;
+  w_current->first_wy = w_y;
+
+  if (!o_select_selected (w_current))
+    return;
+
+  s_current = geda_list_get_glist (page->selection_list);
+
+  if (page->place_list != NULL) {
+    s_delete_object_glist (page->toplevel, page->place_list);
+    page->place_list = NULL;
+  }
+
+  page->place_list = o_glist_copy_all (page->toplevel,
+                                       s_current,
+                                       page->place_list);
+
+  g_run_hook_object_list (w_current,
+                          "%copy-objects-hook",
+                          page->place_list);
+
+  o_place_start (w_current, w_x, w_y);
+}
+
+/*! \todo Finish function documentation!!!
+ *  \brief
+ *  \par Function Description
+ *
+ */
+void o_copy_end(GschemToplevel *w_current)
+{
+  o_place_end (w_current, w_current->second_wx, w_current->second_wy,
+               (w_current->event_state == MCOPYMODE),
+               (w_current->event_state != MCOPYMODE),
+               "%paste-objects-hook", _("Copy"));
+}

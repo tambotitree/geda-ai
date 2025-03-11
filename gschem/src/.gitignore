@@ -1,0 +1,9 @@
+.deps
+Makefile
+Makefile.in
+gschem
+gschem.exe
+*.o
+*.x
+*~
+TAGS

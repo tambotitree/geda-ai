@@ -1,0 +1,7 @@
+.deps
+Makefile
+Makefile.in
+gattrib
+gattrib.exe
+*.o
+*~

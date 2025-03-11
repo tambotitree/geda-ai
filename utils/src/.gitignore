@@ -1,0 +1,10 @@
+Makefile.in
+.deps
+.libs
+Makefile
+gsch2pcb
+grenum
+*.o
+*~
+grenum.exe
+gsch2pcb.exe

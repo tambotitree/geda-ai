@@ -1,0 +1,7 @@
+Makefile
+Makefile.in
+html
+latex
+*~
+gattrib.1
+gattrib.html

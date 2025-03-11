@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+  <link rel="stylesheet" media="screen" type="text/css" href="./style.css" />
+  <link rel="stylesheet" media="screen" type="text/css" href="./design.css" />
+  <link rel="stylesheet" media="print" type="text/css" href="./print.css" />
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+<body>
+
+<h1 class="sectionedit1" id="pcb_plugins">pcb Plugins</h1>
+<div class="level1">
+
+<p>
+pcb has a plug-in mechanism that allows developers to add or modify its functionality. Plugins can add pcb actions, hook into the <abbr title="Graphical User Interface">GUI</abbr> HIDs, create new exporters, and more. For a tutorial on the basics of writing and installing a pluging, see the hello world example on the <a href="geda-pcb_developer_introduction_2.html" class="wikilink1" title="geda-pcb_developer_introduction_2.html"> pcb Developer Introduction</a> page. This page will discuss how plugins interact with the pcb system.
+</p>
+
+</div>
+<!-- EDIT1 SECTION "pcb Plugins" [1-435] -->
+<h2 class="sectionedit2" id="plugin_mechanics">Plugin Mechanics</h2>
+<div class="level2">
+
+<p>
+pcb plugins are essentially shared libraries that pcb will load at run-time. Because of this, they can be written in just about any language that can be compiled into a shared library. I haven&#039;t verified anything other than C and C++, but it ought to be possible. If you&#039;ve successfully written a plugin in another language, let me know!
+</p>
+
+<p>
+At runtime, pcb scans several directories for .so/.dll files (see src/common/hidinit.c:hid_load_dir). These include the exec prefix and the users personal preferences directory (~/.pcb). The exec_prefix is currently reserved for system plugins. Inside the personal pref directory should be a directory called “plugins”. User plugins should be located in this directory.
+</p>
+
+<p>
+If pcb finds a .so/.dll file, it opens it and looks for a couple of symbols: “hid_&lt;file basename&gt;_init” and “pcb_plugin_init”. If it finds one, it executes it as a function. These functions are responsible for registering the code they represent with pcb.
+</p>
+
+</div>
+<!-- EDIT2 SECTION "Plugin Mechanics" [436-1429] -->
+<h3 class="sectionedit3" id="registration">Registration</h3>
+<div class="level3">
+
+</div>
+<!-- EDIT3 SECTION "Registration" [1430-1451] -->
+<h3 class="sectionedit4" id="hid_structures">HID Structures</h3>
+<div class="level3">
+
+</div>
+<!-- EDIT4 SECTION "HID Structures" [1452-1476] -->
+<h2 class="sectionedit5" id="plugin_resources">Plugin Resources</h2>
+<div class="level2">
+
+</div>
+<!-- EDIT5 SECTION "Plugin Resources" [1477-1503] -->
+<h3 class="sectionedit6" id="handy_plugin_template">Handy Plugin Template</h3>
+<div class="level3">
+
+<p>
+<a href="media/geda/pcb_plugin_template.tar.gz" class="media" target="_blank" title="geda:pcb_plugin_template.tar.gz"></a>
+</p>
+
+</div>
+<!-- EDIT6 SECTION "Handy Plugin Template" [1504-1574] -->
+<h3 class="sectionedit7" id="plugin_repositories">Plugin Repositories</h3>
+<div class="level3">
+
+<p>
+<a href="https://github.com/bert/pcb-plugins" class="urlextern" title="https://github.com/bert/pcb-plugins" rel="nofollow">https://github.com/bert/pcb-plugins</a>
+</p>
+
+<p>
+<a href="https://ljh4timm.home.xs4all.nl/gaf/dox_pcb-plugins/index.html" class="urlextern" title="https://ljh4timm.home.xs4all.nl/gaf/dox_pcb-plugins/index.html" rel="nofollow">https://ljh4timm.home.xs4all.nl/gaf/dox_pcb-plugins/index.html</a>
+</p>
+
+</div>
+<!-- EDIT7 SECTION "Plugin Repositories" [1575-1712] -->
+<h3 class="sectionedit8" id="list_of_plugins">List of Plugins</h3>
+<div class="level3">
+<ul>
+<li class="level1"><div class="li"> <a href="http://www.delorie.com/pcb/polystitch.c" class="urlextern" title="http://www.delorie.com/pcb/polystitch.c" rel="nofollow"> Polygon Stitcher</a>, by DJ</div>
+</li>
+<li class="level1"><div class="li"> <a href="http://www.delorie.com/pcb/ben-mode/" class="urlextern" title="http://www.delorie.com/pcb/ben-mode/" rel="nofollow"> Ben Mode</a> photos for the PNG hid, by DJ</div>
+</li>
+<li class="level1"><div class="li"> <a href="http://www.delorie.com/pcb/findrat.c" class="urlextern" title="http://www.delorie.com/pcb/findrat.c" rel="nofollow"> Find Rat</a>, by DJ</div>
+</li>
+<li class="level1"><div class="li"> <a href="http://www.delorie.com/pcb/boardflip.c" class="urlextern" title="http://www.delorie.com/pcb/boardflip.c" rel="nofollow"> Board Flip</a>, by DJ</div>
+</li>
+<li class="level1"><div class="li"> <a href="http://www.delorie.com/pcb/renumberblock.c" class="urlextern" title="http://www.delorie.com/pcb/renumberblock.c" rel="nofollow"> Renumber Block</a>, by DJ</div>
+</li>
+<li class="level1"><div class="li"> <a href="http://www.delorie.com/pcb/teardrops/" class="urlextern" title="http://www.delorie.com/pcb/teardrops/" rel="nofollow"> Teardrops</a>, by DJ</div>
+</li>
+<li class="level1"><div class="li"> <a href="https://github.com/bert/pcb-plugins" class="urlextern" title="https://github.com/bert/pcb-plugins" rel="nofollow">https://github.com/bert/pcb-plugins</a> git repo with many plugins</div>
+</li>
+<li class="level1"><div class="li"> <a href="https://github.com/bgamari/pcb-sedrename" class="urlextern" title="https://github.com/bgamari/pcb-sedrename" rel="nofollow"> sed rename</a>, by bgamari</div>
+</li>
+<li class="level1"><div class="li"> <a href="media/pcb/plugin_debug_window.tar.gz" class="media" target="_blank" title="pcb:plugin_debug_window.tar.gz"> Debug Window</a>, by Chad Parker</div>
+</li>
+</ul>
+
+</div>
+<!-- EDIT8 SECTION "List of Plugins" [1713-] --></body>
+</html>

@@ -1,0 +1,16 @@
+Makefile
+Makefile.in
+html
+latex
+*~
+*.1
+grenum.html
+gsch2pcb.html
+gxyrs.html
+pcb_backannotate.html
+refdes_renum.html
+schdiff.html
+tragesym.html
+garchive.html
+gschlas.html
+gsymfix.html

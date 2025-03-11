@@ -1,0 +1,7 @@
+Makefile
+Makefile.in
+html
+latex
+gsymcheck.1
+gsymcheck.html
+*~
