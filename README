@@ -1,3 +1,13 @@
+John Ryan of Aquana.bio:
+
+I used to love and use this software all the time.  What makes it amazing
+for LLM use is that the files are in ASCII format so the LLM's can generate
+files interactively with the user.  But, let's be honest no one has been
+working on it so I am resurecting the code. All mistakes are mine, but if you
+want to join in on the journey please feel free.  It will always be a gnu-copyright
+and I want to acknowledge the hard work that made this possible so I have included
+the original README below.
+
 ==============================================
  'gschem and Friends' Electronic Design Suite
 ==============================================
