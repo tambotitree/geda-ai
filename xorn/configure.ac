@@ -15,6 +15,18 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+#####################################################################
+# PKG NAME WORKAROUND
+#####################################################################
+# Here we HARDCODE some version name CHECKS. There is a subtle 
+# logic flaw in pg-config. It assumes that the package is just the 
+# base name without a version, however maintainers are free to choose
+# their own name so the package should be guile but in fact it is 
+# guie-3.0 and pkg-config can't find the package without the correct
+# name.  So we create a list of package dependencies that break the
+# paradigm here to centralize management of them. 
+GUILE_PKG_NAME="guile-3.0"
+
 AC_PREREQ([2.69])
 LT_PREREQ([2.4.6])
 
@@ -34,8 +46,13 @@ AM_PATH_PYTHON([2.7])
 PKG_CHECK_MODULES([PYTHON], [python-2.7 >= 2.7],, [
   PKG_CHECK_MODULES([PYTHON], [python2 >= 2.7])
 ])
-PKG_CHECK_MODULES([GUILE], [guile-2.2],, [
-  PKG_CHECK_MODULES([GUILE], [guile-2.0 >= 2.0.10])
+# Updateing Guile to version 3 - LISP is used for routing traces which lisp is not so important
+# tambotitree@gmail.com - Thu Mar 13 05:20:57 CDT 2025
+# PKG_CHECK_MODULES([GUILE], [guile-2.2],, [
+#   PKG_CHECK_MODULES([GUILE], [guile-2.0 >= 2.0.10])
+# ])
+PKG_CHECK_MODULES([GUILE], [guile-3.0],, [
+  PKG_CHECK_MODULES([GUILE], [guile-3.0 >= 3.0.10])
 ])
 
 AM_GNU_GETTEXT([external])

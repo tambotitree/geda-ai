@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geda\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/geda\n"
-"POT-Creation-Date: 2020-12-16 18:12+0100\n"
+"POT-Creation-Date: 2025-03-13 06:21-0500\n"
 "PO-Revision-Date: 2014-08-31 23:03+0100\n"
 "Last-Translator: Bert Timmerman <bert.timmerman@xs4all.nl>\n"
 "Language-Team: gEDA developers <geda-dev@seul.org>\n"
@@ -20,27 +20,27 @@ msgstr ""
 "X-Poedit-Country: NETHERLANDS\n"
 "X-Poedit-Language: Dutch\n"
 
-#: libgeda/data/libgeda.xml.in:3
+#: libgeda/data/libgeda.xml.in.h:3
 msgid "gEDA circuit schematic"
 msgstr "gEDA schakeling schema"
 
-#: libgeda/data/libgeda.xml.in:4
+#: libgeda/data/libgeda.xml.in.h:4
 msgid "gEDA schematic symbol"
 msgstr "gEDA schema symbool"
 
-#: libgeda/data/libgeda.xml.in:5
+#: libgeda/data/libgeda.xml.in.h:5
 msgid "gEDA gsch2pcb project"
 msgstr "gEDA gsch2pcb project"
 
-#: libgeda/data/x-geda-gsch2pcb-project.desktop.in:3
+#: libgeda/data/x-geda-gsch2pcb-project.desktop.in.h:3
 msgid "gEDA Gsch2pcb Project"
 msgstr "gEDA Gsch2pcb Project"
 
-#: libgeda/data/x-geda-schematic.desktop.in:3
+#: libgeda/data/x-geda-schematic.desktop.in.h:3
 msgid "gEDA Circuit Schematic"
 msgstr "gEDA Schakeling Schema"
 
-#: libgeda/data/x-geda-symbol.desktop.in:3
+#: libgeda/data/x-geda-symbol.desktop.in.h:3
 msgid "gEDA Schematic Symbol"
 msgstr "gEDA Schema Symbool"
 
@@ -346,6 +346,16 @@ msgstr "Probeerde een niet tekst item toe te voegen als een attribuut"
 msgid "Unexpected end-of-file in attribute list"
 msgstr "Onverwacht einde-bestand in attribuutlijst"
 
+#: libgeda/src/o_basic.c:103
+#, c-format
+msgid "Found invalid line type [ %d %d %d ], resetting to default\n"
+msgstr ""
+
+#: libgeda/src/o_basic.c:240
+#, c-format
+msgid "Found invalid fill type [ %d %d %d %d %d %d ], resetting to default\n"
+msgstr ""
+
 #: libgeda/src/o_box_basic.c:280 libgeda/src/o_box_basic.c:309
 msgid "Failed to parse box object"
 msgstr "Faalde bij het ontleden van een rechthoek object"
@@ -400,22 +410,22 @@ msgstr ""
 "Komponent niet gevonden:\n"
 " %s"
 
-#: libgeda/src/o_complex_basic.c:712
+#: libgeda/src/o_complex_basic.c:714
 msgid "Failed to parse complex object"
 msgstr "Faalde bij het ontleden van een complex object"
 
-#: libgeda/src/o_complex_basic.c:725
+#: libgeda/src/o_complex_basic.c:727
 #, c-format
 msgid "Found a component with an invalid rotation [ %c %d %d %d %d %d %s ]\n"
 msgstr ""
 "Een komponent met een ongeldige rotatie gevonden [ %c %d %d %d %d %d %s ]\n"
 
-#: libgeda/src/o_complex_basic.c:726 libgeda/src/o_picture.c:104
+#: libgeda/src/o_complex_basic.c:728 libgeda/src/o_picture.c:104
 #: libgeda/src/o_text_basic.c:363
 msgid "Setting angle to 0\n"
 msgstr "Hoek op 0 ingesteld\n"
 
-#: libgeda/src/o_complex_basic.c:738
+#: libgeda/src/o_complex_basic.c:740
 #, c-format
 msgid ""
 "Found a component with an invalid mirror flag [ %c %d %d %d %d %d %s ]\n"
@@ -423,7 +433,7 @@ msgstr ""
 "Een komponent met een ongeldige spiegel vlag gevonden [ %c %d %d %d %d %d "
 "%s ]\n"
 
-#: libgeda/src/o_complex_basic.c:739
+#: libgeda/src/o_complex_basic.c:741
 msgid "Setting mirror to 0\n"
 msgstr "Spiegelen op 0 ingesteld\n"
 
@@ -474,17 +484,17 @@ msgstr ""
 "WAARSCHUWING: Symbool versie fout bij refdes %s (%s):\n"
 "\tSymbool in bibliotheek is nieuwer dan bedoelde symbool\n"
 
-#: libgeda/src/o_complex_basic.c:1150
+#: libgeda/src/o_complex_basic.c:1149
 #, c-format
 msgid "\tMAJOR VERSION CHANGE (file %.3f, instantiated %.3f, %s)!\n"
 msgstr "\tGROTE VERSIE VERANDERING (bestand %.3f, bedoeld %.3f, %s)!\n"
 
-#: libgeda/src/o_complex_basic.c:1168
+#: libgeda/src/o_complex_basic.c:1159
 #, c-format
 msgid "\tMinor version change (file %.3f, instantiated %.3f)\n"
 msgstr "\tKleine versie verandering (bestand %.3f, bedoeld %.3f)!\n"
 
-#: libgeda/src/o_complex_basic.c:1179
+#: libgeda/src/o_complex_basic.c:1170
 #, c-format
 msgid ""
 "WARNING: Symbol version oddity on refdes %s:\n"
