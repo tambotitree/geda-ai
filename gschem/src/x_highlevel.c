@@ -60,7 +60,7 @@ file_changed_since (const gchar *filename,
   if (!has_known_mtime)
     /* file has been created on disk */
     return TRUE;
-
+#ifdef HAVE_ST_MTIM
   if (buf.st_mtim.tv_sec > known_mtime.tv_sec)
     /* disk seconds are more recent than known seconds */
     return TRUE;
@@ -71,6 +71,17 @@ file_changed_since (const gchar *filename,
   if (buf.st_mtim.tv_nsec > known_mtime.tv_nsec)
     /* disk nanoseconds are more recent than known nanoseconds */
     return TRUE;
+#else
+  if (buf.st_mtimespec.tv_sec > known_mtime.tv_sec)
+    /* disk seconds are more recent than known seconds */
+    return TRUE;
+  if (buf.st_mtimespec.tv_sec < known_mtime.tv_sec)
+    /* disk seconds are older than known seconds (file went back in time?) */
+    return FALSE;
+  if (buf.st_mtimespec.tv_nsec > known_mtime.tv_nsec)
+    /* disk nanoseconds are more recent than known nanoseconds */
+    return TRUE;
+#endif
   /* disk nanoseconds are equal or older than known nanoseconds */
   return FALSE;
 }

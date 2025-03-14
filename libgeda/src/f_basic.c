@@ -455,7 +455,12 @@ int f_save(TOPLEVEL *toplevel, PAGE *page, const char *filename, GError **err)
       memset (&page->last_modified, 0, sizeof page->last_modified);
     } else {
       page->exists_on_disk = TRUE;
+      // page->last_modified = buf.st_mtim;
+#ifdef HAVE_ST_MTIM
       page->last_modified = buf.st_mtim;
+#else
+      page->last_modified = buf.st_mtimespec;
+#endif
     }
 
     page->saved_since_first_loaded = 1;

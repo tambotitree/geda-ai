@@ -1,3 +1,27 @@
+
+==============================================
+geda-ai 0.1 changes to incorporate ai into GEDA
+==============================================
+
+* New: The --with-guile-version=VERSION option has been added to
+  configure. This option allows users to specify their preferred
+  Guile version (2.0, 3.0, or auto). For example:
+  ./configure --with-guile-version=3.0
+  The default is "auto", which will try to find Guile 3.0 first,
+  and fall back to Guile 2.0 if 3.0 is not available.
+
+  On MacOS there is no desktop database that belongs to KDE so use:
+  --disable-update-xdg-database
+
+  And just to get it to compile we don't need file alteration monitor support.  We will count on the user to do refreshes.  TODO FIX THIS
+  --without-libfam
+
+  And on MacOS we can gind the python.pc file here: so we need to tell pkg-config about that:
+  export PKG_CONFIG_PATH=/Library/Frameworks/Python.framework/Versions/2.7/lib/pkgconfig:$PKG_CONFIG_PATH
+
+  We modified the logic of x_controlfd.c from strchnul to strchr and in doing so we modified the do {} while(1) loop to while(1) {} Let's hope we did it well.
+
+
 ==============================================
  'gschem and Friends' Electronic Design Suite
 ==============================================

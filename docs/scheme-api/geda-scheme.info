@@ -1,4 +1,4 @@
-This is geda-scheme.info, produced by makeinfo version 6.7 from
+This is geda-scheme.info, produced by makeinfo version 7.2 from
 geda-scheme.texi.
 
 This manual is for gEDA/gaf, version 1.10.2.
@@ -60,7 +60,7 @@ About gEDA
 
 “gEDA”, or _GPL Electronic Design Automation_, is a suite of free
 software tools for designing electronics.  The gEDA project has produced
-and continues working on a full GPL’d suite and toolkit of Electronic
+and continues working on a full GPL'd suite and toolkit of Electronic
 Design Automation (EDA) tools.  These tools are used for electrical
 circuit design, schematic capture, simulation, prototyping, and
 production.  Currently, the gEDA project offers a mature suite of free
@@ -194,9 +194,9 @@ the ‘object’ type.  There are several sub-types of ‘object’, including:
 
    • text;
 
-   • and symbol instances, known as ’components’.
+   • and symbol instances, known as 'components'.
 
-   Each ‘object’ can be part of at most a single ‘page’ – they cannot be
+   Each ‘object’ can be part of at most a single ‘page’ - they cannot be
 shared between pages.  ‘object’s are automatically garbage collected.
 
    Most of different ‘object’ sub-types are quite straightforward to
@@ -215,7 +215,7 @@ selecting it from the gschem component library and placing it on the
 page), a compound ‘object’ known as a “component” is created.
 
    Like a ‘page’, a component contains some number of ‘object’ elements.
-When a component is created from a symbol, the contents of the symbol’s
+When a component is created from a symbol, the contents of the symbol's
 ‘page’ are copied into the component.
 
    In order to allow the component to appear in the correct place on the
@@ -232,7 +232,7 @@ component.
    However, a component may optionally be _embedded_.  In this case, its
 contents _are_ stored in the schematic file.
 
-   *Note*: A component cannot contain another component – only other
+   *Note*: A component cannot contain another component - only other
 types of ‘object’.
 
 
@@ -276,9 +276,9 @@ such as ‘VCC’ or ‘GND’.
 
    _Floating attributes_ are attribute text ‘object’s that are not
 linked to another ‘object’.  These attributes affect the schematic or
-symbol that they’re part of as a whole.  For example, a floating
-‘documentation=URL’ attribute in a symbol tells gschem’s *Help →
-Component Documentation* command how to find the component’s data sheet.
+symbol that they're part of as a whole.  For example, a floating
+‘documentation=URL’ attribute in a symbol tells gschem's *Help →
+Component Documentation* command how to find the component's data sheet.
 
 
 File: geda-scheme.info,  Node: Coordinate system,  Prev: Attributes,  Up: Schematic Document Model
@@ -287,7 +287,7 @@ File: geda-scheme.info,  Node: Coordinate system,  Prev: Attributes,  Up: Schema
 =====================
 
 gEDA documents use a “coordinate system” (internally referred to as
-‘world’ coordinates) with coordinates increasing upwards and to the
+'world' coordinates) with coordinates increasing upwards and to the
 right (i.e.  a conventional right-handed Cartesian coordinate system).
 
    Although all coordinates may be positive or negative, gschem only
@@ -434,7 +434,7 @@ A ‘page’ has a _dirty flag_ that is used to indicate to applications
 that the ‘page’ has been modified since it was last loaded or saved.
 
  -- Function: page-dirty? page
-     Returns ‘#t’ if the PAGE’s page has been marked as dirty;
+     Returns ‘#t’ if the PAGE's page has been marked as dirty;
      otherwise, returns ‘#f’.
 
  -- Function: set-page-dirty! page [state]
@@ -600,7 +600,7 @@ File: geda-scheme.info,  Node: Object fill and stroke,  Prev: Object color,  Up:
 2.2.1.5 Object fill and stroke
 ..............................
 
-Graphical object subtypes – lines, boxes, circles, arcs and paths – are
+Graphical object subtypes - lines, boxes, circles, arcs and paths - are
 drawn with a stroke pattern that can be configured in detail.
 
  -- Function: object-stroke object
@@ -642,7 +642,7 @@ drawn with a stroke pattern that can be configured in detail.
        2. for styles other than ‘solid’, dot/dash spacing;
        3. for ‘dashed’, ‘center’ and ‘phantom’, dash length.
 
-   Some types of ‘object’ – boxes, circles and paths – can have their
+   Some types of ‘object’ - boxes, circles and paths - can have their
 interiors filled with a variety of patterns.
 
  -- Function: object-fill object
@@ -671,7 +671,7 @@ File: geda-scheme.info,  Node: Lines,  Next: Nets and buses,  Prev: General obje
 -----------
 
 Line ‘object’s are straight graphical line segments with no electrical
-meaning.  A line’s geometrical parameters are a start point and end
+meaning.  A line's geometrical parameters are a start point and end
 point, and it supports different colors and stroke styles.
 
    Many of the functions for manipulating lines are also used to
@@ -926,7 +926,7 @@ supported by gEDA are:
      control point; the position of the second control point; and the
      endpoint of the curve.
    • ‘closepath’ elements close the current subpath by drawing a
-     straight line from the current point to the subpath’s initial
+     straight line from the current point to the subpath's initial
      point.  They take no parameters.
 
  -- Function: path? object
@@ -974,7 +974,7 @@ File: geda-scheme.info,  Node: Pictures,  Next: Text,  Prev: Paths,  Up: Core ob
 
 A picture object displays an image in the schematic, and is a purely
 graphical element.  Pictures may be in any format supported by the
-user’s GdkPixbuf installation (but note that images that can’t be loaded
+user's GdkPixbuf installation (but note that images that can't be loaded
 for some reason are preserved).  The TOP-LEFT, BOTTOM-RIGHT, ANGLE and
 MIRROR properties of a picture object indicate the transformation that
 was applied to the original image.  The transformation is applied as
@@ -1157,7 +1157,7 @@ Component ‘object’s represent instances of symbols.  They contain other
 ‘object’s copied from the original symbol when it is instantiated into a
 schematic.
 
-   A component’s BASENAME is a string used to identify which symbol it
+   A component's BASENAME is a string used to identify which symbol it
 originated from.  When instantiating a symbol on initial placement in a
 schematic, or when recreating a component while loading a schematic, the
 BASENAME is used to find the underlying symbol file in the component
@@ -1166,7 +1166,7 @@ library.
    *Note Component objects::.
 
    *Note*: In the gEDA C source code, these are normally called
-“complex” objects.  However, as Guile Scheme supports complex numbers,
+"complex" objects.  However, as Guile Scheme supports complex numbers,
 and the procedures related to working with complex numbers use the word
 ‘complex’ to describe them, this API uses ‘component’ to avoid
 ambiguity.
@@ -1180,9 +1180,9 @@ The transformation is applied in the following order:
      point (0,0) (ANGLE may only be an integer multiple of 90 degrees).
   3. Finally, the symbol is translated by POSITION.
 
-   The component’s contents (as returned by ‘component-contents’) have
+   The component's contents (as returned by ‘component-contents’) have
 the transformation already applied to them.  Updating the translation
-information using e.g.  ‘set-component!’ will not alter them – that must
+information using e.g.  ‘set-component!’ will not alter them - that must
 be done separately (e.g.  by reloading the symbol).
 
  -- Function: component? object
@@ -1213,7 +1213,7 @@ be done separately (e.g.  by reloading the symbol).
      ‘make-component’.  Returns COMPONENT.
 
      *Note*: Remember that modifying the transformation parameters of a
-     component does not update the component’s contents.
+     component does not update the component's contents.
 
  -- Function: set-component-with-transform! component position angle
           mirror locked
@@ -1408,7 +1408,7 @@ including newly-created ones.
 ...........................
 
  -- Function: path-config-context path
-     Normally, you shouldn’t create a configuration context directly;
+     Normally, you shouldn't create a configuration context directly;
      you should obtain the configuration context associated with a PATH.
 
      ‘path-config-context’ looks for a configuration file named
@@ -1731,7 +1731,7 @@ File: geda-scheme.info,  Node: Configuration errors,  Prev: Configuration events
 All errors in functions in the ‘(geda config)’ are reported using one of
 two keys:
 
-  1. File errors (e.g.  “Access denied” or “File not found” are
+  1. File errors (e.g.  "Access denied" or "File not found" are
      indicated with the ‘system-error’ key.
   2. All other errors are indicated using the ‘config-error’ key.
 
@@ -1920,7 +1920,7 @@ and <Shift> keys down, and then pressing <A>.
      Converts KEY to a string, using a format suitable for display.
      This should be used when the key combination needs to be displayed
      to the user e.g.  in the gschem menus or status area.  The returned
-     string is translated according to the user’s current locale.
+     string is translated according to the user's current locale.
 
           (key->display-string (string->key ``<Control>bracketright''))
           => ``Ctrl+]''
@@ -2032,7 +2032,7 @@ the currently selected objects.
      Returns the current selection for PAGE, as a list of ‘object’s.
 
  -- Function: object-selected? object
-     Returns ‘#t’ if OBJECT is in its containing page’s selection.
+     Returns ‘#t’ if OBJECT is in its containing page's selection.
      Otherwise, returns ‘#f’.  If OBJECT is not in a ‘page’, raises an
      ‘object-state’ error.
 
@@ -2134,7 +2134,7 @@ normally modify their arguments.
 
  -- Variable: bind-keys-hook
      Called when a key binding is set or modified.  The arguments are
-     the keymap, the key sequence and the binding’s target.
+     the keymap, the key sequence and the binding's target.
 
      *Note*: ‘bind-keys-hook’ may be run multiple times for a single key
      binding event if the target keymap is bound within a superior
@@ -2219,8 +2219,8 @@ Normally, actions have names begining with an ‘&’ symbol.
 3.5.2 Evaluating actions
 ------------------------
 
-All of gschem’s built-in actions are callable just like normal Scheme
-functions.  However, it’s sometimes useful to explicitly evaluate an
+All of gschem's built-in actions are callable just like normal Scheme
+functions.  However, it's sometimes useful to explicitly evaluate an
 action in the same way that the gschem GUI (menus, toolbars or
 keybindings) would do so.
 
@@ -2296,7 +2296,7 @@ the ‘(gschem attrib)’ module.
         • ‘both’
 
      This function exists to provide a way for actions defined in Scheme
-     to use the same attribute placement heuristics as gschem’s built-in
+     to use the same attribute placement heuristics as gschem's built-in
      *Add Attribute* action.
 
      *Note Text::, *note Attributes:: and *note Windows and views::.
@@ -2500,8 +2500,8 @@ Function Index
 * deselect-object!:                      Selections.          (line  32)
 * detach-attribs!:                       Core attribute functions.
                                                               (line  61)
-* eval-action!:                          Actions.             (line  82)
 * eval-action-at-point!:                 Actions.             (line 109)
+* eval-action!:                          Actions.             (line  82)
 * expand-env-variables:                  System information.  (line  64)
 * fold-bounds:                           Object bounds.       (line  19)
 * inherited-attribs:                     Core attribute functions.
@@ -2611,8 +2611,8 @@ Function Index
                                                               (line  31)
 * set-box!:                              Boxes.               (line  24)
 * set-circle!:                           Circles.             (line  23)
-* set-component!:                        Components.          (line  61)
 * set-component-with-transform!:         Components.          (line  68)
+* set-component!:                        Components.          (line  61)
 * set-config-parent!:                    Configuration contexts.
                                                               (line 121)
 * set-config-trusted!:                   Configuration contexts.
@@ -2626,9 +2626,9 @@ Function Index
 * set-page-dirty!:                       Core page functions. (line 109)
 * set-page-filename!:                    Core page functions. (line  39)
 * set-picture!:                          Pictures.            (line  35)
-* set-text!:                             Text.                (line  62)
 * set-text-string!:                      Text.                (line  97)
 * set-text-visibility!:                  Text.                (line 107)
+* set-text!:                             Text.                (line  62)
 * show-file:                             Miscellanous gschem functions.
                                                               (line  42)
 * show-uri:                              Miscellanous gschem functions.
@@ -2685,54 +2685,53 @@ Variable Index
 * separator:                             System information.   (line 21)
 * separator-char:                        System information.   (line 13)
 
-
 
 Tag Table:
 Node: Top827
 Node: Introduction1705
-Node: Schematic Document Model4652
-Node: Pages5525
-Node: Objects6886
-Node: Component objects7773
-Node: Attributes9123
-Node: Coordinate system11058
-Node: Core API Reference12073
-Node: Core page functions12584
-Node: Core object functions16552
-Node: General object functions17005
-Node: Object sub-types18332
-Node: Object transformations19152
-Node: Object bounds20033
-Node: Object color21087
-Node: Object fill and stroke21676
-Node: Lines24898
-Node: Nets and buses26783
-Node: Pins27992
-Node: Boxes29554
-Node: Circles31106
-Node: Arcs32538
-Node: Paths34209
-Node: Pictures36900
-Node: Text39302
-Node: Components43706
-Node: Core attribute functions48722
-Node: Configuration functions52503
-Node: Configuration contexts53057
-Node: Configuration parameters59394
-Node: Configuration events63092
-Node: Configuration errors64324
-Node: Logging functions65285
-Node: System information65985
-Node: gschem API Reference68418
-Node: Windows and views68894
-Node: Key mapping69746
-Node: Selections74911
-Node: Hooks76471
-Node: Actions79557
-Node: Miscellanous gschem functions84832
-Node: Concept Index86607
-Node: Function Index91060
-Node: Variable Index109644
+Node: Schematic Document Model4650
+Node: Pages5523
+Node: Objects6884
+Node: Component objects7765
+Node: Attributes9111
+Node: Coordinate system11040
+Node: Core API Reference12051
+Node: Core page functions12562
+Node: Core object functions16528
+Node: General object functions16981
+Node: Object sub-types18308
+Node: Object transformations19128
+Node: Object bounds20009
+Node: Object color21063
+Node: Object fill and stroke21652
+Node: Lines24866
+Node: Nets and buses26749
+Node: Pins27958
+Node: Boxes29520
+Node: Circles31072
+Node: Arcs32504
+Node: Paths34175
+Node: Pictures36864
+Node: Text39262
+Node: Components43666
+Node: Core attribute functions48670
+Node: Configuration functions52451
+Node: Configuration contexts53005
+Node: Configuration parameters59340
+Node: Configuration events63038
+Node: Configuration errors64270
+Node: Logging functions65223
+Node: System information65923
+Node: gschem API Reference68356
+Node: Windows and views68832
+Node: Key mapping69684
+Node: Selections74847
+Node: Hooks76405
+Node: Actions79489
+Node: Miscellanous gschem functions84760
+Node: Concept Index86533
+Node: Function Index90986
+Node: Variable Index109570
 
 End Tag Table
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geda\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/geda\n"
-"POT-Creation-Date: 2020-12-16 18:12+0100\n"
+"POT-Creation-Date: 2025-03-14 15:33-0500\n"
 "PO-Revision-Date: 2012-04-09 11:22+0000\n"
 "Last-Translator: Miha Gašperšič <mihec.gaspersic@gmail.com>\n"
 "Language-Team: Slovenian <sl@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "X-Launchpad-Export-Date: 2012-11-14 16:52+0000\n"
 "X-Generator: Launchpad (build 16265)\n"
 
-#: gattrib/data/geda-gattrib.desktop.in:3
+#: gattrib/data/geda-gattrib.desktop.in.h:3
 msgid "gEDA Attribute Editor"
 msgstr "gEDA urejevalnik atributov"
 
-#: gattrib/data/geda-gattrib.desktop.in:4
+#: gattrib/data/geda-gattrib.desktop.in.h:4
 msgid "Manipulate component attributes with gattrib"
 msgstr "Upravljajte atribute sestavnih delov z gattrib"
 

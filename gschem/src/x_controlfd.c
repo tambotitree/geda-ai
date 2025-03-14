@@ -196,31 +196,40 @@ split_args (gchar ***args_return, gint *count_return, gchar *buf)
   size_t len = strlen (buf);
   size_t skip = 0;
 
-  do {
-    size_t sp = strchrnul (buf + skip, ' ') - buf;
-    size_t bs = strchrnul (buf + skip, '\\') - buf;
-
-    if (sp < bs) {
-      if (sp != 0)
-        tokens = g_slist_prepend (tokens, g_strndup (buf, sp));
-      buf += sp + 1;
-      len -= sp + 1;
-      skip = 0;
-    } else if (bs < sp) {
-      if (buf[bs + 1] != ' ' && buf[bs + 1] != '\\') {
-        fprintf (stderr, "Backslash may only be followed by space or another "
-                         "backslash\n");
-        g_slist_free (tokens);
-        return;
+  while (1) {
+        char *sp = strchr (buf + skip, ' ');
+        char *bs = strchr (buf + skip, '\\');
+    
+        if (sp == NULL && bs == NULL)
+          {
+            if (buf[skip] != '\0')
+              tokens = g_slist_prepend (tokens, g_strdup (buf+skip));
+            break;
+          }
+        if (sp == NULL || (bs != NULL && bs < sp))
+        {
+            if (bs != NULL)
+            {
+               if (buf[bs - buf + 1] != ' ' && buf[bs - buf + 1] != '\\') {
+                fprintf (stderr, "Backslash may only be followed by space or another "
+                                 "backslash\n");
+                g_slist_free (tokens);
+                return;
+              }
+              memmove (buf + (bs - buf), buf + (bs - buf) + 1, len - (bs - buf));  /* include trailing NUL */
+              len = strlen(buf);
+              skip = bs-buf+1;
+            }
+        } else if(bs == NULL || sp < bs)
+          {
+            if (sp-buf != 0)
+              tokens = g_slist_prepend (tokens, g_strndup (buf+skip, sp-buf-skip));
+            buf += sp-buf + 1;
+            len -= sp-buf + 1;
+            skip = 0;
+         }
       }
-      memmove (buf + bs, buf + bs + 1, len - bs);  /* include trailing NUL */
-      skip = bs + 1;
-    } else {
-      if (buf[0] != '\0')
-        tokens = g_slist_prepend (tokens, g_strdup (buf));
-      break;
-    }
-  } while (1);
+     
 
   gint count = g_slist_length (tokens);
   gchar **args = g_new (char *, count);

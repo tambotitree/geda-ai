@@ -126,7 +126,12 @@ PAGE *s_page_new (TOPLEVEL *toplevel, const gchar *filename)
     memset (&page->last_modified, 0, sizeof page->last_modified);
   } else {
     page->exists_on_disk = TRUE;
+    // page->last_modified = buf.st_mtim;
+#ifdef HAVE_ST_MTIM
     page->last_modified = buf.st_mtim;
+#else
+    page->last_modified = buf.st_mtimespec;
+#endif
   }
 
   /* big assumption here that page_filename isn't null */

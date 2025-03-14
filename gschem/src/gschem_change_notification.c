@@ -171,7 +171,12 @@ update_current_mtime (GschemChangeNotification *chnot)
     memset (&chnot->current_mtime, 0, sizeof chnot->current_mtime);
   } else {
     chnot->has_current_mtime = TRUE;
-    chnot->current_mtime = buf.st_mtim;
+    // chnot->current_mtime = buf.st_mtim;
+#ifdef HAVE_ST_MTIM
+       chnot->current_mtime = buf.st_mtim;
+#else
+      chnot->current_mtime = buf.st_mtimespec;
+#endif
   }
 }
 

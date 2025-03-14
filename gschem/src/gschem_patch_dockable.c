@@ -341,7 +341,11 @@ x_patch_do_import (GschemToplevel *w_current, PAGE *page)
 
   if (stat (page->patch_filename, &buf) != -1) {
     page->patch_seen_on_disk = TRUE;
+#ifdef HAVE_ST_MTIM
     page->patch_mtime = buf.st_mtim;
+#else
+    page->patch_mtime = buf.st_mtimespec;
+#endif
     x_window_update_patch_change_notification (w_current, page);
   }
 
