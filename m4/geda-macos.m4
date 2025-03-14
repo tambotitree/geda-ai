@@ -48,10 +48,3 @@ int main() {
 ])dnl
 
 
-
-# We need to add the gnu extension flag here.
-# m4_ifdef([AM_PROG_CC_C_O], [AM_PROG_CC_C_O])
-
-# m4_append([AM_PROG_CC_C_O], [
-#   m4_append([AM_PROG_CC_C_O], [
-# AM_PROG_CC_C_O(-std=gnu99)])])

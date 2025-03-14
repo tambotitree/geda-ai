@@ -2,6 +2,9 @@
 ==============================================
 geda-ai 0.1 changes to incorporate ai into GEDA
 ==============================================
+* Good news! This now compiles on MacOS Sequoia wiht guile 3.0.
+  And it runs! Not well mind you, but the window does come up etc.
+  So a little more work to do but WAYYY better than geda-gaf right now.
 
 * New: The --with-guile-version=VERSION option has been added to
   configure. This option allows users to specify their preferred
