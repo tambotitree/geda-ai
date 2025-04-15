@@ -31,6 +31,12 @@ AX_GIT_VERSION([20201216])
 AC_SUBST([CHANGELOG_BASE], [1.0-20070526])
 
 #####################################################################
+# MacOS support
+#####################################################################
+
+m4_ifdef([AX_CONFIGURE_XDG], [AX_CONFIGURE_XDG])
+
+#####################################################################
 # Windows/MinGW/Cygwin support
 #####################################################################
 
@@ -75,20 +81,6 @@ AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION([0.19])
 AX_DESKTOP_I18N
 
-#####################################################################
-# PKG NAME WORKAROUND
-#####################################################################
-# Here we HARDCODE some version name CHECKS. There is a subtle 
-# logic flaw in pg-config. It assumes that the package is just the 
-# base name without a version, however maintainers are free to choose
-# their own name so the package should be guile but in fact it is 
-# guie-3.0 and pkg-config can't find the package without the correct
-# name.  So we create a list of package dependencies that break the
-# paradigm here to centralize management of them. 
-GUILE_PKG_NAME="guile-3.0"
-PYTHON_REQUIRED_WORKAROUND="python2" # TODO: do this better! tambotitree@gmail.com
-# PYTHON="python-2.7"
-PYTHON="2.7"
 
 #####################################################################
 # Check for libraries that use pkg-config
@@ -96,17 +88,15 @@ PYTHON="2.7"
 
 PKG_PROG_PKG_CONFIG
 # Debugging: Print the list of packages known to pkg-config.
-AC_MSG_NOTICE([Debugging: pkg-config --list-all])
+# AC_MSG_NOTICE([Debugging: pkg-config --list-all])
 pkg_list=`$PKG_CONFIG --list-all`
-AC_MSG_NOTICE([Debugging: pkg-config --list-all returned:
-$pkg_list])
+# AC_MSG_NOTICE([Debugging: pkg-config --list-all returned:
+# $pkg_list])
 
 # Check for Guile.  Issue #1.  Attempt by tambotitree@gmail.com Tue Mar 11 10:40:48 CDT 2025
-# AX_CHECK_GUILE([2.0.10])
 AX_CHECK_GUILE([3.0.10])
-# AM_CONDITIONAL([HAVE_GUILE_3], [test "x$ax_cv_guile_3" = xyes])
-AM_CONDITIONAL([HAVE_GUILE_3], [test "x$ax_cv_guile" = xyes])
-
+# AM_CONDITIONAL([HAVE_GUILE_3], [test "x$ax_cv_guile" = xyes])
+AC_SUBST(GUILE_PKG_NAME)
 
 
 PKG_CHECK_MODULES(GLIB, [glib-2.0 >= 2.41.1], ,
@@ -161,6 +151,9 @@ AC_CHECK_HEADERS([errno.h fcntl.h])
 # without a locale.h?  We do need to include locale.h on some systems
 # to be able to build gschem/src/gschem.c
 AC_CHECK_HEADERS([locale.h])
+
+# Check for struct stat membe
+AX_CHECK_ST_MTIMESPEC
 
 # Check for lrint in math library.
 

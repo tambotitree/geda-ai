@@ -6,6 +6,19 @@ geda-ai 0.1 changes to incorporate ai into GEDA
   And it runs! Not well mind you, but the window does come up etc.
   So a little more work to do but WAYYY better than geda-gaf right now.
 
+* On MacOS you may need to set the variables for the XDG database
+
+$XDG_CONFIG_HOME => $HOME/.config
+$XDG_DATA_HOME => $HOME/.local/share
+$XDG_STATE_HOME => $HOME/.local/state
+$XDG_CACHE_HOME => $HOME/.cache
+
+* the gtk desktop and things are part of the gtk maos integrations
+brew install gtk-mac-integration
+brew install shared-mime-info
+update-mime-database /usr/local/share/mime
+https://github.com/KDE/homebrew-kde
+
 * New: The --with-guile-version=VERSION option has been added to
   configure. This option allows users to specify their preferred
   Guile version (2.0, 3.0, or auto). For example:

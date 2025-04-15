@@ -48,3 +48,36 @@ int main() {
 ])dnl
 
 
+
+# check for macOS, then create the directories and set the variables.
+AC_DEFUN([AX_CONFIGURE_XDG],
+[
+AC_MSG_CHECKING([for operating system])
+case "${host_os}" in
+    darwin*)
+        AC_MSG_RESULT([macOS])
+        AC_MSG_NOTICE([Creating XDG directories and setting XDG environment variables])
+
+        # Create the directories if they don't exist
+        AC_RUN_IFELSE([AC_LANG_PROGRAM([[#include <sys/stat.h>]],
+        [[mkdir("$HOME/.config", 0755);
+          mkdir("$HOME/.local", 0755);
+          mkdir("$HOME/.local/share", 0755);
+          mkdir("$HOME/.local/state", 0755);
+          mkdir("$HOME/.cache", 0755);
+        ]])],
+        [],
+        [AC_MSG_ERROR([Failed to create XDG directories])],
+        [AC_MSG_ERROR([Failed to create XDG directories])])
+        AC_SUBST([XDG_CONFIG_HOME], "$HOME/.config")
+        AC_SUBST([XDG_DATA_HOME], "$HOME/.local/share")
+        AC_SUBST([XDG_STATE_HOME], "$HOME/.local/state")
+        AC_SUBST([XDG_CACHE_HOME], "$HOME/.cache")
+        ;;
+    *)
+        AC_MSG_RESULT([non-macOS])
+        ;;
+esac
+])dnl
+
+
