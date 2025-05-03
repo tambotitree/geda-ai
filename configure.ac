@@ -239,10 +239,15 @@ AC_CONFIG_FILES([Makefile
 GEDADATADIR="${datadir}/geda"
 AC_SUBST(GEDADATADIR)
 
+
 # Define the location for gEDA rc files relative to sysconfdir
 # Default sysconfdir is ${prefix}/etc
 GEDARCDIR="${sysconfdir}/geda"
 AC_SUBST(GEDARCDIR)
+
+# Export the variable for subdirectories (alternative to AC_EXPORT or passing args)
+export GEDADATADIR GEDARCDIR
+export GEDARCDIR GEDARCDIR
 
 # --- Configuration Files and Output (MUST BE AT THE END) ---
 AC_CONFIG_SUBDIRS([xorn])
