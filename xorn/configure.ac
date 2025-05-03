@@ -30,16 +30,16 @@ GUILE_PKG_NAME="guile-3.0"
 AC_PREREQ([2.69])
 LT_PREREQ([2.4.6])
 
-AC_INIT([Xorn], [0.0], [bug-xorn@hedmen.org], [], [http://hedmen.org/xorn/])
+AC_INIT([Xorn], [0.1.0], [https://github.com/tambotitree/geda-ai/issues], [xorn])
 AC_CONFIG_SRCDIR([src/cpython/storage/module.c])
 AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE([-Wall -Werror silent-rules subdir-objects])
+
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 LT_INIT([])
 
 AX_PROG_CC_WARNING([cast_function_type], [cast-function-type])
-
 AC_PROG_CXX
 
 AM_PATH_PYTHON([2.7])
@@ -74,8 +74,12 @@ PKG_CHECK_MODULES([GUILE], [guile-3.0],, [
   PKG_CHECK_MODULES([GUILE], [guile-3.0 >= 3.0.10])
 ])
 
-AM_GNU_GETTEXT([external])
-AM_GNU_GETTEXT_VERSION([0.19.8])
+# Checks for libraries.
+PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.32])
+PKG_CHECK_MODULES([GMODULE], [gmodule-2.0])
+# Check for GIO separately as it might not be present in older GLib versions
+# Although our GLib requirement >= 2.32 should guarantee GIO is available.
+PKG_CHECK_MODULES([GIO], [gio-2.0])
 
 # use location passed by main configure script
 AC_MSG_CHECKING([where to look for gEDA shared data])

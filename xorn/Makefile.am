@@ -56,7 +56,7 @@ stamp-h: $(top_srcdir)/configure.ac
 	@echo timestamp > $@
 
 # Ensure version.h is built before any source file that includes it
-BUILT_SOURCES = version.h
+BUILT_SOURCES = stamp-h
 
 # Files to remove when 'make clean' is run
 CLEANFILES = stamp-h version.h version.h.tmp

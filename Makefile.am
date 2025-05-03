@@ -18,7 +18,6 @@ DISTCHECK_CONFIGURE_FLAGS = \
 	GROFF="$(false)" \
 	--disable-update-xdg-database
 
-BUILT_SOURCES = version.h
 EXTRA_DIST = autogen.sh version.h version.h.in HACKING \
 	COPYING.LGPL
 
