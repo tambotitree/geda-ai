@@ -8,7 +8,6 @@ AM_INIT_AUTOMAKE([foreign -Wall -Werror subdir-objects])
 
 
 AC_CONFIG_MACRO_DIRS([m4 xorn/m4]) # Ensure m4 directory is listed
-AX_DEBUG_TRACE_TEST() # Call our test macro
 
 AC_CONFIG_HEADERS([config.h])
 
@@ -239,13 +238,11 @@ AC_CONFIG_FILES([Makefile
 # Default datadir is ${prefix}/share
 GEDADATADIR="${datadir}/geda"
 AC_SUBST(GEDADATADIR)
-AC_EXPORT(GEDADATADIR) # Restore this line
 
 # Define the location for gEDA rc files relative to sysconfdir
 # Default sysconfdir is ${prefix}/etc
 GEDARCDIR="${sysconfdir}/geda"
 AC_SUBST(GEDARCDIR)
-AC_EXPORT(GEDARCDIR) # Restore this line
 
 # --- Configuration Files and Output (MUST BE AT THE END) ---
 AC_CONFIG_SUBDIRS([xorn])
