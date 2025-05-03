@@ -1,7 +1,6 @@
 SUBDIRS = po gedai
 if ENABLE_GATTRIB
-# GATTRIB_DIR=gattrib
-SUBDIRS += gattrib
+GATTRIB_DIR=gattrib
 endif
 SUBDIRS += libgeda libgedacairo gaf gschem ${GATTRIB_DIR} \
 	gsymcheck gnetlist-legacy utils symbols docs examples contrib xorn
