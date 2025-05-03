@@ -1,0 +1,10 @@
+# hello_trace.ac - Minimal test for autoconf --trace
+
+AC_PREREQ([2.72])
+AC_INIT([hello_trace], [1.0])
+
+# A simple, standard macro we can trace
+AC_MSG_NOTICE([Hello from hello_trace.ac])
+
+# Required final macro
+AC_OUTPUT

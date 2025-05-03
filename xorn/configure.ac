@@ -43,9 +43,28 @@ AX_PROG_CC_WARNING([cast_function_type], [cast-function-type])
 AC_PROG_CXX
 
 AM_PATH_PYTHON([2.7])
-PKG_CHECK_MODULES([PYTHON], [python-2.7 >= 2.7],, [
-  PKG_CHECK_MODULES([PYTHON], [python2 >= 2.7])
-])
+# Check for Python 2.7 using pkg-config
+PKG_CHECK_MODULES([PYTHON], python-2.7 >= 2.7,
+  [ : ],  # Action if found: do nothing special, just succeed
+  [ AC_MSG_ERROR( # Action if NOT found: print custom error and exit
+[Required Python 2.7 development files were not found by pkg-config.
+
+This commonly occurs when Python is installed in a non-standard prefix,
+such as with 'pyenv' or 'conda'.
+
+If you are using pyenv and have Python 2.7 installed (e.g., version 2.7.18),
+please ensure its pkg-config directory is in your PKG_CONFIG_PATH. Try:
+
+  export PKG_CONFIG_PATH="$HOME/.pyenv/versions/2.7.18/lib/pkgconfig:\${PKG_CONFIG_PATH}"
+  ./configure
+
+(Adjust the path '$HOME/.pyenv/versions/2.7.18/lib/pkgconfig' if your
+version or installation location differs).
+
+Alternatively, manually set PYTHON_CFLAGS and PYTHON_LIBS environment variables.]
+  ) ] # Closing parenthesis for AC_MSG_ERROR and closing bracket for action
+) # Closing parenthesis for PKG_CHECK_MODULES
+
 # Updateing Guile to version 3 - LISP is used for routing traces which lisp is not so important
 # tambotitree@gmail.com - Thu Mar 13 05:20:57 CDT 2025
 # PKG_CHECK_MODULES([GUILE], [guile-2.2],, [
