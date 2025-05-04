@@ -1,4 +1,5 @@
 SUBDIRS = po gedai
+
 if ENABLE_GATTRIB
 GATTRIB_DIR=gattrib
 endif

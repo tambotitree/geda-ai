@@ -15,6 +15,13 @@ OLLAMA_MODEL = "llama3" # Or whatever model you're using
 # HF_MODEL_ID = "mistralai/Mistral-7B-Instruct-v0.2"
 # hf_client = InferenceClient(model=HF_MODEL_ID, token=HF_API_TOKEN)
 
+@app.get("/")
+async def hello_chat():
+    """
+    Simple endpoint to check if the gedai server is running.
+    """
+    return {"message": "Hello from gEDA-AI!"}
+
 @app.post("/generate_symbol")
 async def generate_symbol(description: str):
     """
