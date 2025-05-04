@@ -147,6 +147,7 @@ AM_CONDITIONAL(ENABLE_KDE_DESKTOP_DATA, test "x$enable_kde_desktop_data" = xyes)
 
 # --- Configuration Files and Output (MUST BE AT THE END) ---
 AC_CONFIG_FILES([Makefile
+                 po/Makefile
                  contrib/Makefile
                  contrib/gmk_sym/Makefile
                  contrib/olib/Makefile
