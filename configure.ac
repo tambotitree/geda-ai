@@ -4,6 +4,8 @@
 AC_PREREQ([2.72])
 AC_INIT([geda-ai], [0.9], [https://github.com/tambotitree/geda-ai/issues], [geda-ai])
 AC_USE_SYSTEM_EXTENSIONS
+AX_GIT_VERSION([$PACKAGE_VERSION]) # Add this to define version variables
+AC_CONFIG_AUX_DIR([build-tools]) # Tell automake where helper scripts are
 AM_INIT_AUTOMAKE([foreign -Wall -Werror subdir-objects])
 
 
@@ -49,9 +51,29 @@ AC_PROG_LEX([yywrap])
 # Initialize libtool
 LT_INIT
 
+# Check for Guile and its development tools (needed for libgeda)
+GEDA_GUILE_CHECKS
+# GEDA_GUILE_CHECKS # This macro might not be defined in the current m4/geda-guile.m4
+AX_CHECK_GUILE([1.8.0]) # Call the macro that is defined in m4/geda-guile.m4
+
+
 # --- Checks for libraries ---
 # FIXME: Replace 'main' with a function in '-lm':
 AC_CHECK_LIB([m], [main])
+
+# Check for GLib (needed by libgeda and other components)
+PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.32,
+                  [have_glib=yes], [have_glib=no])
+if test "x$have_glib" = "xno"; then
+  AC_MSG_ERROR([GLib >= 2.32 not found. Please install the GLib development package.])
+fi
+
+# Check for GDK-Pixbuf (needed by libgeda for image handling)
+PKG_CHECK_MODULES(GDK_PIXBUF, gdk-pixbuf-2.0 >= 2.24.0,
+                  [have_gdk_pixbuf=yes], [have_gdk_pixbuf=no])
+if test "x$have_gdk_pixbuf" = "xno"; then
+  AC_MSG_ERROR([GDK-Pixbuf >= 2.24.0 not found. Please install the GDK-Pixbuf development package.])
+fi
 
 # --- Checks for header files ---
 AC_FUNC_ALLOCA
@@ -74,6 +96,11 @@ AC_FUNC_CHOWN
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION([0.19])
 AM_GNU_GETTEXT_REQUIRE_VERSION([0.19])
+AX_DESKTOP_I18N # Use the macro from geda-desktop-i18n.m4
+# Define the text domain for libgeda
+AC_DEFINE_UNQUOTED([LIBGEDA_GETTEXT_DOMAIN], ["libgeda"], [The gettext domain for libgeda])
+
+
 AC_FUNC_LSTAT_FOLLOWS_SLASHED_SYMLINK
 AC_FUNC_MALLOC
 AC_FUNC_MBRTOWC
@@ -108,24 +135,13 @@ if test "x$have_git_repo" = xyes; then
   AC_DEFINE(HAVE_GIT_REPO, 1, [Define if building from a git repository])
 fi
 
-# Check for XDG utils (for desktop integration database updates)
-AC_CHECK_PROG(UPDATE_MIME_DATABASE, update-mime-database, yes, no)
-AC_CHECK_PROG(UPDATE_DESKTOP_DATABASE, update-desktop-database, yes, no)
-AC_ARG_ENABLE(update-xdg-database,
-  AS_HELP_STRING([--disable-update-xdg-database],[disable updating XDG database (default: yes, if tools found)]),
-  [enable_update_xdg_database=$enableval],
-  [enable_update_xdg_database=yes]) # Default: yes
-if test "x$enable_update_xdg_database" = xyes; then
-  if test "x$UPDATE_MIME_DATABASE" = xno; then
-    AC_MSG_WARN([update-mime-database not found, disabling XDG database update])
-    enable_update_xdg_database=no
-  fi
-  if test "x$UPDATE_DESKTOP_DATABASE" = xno; then
-    AC_MSG_WARN([update-desktop-database not found, disabling XDG database update])
-    enable_update_xdg_database=no
-  fi
-fi
-AM_CONDITIONAL(ENABLE_UPDATE_XDG_DATABASE, test "x$enable_update_xdg_database" = xyes)
+
+# Optional XDG integration (uses AX_* macros from m4/geda-desktop.m4)
+# Explicitly define the conditional here as a fallback/diagnostic
+AM_CONDITIONAL(HAVE_ICON_INSTALLER, test "x$ax_cv_xdg_icon_installer" != xno)
+AX_OPTION_XDG_DB   # Should define ENABLE_UPDATE_XDG_DATABASE conditional
+# AX_OPTION_KDE3_DATA # Keep commented unless KDE3 support is needed
+
 
 # Check for KDE desktop data installation
 kde_default=yes
@@ -147,6 +163,7 @@ AM_CONDITIONAL(ENABLE_KDE_DESKTOP_DATA, test "x$enable_kde_desktop_data" = xyes)
 
 # --- Configuration Files and Output (MUST BE AT THE END) ---
 AC_CONFIG_FILES([Makefile
+                 version.h
                  po/Makefile
                  gedai/Makefile
                  contrib/Makefile

@@ -58,7 +58,9 @@ DOMAIN=$(LIBGEDA_GETTEXT_DOMAIN)
 @DESKTOP_I18N_XML_RULE@
 
 install-data-local:
+if HAVE_ICON_INSTALLER
 	$(install_icon_exec) -i $(theme_icons)
+endif
 
 install-data-hook:
 if ENABLE_UPDATE_XDG_DATABASE
@@ -69,7 +71,9 @@ uninstall-hook:
 if ENABLE_UPDATE_XDG_DATABASE
 	$(UPDATE_MIME_DATABASE) "$(DESTDIR)$(mimedir)"
 endif
+if HAVE_ICON_INSTALLER
 	$(install_icon_exec) -u $(theme_icons)
+endif
 
 MAINTAINERCLEANFILES = *.log core FILE *~ Makefile.in
 DISTCLEANFILES = $(xml_DATA) $(application_DATA)
