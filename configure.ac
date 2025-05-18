@@ -51,10 +51,40 @@ AC_PROG_LEX([yywrap])
 # Initialize libtool
 LT_INIT
 
+# --- Windows (MinGW) specific settings ---
+case "${host_os}" in
+  mingw*)
+    WINDOWS_LIBTOOL_FLAGS="-no-undefined"
+    MINGW_LDFLAGS="-Wl,--enable-auto-image-base"
+    AC_DEFINE(WIN32, 1, [Define if compiling for Win32])
+    ;;
+  *)
+    WINDOWS_LIBTOOL_FLAGS=""
+    MINGW_LDFLAGS=""
+    ;;
+esac
+AC_SUBST(WINDOWS_LIBTOOL_FLAGS)
+AC_SUBST(MINGW_LDFLAGS)
+
+
 # Check for Guile and its development tools (needed for libgeda)
 GEDA_GUILE_CHECKS
 # GEDA_GUILE_CHECKS # This macro might not be defined in the current m4/geda-guile.m4
 AX_CHECK_GUILE([1.8.0]) # Call the macro that is defined in m4/geda-guile.m4
+
+# Set up libgeda with the correct ld version number
+LIBGEDA_LT_CURRENT=1
+LIBGEDA_LT_REVISION=0
+LIBGEDA_LT_AGE=0
+LIBGEDA_LT_VERSION="${LIBGEDA_LT_CURRENT}:${LIBGEDA_LT_REVISION}:${LIBGEDA_LT_AGE}"
+AC_SUBST(LIBGEDA_LT_VERSION)
+
+# Set up libgedacairo with the correct ld version number
+LIBGEDACAIRO_LT_CURRENT=1
+LIBGEDACAIRO_LT_REVISION=0
+LIBGEDACAIRO_LT_AGE=0
+LIBGEDACAIRO_LT_VERSION="${LIBGEDACAIRO_LT_CURRENT}:${LIBGEDACAIRO_LT_REVISION}:${LIBGEDACAIRO_LT_AGE}"
+AC_SUBST(LIBGEDACAIRO_LT_VERSION)
 
 
 # --- Checks for libraries ---
@@ -73,6 +103,20 @@ PKG_CHECK_MODULES(GDK_PIXBUF, gdk-pixbuf-2.0 >= 2.24.0,
                   [have_gdk_pixbuf=yes], [have_gdk_pixbuf=no])
 if test "x$have_gdk_pixbuf" = "xno"; then
   AC_MSG_ERROR([GDK-Pixbuf >= 2.24.0 not found. Please install the GDK-Pixbuf development package.])
+fi
+
+# Check for Cairo (needed by libgedacairo)
+PKG_CHECK_MODULES(CAIRO, cairo >= 1.2.0,
+                  [have_cairo=yes], [have_cairo=no])
+if test "x$have_cairo" = "xno"; then
+  AC_MSG_ERROR([Cairo >= 1.2.0 not found. Please install the Cairo development package (e.g., libcairo2-dev).])
+fi
+
+# Check for Pango and PangoCairo (needed by libgedacairo for text rendering)
+PKG_CHECK_MODULES(PANGO, [pango >= 1.10.0 pangocairo >= 1.10.0],
+                  [have_pango=yes], [have_pango=no])
+if test "x$have_pango" = "xno"; then
+  AC_MSG_ERROR([Pango/PangoCairo >= 1.10.0 not found. Please install the Pango development package (e.g., libpango1.0-dev).])
 fi
 
 # --- Checks for header files ---
@@ -225,6 +269,7 @@ AC_CONFIG_FILES([Makefile
                  gsymcheck/src/Makefile
                  gsymcheck/tests/Makefile
                  libgeda/Makefile
+                 libgeda/libgeda.pc
                  libgeda/data/Makefile
                  libgeda/docs/Makefile
                  libgeda/docs/images/Makefile
@@ -257,6 +302,7 @@ AC_CONFIG_FILES([Makefile
 # Default datadir is ${prefix}/share
 GEDADATADIR="${datadir}/geda"
 AC_SUBST(GEDADATADIR)
+AC_DEFINE_UNQUOTED([GEDADATADIR], ["${GEDADATADIR}"], [Path to gEDA shared data directory])
 
 
 # Define the location for gEDA rc files relative to sysconfdir

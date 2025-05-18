@@ -1,8 +1,17 @@
+#undef PACKAGE_GIT_COMMIT
+#ifndef GEDA_VERSION_H
+
 /* Date part of package version string. */
 #undef PACKAGE_DATE_VERSION
+/* #undef PACKAGE_DATE_VERSION */
+#define PACKAGE_DATE_VERSION "@PACKAGE_DATE_VERSION@"
 
 /* Dotted part of package version string. */
-#undef PACKAGE_DOTTED_VERSION
+/* #undef PACKAGE_DOTTED_VERSION */
+#define PACKAGE_DOTTED_VERSION "@PACKAGE_DOTTED_VERSION@"
 
 /* Current git commit. */
-#undef PACKAGE_GIT_COMMIT
+/* #undef PACKAGE_GIT_COMMIT */
+#define PACKAGE_GIT_COMMIT "@PACKAGE_GIT_COMMIT@"
+
+#endif /* GEDA_VERSION_H */
