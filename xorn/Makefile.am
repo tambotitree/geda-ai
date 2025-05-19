@@ -1,82 +1,81 @@
-# Makefile.am for xorn
+# Copyright (C) 2013-2020 Roland Lutz
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-# Tell aclocal where to find our M4 macros
+SUBDIRS = \
+	po \
+	src/storage \
+	src/cpython/storage \
+	src/cpython/guile \
+	src/python \
+	src/gaf \
+	src/command \
+	src/backend \
+	. \
+	tests \
+	tests/netlist
+
+include_HEADERS = include/xornstorage.h
+
+nodist_noinst_PYTHON = built-packages/xorn.py built-packages/gaf.py
+all-local: $(nodist_noinst_PYTHON)
+built-packages/xorn.py: Makefile
+	$(AM_V_GEN)$(MKDIR_P) built-packages && { \
+	    echo '__path__ = ["$(abs_builddir)/src/cpython/storage/.libs",'; \
+	    echo '            "$(abs_builddir)/src/cpython/guile/.libs",'; \
+	    echo '            "$(abs_builddir)/src/python",'; \
+	    echo '            "$(abs_srcdir)/src/python"]'; \
+	} > $@
+built-packages/gaf.py: Makefile
+	$(AM_V_GEN)$(MKDIR_P) built-packages && { \
+	    echo '__path__ = ["$(abs_srcdir)/src/gaf"]'; \
+	} > $@
+
+CLEANFILES = \
+	built-packages/xorn.py \
+	built-packages/xorn.pyc \
+	built-packages/gaf.py \
+	built-packages/gaf.pyc
+
 ACLOCAL_AMFLAGS = -I m4
 
-# We are building one program, 'xorn', and installing it in bindir
-bin_PROGRAMS = xorn
-
-# Source files needed to compile the xorn executable
-# Make sure this list matches the actual files in xorn/src/
-xorn_SOURCES = \
-	src/main.c \
-	src/xorn.c src/xorn.h \
-	src/action.c src/action.h \
-	src/config.c src/config.h \
-	src/log.c src/log.h \
-	src/module.c src/module.h \
-	src/plugin.c src/plugin.h \
-	src/rcfile.c src/rcfile.h \
-	src/utils.c src/utils.h \
-	version.h
-
-# Compiler Preprocessor Flags (include paths, defines)
-# These rely on configure checks (PKG_CHECK_MODULES, AM_GNU_GETTEXT, etc.)
-# being present in xorn/configure.ac
-xorn_CPPFLAGS = \
-	$(AM_CPPFLAGS) \
-	-I$(srcdir)/include \
-	-I$(srcdir)/src \
-	$(GLIB_CFLAGS) \
-	$(GMODULE_CFLAGS) \
-	$(GIO_CFLAGS) \
-	$(INTLLIBS_CFLAGS)
-
-# Linker Flags
-xorn_LDFLAGS = \
-	$(AM_LDFLAGS) \
-	$(GLIB_LDFLAGS) \
-	$(GMODULE_LDFLAGS) \
-	$(GIO_LDFLAGS)
-
-# Libraries to link against
-xorn_LDADD = \
-	$(AM_LDADD) \
-	$(GLIB_LIBS) \
-	$(GMODULE_LIBS) \
-	$(GIO_LIBS) \
-	$(INTLLIBS)
-
-# Rule to generate version.h from configure variables
-# Depends on configure.ac having AC_INIT([xorn], [VERSION], ...)
-stamp-h: $(top_srcdir)/configure.ac
-	@echo Creating $@
-	@echo "#define VERSION \"$(VERSION)\"" > version.h.tmp
-	@mv version.h.tmp version.h
-	@echo timestamp > $@
-
-# Ensure version.h is built before any source file that includes it
-BUILT_SOURCES = stamp-h
-
-# Files to remove when 'make clean' is run
-CLEANFILES = stamp-h version.h version.h.tmp
-
-# Additional files to include in the distribution tarball
 EXTRA_DIST = \
-	README.md \
-	COPYING \
-	AUTHORS \
-	ChangeLog \
-	NEWS \
-	m4/introspection.m4 # Add other m4 files if needed
+	pprint-chlog \
+	doc/HACKING \
+	doc/mainpage.md \
+	doc/storage.md \
+	doc/api/Doxyfile \
+	doc/api/storage.dox \
+	doc/api/using-storage.md \
+	doc/geda/colors.md \
+	doc/geda/coordinatespace.jpg \
+	doc/geda/data.dox \
+	doc/geda/file_format_spec \
+	doc/geda/fileformat_textgraphic.jpg \
+	doc/geda/filltype.svg \
+	doc/geda/linetype.svg \
+	doc/geda/path_example_and_gate-smaller.png \
+	doc/geda/xml-file-format.md
 
-# If you have subdirectories like 'po' (for translations) or 'tests'
-# that need their own Makefiles and build steps, uncomment SUBDIRS.
-# Make sure those subdirectories have their own Makefile.am.
-# SUBDIRS = po tests
+dist-hook:
+	if test -d $(srcdir)/.git; \
+	then	chmod u+w $(distdir)/ChangeLog; \
+		( cd $(srcdir); ./pprint-chlog ) > $(distdir)/ChangeLog; \
+	fi
 
-# Optional: If you have Doxygen documentation specific to xorn
-# doxygen:
-#	cd $(srcdir)/doc && doxygen Doxyfile
-# .PHONY: doxygen
+doxygen:
+	cd $(srcdir)/doc/api && doxygen
 
+.PHONY: doxygen

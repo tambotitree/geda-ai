@@ -237,6 +237,11 @@ AC_CONFIG_FILES([Makefile
                  contrib/olib/Makefile
                  contrib/sarlacc_schem/Makefile
                  contrib/scripts/Makefile
+                 contrib/scripts/gnet_hier_verilog.1
+                 contrib/scripts/pads_backannotate.1
+                 contrib/scripts/sarlacc_sym.1
+                 contrib/scripts/sw2asc
+                 contrib/scripts/sw2asc.1
                  contrib/smash_megafile/Makefile
                  docs/Makefile
                  docs/toplevel/gedadocs.html

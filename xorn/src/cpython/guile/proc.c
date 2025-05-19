@@ -14,29 +14,27 @@
    along with this program; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include "module.h"
-#include <string.h>
 
 
 SCM scm_procedure_or_name(SCM proc)
 {
-// #if SCM_MINOR_VERSION < 2
-// #if GUILE_VERSION_NUMBER < 30000
-#if WITH_GUILE_30
-	return proc;
-#else
+#ifdef HAVE_SCM_PROCEDURE_NAME
 	return scm_procedure_name(proc);
+#else
+	return proc;
 #endif
 }
 
 SCM scm_frame_procedure_or_name(SCM frame)
 {
-// #if SCM_MINOR_VERSION < 2
-// #if GUILE_VERSION_NUMBER < 30000
-#if WITH_GUILE_30
-	return scm_frame_procedure(frame);
-#else
+#ifdef HAVE_SCM_FRAME_PROCEDURE_NAME
 	return scm_frame_procedure_name(frame);
+#else
+	return scm_frame_procedure(frame);
 #endif
 }
 
