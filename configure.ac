@@ -239,6 +239,7 @@ AC_CONFIG_FILES([Makefile
                  contrib/scripts/Makefile
                  contrib/smash_megafile/Makefile
                  docs/Makefile
+                 docs/toplevel/gedadocs.html
                  docs/scheme-api/Makefile
                  docs/toplevel/Makefile
                  docs/wiki/Makefile
