@@ -1,4 +1,4 @@
-SUBDIRS = po
+SUBDIRS = 
 
 bin_PROGRAMS = gaf
 

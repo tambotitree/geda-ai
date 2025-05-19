@@ -47,6 +47,11 @@ AC_PROG_MKDIR_P
 AC_PROG_YACC
 AC_PROG_LEX([yywrap])
 
+# Check for a program to open URIs (web links, help files)
+# GEDA_PROG_URI_VIEWER # Switching to the AX_OPTION_ variant used by geda-gaf
+AX_OPTION_ASSERT
+AX_OPTION_URI_VIEWER
+AX_OPTION_GATTRIB
 
 # Initialize libtool
 LT_INIT
@@ -119,6 +124,19 @@ if test "x$have_pango" = "xno"; then
   AC_MSG_ERROR([Pango/PangoCairo >= 1.10.0 not found. Please install the Pango development package (e.g., libpango1.0-dev).])
 fi
 
+# Check for GTK+ 2.x (includes GDK, needed by libgedacairo and gschem, gattrib etc.)
+PKG_CHECK_MODULES(GTK, gtk+-2.0 >= 2.10.0,
+                  [have_gtk=yes], [have_gtk=no])
+if test "x$have_gtk" = "xno"; then
+  AC_MSG_ERROR([GTK+ 2.x (>= 2.10.0) not found. Please install the GTK+ 2 development package (e.g., libgtk2.0-dev).])
+fi
+
+# Hacked in we should modify the libgedacairo/Makefile.am 
+GDK_CFLAGS="$GTK_CFLAGS"
+GDK_LIBS="$GTK_LIBS"
+AC_SUBST(GDK_CFLAGS)
+AC_SUBST(GDK_LIBS)
+
 # --- Checks for header files ---
 AC_FUNC_ALLOCA
 AC_CHECK_HEADERS([argz.h fcntl.h inttypes.h langinfo.h libintl.h malloc.h stdint.h stdio_ext.h strings.h sys/param.h sys/time.h unistd.h])
@@ -143,6 +161,10 @@ AM_GNU_GETTEXT_REQUIRE_VERSION([0.19])
 AX_DESKTOP_I18N # Use the macro from geda-desktop-i18n.m4
 # Define the text domain for libgeda
 AC_DEFINE_UNQUOTED([LIBGEDA_GETTEXT_DOMAIN], ["libgeda"], [The gettext domain for libgeda])
+
+# Define GETOPT_OPTIONS for gnetlist-legacy
+AC_SUBST(GNETLIST_GETOPT_OPTIONS) # For Makefiles, if needed
+AC_DEFINE_UNQUOTED(GETOPT_OPTIONS, "$GNETLIST_GETOPT_OPTIONS", [Getopt options string for gnetlist-legacy])
 
 
 AC_FUNC_LSTAT_FOLLOWS_SLASHED_SYMLINK
@@ -229,6 +251,7 @@ AC_CONFIG_FILES([Makefile
                  examples/lightning_detector/Makefile
                  gaf/Makefile
                  gattrib/Makefile
+                 gattrib/lib/system-gattribrc
                  gattrib/data/Makefile
                  gattrib/design/Makefile
                  gattrib/docs/Makefile
@@ -236,7 +259,7 @@ AC_CONFIG_FILES([Makefile
                  gattrib/lib/Makefile
                  gattrib/src/Makefile
                  gnetlist-legacy/Makefile
-                 gnetlist-legacy/docs/Makefile
+                 gnetlist-legacy/lib/system-gnetlistrc
                  gnetlist-legacy/docs/vams/Makefile
                  gnetlist-legacy/examples/Makefile
                  gnetlist-legacy/examples/switcap/Makefile
@@ -263,8 +286,7 @@ AC_CONFIG_FILES([Makefile
                  gschem/src/Makefile
                  gschem/tests/Makefile
                  gsymcheck/Makefile
-                 gsymcheck/docs/Makefile
-                 gsymcheck/include/Makefile
+                 gsymcheck/lib/system-gsymcheckrc
                  gsymcheck/lib/Makefile
                  gsymcheck/src/Makefile
                  gsymcheck/tests/Makefile
@@ -278,6 +300,7 @@ AC_CONFIG_FILES([Makefile
                  libgeda/scheme/Makefile
                  libgeda/src/Makefile
                  libgedacairo/Makefile
+                 libgedacairo/libgedacairo.pc
                  symbols/Makefile
                  symbols/documentation/Makefile
                  tmpwrk23234/gettext-0.19/intl/Makefile
@@ -289,6 +312,7 @@ AC_CONFIG_FILES([Makefile
                  utils/examples/gsch2pcb/Makefile
                  utils/examples/tragesym/Makefile
                  utils/gschlas/Makefile
+                 utils/lib/system-gschlasrc
                  utils/gxyrs/Makefile
                  utils/include/Makefile
                  utils/lib/Makefile

@@ -34,6 +34,9 @@
 #include <unistd.h>
 #endif
 
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
+#endif
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
