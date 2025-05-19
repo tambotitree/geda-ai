@@ -139,7 +139,7 @@ AC_SUBST(GDK_LIBS)
 
 # --- Checks for header files ---
 AC_FUNC_ALLOCA
-AC_CHECK_HEADERS([argz.h fcntl.h inttypes.h langinfo.h libintl.h malloc.h stdint.h stdio_ext.h strings.h sys/param.h sys/time.h unistd.h])
+AC_CHECK_HEADERS([argz.h ctype.h fcntl.h inttypes.h langinfo.h libintl.h malloc.h stdint.h stdio_ext.h strings.h sys/param.h sys/time.h unistd.h])
 
 # --- Checks for typedefs, structures, and compiler characteristics ---
 AC_CHECK_HEADER_STDBOOL
