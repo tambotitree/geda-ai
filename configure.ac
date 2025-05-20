@@ -166,6 +166,24 @@ AC_DEFINE_UNQUOTED([LIBGEDA_GETTEXT_DOMAIN], ["libgeda"], [The gettext domain fo
 AC_SUBST(GNETLIST_GETOPT_OPTIONS) # For Makefiles, if needed
 AC_DEFINE_UNQUOTED(GETOPT_OPTIONS, "$GNETLIST_GETOPT_OPTIONS", [Getopt options string for gnetlist-legacy])
 
+# --- gEDA Specific Path and Library Setup (using AX_ macros from geda-gaf) ---
+# Where should data files be installed/searched for?
+AX_DATA_DIRS
+# Where should PCB footprints be searched for?
+AX_PCB_DIRS
+# Set up libgeda with the correct ld version number
+# Using 1:0:0 for geda-ai for now. geda-gaf used a different scheme (e.g., 47:0:0)
+AX_LIBGEDA([1:0:0])
+# Set up libgedacairo with the correct ld version number
+# Using 1:0:0 for geda-ai for now. geda-gaf used a different scheme (e.g., 1:3:0)
+AX_LIBGEDACAIRO([1:0:0])
+
+#####################################################################
+# Recurse into Xorn configuration
+#####################################################################
+
+export GEDADATADIR
+export GEDARCDIR
 
 AC_FUNC_LSTAT_FOLLOWS_SLASHED_SYMLINK
 AC_FUNC_MALLOC
@@ -328,21 +346,7 @@ AC_CONFIG_FILES([Makefile
                  utils/tests/refdes_renum/Makefile])
 # --- Define and Export Paths for Subdirectories ---
 
-# Define the location for shared gEDA data relative to datadir
-# Default datadir is ${prefix}/share
-GEDADATADIR="${datadir}/geda"
-AC_SUBST(GEDADATADIR)
-AC_DEFINE_UNQUOTED([GEDADATADIR], ["${GEDADATADIR}"], [Path to gEDA shared data directory])
 
-
-# Define the location for gEDA rc files relative to sysconfdir
-# Default sysconfdir is ${prefix}/etc
-GEDARCDIR="${sysconfdir}/geda"
-AC_SUBST(GEDARCDIR)
-
-# Export the variable for subdirectories (alternative to AC_EXPORT or passing args)
-export GEDADATADIR GEDARCDIR
-export GEDARCDIR GEDARCDIR
 
 # --- Configuration Files and Output (MUST BE AT THE END) ---
 AC_CONFIG_SUBDIRS([xorn])

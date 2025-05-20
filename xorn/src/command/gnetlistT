@@ -32,11 +32,11 @@
 # It does *not* read the new-style configuration file \c geda.conf,
 # and it does *not* support Guile functions as a symbol library.
 
-pyexecdir = '/Users/johnryan/Documents/GitHub/geda-ai/xorn/built-packages'
-XORN = '/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/command/xorn'
+pyexecdir = '/Users/johnryan/geda/lib/python2.7/site-packages'
+XORN = '/Users/johnryan/geda/bin/xorn'
 gedadatadir = '/Users/johnryan/geda/share/gEDA'
 gedasysconfdir = '/Users/johnryan/geda/share/gEDA'
-backenddir = '/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/backend'
+backenddir = '/Users/johnryan/geda/lib/xorn/backends'
 
 import getopt, gettext, os, sys
 from gettext import gettext as _

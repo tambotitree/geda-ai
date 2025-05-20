@@ -23,4 +23,4 @@ PACKAGE_URL = 'http://hedmen.org/xorn/'
 PACKAGE_VERSION = '0.0'
 VERSION = '0.0'
 
-localedir = '/usr/local/share/locale'
+localedir = '/Users/johnryan/geda/share/locale'
