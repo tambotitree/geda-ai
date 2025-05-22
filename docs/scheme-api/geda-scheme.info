@@ -1,7 +1,7 @@
 This is geda-scheme.info, produced by makeinfo version 7.2 from
 geda-scheme.texi.
 
-This manual is for gEDA/gaf, version 0.9.
+This manual is for gEDA/gaf, version 1.0.0.
 
    Copyright © 2011-2013 Peter TB Brett
 
@@ -24,7 +24,7 @@ File: geda-scheme.info,  Node: Top,  Next: Introduction,  Up: (dir)
 gEDA Scheme Reference Manual
 ****************************
 
-This manual is for gEDA/gaf, version 0.9.
+This manual is for gEDA/gaf, version 1.0.0.
 
    Copyright © 2011-2013 Peter TB Brett
 
@@ -2687,51 +2687,51 @@ Variable Index
 
 
 Tag Table:
-Node: Top824
-Node: Introduction1699
-Node: Schematic Document Model4644
-Node: Pages5517
-Node: Objects6878
-Node: Component objects7759
-Node: Attributes9105
-Node: Coordinate system11034
-Node: Core API Reference12045
-Node: Core page functions12556
-Node: Core object functions16522
-Node: General object functions16975
-Node: Object sub-types18302
-Node: Object transformations19122
-Node: Object bounds20003
-Node: Object color21057
-Node: Object fill and stroke21646
-Node: Lines24860
-Node: Nets and buses26743
-Node: Pins27952
-Node: Boxes29514
-Node: Circles31066
-Node: Arcs32498
-Node: Paths34169
-Node: Pictures36858
-Node: Text39256
-Node: Components43660
-Node: Core attribute functions48664
-Node: Configuration functions52445
-Node: Configuration contexts52999
-Node: Configuration parameters59334
-Node: Configuration events63032
-Node: Configuration errors64264
-Node: Logging functions65217
-Node: System information65917
-Node: gschem API Reference68350
-Node: Windows and views68826
-Node: Key mapping69678
-Node: Selections74841
-Node: Hooks76399
-Node: Actions79483
-Node: Miscellanous gschem functions84754
-Node: Concept Index86527
-Node: Function Index90980
-Node: Variable Index109564
+Node: Top826
+Node: Introduction1703
+Node: Schematic Document Model4648
+Node: Pages5521
+Node: Objects6882
+Node: Component objects7763
+Node: Attributes9109
+Node: Coordinate system11038
+Node: Core API Reference12049
+Node: Core page functions12560
+Node: Core object functions16526
+Node: General object functions16979
+Node: Object sub-types18306
+Node: Object transformations19126
+Node: Object bounds20007
+Node: Object color21061
+Node: Object fill and stroke21650
+Node: Lines24864
+Node: Nets and buses26747
+Node: Pins27956
+Node: Boxes29518
+Node: Circles31070
+Node: Arcs32502
+Node: Paths34173
+Node: Pictures36862
+Node: Text39260
+Node: Components43664
+Node: Core attribute functions48668
+Node: Configuration functions52449
+Node: Configuration contexts53003
+Node: Configuration parameters59338
+Node: Configuration events63036
+Node: Configuration errors64268
+Node: Logging functions65221
+Node: System information65921
+Node: gschem API Reference68354
+Node: Windows and views68830
+Node: Key mapping69682
+Node: Selections74845
+Node: Hooks76403
+Node: Actions79487
+Node: Miscellanous gschem functions84758
+Node: Concept Index86531
+Node: Function Index90984
+Node: Variable Index109568
 
 End Tag Table
 

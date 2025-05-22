@@ -2,16 +2,27 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.72])
-AC_INIT([geda-ai], [0.9], [https://github.com/tambotitree/geda-ai/issues], [geda-ai])
+AC_INIT([geda-ai], [1.0.0], [https://github.com/tambotitree/geda-ai/issues], [geda-ai])
 AC_USE_SYSTEM_EXTENSIONS
-AX_GIT_VERSION([$PACKAGE_VERSION]) # Add this to define version variables
 AC_CONFIG_AUX_DIR([build-tools]) # Tell automake where helper scripts are
 AM_INIT_AUTOMAKE([foreign -Wall -Werror subdir-objects])
 
 
 AC_CONFIG_MACRO_DIRS([m4 xorn/m4]) # Ensure m4 directory is listed
+AC_CONFIG_HEADERS([config.h version.h]) # Ensure version.h is listed for generation
 
-AC_CONFIG_HEADERS([config.h])
+# Get detailed git version information using AX_GIT_VERSION.
+# This macro typically sets its own variables (e.g., AX_GIT_COMMIT) and might
+# also influence how PACKAGE_VERSION or similar are defined if not already set by AC_INIT.
+AX_GIT_VERSION([$PACKAGE_VERSION])
+
+# For consistency in user-facing messages and to simplify gschemrc version checks,
+# we will ensure PACKAGE_DATE_VERSION (used in C code and messages)
+# is the same as the simple PACKAGE_VERSION (e.g., "1.0.0").
+temp_package_date_version="$PACKAGE_VERSION"
+AC_DEFINE_UNQUOTED([PACKAGE_DATE_VERSION], ["$temp_package_date_version"], [The package version string, simplified to dotted version for geda-ai.])
+AC_SUBST([PACKAGE_DATE_VERSION], [$temp_package_date_version])
+ 
 
 # --- Enable/Disable Arguments ---
 AC_ARG_ENABLE([gattrib],
@@ -247,7 +258,6 @@ AM_CONDITIONAL(ENABLE_KDE_DESKTOP_DATA, test "x$enable_kde_desktop_data" = xyes)
 
 # --- Configuration Files and Output (MUST BE AT THE END) ---
 AC_CONFIG_FILES([Makefile
-                 version.h
                  po/Makefile
                  gedai/Makefile
                  contrib/Makefile

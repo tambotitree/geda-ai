@@ -1,0 +1,16 @@
+Loaded RC file [/Users/johnryan/Documents/GitHub/geda-ai/gsymcheck/lib/system-gsymcheckrc]
+Read an old format sym/sch file!
+Please run g[sym|sch]update on:
+[/Users/johnryan/Documents/GitHub/geda-ai/gsymcheck/tests/invalid_slotdef3.sym]
+Found a pin which did not have the whichend field set.
+Verify and correct manually.
+Found a pin which did not have the whichend field set.
+Verify and correct manually.
+Found a pin which did not have the whichend field set.
+Verify and correct manually.
+Loaded file [/Users/johnryan/Documents/GitHub/geda-ai/gsymcheck/tests/./invalid_slotdef3.sym]
+
+Checking: /Users/johnryan/Documents/GitHub/geda-ai/gsymcheck/tests/invalid_slotdef3.sym
+ERROR: Not enough pins in slotdef=4:12,13
+1 ERROR found 
+
