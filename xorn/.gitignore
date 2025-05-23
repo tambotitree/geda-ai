@@ -31,7 +31,6 @@ Makefile.in
 /depcomp
 /install-sh
 /ltmain.sh
-/m4/
 /missing
 /po/Makefile.in.in
 /po/Makevars.template
