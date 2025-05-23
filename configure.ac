@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.72])
+AC_PREREQ([2.69])
 AC_INIT([geda-ai], [1.0.0], [https://github.com/tambotitree/geda-ai/issues], [geda-ai])
 AC_USE_SYSTEM_EXTENSIONS
 AC_CONFIG_AUX_DIR([build-tools]) # Tell automake where helper scripts are
