@@ -337,8 +337,6 @@ AC_CONFIG_FILES([Makefile
                  libgedacairo/libgedacairo.pc
                  symbols/Makefile
                  symbols/documentation/Makefile
-                 tmpwrk23234/gettext-0.19/intl/Makefile
-                 tmpwrk71399/archive/intl/Makefile
                  utils/Makefile
                  utils/docs/Makefile
                  utils/examples/Makefile

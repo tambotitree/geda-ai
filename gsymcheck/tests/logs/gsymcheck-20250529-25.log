@@ -1,0 +1,16 @@
+Loaded RC file [/Users/johnryan/Documents/GitHub/geda-ai/gsymcheck/lib/system-gsymcheckrc]
+Read an old format sym/sch file!
+Please run g[sym|sch]update on:
+[/Users/johnryan/Documents/GitHub/geda-ai/gsymcheck/tests/missing_slotdef.sym]
+Found a pin which did not have the whichend field set.
+Verify and correct manually.
+Found a pin which did not have the whichend field set.
+Verify and correct manually.
+Found a pin which did not have the whichend field set.
+Verify and correct manually.
+Loaded file [/Users/johnryan/Documents/GitHub/geda-ai/gsymcheck/tests/./missing_slotdef.sym]
+
+Checking: /Users/johnryan/Documents/GitHub/geda-ai/gsymcheck/tests/missing_slotdef.sym
+ERROR: Missing slotdef= (there should be 4 slotdef= attributes)
+1 ERROR found 
+

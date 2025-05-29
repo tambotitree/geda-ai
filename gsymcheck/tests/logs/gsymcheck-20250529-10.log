@@ -1,0 +1,17 @@
+Loaded RC file [/Users/johnryan/Documents/GitHub/geda-ai/gsymcheck/lib/system-gsymcheckrc]
+Read an old format sym/sch file!
+Please run g[sym|sch]update on:
+[/Users/johnryan/Documents/GitHub/geda-ai/gsymcheck/tests/graphical_incorrect.sym]
+Found a pin which did not have the whichend field set.
+Verify and correct manually.
+Found a pin which did not have the whichend field set.
+Verify and correct manually.
+Found a pin which did not have the whichend field set.
+Verify and correct manually.
+Loaded file [/Users/johnryan/Documents/GitHub/geda-ai/gsymcheck/tests/./graphical_incorrect.sym]
+
+Checking: /Users/johnryan/Documents/GitHub/geda-ai/gsymcheck/tests/graphical_incorrect.sym
+Warning: Found graphical symbol, device= should be set to none
+1 warnings found 
+No errors found
+

@@ -29,11 +29,45 @@ LT_INIT([])
 AX_PROG_CC_WARNING([cast_function_type], [cast-function-type])
 
 AC_PROG_CXX
-
+AC_MSG_CHECKING([for python2 >= 2.7])
 AM_PATH_PYTHON([2.7])
-PKG_CHECK_MODULES([PYTHON], [python-2.7 >= 2.7],, [
-  PKG_CHECK_MODULES([PYTHON], [python2 >= 2.7]) # Fallback to python2 if python-2.7 not found
+PKG_CHECK_MODULES([PYTHON_PKG], [python-2.7 >= 2.7], [
+  PYTHON_CFLAGS="$PYTHON_PKG_CFLAGS"
+  PYTHON_LIBS="$PYTHON_PKG_LIBS"
+  AC_MSG_RESULT([yes, via pkg-config (python-2.7)])
+  have_python=yes
+], [
+  PKG_CHECK_MODULES([PYTHON_PKG], [python2 >= 2.7], [
+    PYTHON_CFLAGS="$PYTHON_PKG_CFLAGS"
+    PYTHON_LIBS="$PYTHON_PKG_LIBS"
+    AC_MSG_RESULT([yes, via pkg-config (python2)])
+    have_python=yes
+  ], [
+    AC_MSG_RESULT([no, via pkg-config])
+    # Fallback to pythonX-config if pkg-config fails
+    AC_PATH_PROG([PYTHON_CONFIG], [python2.7-config python2-config], [no])
+    if test "x$PYTHON_CONFIG" != "xno"; then
+      AC_MSG_CHECKING([for python2 >= 2.7 via $PYTHON_CONFIG])
+      PYTHON_CFLAGS=`$PYTHON_CONFIG --includes`
+      PYTHON_LIBS=`$PYTHON_CONFIG --libs`
+      AC_MSG_RESULT([yes, via $PYTHON_CONFIG])
+      have_python=yes
+    fi
+  ])
 ])
+
+if test "x$have_python" != "xyes"; then
+  AC_MSG_ERROR([
+Python 2.7 development files were not found.
+
+Tried pkg-config for 'python-2.7' and 'python2', and also searched for
+'python2.7-config' or 'python2-config' scripts.
+
+Please ensure Python 2.7 development headers and libraries are installed
+and discoverable (e.g., via PKG_CONFIG_PATH or by having pythonX-config
+in your PATH). Alternatively, set PYTHON_CFLAGS and PYTHON_LIBS manually.
+])
+fi
 
 # Check for Guile for xorn (trying 3.0 then 2.0)
 AC_MSG_CHECKING([for Guile for xorn (trying 3.0 then 2.0)])

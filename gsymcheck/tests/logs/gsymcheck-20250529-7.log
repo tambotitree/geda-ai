@@ -1,0 +1,16 @@
+Loaded RC file [/Users/johnryan/Documents/GitHub/geda-ai/gsymcheck/lib/system-gsymcheckrc]
+Read an old format sym/sch file!
+Please run g[sym|sch]update on:
+[/Users/johnryan/Documents/GitHub/geda-ai/gsymcheck/tests/duplicate_pinnumber.sym]
+Found a pin which did not have the whichend field set.
+Verify and correct manually.
+Found a pin which did not have the whichend field set.
+Verify and correct manually.
+Found a pin which did not have the whichend field set.
+Verify and correct manually.
+Loaded file [/Users/johnryan/Documents/GitHub/geda-ai/gsymcheck/tests/./duplicate_pinnumber.sym]
+
+Checking: /Users/johnryan/Documents/GitHub/geda-ai/gsymcheck/tests/duplicate_pinnumber.sym
+ERROR: Found duplicate pinnumber=2 attribute in the symbol
+1 ERROR found 
+

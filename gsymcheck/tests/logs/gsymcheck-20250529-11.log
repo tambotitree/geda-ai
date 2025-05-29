@@ -1,0 +1,17 @@
+Loaded RC file [/Users/johnryan/Documents/GitHub/geda-ai/gsymcheck/lib/system-gsymcheckrc]
+Read an old format sym/sch file!
+Please run g[sym|sch]update on:
+[/Users/johnryan/Documents/GitHub/geda-ai/gsymcheck/tests/invalid_slotdef1.sym]
+Found a pin which did not have the whichend field set.
+Verify and correct manually.
+Found a pin which did not have the whichend field set.
+Verify and correct manually.
+Found a pin which did not have the whichend field set.
+Verify and correct manually.
+Loaded file [/Users/johnryan/Documents/GitHub/geda-ai/gsymcheck/tests/./invalid_slotdef1.sym]
+
+Checking: /Users/johnryan/Documents/GitHub/geda-ai/gsymcheck/tests/invalid_slotdef1.sym
+ERROR: Invalid slotdef=a attributes, not continuing
+ERROR: Malformed slotdef= (the format is #:#,#,#,...)
+2 ERRORS found 
+

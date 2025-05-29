@@ -12,9 +12,12 @@ config.h.in
 config.status
 config.log
 configure
-intl
 libtool
+tmpwrk*/
 stamp-git
 stamp-h1
 version.h
 INSTALL
+po/Makefile.in
+po/Makefile
+po/*.mo
