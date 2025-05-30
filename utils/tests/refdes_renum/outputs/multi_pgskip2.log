@@ -1,0 +1,8 @@
+perl -w /Users/johnryan/Documents/GitHub/geda-ai/utils/tests/refdes_renum/../../scripts/refdes_renum  --pgskip 10  file1.sch file2.sch file3.sch 
+Scanning input file #1: file1.sch
+Scanning input file #2: file2.sch
+Scanning input file #3: file3.sch
+Now processing input file #1: file1.sch
+Now processing input file #2: file2.sch
+Now processing input file #3: file3.sch
+PASS outputs/multi_pgskip2 (exit status: 0)

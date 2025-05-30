@@ -1,0 +1,3 @@
+perl -I /Users/johnryan/Documents/GitHub/geda-ai/utils/tests/gxyrs/../../gxyrs -w /Users/johnryan/Documents/GitHub/geda-ai/utils/tests/gxyrs/../../gxyrs/gxyrs  --tabulate --eval "return subst_col_val \$FOOTPRINT_COL, '\"footprint\"'"  report1.txt  --output stdout 2> stderr
+Checking argument report1.txt.
+PASS outputs/footprint_report1.out (exit status: 0)

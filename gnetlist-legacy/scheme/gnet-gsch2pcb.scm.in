@@ -25,7 +25,7 @@
 ;;  6/17/2003
 
 (use-modules (ice-9 popen))
-(use-modules (ice-9 syncase))
+;; (use-modules (ice-9 syncase))
 (use-modules (ice-9 rdelim))
 
 ;;

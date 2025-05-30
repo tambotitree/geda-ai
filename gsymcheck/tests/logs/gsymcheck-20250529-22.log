@@ -1,8 +1,0 @@
-Loaded RC file [/Users/johnryan/Documents/GitHub/geda-ai/gsymcheck/lib/system-gsymcheckrc]
-Loaded file [/Users/johnryan/Documents/GitHub/geda-ai/gsymcheck/tests/./missing_pinlabel.sym]
-
-Checking: /Users/johnryan/Documents/GitHub/geda-ai/gsymcheck/tests/missing_pinlabel.sym
-Warning: Missing pinlabel= attribute
-1 warnings found 
-No errors found
-

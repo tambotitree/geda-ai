@@ -29,4 +29,4 @@ libxornstorage_la_SOURCES = \
 	revision.cc \
 	selection.cc \
 	validate.cc
-libxornstorage_la_LDFLAGS = -export-symbols-regex '^xorn_'
+libxornstorage_la_LDFLAGS = -export-symbols-regex '^xorn(sch)?_'

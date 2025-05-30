@@ -22,12 +22,13 @@ SUFFIXES = .fig .pic .ps .doc .pdf
 .doc.ps:
 	@echo "Creating ps (using groff)"
 	@rm -rf $@.tmp
-	@if test "x$(GROFF)" != xno; then                        \
+	@if test -n "$(GROFF)" && test "x$(GROFF)" != xno; then  \
 		LC_NUMERIC=C $(GROFF) -t -sp -ms $< > $@.tmp    ;\
 		mv -f $@.tmp $@                                 ;\
 	else						         \
-		echo "** Did not find groff **"                 ;\
+		echo "** Did not find groff or GROFF variable is not set properly **" ;\
 		echo "Some Documentation might not be correct!" ;\
+		echo "Please ensure groff is installed and detected by ./configure." ;\
 		touch $@                                     ;\
 	fi
 

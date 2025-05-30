@@ -22,8 +22,8 @@
   #:use-module (gschem action)
   #:use-module (gschem gschemdoc))
 
-(or (defined? 'define-syntax)
-    (use-modules (ice-9 syncase)))
+;; (or (defined? 'define-syntax)
+;;    (use-modules (ice-9 syncase)))
 
 (define-syntax define-action-public
   (syntax-rules ()

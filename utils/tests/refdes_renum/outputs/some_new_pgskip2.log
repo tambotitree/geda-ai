@@ -1,0 +1,8 @@
+perl -w /Users/johnryan/Documents/GitHub/geda-ai/utils/tests/refdes_renum/../../scripts/refdes_renum  --pgskip  someold1.sch someold2.sch someold3.sch 
+Scanning input file #1: someold1.sch
+Scanning input file #2: someold2.sch
+Scanning input file #3: someold3.sch
+Now processing input file #1: someold1.sch
+Now processing input file #2: someold2.sch
+Now processing input file #3: someold3.sch
+PASS outputs/some_new_pgskip2 (exit status: 0)

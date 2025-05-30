@@ -38,4 +38,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/usr/local/lib/python2.7/site-packages/xorn'
+libdir='/Users/johnryan/geda/lib/python2.7/site-packages/xorn'

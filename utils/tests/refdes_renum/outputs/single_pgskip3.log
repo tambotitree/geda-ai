@@ -1,0 +1,9 @@
+perl -w /Users/johnryan/Documents/GitHub/geda-ai/utils/tests/refdes_renum/../../scripts/refdes_renum  --pgskip 10   more_than_10.sch 
+ERROR:  You are numbering more than 10 elements with
+prefix C on this sheet.  You will need to either
+reduce this number or specify a larger step with the
+--pgskip argument.
+Died at /Users/johnryan/Documents/GitHub/geda-ai/utils/tests/refdes_renum/../../scripts/refdes_renum line 405, <NETLIST> line 18.
+Scanning input file #1: more_than_10.sch
+Now processing input file #1: more_than_10.sch
+PASS outputs/single_pgskip3 (exit status: 0)

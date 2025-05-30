@@ -16,20 +16,28 @@
 
 #include "internal.h"
 
+// Define a macro for exporting symbols with default visibility
+#if defined (__GNUC__) && __GNUC__ >= 4
+#define XORN_STORAGE_API_EXPORT __attribute__ ((visibility ("default")))
+#else
+#define XORN_STORAGE_API_EXPORT
+#endif
+
+extern "C" {
 
 #define OBJMETHODS(type) \
-	const struct xornsch_##type *xornsch_get_##type##_data( \
+	XORN_STORAGE_API_EXPORT const struct xornsch_##type *xornsch_get_##type##_data( \
 		xorn_revision_t rev, xorn_object_t ob) { \
 		return static_cast<const struct xornsch_##type *>( \
 		    xorn_get_object_data(rev, ob, xornsch_obtype_##type)); \
 	} \
-	xorn_object_t xornsch_add_##type(xorn_revision_t rev, \
+	XORN_STORAGE_API_EXPORT xorn_object_t xornsch_add_##type(xorn_revision_t rev, \
 					 const struct xornsch_##type *data, \
 					 xorn_error_t *err) { \
 		return xorn_add_object( \
 			rev, xornsch_obtype_##type, data, err); \
 	} \
-	int xornsch_set_##type##_data(xorn_revision_t rev, xorn_object_t ob, \
+	XORN_STORAGE_API_EXPORT int xornsch_set_##type##_data(xorn_revision_t rev, xorn_object_t ob, \
 				      const struct xornsch_##type *data, \
 				      xorn_error_t *err) { \
 		return xorn_set_object_data( \
@@ -45,3 +53,5 @@ OBJMETHODS(net)
 OBJMETHODS(path)
 OBJMETHODS(picture)
 OBJMETHODS(text)
+
+} // extern "C"

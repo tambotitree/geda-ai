@@ -69,6 +69,9 @@ in your PATH). Alternatively, set PYTHON_CFLAGS and PYTHON_LIBS manually.
 ])
 fi
 
+AC_SUBST(PYTHON_CFLAGS)
+AC_SUBST(PYTHON_LIBS)
+
 # Check for Guile for xorn (trying 3.0 then 2.0)
 AC_MSG_CHECKING([for Guile for xorn (trying 3.0 then 2.0)])
 _found_guile_for_xorn=no

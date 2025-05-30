@@ -1,0 +1,98 @@
+Backtrace:
+In ice-9/boot-9.scm:
+  1755:12  1 (with-exception-handler _ _ #:unwind? _ #:unwind-for-type _)
+In unknown file:
+           0 (apply-smob/0 #<thunk 10df0c300>)
+
+ERROR: In procedure apply-smob/0:
+Python type "object" doesn't have a corresponding Guile type
+Backtrace:
+In ice-9/boot-9.scm:
+  1755:12  1 (with-exception-handler _ _ #:unwind? _ #:unwind-for-type _)
+In unknown file:
+           0 (apply-smob/0 #<thunk 10eb21cc0>)
+
+ERROR: In procedure apply-smob/0:
+In procedure module-lookup: Unbound variable: bar
+ice-9/read.scm:126:4: In procedure lp:
+#<unknown port>:1:2: unexpected end of input while searching for: )
+Backtrace:
+In ice-9/boot-9.scm:
+  1755:12  5 (with-exception-handler _ _ #:unwind? _ #:unwind-for-type _)
+In unknown file:
+           4 (apply-smob/0 #<thunk 10eb39f00>)
+In ice-9/boot-9.scm:
+   2858:4  3 (save-module-excursion #<procedure 10dfc5220 at ice-9/eval-string.scm:65:9 ()>)
+In ice-9/eval-string.scm:
+     37:6  2 (read-and-eval #<input: custom-port 10eb8a7e0> #:lang _)
+In ice-9/eval.scm:
+   223:20  1 (proc #<directory (guile-user) 10df0fc80>)
+In unknown file:
+           0 (%resolve-variable (7 . bar) #<directory (guile-user) 10df0fc80>)
+
+ERROR: In procedure %resolve-variable:
+Unbound variable: bar
+Backtrace:
+In ice-9/boot-9.scm:
+  1755:12  1 (with-exception-handler _ _ #:unwind? _ #:unwind-for-type _)
+In unknown file:
+           0 (apply-smob/0 #<thunk 10ef156e0>)
+
+ERROR: In procedure apply-smob/0:
+In procedure length: Wrong type argument in position 1: (0 . 1)
+Backtrace:
+In ice-9/boot-9.scm:
+  1755:12  2 (with-exception-handler _ _ #:unwind? _ #:unwind-for-type _)
+In unknown file:
+           1 (apply-smob/0 #<thunk 10ef7c4a0>)
+           0 (- #<undefined> #<undefined>)
+
+ERROR: In procedure -:
+Wrong number of arguments to -
+Backtrace:
+In ice-9/boot-9.scm:
+  1755:12  4 (with-exception-handler _ _ #:unwind? _ #:unwind-for-type _)
+In unknown file:
+           3 (apply-smob/0 #<thunk 10f001720>)
+In ice-9/boot-9.scm:
+   2858:4  2 (save-module-excursion #<procedure 10f003440 at ice-9/eval-string.scm:65:9 ()>)
+In ice-9/eval-string.scm:
+     37:6  1 (read-and-eval #<input: custom-port 10effa930> #:lang _)
+In unknown file:
+           0 (__py_callable_7f78d6b65950__)
+
+ERROR: In procedure __py_callable_7f78d6b65950__:
+Throw to key `python-exception' with args `("exceptions.TypeError" "update_state() takes exactly 1 argument (0 given)")'.
+Backtrace:
+In ice-9/boot-9.scm:
+  1755:12  4 (with-exception-handler _ _ #:unwind? _ #:unwind-for-type _)
+In unknown file:
+           3 (apply-smob/0 #<thunk 10f12ee00>)
+In ice-9/boot-9.scm:
+   2858:4  2 (save-module-excursion #<procedure 10f131e60 at ice-9/eval-string.scm:65:9 ()>)
+In ice-9/eval-string.scm:
+     37:6  1 (read-and-eval #<input: custom-port 10f0ee460> #:lang _)
+In unknown file:
+           0 (__py_callable_7f78d6b65950__ 0 1)
+
+ERROR: In procedure __py_callable_7f78d6b65950__:
+Throw to key `python-exception' with args `("exceptions.TypeError" "update_state() takes exactly 1 argument (2 given)")'.
+Backtrace:
+In ice-9/boot-9.scm:
+  1755:12  4 (with-exception-handler _ _ #:unwind? _ #:unwind-for-type _)
+In unknown file:
+           3 (apply-smob/0 #<thunk 10ded2460>)
+In ice-9/boot-9.scm:
+   2858:4  2 (save-module-excursion #<procedure 10ded9c00 at ice-9/eval-string.scm:65:9 ()>)
+In ice-9/eval-string.scm:
+     37:6  1 (read-and-eval #<input: custom-port 10ef61930> #:lang _)
+In unknown file:
+           0 (__py_callable_7f78d6b658d0__ 1)
+
+ERROR: In procedure __py_callable_7f78d6b658d0__:
+Throw to key `python-exception' with args `("exceptions.AssertionError" #f)'.
+;;; note: auto-compilation is enabled, set GUILE_AUTO_COMPILE=0
+;;;       or pass the --no-auto-compile argument to disable.
+;;; compiling /Users/johnryan/Documents/GitHub/geda-ai/xorn/tests/tmpIHDV65.scm
+;;; compiled /Users/johnryan/.cache/guile/ccache/3.0-LE-8-4.7/Users/johnryan/Documents/GitHub/geda-ai/xorn/tests/tmpIHDV65.scm.go
+PASS cpython/guile.py (exit status: 0)

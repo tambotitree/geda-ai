@@ -207,7 +207,7 @@ AC_CHECK_FUNCS([__argz_count __argz_next __argz_stringify floor getcwd localecon
 # --- Feature Conditionals (MUST BE BEFORE AC_OUTPUT) ---
 
 # Check for groff (for HTML docs)
-AC_CHECK_PROG(GROFF, groff, yes, no)
+AC_PATH_PROG([GROFF], [groff], [no])
 AC_ARG_ENABLE(groff-html,
   AS_HELP_STRING([--disable-groff-html],[disable HTML documentation generation via groff]),
   [enable_groff_html=$enableval],

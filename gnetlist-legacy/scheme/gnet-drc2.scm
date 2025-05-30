@@ -169,8 +169,8 @@
 ;; -------------------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
-(or (defined? 'define-syntax)
-    (use-modules (ice-9 syncase)))
+;;  (or (defined? 'define-syntax)
+;;       (use-modules (ice-9 syncase)))
 
 (define-syntax define-undefined
   (syntax-rules ()

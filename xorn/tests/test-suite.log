@@ -1,0 +1,476 @@
+====================================
+   Xorn 0.0: tests/test-suite.log
+====================================
+
+# TOTAL: 75
+# PASS:  37
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  38
+# XPASS: 0
+# ERROR: 0
+
+System information (uname -a): Darwin 24.3.0 Darwin Kernel Version 24.3.0: Thu Jan 2 20:22:00 PST 2025; root:xnu-11215.81.4~3/RELEASE_X86_64
+
+.. contents:: :depth: 2
+
+FAIL: cpython/snippets/storage_funcs
+====================================
+
+Traceback (most recent call last):
+  File "./cpython/snippets/storage_funcs.py", line 17, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/snippets/storage_funcs.py (exit status: 1)
+
+FAIL: cpython/storage/copy_attached
+===================================
+
+Traceback (most recent call last):
+  File "./cpython/storage/copy_attached.py", line 17, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/copy_attached.py (exit status: 1)
+
+FAIL: cpython/storage/copy_object
+=================================
+
+Traceback (most recent call last):
+  File "./cpython/storage/copy_object.py", line 17, in <module>
+    import xorn.storage, Setup
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/copy_object.py (exit status: 1)
+
+FAIL: cpython/storage/copy_objects
+==================================
+
+Traceback (most recent call last):
+  File "./cpython/storage/copy_objects.py", line 17, in <module>
+    import xorn.storage, Setup
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/copy_objects.py (exit status: 1)
+
+FAIL: cpython/storage/data_ctors
+================================
+
+Traceback (most recent call last):
+  File "./cpython/storage/data_ctors.py", line 17, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/data_ctors.py (exit status: 1)
+
+FAIL: cpython/storage/delete_sel
+================================
+
+Traceback (most recent call last):
+  File "./cpython/storage/delete_sel.py", line 17, in <module>
+    import xorn.storage, Setup
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/delete_sel.py (exit status: 1)
+
+FAIL: cpython/storage/exist
+===========================
+
+Traceback (most recent call last):
+  File "./cpython/storage/exist.py", line 17, in <module>
+    import xorn.storage, Setup
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/exist.py (exit status: 1)
+
+FAIL: cpython/storage/get_loc_attach
+====================================
+
+Traceback (most recent call last):
+  File "./cpython/storage/get_loc_attach.py", line 17, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/get_loc_attach.py (exit status: 1)
+
+FAIL: cpython/storage/get_loc_order
+===================================
+
+Traceback (most recent call last):
+  File "./cpython/storage/get_loc_order.py", line 17, in <module>
+    import xorn.storage, Setup
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/get_loc_order.py (exit status: 1)
+
+FAIL: cpython/storage/get_obdata
+================================
+
+Traceback (most recent call last):
+  File "./cpython/storage/get_obdata.py", line 17, in <module>
+    import xorn.storage, Setup
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/get_obdata.py (exit status: 1)
+
+FAIL: cpython/storage/get_objects
+=================================
+
+Traceback (most recent call last):
+  File "./cpython/storage/get_objects.py", line 17, in <module>
+    import xorn.storage, Setup
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/get_objects.py (exit status: 1)
+
+FAIL: cpython/storage/get_obtype
+================================
+
+Traceback (most recent call last):
+  File "./cpython/storage/get_obtype.py", line 17, in <module>
+    import xorn.storage, Setup
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/get_obtype.py (exit status: 1)
+
+FAIL: cpython/storage/is_selected
+=================================
+
+Traceback (most recent call last):
+  File "./cpython/storage/is_selected.py", line 17, in <module>
+    import xorn.storage, Setup
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/is_selected.py (exit status: 1)
+
+FAIL: cpython/storage/module
+============================
+
+Traceback (most recent call last):
+  File "./cpython/storage/module.py", line 17, in <module>
+    import types, xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/module.py (exit status: 1)
+
+FAIL: cpython/storage/normalize
+===============================
+
+Traceback (most recent call last):
+  File "./cpython/storage/normalize.py", line 17, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/normalize.py (exit status: 1)
+
+FAIL: cpython/storage/ob_equality
+=================================
+
+Traceback (most recent call last):
+  File "./cpython/storage/ob_equality.py", line 17, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/ob_equality.py (exit status: 1)
+
+FAIL: cpython/storage/pointer
+=============================
+
+Traceback (most recent call last):
+  File "./cpython/storage/pointer.py", line 17, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/pointer.py (exit status: 1)
+
+FAIL: cpython/storage/query_attached
+====================================
+
+Traceback (most recent call last):
+  File "./cpython/storage/query_attached.py", line 17, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/query_attached.py (exit status: 1)
+
+FAIL: cpython/storage/reloc_attach
+==================================
+
+Traceback (most recent call last):
+  File "./cpython/storage/reloc_attach.py", line 17, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/reloc_attach.py (exit status: 1)
+
+FAIL: cpython/storage/reloc_order
+=================================
+
+Traceback (most recent call last):
+  File "./cpython/storage/reloc_order.py", line 17, in <module>
+    import xorn.storage, Setup
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/reloc_order.py (exit status: 1)
+
+FAIL: cpython/storage/selection
+===============================
+
+Traceback (most recent call last):
+  File "./cpython/storage/selection.py", line 17, in <module>
+    import xorn.storage, Setup
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/selection.py (exit status: 1)
+
+FAIL: cpython/storage/set_obdata
+================================
+
+Traceback (most recent call last):
+  File "./cpython/storage/set_obdata.py", line 17, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/set_obdata.py (exit status: 1)
+
+FAIL: cpython/storage/stat
+==========================
+
+Traceback (most recent call last):
+  File "./cpython/storage/stat.py", line 17, in <module>
+    import xorn.storage, Setup
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/stat.py (exit status: 1)
+
+FAIL: cpython/storage/string
+============================
+
+Traceback (most recent call last):
+  File "./cpython/storage/string.py", line 17, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/string.py (exit status: 1)
+
+FAIL: cpython/storage/transient
+===============================
+
+Traceback (most recent call last):
+  File "./cpython/storage/transient.py", line 17, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/transient.py (exit status: 1)
+
+FAIL: cpython/storage/validate
+==============================
+
+Traceback (most recent call last):
+  File "./cpython/storage/validate.py", line 17, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL cpython/storage/validate.py (exit status: 1)
+
+FAIL: python/proxy
+==================
+
+Traceback (most recent call last):
+  File "./python/proxy.py", line 17, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL python/proxy.py (exit status: 1)
+
+FAIL: gaf/attrib
+================
+
+Traceback (most recent call last):
+  File "./gaf/attrib.py", line 17, in <module>
+    import xorn.proxy
+  File "/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/python/proxy.py", line 20, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL gaf/attrib.py (exit status: 1)
+
+FAIL: gaf/complex
+=================
+
+Traceback (most recent call last):
+  File "./gaf/complex.py", line 18, in <module>
+    import xorn.proxy
+  File "/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/python/proxy.py", line 20, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL gaf/complex.py (exit status: 1)
+
+FAIL: gaf/parse_attrib
+======================
+
+Traceback (most recent call last):
+  File "./gaf/parse_attrib.py", line 17, in <module>
+    import gaf.attrib
+  File "/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/gaf/attrib.py", line 38, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL gaf/parse_attrib.py (exit status: 1)
+
+FAIL: gaf/pixmap
+================
+
+Traceback (most recent call last):
+  File "./gaf/pixmap.py", line 19, in <module>
+    import gaf.read
+  File "/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/gaf/read.py", line 25, in <module>
+    import gaf.clib
+  File "/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/gaf/clib.py", line 56, in <module>
+    import xorn.proxy
+  File "/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/python/proxy.py", line 20, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL gaf/pixmap.py (exit status: 1)
+
+FAIL: gaf/plain_transform
+=========================
+
+Traceback (most recent call last):
+  File "./gaf/plain_transform.py", line 18, in <module>
+    import xorn.proxy
+  File "/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/python/proxy.py", line 20, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL gaf/plain_transform.py (exit status: 1)
+
+FAIL: gaf/plainread_log
+=======================
+
+Traceback (most recent call last):
+  File "./gaf/plainread_log.py", line 19, in <module>
+    import gaf.read
+  File "/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/gaf/read.py", line 25, in <module>
+    import gaf.clib
+  File "/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/gaf/clib.py", line 56, in <module>
+    import xorn.proxy
+  File "/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/python/proxy.py", line 20, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL gaf/plainread_log.py (exit status: 1)
+
+FAIL: gaf/ripperdir
+===================
+
+Traceback (most recent call last):
+  File "./gaf/ripperdir.py", line 19, in <module>
+    import gaf.read
+  File "/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/gaf/read.py", line 25, in <module>
+    import gaf.clib
+  File "/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/gaf/clib.py", line 56, in <module>
+    import xorn.proxy
+  File "/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/python/proxy.py", line 20, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL gaf/ripperdir.py (exit status: 1)
+
+FAIL: gaf/unhide_attrib
+=======================
+
+Traceback (most recent call last):
+  File "./gaf/unhide_attrib.py", line 18, in <module>
+    import gaf.attrib
+  File "/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/gaf/attrib.py", line 38, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL gaf/unhide_attrib.py (exit status: 1)
+
+FAIL: gaf/xmlread
+=================
+
+Traceback (most recent call last):
+  File "./gaf/xmlread.py", line 18, in <module>
+    import gaf.read
+  File "/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/gaf/read.py", line 25, in <module>
+    import gaf.clib
+  File "/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/gaf/clib.py", line 56, in <module>
+    import xorn.proxy
+  File "/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/python/proxy.py", line 20, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL gaf/xmlread.py (exit status: 1)
+
+FAIL: gaf/xmlread_log
+=====================
+
+Traceback (most recent call last):
+  File "./gaf/xmlread_log.py", line 19, in <module>
+    import gaf.read
+  File "/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/gaf/read.py", line 25, in <module>
+    import gaf.clib
+  File "/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/gaf/clib.py", line 56, in <module>
+    import xorn.proxy
+  File "/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/python/proxy.py", line 20, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL gaf/xmlread_log.py (exit status: 1)
+
+FAIL: gaf/xmlwrite
+==================
+
+Traceback (most recent call last):
+  File "./gaf/xmlwrite.py", line 18, in <module>
+    import xorn.proxy
+  File "/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/python/proxy.py", line 20, in <module>
+    import xorn.storage
+ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
+  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
+  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
+FAIL gaf/xmlwrite.py (exit status: 1)
+

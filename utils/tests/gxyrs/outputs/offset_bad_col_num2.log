@@ -1,0 +1,3 @@
+perl -I /Users/johnryan/Documents/GitHub/geda-ai/utils/tests/gxyrs/../../gxyrs -w /Users/johnryan/Documents/GitHub/geda-ai/utils/tests/gxyrs/../../gxyrs/gxyrs  --eval "return add_number_to_col 'd4', -90, 1, 'R[0-9]+'"  pcb_example1.xy  --output stdout 2> stderr
+Checking argument pcb_example1.xy.
+PASS outputs/offset_bad_col_num2.out (exit status: 0)
