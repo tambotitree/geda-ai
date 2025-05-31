@@ -21,7 +21,12 @@ LDADD = $(top_builddir)/src/storage/libxornstorage.la
 TEST_EXTENSIONS = .py
 
 AM_TESTS_ENVIRONMENT = \
-	PYTHONPATH='$(top_builddir)/built-packages'; \
+	abs_top_builddir=`cd $(top_builddir) && pwd`; \
+	XORN_STORAGE_LIB_DIR="$(abs_top_builddir)/xorn/src/storage/.libs"; \
+	LD_LIBRARY_PATH="$$XORN_STORAGE_LIB_DIR:$$LD_LIBRARY_PATH"; \
+	DYLD_LIBRARY_PATH="$$XORN_STORAGE_LIB_DIR:$$DYLD_LIBRARY_PATH"; \
+	export LD_LIBRARY_PATH DYLD_LIBRARY_PATH; \
+	PYTHONPATH="$(abs_top_builddir)/xorn/src/cpython/storage/.libs:$(abs_top_builddir)/built-packages:$$PYTHONPATH"; \
 	export PYTHONPATH;
 PY_LOG_COMPILER = $(PYTHON)
 

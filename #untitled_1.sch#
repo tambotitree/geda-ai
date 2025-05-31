@@ -1,0 +1,24 @@
+v 1.0.0 2
+C 40000 40000 0 0 0 title-B.sym
+C 48600 48500 1 0 0 resistor-1.sym
+{
+T 48900 48900 5 10 0 0 0 0 1
+device=RESISTOR
+T 48800 48800 5 10 1 1 0 0 1
+refdes=R?
+}
+C 48100 47900 1 0 0 resistor-1.sym
+{
+T 48400 48300 5 10 0 0 0 0 1
+device=RESISTOR
+T 48300 48200 5 10 1 1 0 0 1
+refdes=R?
+}
+C 48300 47200 1 0 0 resistor-1.sym
+{
+T 48600 47600 5 10 0 0 0 0 1
+device=RESISTOR
+T 48500 47500 5 10 1 1 0 0 1
+refdes=R?
+}
+L 42200 48500 44000 48500 3 0 1 0 -1 -1

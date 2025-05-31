@@ -1,7 +1,1 @@
-Traceback (most recent call last):
-  File "./cpython/storage/reloc_order.py", line 17, in <module>
-    import xorn.storage, Setup
-ImportError: dlopen(/Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so, 0x0002): Symbol not found: _xornsch_get_arc_data
-  Referenced from: <A48E9C53-4004-3217-AF06-328DB837EFF9> /Users/johnryan/Documents/GitHub/geda-ai/xorn/src/cpython/storage/.libs/storagemodule.so
-  Expected in:     <DFE2867F-459C-3250-8D71-E1BD3DD29981> /Users/johnryan/geda/lib/libxornstorage.0.dylib
-FAIL cpython/storage/reloc_order.py (exit status: 1)
+PASS cpython/storage/reloc_order.py (exit status: 0)
