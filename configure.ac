@@ -323,6 +323,8 @@ AC_CONFIG_FILES([Makefile
                  gschem/src/Makefile
                  gschem/tests/Makefile
                  gsymcheck/Makefile
+                 gsymcheck/include/Makefile
+                 gsymcheck/docs/Makefile
                  gsymcheck/lib/system-gsymcheckrc
                  gsymcheck/lib/Makefile
                  gsymcheck/src/Makefile

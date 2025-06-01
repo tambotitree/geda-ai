@@ -73,10 +73,6 @@ fi
 echo "Running libtoolize..."
 # On macOS, glibtoolize is common. autoreconf log shows glibtoolize.
 if command -v glibtoolize >/dev/null; then
-
-echo "Running libtoolize..."
-# On macOS, glibtoolize is common. autoreconf log shows glibtoolize.
-if command -v glibtoolize >/dev/null; then
     LIBTOOLIZE=glibtoolize
 else
     LIBTOOLIZE=libtoolize
