@@ -296,6 +296,7 @@ AC_CONFIG_FILES([Makefile
                  gattrib/lib/Makefile
                  gattrib/src/Makefile
                  gnetlist-legacy/Makefile
+                 gnetlist-legacy/docs/Makefile
                  gnetlist-legacy/lib/system-gnetlistrc
                  gnetlist-legacy/docs/vams/Makefile
                  gnetlist-legacy/examples/Makefile
@@ -310,6 +311,7 @@ AC_CONFIG_FILES([Makefile
                  gnetlist-legacy/scripts/Makefile
                  gnetlist-legacy/src/Makefile
                  gnetlist-legacy/tests/Makefile
+                 gnetlist-legacy/tests/netlists/Makefile
                  gnetlist-legacy/utils/Makefile
                  gschem/Makefile
                  gschem/bitmap/Makefile

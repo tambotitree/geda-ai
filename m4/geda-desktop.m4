@@ -99,18 +99,20 @@ AC_DEFUN([AX_OPTION_XDG_DB],
     AC_CHECK_PROG([UPDATE_MIME_DATABASE], [update-mime-database],
                   [update-mime-database], [no])
     if test "X$UPDATE_MIME_DATABASE" = "Xno"; then
-      AC_MSG_ERROR([The update-mime-database tool could not be found. Ensure it is
-installed and in your path, or configure with
---disable-update-xdg-database.])
+      AC_MSG_WARN([The update-mime-database tool could not be found.
+This may be expected if you intend to use a custom mechanism for updating XDG databases.
+Otherwise, ensure it is installed and in your PATH, or use --disable-update-xdg-database
+if no update is desired.])
     fi
 
     # Check for update-desktop-database
     AC_CHECK_PROG([UPDATE_DESKTOP_DATABASE], [update-desktop-database],
                   [update-desktop-database], [no])
     if test "X$UPDATE_DESKTOP_DATABASE" = "Xno"; then
-      AC_MSG_ERROR([The update-desktop-database tool could not be found. Ensure it is
-installed and in your path, or configure with
---disable-update-xdg-database.])
+      AC_MSG_WARN([The update-desktop-database tool could not be found.
+This may be expected if you intend to use a custom mechanism for updating XDG databases.
+Otherwise, ensure it is installed and in your PATH, or use --disable-update-xdg-database
+if no update is desired.])
     fi
   else
     AC_MSG_RESULT([no])
