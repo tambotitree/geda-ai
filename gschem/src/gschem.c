@@ -29,6 +29,7 @@
 #endif
 
 #include <glib.h>
+#include <glib/gstdio.h> /* For g_build_filename */
 
 #include "gschem.h"
 
@@ -262,6 +263,22 @@ void main_prog(void *closure, int argc, char *argv[])
 #endif
 
   gtk_init(&argc, &argv);
+
+    /* Add our application's icon directory to the theme search path */
+  /* This should be done after gtk_init() */
+  GtkIconTheme *icon_theme = gtk_icon_theme_get_default();
+  if (icon_theme) {
+    /* PKGDATADIR is defined in config.h, which is included via gschem.h */
+    /* It will expand to something like "$HOME/geda/share/geda-ai" */
+    gchar *app_icon_dir = g_build_filename(PKGDATADIR, "icons", NULL);
+    if (g_file_test(app_icon_dir, G_FILE_TEST_IS_DIR)) {
+      gtk_icon_theme_append_search_path(icon_theme, app_icon_dir);
+      s_log_message(_("Added icon search path: %s\n"), app_icon_dir);
+    } else {
+      s_log_message(_("Icon search path not found or not a directory: %s\n"), app_icon_dir);
+    }
+    g_free(app_icon_dir);
+  }
 
   argv_index = parse_commandline(argc, argv);
   cwd = g_get_current_dir();

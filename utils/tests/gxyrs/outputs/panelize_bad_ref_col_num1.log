@@ -1,3 +1,0 @@
-perl -I /Users/johnryan/Documents/GitHub/geda-ai/utils/tests/gxyrs/../../gxyrs -w /Users/johnryan/Documents/GitHub/geda-ai/utils/tests/gxyrs/../../gxyrs/gxyrs  --eval "return panelize_xyrs 15,15,500,1500, \$X_COL,\$Y_COL, 'd2', ''"  pcb_example1.xy  --output stdout 2> stderr
-Checking argument pcb_example1.xy.
-PASS outputs/panelize_bad_ref_col_num1.out (exit status: 0)

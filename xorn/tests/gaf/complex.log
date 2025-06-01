@@ -1,3 +1,0 @@
-<test data>:5: error: embedded symbol is missing
-<test data>:3: error: embedded symbol start marker following component with non-embedded symbol
-PASS gaf/complex.py (exit status: 0)

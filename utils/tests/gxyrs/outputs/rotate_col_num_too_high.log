@@ -1,3 +1,0 @@
-perl -I /Users/johnryan/Documents/GitHub/geda-ai/utils/tests/gxyrs/../../gxyrs -w /Users/johnryan/Documents/GitHub/geda-ai/utils/tests/gxyrs/../../gxyrs/gxyrs  --eval "return rotate_comp 100, -90, 1, 'R[0-9]+'"  pcb_example1.xy  --output stdout 2> stderr
-Checking argument pcb_example1.xy.
-PASS outputs/rotate_col_num_too_high.out (exit status: 0)

@@ -26,9 +26,10 @@ AC_DEFUN([AX_DATA_DIRS],
   # Check where to install ordinary data files (e.g. symbols and
   # gnetlist backends)
   # FIXME at some point this should become "$datarootdir/geda-gaf" to
-  # match the tarball name.
+  # match the tarball name.-> This is now $PACKAGE_TARNAME
   AC_MSG_CHECKING([where to install gEDA shared data])
-  GEDADATADIR="$datarootdir/gEDA"
+  GEDADATADIR="$datarootdir/$PACKAGE_TARNAME"
+ 
   AC_MSG_RESULT([$GEDADATADIR])
 
   # Check where to install rc files.
@@ -40,8 +41,8 @@ AC_DEFUN([AX_DATA_DIRS],
     AS_HELP_STRING([--with-rcdir[[[=DIR]]]],
       [install system config in specific DIR]),
     [ if test "X$with_rcdir" != "Xno"; then
-        if test "X$with_rcdir" = "Xyes"; then
-          GEDARCDIR="$sysconfdir/gEDA"
+          if test "X$with_rcdir" = "Xyes"; then # Default for --with-rcdir without arg
+          GEDARCDIR="$sysconfdir/$PACKAGE_TARNAME"
         else
           GEDARCDIR="$with_rcdir"
         fi

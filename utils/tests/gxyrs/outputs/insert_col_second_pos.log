@@ -1,3 +1,0 @@
-perl -I /Users/johnryan/Documents/GitHub/geda-ai/utils/tests/gxyrs/../../gxyrs -w /Users/johnryan/Documents/GitHub/geda-ai/utils/tests/gxyrs/../../gxyrs/gxyrs  --eval "return insert_column 1, 'new_value'"  pcb_example1.xy  --output stdout 2> stderr
-Checking argument pcb_example1.xy.
-PASS outputs/insert_col_second_pos.out (exit status: 0)

@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<document attribute="value">
-  some text
-</document>
-PASS python/snippets/xml_writer.py (exit status: 0)

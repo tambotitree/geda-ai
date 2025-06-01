@@ -1,3 +1,0 @@
-perl -I /Users/johnryan/Documents/GitHub/geda-ai/utils/tests/gxyrs/../../gxyrs -w /Users/johnryan/Documents/GitHub/geda-ai/utils/tests/gxyrs/../../gxyrs/gxyrs  --caseinsensitive --eval "return del_line 1, 'R[0-9]+'"  pcb_example2.xy  --output stdout 2> stderr
-Checking argument pcb_example2.xy.
-PASS outputs/del_case_insens2.out (exit status: 0)

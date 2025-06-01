@@ -173,6 +173,9 @@ AX_DESKTOP_I18N # Use the macro from geda-desktop-i18n.m4
 # Define the text domain for libgeda
 AC_DEFINE_UNQUOTED([LIBGEDA_GETTEXT_DOMAIN], ["libgeda"], [The gettext domain for libgeda])
 
+# Define PKGDATADIR for use in C code
+AC_DEFINE_UNQUOTED([PKGDATADIR], ["${pkgdatadir}"], [Package data directory])
+
 # Define GETOPT_OPTIONS for gnetlist-legacy
 AC_SUBST(GNETLIST_GETOPT_OPTIONS) # For Makefiles, if needed
 AC_DEFINE_UNQUOTED(GETOPT_OPTIONS, "$GNETLIST_GETOPT_OPTIONS", [Getopt options string for gnetlist-legacy])

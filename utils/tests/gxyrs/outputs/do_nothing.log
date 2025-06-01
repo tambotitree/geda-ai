@@ -1,3 +1,0 @@
-perl -I /Users/johnryan/Documents/GitHub/geda-ai/utils/tests/gxyrs/../../gxyrs -w /Users/johnryan/Documents/GitHub/geda-ai/utils/tests/gxyrs/../../gxyrs/gxyrs    pcb_example1.xy  --adjust  do_nothing.pl  --output stdout 2> stderr
-Checking argument pcb_example1.xy.
-PASS outputs/do_nothing.out (exit status: 0)

@@ -1,6 +1,7 @@
 theme=hicolor
-xdgdatadir=@XDGDATADIR@
-themedir=$(xdgdatadir)/icons/$(theme)
+geda_ai_datadir=$(pkgdatadir)
+icondir=$(geda_ai_datadir)/icons
+themedir=$(icondir)/$(theme)
 
 mime_icons = \
 	application-x-geda-gsch2pcb-project \
@@ -24,8 +25,8 @@ mime_icon_sources = \
 theme_icons = \
 	$(mime_icon_files:%=mimetypes,%)
 
-mimedir = $(xdgdatadir)/mime
-xmldir = $(mimedir)/packages
+geda_ai_mimedir = $(geda_ai_datadir)/mime
+xmldir = $(geda_ai_mimedir)/packages
 
 xml_in_files = libgeda.xml.in
 xml_DATA = $(xml_in_files:.xml.in=.xml)
@@ -42,37 +43,37 @@ applicationdir = $(mimelnkdir)/application
 application_DATA = $(application_in_files:.desktop.in=.desktop)
 endif ENABLE_KDE_DESKTOP_DATA
 
-install_icon_exec = \
-	$(ICON_THEME_INSTALLER) \
-	-t $(theme) \
-	-s $(srcdir) \
-	-d "x$(DESTDIR)" \
-	-b $(themedir) \
-	-m "$(mkinstalldirs)" \
-	-x "$(INSTALL_DATA)"
-
 DOMAIN=$(LIBGEDA_GETTEXT_DOMAIN)
 
 @DESKTOP_I18N_LANGS_RULE@
 @DESKTOP_I18N_DESKTOP_RULE@
 @DESKTOP_I18N_XML_RULE@
 
+# Custom icon installation to be prefix-relative and Hicolor compliant
 install-data-local:
-if HAVE_ICON_INSTALLER
-	$(install_icon_exec) -i $(theme_icons)
-endif
+	$(MKDIR_P) "$(DESTDIR)$(themedir)/16x16/mimetypes"
+	$(MKDIR_P) "$(DESTDIR)$(themedir)/22x22/mimetypes"
+	$(MKDIR_P) "$(DESTDIR)$(themedir)/24x24/mimetypes"
+	$(MKDIR_P) "$(DESTDIR)$(themedir)/32x32/mimetypes"
+	$(MKDIR_P) "$(DESTDIR)$(themedir)/48x48/mimetypes"
+	$(MKDIR_P) "$(DESTDIR)$(themedir)/scalable/mimetypes"
+	for icon_base_name in $(mime_icons); do \
+	  $(INSTALL_DATA) "$(srcdir)/$${icon_base_name}-16.png" "$(DESTDIR)$(themedir)/16x16/mimetypes/$${icon_base_name}.png"; \
+	  $(INSTALL_DATA) "$(srcdir)/$${icon_base_name}-22.png" "$(DESTDIR)$(themedir)/22x22/mimetypes/$${icon_base_name}.png"; \
+	  $(INSTALL_DATA) "$(srcdir)/$${icon_base_name}-24.png" "$(DESTDIR)$(themedir)/24x24/mimetypes/$${icon_base_name}.png"; \
+	  $(INSTALL_DATA) "$(srcdir)/$${icon_base_name}-32.png" "$(DESTDIR)$(themedir)/32x32/mimetypes/$${icon_base_name}.png"; \
+	  $(INSTALL_DATA) "$(srcdir)/$${icon_base_name}-48.png" "$(DESTDIR)$(themedir)/48x48/mimetypes/$${icon_base_name}.png"; \
+	  $(INSTALL_DATA) "$(srcdir)/$${icon_base_name}.svg" "$(DESTDIR)$(themedir)/scalable/mimetypes/$${icon_base_name}.svg"; \
+	done
 
 install-data-hook:
 if ENABLE_UPDATE_XDG_DATABASE
-	$(UPDATE_MIME_DATABASE) "$(DESTDIR)$(mimedir)"
+	$(UPDATE_MIME_DATABASE) "$(DESTDIR)$(geda_ai_mimedir)"
 endif
 
 uninstall-hook:
 if ENABLE_UPDATE_XDG_DATABASE
-	$(UPDATE_MIME_DATABASE) "$(DESTDIR)$(mimedir)"
-endif
-if HAVE_ICON_INSTALLER
-	$(install_icon_exec) -u $(theme_icons)
+	$(UPDATE_MIME_DATABASE) "$(DESTDIR)$(geda_ai_mimedir)"
 endif
 
 MAINTAINERCLEANFILES = *.log core FILE *~ Makefile.in

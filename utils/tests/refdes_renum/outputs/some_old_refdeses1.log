@@ -1,4 +1,0 @@
-perl -w /Users/johnryan/Documents/GitHub/geda-ai/utils/tests/refdes_renum/../../scripts/refdes_renum  --gentle  someold1.sch 
-Scanning input file #1: someold1.sch
-Now processing input file #1: someold1.sch
-PASS outputs/some_old_refdeses1 (exit status: 0)

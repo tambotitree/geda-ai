@@ -1,3 +1,0 @@
-perl -w /Users/johnryan/Documents/GitHub/geda-ai/utils/tests/refdes_renum/../../scripts/refdes_renum  --clear  file1.sch 
-Now processing input file #1: file1.sch
-PASS outputs/single_clear (exit status: 0)
