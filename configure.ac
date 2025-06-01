@@ -237,6 +237,7 @@ fi
 # Optional XDG integration (uses AX_* macros from m4/geda-desktop.m4)
 # Explicitly define the conditional here as a fallback/diagnostic
 AM_CONDITIONAL(HAVE_ICON_INSTALLER, test "x$ax_cv_xdg_icon_installer" != xno)
+AX_OPTION_XDG_DATA # Define ICON_THEME_INSTALLER and XDGDATADIR
 AX_OPTION_XDG_DB   # Should define ENABLE_UPDATE_XDG_DATABASE conditional
 # AX_OPTION_KDE3_DATA # Keep commented unless KDE3 support is needed
 
@@ -311,7 +312,6 @@ AC_CONFIG_FILES([Makefile
                  gnetlist-legacy/scripts/Makefile
                  gnetlist-legacy/src/Makefile
                  gnetlist-legacy/tests/Makefile
-                 gnetlist-legacy/tests/netlists/Makefile
                  gnetlist-legacy/utils/Makefile
                  gschem/Makefile
                  gschem/bitmap/Makefile

@@ -60,6 +60,7 @@ AC_DEFUN([AX_OPTION_XDG_DATA],
   dnl Complain if icon-theme-installer is missing
   AC_REQUIRE_AUX_FILE([icon-theme-installer])
   ICON_THEME_INSTALLER="\${SHELL} $am_aux_dir/icon-theme-installer"
+ 
   AC_SUBST([ICON_THEME_INSTALLER])
 
   AC_MSG_CHECKING([where to install XDG desktop files])
