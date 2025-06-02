@@ -57,3 +57,40 @@
 #define HAVE_SYS_TIME_H 1
 #define HAVE_UNISTD_H 1
 #define HAVE__BOOL 1
+/* end confdefs.h.  */
+#include <stddef.h>
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif
+#ifdef HAVE_INTTYPES_H
+# include <inttypes.h>
+#endif
+#ifdef HAVE_STDINT_H
+# include <stdint.h>
+#endif
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+# include <sys/stat.h>
+#endif
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+int
+main (void)
+{
+if (sizeof ((mode_t)))
+	    return 0;
+  ;
+  return 0;
+}
