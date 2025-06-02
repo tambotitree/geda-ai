@@ -5,18 +5,13 @@ geda-update-databases.sh \- gEDA-AI XDG MIME and Desktop Database Update Script
 .B geda-update-databases.sh
 \fITYPE\fR \fITARGET_DIR\fR
 .SH DESCRIPTION
-.PP
-\fBgeda-update-databases.sh\fR is a utility script for the gEDA-AI (gEDA Autotools Improved) project. It is primarily intended to be invoked by the `make install` process rather than directly by users. Its purpose is to handle the updating of XDG (X Desktop Group) MIME type and desktop application databases in a way that is compatible with various installation scenarios, particularly user-local installations (e.g., using `--prefix=$HOME/geda-ai`) and cross-platform builds (including macOS, where standard XDG utilities may not be present or applicable).
-.PP
-This script replaces direct calls to system utilities like `update-mime-database` and `update-desktop-database` that would typically occur during installation. This change aims to:
-.IP \(bu 2
-Eliminate the need for `sudo` privileges when installing gEDA-AI to a user-writable prefix.
-.IP \(bu 2
-Provide a consistent mechanism for database updates (or no-ops) across different operating systems (Linux, macOS, potentially Windows).
-.IP \(bu 2
-Make the gEDA-AI installation process more self-sufficient and less dependent on specific system configurations.
+.SH ARGUMENTS
+The script accepts a --help option or two main arguments:
 .SH ARGUMENTS
 The script expects two arguments:
+.TP 8
+fB--help\fR
+Displays usage information and exits.
 .TP 8
 \fITYPE\fR
 Specifies the type of XDG database update to perform. This can be one of:
@@ -25,26 +20,23 @@ Specifies the type of XDG database update to perform. This can be one of:
 \fBmime\fR
 Indicates that MIME type database information should be updated. This typically involves processing XML files defining MIME types for gEDA-AI files (e.g., `.sch`, `.sym`).
 .TP 4
-\fBdesktop\fR
-Indicates that desktop application database information should be updated. This typically involves processing `.desktop` files that describe how to launch gEDA-AI applications (e.g., gschem) from a desktop environment.
+\fBdesktop\fR Indicates that desktop application database information should be updated. This typically involves processing `.desktop` files that describe how to launch gEDA-AI applications (e.g., gschem). The script updates an internal gEDA-AI cache.
 .RE
 .TP 8
 \fITARGET_DIR\fR
-The directory path where the relevant files (e.g., MIME XML files, `.desktop` files) have been installed by `make install`. This directory is usually within the installation prefix (e.g., `$(prefix)/share/mime/packages` or `$(prefix)/share/applications`).
+The source directory path where the relevant gEDA-AI files (e.g., MIME XML files, `.desktop` files) have been installed by `make install`.
+For \fBmime\fR, this is typically `$(DESTDIR)$(prefix)/share/geda-ai/mime/packages`.
+For \fBdesktop\fR, this is typically `$(DESTDIR)$(prefix)/share/geda-ai/applications`.
 .SH BEHAVIOR
-The behavior of \fBgeda-update-databases.sh\fR varies based on the operating system and the installation context:
-.TP 8
-.B macOS
-On macOS, which does not use the XDG database system in the same way as Linux, this script is generally expected to perform a no-op (no operation) or minimal local actions. It will log that no standard XDG update is being performed.
-.TP 8
-.B Linux (User-Local Prefix Install)
-When gEDA-AI is installed to a user-local prefix (e.g., `--prefix=$HOME/geda-ai`), the script will attempt to handle database updates locally within that prefix. This might involve ensuring that gEDA-AI's MIME type definitions and `.desktop` files are correctly placed in subdirectories like `$PREFIX/share/mime/packages` and `$PREFIX/share/applications` respectively, so they can be discovered by desktop environments that respect `XDG_DATA_DIRS`. The script aims to avoid calling system-wide update utilities that would require root privileges.
-.TP 8
-.B Linux (System-Wide Install)
-If gEDA-AI were being installed system-wide (requiring `sudo`), this script could potentially be adapted or configured to call the standard system `update-mime-database` and `update-desktop-database` utilities. However, the primary goal is to support `sudo`-less user installs.
-.TP 8
-.B Other Systems (e.g., Windows)
-The behavior for other operating systems like Windows is currently undefined but could be implemented in the future if XDG-like integration is desired.
+\fBgeda-update-databases.sh\fR processes gEDA-AI specific files from the \fITARGET_DIR\fR and updates an internal cache located within the installation prefix, typically at `$(prefix)/share/geda-ai/db/`.
+.PP
+For \fBmime\fR type:
+It scans \fITARGET_DIR\fR (expected to be `.../geda-ai/mime/packages`) for `*.xml` files and updates a `mime.cache` file in the internal database directory. (Currently, it's a placeholder operation).
+.PP
+For \fBdesktop\fR type:
+It scans \fITARGET_DIR\fR (expected to be `.../geda-ai/applications`) for `*.desktop` files and updates a `desktop.cache` file in the internal database directory. (Currently, it's a placeholder operation).
+.PP
+This script is designed to be OS-agnostic and aims to make gEDA-AI more self-sufficient by managing its own application metadata, eliminating direct dependencies on system-wide XDG utilities like `update-mime-database` or `update-desktop-database`. This approach is particularly beneficial for user-local installations (e.g., using `--prefix=$HOME/geda-ai`) and for platforms like macOS where XDG utilities are not standard.
 .SH INVOCATION
 .PP
 \fBgeda-update-databases.sh\fR is not typically run manually. It is invoked by `make install` rules within the gEDA-AI build system. The `configure` script (via `m4/geda-desktop.m4`) sets up the `UPDATE_MIME_DATABASE` and `UPDATE_DESKTOP_DATABASE` make variables to point to this script.
@@ -52,13 +44,13 @@ The behavior for other operating systems like Windows is currently undefined but
 An example invocation by `make install` might look like:
 .RS 8
 .nf
-$(SHELL) $(top_srcdir)/admin/geda-update-databases.sh mime $(DESTDIR)$(prefix)/share/mime/packages
+$(SHELL) $(top_srcdir)/admin/geda-update-databases.sh mime $(DESTDIR)$(prefix)/share/geda-ai/mime/packages
 .fi
 .RE
 .SH ENVIRONMENT
 .TP 8
 .B SHELL
-The shell used to execute the script.
+The shell used to execute the script (typically /bin/sh).
 .TP 8
 .B top_srcdir
 (Make variable) Points to the top-level source directory of gEDA-AI, used by `make` to locate the script.
@@ -70,8 +62,11 @@ The shell used to execute the script.
 (Make variable) The installation prefix for gEDA-AI.
 .SH FILES
 .TP 8
-\fB$(prefix)/share/mime/packages/\fR
-Typical installation directory for MIME type XML files.
+\fB$(prefix)/share/geda-ai/mime/packages/\fR
+Typical installation directory for gEDA-AI MIME type XML files.
+.TP 8
+\fB$(prefix)/share/geda-ai/db/\fR
+Directory for gEDA-AI's internal metadata caches (e.g., `mime.cache`, `desktop.cache`).
 .TP 8
 \fB$(prefix)/share/applications/\fR
 Typical installation directory for `.desktop` application files.

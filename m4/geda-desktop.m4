@@ -93,30 +93,14 @@ AC_DEFUN([AX_OPTION_XDG_DB],
     [], [enable_update_xdg_database=yes])
 
   # If user didn't disable XDG database update, look for tools
-  if test "X$enable_update_xdg_database" = "Xyes"; then
-    AC_MSG_RESULT([yes])
+  # For gEDA-AI, we always use our internal script if updates are enabled.
 
-    # Check for update-mime-database
-    AC_CHECK_PROG([UPDATE_MIME_DATABASE], [update-mime-database],
-                  [update-mime-database], [no])
-    if test "X$UPDATE_MIME_DATABASE" = "Xno"; then
-      AC_MSG_WARN([The update-mime-database tool could not be found.
-This may be expected if you intend to use a custom mechanism for updating XDG databases.
-Otherwise, ensure it is installed and in your PATH, or use --disable-update-xdg-database
-if no update is desired.])
-    fi
-
-    # Check for update-desktop-database
-    AC_CHECK_PROG([UPDATE_DESKTOP_DATABASE], [update-desktop-database],
-                  [update-desktop-database], [no])
-    if test "X$UPDATE_DESKTOP_DATABASE" = "Xno"; then
-      AC_MSG_WARN([The update-desktop-database tool could not be found.
-This may be expected if you intend to use a custom mechanism for updating XDG databases.
-Otherwise, ensure it is installed and in your PATH, or use --disable-update-xdg-database
-if no update is desired.])
-    fi
+    UPDATE_MIME_DATABASE="\${SHELL} \$(top_srcdir)/admin/geda-update-databases.sh mime"
+    UPDATE_DESKTOP_DATABASE="\${SHELL} \$(top_srcdir)/admin/geda-update-databases.sh desktop"
   else
     AC_MSG_RESULT([no])
+    UPDATE_MIME_DATABASE="no"
+    UPDATE_DESKTOP_DATABASE="no"
   fi
 
   AM_CONDITIONAL([ENABLE_UPDATE_XDG_DATABASE],
