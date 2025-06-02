@@ -13,6 +13,7 @@ man1_MANS = geda-update-databases.1
 
 EXTRA_DIST = $(man1_MANS)
 
+
 MOSTLYCLEANFILES = *~
 CLEANFILES = *~
 DISTCLEANFILES = *~ Makefile.in

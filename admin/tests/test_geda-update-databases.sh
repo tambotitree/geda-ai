@@ -121,8 +121,7 @@ mkdir -p "${TEST_DIR}/bad_structure/foo/packages"
 run_test "Invalid TARGET_DIR structure" 1 "Error: TARGET_DIR" mime "${TEST_DIR}/bad_structure/foo/packages"
 
 # Test 7: Missing arguments
-+run_test "Missing arguments" 1 "Error: Incorrect number of arguments."
- 
+run_test "Missing arguments" 1 "Error: Incorrect number of arguments." 
 
 # --- Summary ---
 echo "-----------------------------------------------------"
