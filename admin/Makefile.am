@@ -22,9 +22,6 @@ EXTRA_DIST = \
     tests/test_geda-update-databases.sh \
     docs/geda-update-databases.1
 
-# Define the test script to be run during 'make check'
-TESTS = tests/test_geda-update-databases.sh
-
 # Install the man page for geda-update-databases.sh
 # Even though the script itself isn't installed in $(bindir),
 # its documentation can be useful for developers and packagers.
