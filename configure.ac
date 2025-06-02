@@ -358,7 +358,10 @@ AC_CONFIG_FILES([Makefile
                  utils/scripts/Makefile
                  utils/src/Makefile
                  utils/tests/gxyrs/Makefile
-                 utils/tests/refdes_renum/Makefile])
+                 utils/tests/refdes_renum/Makefile
+                 admin/Makefile
+                 admin/docs/Makefile
+                 admin/tests/Makefile])
 # --- Define and Export Paths for Subdirectories ---
 
 
