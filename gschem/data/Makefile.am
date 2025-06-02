@@ -79,17 +79,20 @@ theme_icons = \
 
 # --------------------------------------------------------------------
 # We also install a .desktop file.
-xdgdatadir=@XDGDATADIR@
+# xdgdatadir=@XDGDATADIR@ # This is for standard XDG paths, we'll use pkgdatadir for gEDA-AI specific
 
-desktopdir=$(xdgdatadir)/applications
+# Install to gEDA-AI specific application directory
+gedaaidesktopdir = $(pkgdatadir)/applications # $(pkgdatadir) will be $(datadir)/geda-ai
 desktop_in_files = geda-gschem.desktop.in
-desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
+# Use dist_PRIMARY_DATA for automake to correctly handle installation to PRIMARYdir
+dist_gedaaidesktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
 
 DOMAIN=geda-gschem
 
 @DESKTOP_I18N_LANGS_RULE@
 @DESKTOP_I18N_DESKTOP_RULE@
 
+# AppData/AppStream metadata file - this still goes to a standard location
 metainfodir = $(datadir)/metainfo
 dist_metainfo_DATA = geda-gschem.metainfo.xml
 
@@ -118,11 +121,13 @@ install-data-local:
 
 
 install-data-hook:
-if ENABLE_UPDATE_XDG_DATABASE
-	$(UPDATE_DESKTOP_DATABASE) "$(DESTDIR)$(desktopdir)"
-endif
+	@echo "Running install-data-hook for gEDA-AI desktop database (gschem/data/Makefile.am)"
+	$(SHELL) $(top_srcdir)/admin/geda-update-databases.sh desktop "$(DESTDIR)$(gedaaidesktopdir)"
+	@echo "gEDA-AI desktop database update script called for $(DESTDIR)$(gedaaidesktopdir)"
 
 uninstall-hook:
+# The uninstall part for XDG database might need to be re-evaluated if geda-update-databases.sh
+# is to handle cache removal in the future. For now, this part related to XDG can be removed or commented.
 if ENABLE_UPDATE_XDG_DATABASE
 	$(UPDATE_DESKTOP_DATABASE) "$(DESTDIR)$(desktopdir)"
 endif
@@ -130,7 +135,7 @@ endif
 	$(install_theme_icons_exec) -u $(theme_icons)
 
 MAINTAINERCLEANFILES = *.log core FILE *~ Makefile.in
-DISTCLEANFILES = $(desktop_DATA)
+DISTCLEANFILES = $(dist_gedaaidesktop_DATA)
 EXTRA_DIST = $(iconsvg) $(action_icon_files) \
              $(app_icon_files) \
-             $(desktop_in_files) $(desktop_DATA)
+             $(desktop_in_files)

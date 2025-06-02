@@ -5,6 +5,8 @@ set -eu # Exit immediately if a command exits with a non-zero status or if an un
 #
 # Updates gEDA-AI specific application databases (MIME types, desktop entries)
 # by processing files within the installation prefix and updating an internal cache.
+# This script provides workalike behavior for update-mime-database and
+# update-desktop-database for gEDA-AI's internal needs, facilitating cross-platform:w
 # This script is intended to be OS-agnostic for its core functionality.
 
 usage() {
@@ -17,8 +19,8 @@ usage() {
   echo "  mime      - Update gEDA-AI internal MIME type information cache."
   echo "  desktop   - Update gEDA-AI internal desktop application entry cache."
   echo ""
-  echo "TARGET_DIR is the source directory for the update, typically within the"
-  echo "installation prefix (e.g., \$(DESTDIR)\$(prefix)/share/geda-ai/mime/packages for MIME,"
+    echo "installation prefix (e.g., \$(DESTDIR)\$(prefix)/share/geda-ai/mime for MIME type sources,"
+  echo "or \$(DESTDIR)\$(prefix)/share/geda-ai/applications for desktop entry sources)."
   echo "or \$(DESTDIR)\$(prefix)/share/geda-ai/applications for desktop entries)."
   exit 1
 }
