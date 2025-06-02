@@ -95,6 +95,8 @@ AC_DEFUN([AX_OPTION_XDG_DB],
   # If user didn't disable XDG database update, look for tools
   # For gEDA-AI, we always use our internal script if updates are enabled.
 
+   if test "X$enable_update_xdg_database" = "Xyes"; then
+    AC_MSG_RESULT([yes]) 
     UPDATE_MIME_DATABASE="\${SHELL} \$(top_srcdir)/admin/geda-update-databases.sh mime"
     UPDATE_DESKTOP_DATABASE="\${SHELL} \$(top_srcdir)/admin/geda-update-databases.sh desktop"
   else
