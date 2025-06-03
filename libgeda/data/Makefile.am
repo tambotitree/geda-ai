@@ -30,6 +30,7 @@ theme_icons = \
 
 
 xml_in_files = libgeda.xml.in
+xmldirdir = $(xmldir) # This will be $(prefix)/share/mime/packages
 # Install $(xml_DATA) into the directory specified by the variable xmldir
 dist_xmldir_DATA = $(xml_in_files:.xml.in=.xml)
 
