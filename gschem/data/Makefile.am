@@ -5,7 +5,6 @@ theme=hicolor
 # directory. They're used within gschem.
 datadir=@datadir@ # Standard data directory, becomes $(prefix)/share
 icondir=$(datadir)/icons
-themedir=$(icondir)/$(theme) # This will be $(prefix)/share/icons/hicolor
 iconsvg = gschem-icons.svg
 
 action_icons = \
@@ -87,7 +86,6 @@ xdgdatadir=@XDGDATADIR@ # This is for standard XDG paths, we'll use pkgdatadir f
 desktopdir = $(datadir)/applications # This will be $(prefix)/share/applications
 desktop_in_files = geda-gschem.desktop.in
 # Use dist_PRIMARY_DATA for automake to correctly handle installation to PRIMARYdir
-dist_gedaaidesktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
 desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
 
 

@@ -1,6 +1,9 @@
 theme=hicolor
 datadir=@datadir@ # Standard data directory, becomes $(prefix)/share
 icondir=$(datadir)/icons
+
+mimedir = $(datadir)/mime # This will be $(prefix)/share/mime
+xmldir = $(mimedir)/packages # This will be $(prefix)/share/mime/packages
 themedir=$(icondir)/$(theme) # This will be $(prefix)/share/icons/hicolor
 
 mime_icons = \
@@ -25,8 +28,6 @@ mime_icon_sources = \
 theme_icons = \
 	$(mime_icon_files:%=mimetypes,%)
 
-mimedir = $(datadir)/mime # This will be $(prefix)/share/mime
-xmldir = $(mimedir)/packages # This will be $(prefix)/share/mime/packages
 
 xml_in_files = libgeda.xml.in
 # Install $(xml_DATA) into the directory specified by the variable xmldir
