@@ -79,7 +79,7 @@ theme_icons = \
 
 # --------------------------------------------------------------------
 # We also install a .desktop file.
-# xdgdatadir=@XDGDATADIR@ # This is for standard XDG paths, we'll use pkgdatadir for gEDA-AI specific
+xdgdatadir=@XDGDATADIR@ # This is for standard XDG paths, we'll use pkgdatadir for gEDA-AI specific
 
 # Install to gEDA-AI specific application directory
 gedaaidesktopdir = $(pkgdatadir)/applications # $(pkgdatadir) will be $(datadir)/geda-ai

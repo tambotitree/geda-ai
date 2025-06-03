@@ -27,9 +27,11 @@ theme_icons = \
 
 geda_ai_mimedir = $(geda_ai_datadir)/mime
 xmldir = $(geda_ai_mimedir)/packages
+xmldirdir = $(xmldir) # Define the installation directory for dist_xmldir_DATA
 
 xml_in_files = libgeda.xml.in
-xml_DATA = $(xml_in_files:.xml.in=.xml)
+# Install $(xml_DATA) into the directory specified by the variable xmldir
+dist_xmldir_DATA = $(xml_in_files:.xml.in=.xml)
 
 application_in_files = \
 	x-geda-gsch2pcb-project.desktop.in \
@@ -66,10 +68,11 @@ install-data-local:
 	  $(INSTALL_DATA) "$(srcdir)/$${icon_base_name}.svg" "$(DESTDIR)$(themedir)/scalable/mimetypes/$${icon_base_name}.svg"; \
 	done
 
+# Pass the parent of 'packages' dir to the script, as it expects to append '/packages'
 install-data-hook:
-if ENABLE_UPDATE_XDG_DATABASE
-	$(UPDATE_MIME_DATABASE) "$(DESTDIR)$(geda_ai_mimedir)"
-endif
+	@echo "Running install-data-hook for gEDA-AI mime database (libgeda/data/Makefile.am)"
+	$(SHELL) $(top_srcdir)/admin/geda-update-databases.sh mime "$(DESTDIR)$(geda_ai_mimedir)"
+	@echo "gEDA-AI mime database update script called for $(DESTDIR)$(geda_ai_mimedir)"
 
 uninstall-hook:
 if ENABLE_UPDATE_XDG_DATABASE
@@ -77,7 +80,8 @@ if ENABLE_UPDATE_XDG_DATABASE
 endif
 
 MAINTAINERCLEANFILES = *.log core FILE *~ Makefile.in
-DISTCLEANFILES = $(xml_DATA) $(application_DATA)
+# $(xml_DATA) are the generated files from $(xml_in_files)
+DISTCLEANFILES = $(xml_in_files:.xml.in=.xml) $(application_DATA)
 EXTRA_DIST = $(mime_icon_files) $(mime_icon_sources) \
              $(xml_in_files) $(application_in_files)
 
