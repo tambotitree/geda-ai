@@ -1,7 +1,7 @@
 theme=hicolor
-geda_ai_datadir=$(pkgdatadir)
-icondir=$(geda_ai_datadir)/icons
-themedir=$(icondir)/$(theme)
+datadir=@datadir@ # Standard data directory, becomes $(prefix)/share
+icondir=$(datadir)/icons
+themedir=$(icondir)/$(theme) # This will be $(prefix)/share/icons/hicolor
 
 mime_icons = \
 	application-x-geda-gsch2pcb-project \
@@ -25,9 +25,8 @@ mime_icon_sources = \
 theme_icons = \
 	$(mime_icon_files:%=mimetypes,%)
 
-geda_ai_mimedir = $(geda_ai_datadir)/mime
-xmldir = $(geda_ai_mimedir)/packages
-xmldirdir = $(xmldir) # Define the installation directory for dist_xmldir_DATA
+mimedir = $(datadir)/mime # This will be $(prefix)/share/mime
+xmldir = $(mimedir)/packages # This will be $(prefix)/share/mime/packages
 
 xml_in_files = libgeda.xml.in
 # Install $(xml_DATA) into the directory specified by the variable xmldir
@@ -52,32 +51,32 @@ DOMAIN=$(LIBGEDA_GETTEXT_DOMAIN)
 @DESKTOP_I18N_XML_RULE@
 
 # Custom icon installation to be prefix-relative and Hicolor compliant
+install_mime_icons_exec = \
+	$(ICON_THEME_INSTALLER) \
+	-t $(theme) \
+	-s $(srcdir) \
+	-d "x$(DESTDIR)" \
+	-b $(themedir) \
+	-m "$(mkinstalldirs)" \
+	-x "$(INSTALL_DATA)"
+
 install-data-local:
-	$(MKDIR_P) "$(DESTDIR)$(themedir)/16x16/mimetypes"
-	$(MKDIR_P) "$(DESTDIR)$(themedir)/22x22/mimetypes"
-	$(MKDIR_P) "$(DESTDIR)$(themedir)/24x24/mimetypes"
-	$(MKDIR_P) "$(DESTDIR)$(themedir)/32x32/mimetypes"
-	$(MKDIR_P) "$(DESTDIR)$(themedir)/48x48/mimetypes"
-	$(MKDIR_P) "$(DESTDIR)$(themedir)/scalable/mimetypes"
-	for icon_base_name in $(mime_icons); do \
-	  $(INSTALL_DATA) "$(srcdir)/$${icon_base_name}-16.png" "$(DESTDIR)$(themedir)/16x16/mimetypes/$${icon_base_name}.png"; \
-	  $(INSTALL_DATA) "$(srcdir)/$${icon_base_name}-22.png" "$(DESTDIR)$(themedir)/22x22/mimetypes/$${icon_base_name}.png"; \
-	  $(INSTALL_DATA) "$(srcdir)/$${icon_base_name}-24.png" "$(DESTDIR)$(themedir)/24x24/mimetypes/$${icon_base_name}.png"; \
-	  $(INSTALL_DATA) "$(srcdir)/$${icon_base_name}-32.png" "$(DESTDIR)$(themedir)/32x32/mimetypes/$${icon_base_name}.png"; \
-	  $(INSTALL_DATA) "$(srcdir)/$${icon_base_name}-48.png" "$(DESTDIR)$(themedir)/48x48/mimetypes/$${icon_base_name}.png"; \
-	  $(INSTALL_DATA) "$(srcdir)/$${icon_base_name}.svg" "$(DESTDIR)$(themedir)/scalable/mimetypes/$${icon_base_name}.svg"; \
-	done
+	$(install_mime_icons_exec) -i $(theme_icons)
+
 
 # Pass the parent of 'packages' dir to the script, as it expects to append '/packages'
 install-data-hook:
 	@echo "Running install-data-hook for gEDA-AI mime database (libgeda/data/Makefile.am)"
-	$(SHELL) $(top_srcdir)/admin/geda-update-databases.sh mime "$(DESTDIR)$(geda_ai_mimedir)"
-	@echo "gEDA-AI mime database update script called for $(DESTDIR)$(geda_ai_mimedir)"
+	$(SHELL) $(top_srcdir)/admin/geda-update-databases.sh mime "$(DESTDIR)$(mimedir)"
+	@echo "gEDA-AI mime database update script called for $(DESTDIR)$(mimedir)"
 
 uninstall-hook:
-if ENABLE_UPDATE_XDG_DATABASE
-	$(UPDATE_MIME_DATABASE) "$(DESTDIR)$(geda_ai_mimedir)"
-endif
+# if ENABLE_UPDATE_XDG_DATABASE # This conditional might be removed if custom script is sole authority
+#	$(UPDATE_MIME_DATABASE) "$(DESTDIR)$(mimedir)"
+# endif
+	$(SHELL) $(top_srcdir)/admin/geda-update-databases.sh mime "$(DESTDIR)$(mimedir)" uninstall
+	$(install_mime_icons_exec) -u $(theme_icons)
+
 
 MAINTAINERCLEANFILES = *.log core FILE *~ Makefile.in
 # $(xml_DATA) are the generated files from $(xml_in_files)

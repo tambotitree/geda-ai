@@ -3,7 +3,9 @@ theme=hicolor
 # --------------------------------------------------------------------
 # These icons get installed to a gEDA-specific icons
 # directory. They're used within gschem.
-icondir = $(GEDADATADIR)/icons/$(theme)
+datadir=@datadir@ # Standard data directory, becomes $(prefix)/share
+icondir=$(datadir)/icons
+themedir=$(icondir)/$(theme) # This will be $(prefix)/share/icons/hicolor
 iconsvg = gschem-icons.svg
 
 action_icons = \
@@ -82,10 +84,14 @@ theme_icons = \
 xdgdatadir=@XDGDATADIR@ # This is for standard XDG paths, we'll use pkgdatadir for gEDA-AI specific
 
 # Install to gEDA-AI specific application directory
-gedaaidesktopdir = $(pkgdatadir)/applications # $(pkgdatadir) will be $(datadir)/geda-ai
+desktopdir = $(datadir)/applications # This will be $(prefix)/share/applications
 desktop_in_files = geda-gschem.desktop.in
 # Use dist_PRIMARY_DATA for automake to correctly handle installation to PRIMARYdir
 dist_gedaaidesktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
+desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
+
+
+
 
 DOMAIN=geda-gschem
 
@@ -106,6 +112,7 @@ install_icons_exec = \
 	-b $(icondir) \
 	-m "$(mkinstalldirs)" \
 	-x "$(INSTALL_DATA)"
+
 install_theme_icons_exec = \
 	$(ICON_THEME_INSTALLER) \
 	-t $(theme) \
@@ -122,20 +129,21 @@ install-data-local:
 
 install-data-hook:
 	@echo "Running install-data-hook for gEDA-AI desktop database (gschem/data/Makefile.am)"
-	$(SHELL) $(top_srcdir)/admin/geda-update-databases.sh desktop "$(DESTDIR)$(gedaaidesktopdir)"
-	@echo "gEDA-AI desktop database update script called for $(DESTDIR)$(gedaaidesktopdir)"
+	$(SHELL) $(top_srcdir)/admin/geda-update-databases.sh desktop "$(DESTDIR)$(desktopdir)"
+	@echo "gEDA-AI desktop database update script called for $(DESTDIR)$(desktopdir)"
 
 uninstall-hook:
 # The uninstall part for XDG database might need to be re-evaluated if geda-update-databases.sh
 # is to handle cache removal in the future. For now, this part related to XDG can be removed or commented.
-if ENABLE_UPDATE_XDG_DATABASE
-	$(UPDATE_DESKTOP_DATABASE) "$(DESTDIR)$(desktopdir)"
-endif
+# if ENABLE_UPDATE_XDG_DATABASE # This conditional might be removed if custom script is sole authority
+#	$(UPDATE_DESKTOP_DATABASE) "$(DESTDIR)$(desktopdir)"
+# endif
+	$(SHELL) $(top_srcdir)/admin/geda-update-databases.sh desktop "$(DESTDIR)$(desktopdir)" uninstall
 	$(install_icons_exec) -u $(icons)
 	$(install_theme_icons_exec) -u $(theme_icons)
 
 MAINTAINERCLEANFILES = *.log core FILE *~ Makefile.in
-DISTCLEANFILES = $(dist_gedaaidesktop_DATA)
+DISTCLEANFILES = $(desktop_DATA)
 EXTRA_DIST = $(iconsvg) $(action_icon_files) \
              $(app_icon_files) \
              $(desktop_in_files)
