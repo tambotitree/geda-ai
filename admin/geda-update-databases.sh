@@ -6,7 +6,7 @@ set -eu # Exit immediately if a command exits with a non-zero status or if an un
 # Updates gEDA-AI specific application databases (MIME types, desktop entries)
 # by processing files within the installation prefix and updating an internal cache.
 # This script provides workalike behavior for update-mime-database and
-# update-desktop-database for gEDA-AI's internal needs, facilitating cross-platform:w
+# update-desktop-database for gEDA-AI's internal needs, facilitating cross-platform
 # This script is intended to be OS-agnostic for its core functionality.
 
 usage() {
@@ -19,9 +19,12 @@ usage() {
   echo "  mime      - Update gEDA-AI internal MIME type information cache."
   echo "  desktop   - Update gEDA-AI internal desktop application entry cache."
   echo ""
-    echo "installation prefix (e.g., \$(DESTDIR)\$(prefix)/share/geda-ai/mime for MIME type sources,"
-  echo "or \$(DESTDIR)\$(prefix)/share/geda-ai/applications for desktop entry sources)."
-  echo "or \$(DESTDIR)\$(prefix)/share/geda-ai/applications for desktop entries)."
+  echo "TARGET_DIR is the gEDA-AI specific data directory for the given TYPE."
+  echo "           It is expected to be a path like '\$(datadir)/geda-ai/mime'"
+  echo "           (for MIME types) or '\$(datadir)/geda-ai/applications'"
+  echo "           (for desktop entries)."
+  echo "           For 'mime', TARGET_DIR should contain a 'packages' subdirectory with XML source files."
+  echo "           For 'desktop', TARGET_DIR should directly contain .desktop source files."
   exit 1
 }
 
@@ -35,7 +38,7 @@ if [ $# -ne 2 ]; then
 fi
 
 TYPE="$1"
-RAW_TARGET_DIR="$2" # e.g., $(DESTDIR)$(prefix)/share/geda-ai/mime or $(DESTDIR)$(prefix)/share/geda-ai/applications
+RAW_TARGET_DIR="$2" # e.g., $(DESTDIR)$(prefix)/share/geda/mime or $(DESTDIR)$(prefix)/share/geda-ai/applications
 
 echo "gEDA custom database update script called:"
 echo "Type: ${TYPE}"
@@ -45,14 +48,15 @@ echo "Raw Target Directory (from Makefile): ${RAW_TARGET_DIR}"
 # OS_TYPE=$(uname) # Currently unused, can be removed if not needed for future OS-specific logic.
 
 # Determine the effective gEDA-AI share directory and internal database directory.
-# RAW_TARGET_DIR is e.g. $(DESTDIR)$(prefix)/share/geda-ai/mime or $(DESTDIR)$(prefix)/share/geda-ai/applications
+# RAW_TARGET_DIR is e.g. $(DESTDIR)$(prefix)/share/geda-ai/mime or $(DESTDIR)$(prefix)/share/geda/applications
 # The gEDA-AI application root directory (e.g., $(DESTDIR)$(prefix)/share/geda-ai)
 # is expected to be the parent of RAW_TARGET_DIR.
 GEDA_AI_APP_ROOT=$(dirname "${RAW_TARGET_DIR}")
 
-if [ "$(basename "${GEDA_AI_APP_ROOT}")" != "geda-ai" ]; then
+# set our expectations to be ${GEDADATADIR} . because who knows what kind of legacy troble we could get into?
+if [ "$(basename "${GEDA_AI_APP_ROOT}")" != "geda" ]; then
     echo "Error: RAW_TARGET_DIR '${RAW_TARGET_DIR}' does not appear to be directly under a 'geda-ai' directory." >&2
-    echo "       Expected parent of RAW_TARGET_DIR to be 'geda-ai', but found '$(basename "${GEDA_AI_APP_ROOT}")'." >&2
+    echo "       Expected parent of RAW_TARGET_DIR to be 'geda', but found '$(basename "${GEDA_AI_APP_ROOT}")'." >&2
     echo "       Full path to expected 'geda-ai' parent: ${GEDA_AI_APP_ROOT}" >&2
     exit 1
 fi

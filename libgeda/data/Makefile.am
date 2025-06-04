@@ -1,10 +1,10 @@
 theme=hicolor
-datadir=@datadir@ # Standard data directory, becomes $(prefix)/share
+datadir=@datadir@
 icondir=$(datadir)/icons
 
-mimedir = $(datadir)/mime # This will be $(prefix)/share/mime
-xmldir = $(mimedir)/packages # This will be $(prefix)/share/mime/packages
-themedir=$(icondir)/$(theme) # This will be $(prefix)/share/icons/hicolor
+mimedir = $(datadir)/mime
+xmldir = $(mimedir)/packages
+themedir=$(icondir)/$(theme)
 
 mime_icons = \
 	application-x-geda-gsch2pcb-project \
@@ -30,7 +30,7 @@ theme_icons = \
 
 
 xml_in_files = libgeda.xml.in
-xmldirdir = $(xmldir) # This will be $(prefix)/share/mime/packages
+xmldirdir = $(xmldir)
 # Install $(xml_DATA) into the directory specified by the variable xmldir
 dist_xmldir_DATA = $(xml_in_files:.xml.in=.xml)
 

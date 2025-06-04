@@ -197,6 +197,8 @@ AX_LIBGEDACAIRO([1:0:0])
 #####################################################################
 
 export GEDADATADIR
+GEDAIDATADIR="${GEDADATADIR}
+export GEDAIDATADIR
 export GEDARCDIR
 
 AC_FUNC_LSTAT_FOLLOWS_SLASHED_SYMLINK

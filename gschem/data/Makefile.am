@@ -3,7 +3,7 @@ theme=hicolor
 # --------------------------------------------------------------------
 # These icons get installed to a gEDA-specific icons
 # directory. They're used within gschem.
-datadir=@datadir@ # Standard data directory, becomes $(prefix)/share
+datadir=@datadir@
 icondir=$(datadir)/icons
 iconsvg = gschem-icons.svg
 
@@ -80,10 +80,12 @@ theme_icons = \
 
 # --------------------------------------------------------------------
 # We also install a .desktop file.
-xdgdatadir=@XDGDATADIR@ # This is for standard XDG paths, we'll use pkgdatadir for gEDA-AI specific
+# This is for standard XDG paths, we'll use pkgdatadir for gEDA-AI specific
+xdgdatadir=@XDGDATADIR@
 
 # Install to gEDA-AI specific application directory
-desktopdir = $(datadir)/applications # This will be $(prefix)/share/applications
+# This will be $(prefix)/share/applications
+desktopdir = $(datadir)/applications
 desktop_in_files = geda-gschem.desktop.in
 # Use dist_PRIMARY_DATA for automake to correctly handle installation to PRIMARYdir
 desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)

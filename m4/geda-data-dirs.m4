@@ -28,9 +28,13 @@ AC_DEFUN([AX_DATA_DIRS],
   # FIXME at some point this should become "$datarootdir/geda-gaf" to
   # match the tarball name.-> This is now $PACKAGE_TARNAME
   AC_MSG_CHECKING([where to install gEDA shared data])
-  GEDADATADIR="$datarootdir/$PACKAGE_TARNAME"
+  # Setting GEDADATADIR to datarootdir/$PACKAGE_TARNAME is a bad idea because the tar name mught be data specific.
+  # If we are that deep into specific build just do it a s branch and then merge back in.
+  GEDADATADIR=${datarootdir}/geda
+  GEDAIDATADIR=GEDADATADIR
  
   AC_MSG_RESULT([$GEDADATADIR])
+  AC_MSG_RESULT([$GEDAIDATADIR])
 
   # Check where to install rc files.
   # FIXME at some point the rc directory needs to start *defaulting*
