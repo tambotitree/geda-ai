@@ -43,11 +43,11 @@ class GuileError(Exception):
 
 class Procedure(object):
     ## x.__call__(...) <==> x(...)
-    def __call__(...):
+    def __call__(self, *args, **kwargs):
         pass
 
     ## x.__repr__() <==> repr(x)
-    def __repr__(...):
+    def __repr__(self):
         pass
 
 ## Return the variable bound to a symbol.

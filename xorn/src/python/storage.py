@@ -303,11 +303,11 @@ class Revision:
 
 class Object:
     ## x.__cmp__(y) <==> cmp(x,y)
-    def __cmp__(...):
+    def __cmp__(self, other):
         pass
 
     ## x.__hash__() <==> hash(x)
-    def __hash__(...):
+    def __hash__(self):
         pass
 
 ## The identity of a set of objects across revisions.
@@ -353,7 +353,7 @@ def get_selected_objects(rev, sel):
 #
 # \throw MemoryError if there is not enough memory
 
-def get_added_objects(from, to):
+def get_added_objects(from_rev, to_rev):
     pass
 
 ## Return a list of objects which are in one revision but not in
@@ -364,7 +364,7 @@ def get_added_objects(from, to):
 #
 # \throw MemoryError if there is not enough memory
 
-def get_removed_objects(from, to):
+def get_removed_objects(from_rev, to_rev):
     pass
 
 ## Return a list of objects which exist in two revisions but have
@@ -374,7 +374,7 @@ def get_removed_objects(from, to):
 #
 # \throw MemoryError if there is not enough memory
 
-def get_modified_objects(from, to):
+def get_modified_objects(from_rev, to_rev):
     pass
 
 ## Return an empty selection.
