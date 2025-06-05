@@ -197,7 +197,7 @@ AX_LIBGEDACAIRO([1:0:0])
 #####################################################################
 
 export GEDADATADIR
-GEDAIDATADIR="${GEDADATADIR}
+GEDAIDATADIR="${GEDADATADIR}"
 export GEDAIDATADIR
 export GEDARCDIR
 
@@ -338,8 +338,6 @@ AC_CONFIG_FILES([Makefile
                  libgeda/data/Makefile
                  libgeda/docs/Makefile
                  libgeda/docs/images/Makefile
-                 libgeda/include/Makefile
-                 libgeda/lib/Makefile
                  libgeda/scheme/Makefile
                  libgeda/src/Makefile
                  libgedacairo/Makefile
