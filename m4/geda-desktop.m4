@@ -68,7 +68,7 @@ AC_DEFUN([AX_OPTION_XDG_DATA],
     AS_HELP_STRING([--with-xdgdatadir[[[=DIR]]]],
       [install XDG desktop files in DIR [[DIR=DATAROOTDIR]]]))
 
-  if (test "X$with_xdgdatadir" = "X$yes") || (test "X$with_xdgdatadir" = "X"); then
+  if test "X$with_xdgdatadir" = "Xyes" || test "X$with_xdgdatadir" = "X"; then
     with_xdgdatadir="$datarootdir"
   fi
   AC_MSG_RESULT([$with_xdgdatadir])

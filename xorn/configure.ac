@@ -20,38 +20,40 @@ LT_PREREQ([2.4.6])
 
 AC_INIT([Xorn], [0.0], [bug-xorn@hedmen.org], [], [http://hedmen.org/xorn/])
 AC_CONFIG_SRCDIR([src/cpython/storage/module.c])
-AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_MACRO_DIR([m4], [xorn/m4])
 
-AM_INIT_AUTOMAKE([-Wall -Werror silent-rules subdir-objects])
+AM_INIT_AUTOMAKE([1.16 -Wall -Werror silent-rules subdir-objects])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 LT_INIT([])
 
 AX_PROG_CC_WARNING([cast_function_type], [cast-function-type])
 
 AC_PROG_CXX
-AC_MSG_CHECKING([for python2 >= 2.7])
-AM_PATH_PYTHON([2.7])
-PKG_CHECK_MODULES([PYTHON_PKG], [python-2.7 >= 2.7], [
+AC_MSG_CHECKING([for python3 >= 3.6])
+AM_PATH_PYTHON3([3.6])
+PKG_CHECK_MODULES([PYTHON_PKG], [python-3.6 >= 3.6], [
   PYTHON_CFLAGS="$PYTHON_PKG_CFLAGS"
   PYTHON_LIBS="$PYTHON_PKG_LIBS"
-  AC_MSG_RESULT([yes, via pkg-config (python-2.7)])
+  AC_MSG_RESULT([yes, via pkg-config (python-3.6)])
   have_python=yes
 ], [
-  PKG_CHECK_MODULES([PYTHON_PKG], [python2 >= 2.7], [
+  PKG_CHECK_MODULES([PYTHON_PKG], [python3 >= 3.6], [
     PYTHON_CFLAGS="$PYTHON_PKG_CFLAGS"
     PYTHON_LIBS="$PYTHON_PKG_LIBS"
-    AC_MSG_RESULT([yes, via pkg-config (python2)])
+    AC_MSG_RESULT([yes, via pkg-config (python3)])
     have_python=yes
   ], [
     AC_MSG_RESULT([no, via pkg-config])
     # Fallback to pythonX-config if pkg-config fails
-    AC_PATH_PROG([PYTHON_CONFIG], [python2.7-config python2-config], [no])
+    AC_PATH_PROG([PYTHON_CONFIG], [python3.12-config python3.11-config python3.10-config python3-config], [no])
     if test "x$PYTHON_CONFIG" != "xno"; then
-      AC_MSG_CHECKING([for python2 >= 2.7 via $PYTHON_CONFIG])
+      AC_MSG_CHECKING([for python3 >= 3.6 via $PYTHON_CONFIG])
       PYTHON_CFLAGS=`$PYTHON_CONFIG --includes`
       PYTHON_LIBS=`$PYTHON_CONFIG --libs`
       AC_MSG_RESULT([yes, via $PYTHON_CONFIG])
       have_python=yes
+    else
+      AC_MSG_ERROR([No suitable python3 found (>= 3.6)])
     fi
   ])
 ])
