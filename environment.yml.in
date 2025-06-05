@@ -1,0 +1,14 @@
+name: geda
+channels:
+  - defaults
+dependencies:
+  - python=@PYTHON_VERSION@
+  - guile
+  - gtk2
+  - cairo
+  - pkg-config
+  - gettext
+  - glib
+  - pango
+  - gdk-pixbuf
+  - pip

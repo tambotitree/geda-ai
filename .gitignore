@@ -36,4 +36,5 @@ xorn/tests/*/*.new
 xorn/tests/*/*/*.new
 xorn/tests/netlist/devfiles/*.txt
 xorn/tests/netlist/devfiles/*/*.txt
-
+requirements.txt
+DISTCLEANFILES = environment.yml

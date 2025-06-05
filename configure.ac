@@ -6,6 +6,9 @@ AC_INIT([geda-ai], [1.0.0], [https://github.com/tambotitree/geda-ai/issues], [ge
 AC_USE_SYSTEM_EXTENSIONS
 AC_CONFIG_AUX_DIR([build-tools]) # Tell automake where helper scripts are
 AM_INIT_AUTOMAKE([foreign -Wall -Werror subdir-objects])
+AC_SUBST([PYTHON_VERSION], [3.9])
+AC_CONFIG_FILES([environment.yml])
+GEDA_PYTHON_SETUP
 
 
 AC_CONFIG_MACRO_DIRS([m4 xorn/m4]) # Ensure m4 directory is listed
@@ -261,6 +264,7 @@ if test "x$enable_kde_desktop_data" = xyes; then
 fi
 AM_CONDITIONAL(ENABLE_KDE_DESKTOP_DATA, test "x$enable_kde_desktop_data" = xyes)
 
+AX_CREATE_CONDA_ENVIRONMENT_YML
 
 # --- Configuration Files and Output (MUST BE AT THE END) ---
 AC_CONFIG_FILES([Makefile
