@@ -22,7 +22,7 @@ DISTCHECK_CONFIGURE_FLAGS = \
 	GROFF="$(false)" \
 	--disable-update-xdg-database
 
-EXTRA_DIST = autogen.sh version.h version.h.in HACKING \
+EXTRA_DIST += autogen.sh version.h version.h.in HACKING \
 	COPYING.LGPL
 
 

@@ -18,6 +18,19 @@
 AC_PREREQ([2.69])
 LT_PREREQ([2.4.6])
 
+# We require a python environment for xorn. We do not just run with the system python. Period.
+# Please take your complaints to your local pastor.
+AC_MSG_CHECKING([if running inside a conda environment])
+if test -n "$CONDA_PREFIX"; then
+  AC_MSG_RESULT([yes ($CONDA_PREFIX)])
+  PKG_CONFIG_PATH="$CONDA_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH"
+  export PKG_CONFIG_PATH
+  AC_MSG_NOTICE([Updated PKG_CONFIG_PATH: $PKG_CONFIG_PATH])
+else
+  AC_MSG_RESULT([no])
+  AC_MSG_WARN([Not running inside conda. Recommend activating a conda env with python >= 3.6])
+fi
+
 AC_INIT([Xorn], [0.0], [bug-xorn@hedmen.org], [], [http://hedmen.org/xorn/])
 AC_CONFIG_SRCDIR([src/cpython/storage/module.c])
 AC_CONFIG_MACRO_DIR([m4], [xorn/m4])
@@ -30,7 +43,9 @@ AX_PROG_CC_WARNING([cast_function_type], [cast-function-type])
 
 AC_PROG_CXX
 AC_MSG_CHECKING([for python3 >= 3.6])
-AM_PATH_PYTHON3([3.6])
+PYTHON=/opt/homebrew/Caskroom/miniconda/base/envs/tmpPy3/bin/python
+m4_define([_AM_PYTHON_INTERPRETER], [/opt/homebrew/Caskroom/miniconda/base/envs/tmpPy3/bin/python])
+AM_PATH_PYTHON([3.6])
 PKG_CHECK_MODULES([PYTHON_PKG], [python-3.6 >= 3.6], [
   PYTHON_CFLAGS="$PYTHON_PKG_CFLAGS"
   PYTHON_LIBS="$PYTHON_PKG_LIBS"

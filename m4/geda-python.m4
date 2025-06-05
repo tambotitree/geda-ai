@@ -10,6 +10,27 @@ AC_DEFUN([GEDA_PYTHON_SETUP], [
   AC_MSG_CHECKING([Python version])
   python_ver="`$PYTHON -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")' 2>/dev/null || echo no`"
   if test "$python_ver" = "no"; then
+    AC_MSG_NOTICE([
+=========================================================
+ 💥 Python3 >= 3.6 not found via pkg-config or pythonX-config
+---------------------------------------------------------
+ 🤔 Are you running inside a conda environment?
+
+    Current CONDA_PREFIX: ${CONDA_PREFIX:-not set}
+
+    If not set, activate your conda environment:
+      conda create -n geda-ai python=3.9
+      conda activate geda-ai
+      pip install -r requirements.txt
+
+    Then re-run:
+      ./configure --prefix=$HOME/geda
+
+ 🐍 A python with headers and .pc files is required.
+
+ 😤 You chose... system Python? That was unwise.
+=========================================================
+    ])
     AC_MSG_ERROR([no usable Python interpreter found])
   fi
   AC_MSG_RESULT([$python_ver])
