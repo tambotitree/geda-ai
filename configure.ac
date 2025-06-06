@@ -11,6 +11,14 @@ AC_CONFIG_FILES([environment.yml])
 AX_GEDA_PYTHON_ENVIRONMENT_CHECK
 GEDA_PYTHON_SETUP
 
+AC_MSG_CHECKING([for reproducible build date])
+if git describe --tags >/dev/null 2>&1; then
+  build_date=`git log -1 --format=%cd --date=format:"%B %d, %Y"`
+else
+  build_date="June 4, 2025"
+fi
+AC_MSG_RESULT([$build_date])
+AC_SUBST([BUILD_DATE], [$build_date])
 
 AC_CONFIG_MACRO_DIRS([m4 xorn/m4]) # Ensure m4 directory is listed
 AC_CONFIG_HEADERS([config.h version.h]) # Ensure version.h is listed for generation
@@ -340,6 +348,8 @@ AC_CONFIG_FILES([Makefile
                  gsymcheck/tests/Makefile
                  libgeda/Makefile
                  libgeda/libgeda.pc
+                 libgeda/include/Makefile
+                 libgeda/lib/Makefile
                  libgeda/data/Makefile
                  libgeda/docs/Makefile
                  libgeda/docs/images/Makefile

@@ -716,6 +716,7 @@ snap -----------------------------------
 
 	/* Type attribute cache version tag. Added in version 2.6 */
 	0,				/* unsigned int tp_version_tag */
+	0,			/* Py_ssize_t tp_vectorcall_offset */
 };
 end_divert
 ')

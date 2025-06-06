@@ -1,6 +1,6 @@
 /* Copyright (C) 2013-2020 Roland Lutz
 
-   AUTOMATICALLY GENERATED FROM data_arc.m4 -- DO NOT EDIT
+   AUTOMATICALLY GENERATED FROM  -- DO NOT EDIT
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -267,4 +267,7 @@ PyTypeObject ArcType = {
 
 	/* Type attribute cache version tag. Added in version 2.6 */
 	0,				/* unsigned int tp_version_tag */
+#if PY_VERSION_HEX >= 0x03080000
+	0,			/* Py_ssize_t tp_vectorcall_offset */
+#endif
 };
