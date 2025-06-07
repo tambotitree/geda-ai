@@ -15,103 +15,59 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+# Process this file with autoconf to produce a configure script.
+
 AC_PREREQ([2.69])
-LT_PREREQ([2.4.6])
+AC_INIT([xorn], [1.0.0], [https://github.com/tambotitree/geda-ai/issues])
+AM_INIT_AUTOMAKE([foreign subdir-objects -Wall])
+AC_CONFIG_MACRO_DIR([m4])
 
-# We require a python environment for xorn. We do not just run with the system python. Period.
-# Please take your complaints to your local pastor.
-AC_MSG_CHECKING([if running inside a conda environment])
-if test -n "$CONDA_PREFIX"; then
-  AC_MSG_RESULT([yes ($CONDA_PREFIX)])
-  PKG_CONFIG_PATH="$CONDA_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH"
-  export PKG_CONFIG_PATH
-  AC_MSG_NOTICE([Updated PKG_CONFIG_PATH: $PKG_CONFIG_PATH])
-else
-  AC_MSG_RESULT([no])
-  AC_MSG_WARN([Not running inside conda. Recommend activating a conda env with python >= 3.6])
-fi
-
-AC_INIT([Xorn], [0.0], [bug-xorn@hedmen.org], [], [http://hedmen.org/xorn/])
-AC_CONFIG_SRCDIR([src/cpython/storage/module.c])
-AC_CONFIG_MACRO_DIR([m4], [xorn/m4])
-
-AM_INIT_AUTOMAKE([1.16 -Wall -Werror silent-rules subdir-objects])
-m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
-LT_INIT([])
-
-AX_PROG_CC_WARNING([cast_function_type], [cast-function-type])
-
-AC_PROG_CXX
-AC_MSG_CHECKING([for python3 >= 3.6])
-PYTHON=/opt/homebrew/Caskroom/miniconda/base/envs/tmpPy3/bin/python
-m4_define([_AM_PYTHON_INTERPRETER], [/opt/homebrew/Caskroom/miniconda/base/envs/tmpPy3/bin/python])
+# Required for automake Python support (must define PYTHON, etc.)
 AM_PATH_PYTHON([3.6])
-PKG_CHECK_MODULES([PYTHON_PKG], [python-3.6 >= 3.6], [
-  PYTHON_CFLAGS="$PYTHON_PKG_CFLAGS"
-  PYTHON_LIBS="$PYTHON_PKG_LIBS"
-  AC_MSG_RESULT([yes, via pkg-config (python-3.6)])
-  have_python=yes
-], [
-  PKG_CHECK_MODULES([PYTHON_PKG], [python3 >= 3.6], [
-    PYTHON_CFLAGS="$PYTHON_PKG_CFLAGS"
-    PYTHON_LIBS="$PYTHON_PKG_LIBS"
-    AC_MSG_RESULT([yes, via pkg-config (python3)])
-    have_python=yes
-  ], [
-    AC_MSG_RESULT([no, via pkg-config])
-    # Fallback to pythonX-config if pkg-config fails
-    AC_PATH_PROG([PYTHON_CONFIG], [python3.12-config python3.11-config python3.10-config python3-config], [no])
-    if test "x$PYTHON_CONFIG" != "xno"; then
-      AC_MSG_CHECKING([for python3 >= 3.6 via $PYTHON_CONFIG])
-      PYTHON_CFLAGS=`$PYTHON_CONFIG --includes`
-      PYTHON_LIBS=`$PYTHON_CONFIG --libs`
-      AC_MSG_RESULT([yes, via $PYTHON_CONFIG])
-      have_python=yes
-    else
-      AC_MSG_ERROR([No suitable python3 found (>= 3.6)])
-    fi
-  ])
-])
 
-if test "x$have_python" != "xyes"; then
-  AC_MSG_ERROR([
-Python 2.7 development files were not found.
-
-Tried pkg-config for 'python-2.7' and 'python2', and also searched for
-'python2.7-config' or 'python2-config' scripts.
-
-Please ensure Python 2.7 development headers and libraries are installed
-and discoverable (e.g., via PKG_CONFIG_PATH or by having pythonX-config
-in your PATH). Alternatively, set PYTHON_CFLAGS and PYTHON_LIBS manually.
-])
-fi
-
+# gEDA Python environment
+m4_include([../m4/geda-python.m4])
+GEDA_PYTHON_SETUP
 AC_SUBST(PYTHON_CFLAGS)
 AC_SUBST(PYTHON_LIBS)
+AC_ARG_VAR([PYTHON_CFLAGS], [C compiler flags for Python])
+AC_ARG_VAR([PYTHON_LIBS], [linker flags for Python])
+
+AC_CONFIG_SRCDIR([src/backend/gnet_geda.py])
+AC_CONFIG_HEADERS([config.h])
+
+# Required compilers and tools
+AC_PROG_CC
+AC_PROG_CXX
+AM_PROG_AR
+LT_INIT
+
+# Required for building shared libraries with libtool and Python modules
+PKG_PROG_PKG_CONFIG
 
 # Check for Guile for xorn (trying 3.0 then 2.0)
 AC_MSG_CHECKING([for Guile for xorn (trying 3.0 then 2.0)])
 _found_guile_for_xorn=no
-PKG_CHECK_MODULES([XORN_GUILE_CHECK], [guile-3.0 >= 2.2], # Use a reasonable minimum for Guile 3
+PKG_CHECK_MODULES([XORN_GUILE_CHECK], [guile-3.0 >= 2.2],
     [
         _found_guile_for_xorn=yes
         GUILE_CFLAGS="$XORN_GUILE_CHECK_CFLAGS"
         GUILE_LIBS="$XORN_GUILE_CHECK_LIBS"
-        GUILE_EFFECTIVE_VERSION="3.0" # Or extract from pkg-config if needed
+        GUILE_EFFECTIVE_VERSION="3.0"
         GUILE_PKG_NAME="guile-3.0"
         AC_MSG_RESULT([found Guile 3.0])
     ],
-    [ # If Guile 3.0 not found, try Guile 2.0
+    [
         PKG_CHECK_MODULES([XORN_GUILE_CHECK], [guile-2.0 >= 2.0.10],
             [
                 _found_guile_for_xorn=yes
                 GUILE_CFLAGS="$XORN_GUILE_CHECK_CFLAGS"
                 GUILE_LIBS="$XORN_GUILE_CHECK_LIBS"
-                GUILE_EFFECTIVE_VERSION="2.0" # Or extract from pkg-config if needed
+                GUILE_EFFECTIVE_VERSION="2.0"
                 GUILE_PKG_NAME="guile-2.0"
                 AC_MSG_RESULT([found Guile 2.0])
             ],
-            [:]) # Silent failure if Guile 2.0 also not found
+            [:])
     ])
 
 if test "x$_found_guile_for_xorn" = "xyes"; then
@@ -123,54 +79,50 @@ if test "x$_found_guile_for_xorn" = "xyes"; then
 else
     AC_MSG_RESULT([no suitable Guile found])
     AC_MSG_ERROR([Guile (>= 3.0 or >= 2.0.10) is required for xorn.])
-
 fi
 
-# Check for specific Guile functions needed by xorn's C extensions.
-# We need GUILE_CFLAGS and GUILE_LIBS to be set for this check to link correctly.
+# Check for specific Guile functions
 OLD_CFLAGS="$CFLAGS"
 OLD_LIBS="$LIBS"
 CFLAGS="$CFLAGS $GUILE_CFLAGS"
-LIBS="$LIBS $GUILE_LIBS" # Add scm_procedure_name to the check
+LIBS="$LIBS $GUILE_LIBS"
 AC_CHECK_FUNCS([scm_frame_procedure_name scm_procedure_name])
 CFLAGS="$OLD_CFLAGS"
 LIBS="$OLD_LIBS"
 
+# gettext support
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION([0.19.8])
 
-# use location passed by main configure script
+# Look for shared gEDA data (passed from top-level)
 AC_MSG_CHECKING([where to look for gEDA shared data])
 AC_ARG_VAR([GEDADATADIR], [path to gEDA shared data])
 gedadatadir="$GEDADATADIR"
 AC_MSG_RESULT([$gedadatadir])
 AS_IF([test "x$gedadatadir" = "x"],
-      [AC_MSG_ERROR([No gEDA shared data location given
-
-==> This sometimes happens when the configuration scripts aren't run in
-    the correct order.  Re-running `configure' should solve the issue.
-])])
+      [AC_MSG_ERROR([No gEDA shared data location given. Try re-running configure from top level.])])
 AC_SUBST([gedadatadir])
 
-# use location passed by main configure script
+# Look for gEDA rc files (passed from top-level)
 AC_MSG_CHECKING([where to look for gEDA rc files])
 AC_ARG_VAR([GEDARCDIR], [path to gEDA rc files])
 gedasysconfdir="$GEDARCDIR"
 AC_MSG_RESULT([$gedasysconfdir])
 AC_SUBST([gedasysconfdir])
 
-AC_CONFIG_HEADERS([config.h])
+# Declare output files
 AC_CONFIG_FILES([
-	Makefile
-	po/Makefile.in
-	src/storage/Makefile
-	src/cpython/storage/Makefile
-	src/cpython/guile/Makefile
-	src/python/Makefile
-	src/gaf/Makefile
-	src/command/Makefile
-	src/backend/Makefile
-	tests/Makefile
-	tests/netlist/Makefile
+    Makefile
+    po/Makefile.in
+    src/storage/Makefile
+    src/cpython/storage/Makefile
+    src/cpython/guile/Makefile
+    src/python/Makefile
+    src/gaf/Makefile
+    src/command/Makefile
+    src/backend/Makefile
+    tests/Makefile
+    tests/netlist/Makefile
 ])
+
 AC_OUTPUT

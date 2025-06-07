@@ -31,90 +31,86 @@ PyObject *build_selection(xorn_selection_t sel)
 static void Selection_dealloc(Selection *self)
 {
 	xorn_free_selection(self->sel);
-	self->ob_type->tp_free((PyObject *)self);
+	Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
 PyTypeObject SelectionType = {
-	PyObject_HEAD_INIT(NULL)
-	0,                         /*ob_size*/
+    PyVarObject_HEAD_INIT(NULL, 0)
+    .tp_name = "xorn.storage.Selection",
+    .tp_basicsize = sizeof(Selection),
+    .tp_itemsize = 0,
 
-	/* For printing, in format "<module>.<name>" */
-	"xorn.storage.Selection",	/* const char *tp_name */
+    /* Standard operations */
+    .tp_dealloc = (destructor)Selection_dealloc,
+    .tp_getattr = NULL,
+    .tp_setattr = NULL,
+    .tp_as_async = NULL,           /* Python 3+: replaces tp_compare/cmpfunc */
+    .tp_repr = NULL,
 
-	/* For allocation */
-	sizeof(Selection),		/* Py_ssize_t tp_basicsize */
-	0,				/* Py_ssize_t tp_itemsize */
+    /* Numeric / Sequence / Mapping protocol */
+    .tp_as_number = NULL,
+    .tp_as_sequence = NULL,
+    .tp_as_mapping = NULL,
 
-	/* Methods to implement standard operations */
-	(destructor)Selection_dealloc,	/* destructor tp_dealloc */
-	NULL,				/* printfunc tp_print */
-	NULL,				/* getattrfunc tp_getattr */
-	NULL,				/* setattrfunc tp_setattr */
-	NULL,				/* cmpfunc tp_compare */
-	NULL,				/* reprfunc tp_repr */
+    /* Object methods */
+    .tp_hash = NULL,
+    .tp_call = NULL,
+    .tp_str = NULL,
+    .tp_getattro = NULL,
+    .tp_setattro = NULL,
 
-	/* Method suites for standard classes */
-	NULL,				/* PyNumberMethods *tp_as_number */
-	NULL,				/* PySequenceMethods *tp_as_sequence */
-	NULL,				/* PyMappingMethods *tp_as_mapping */
+    /* Buffer interface */
+    .tp_as_buffer = NULL,
 
-	/* More standard operations (here for binary compatibility) */
-	NULL,				/* hashfunc tp_hash */
-	NULL,				/* ternaryfunc tp_call */
-	NULL,				/* reprfunc tp_str */
-	NULL,				/* getattrofunc tp_getattro */
-	NULL,				/* setattrofunc tp_setattro */
+    /* Type flags */
+    .tp_flags = Py_TPFLAGS_DEFAULT,
 
-	/* Functions to access object as input/output buffer */
-	NULL,				/* PyBufferProcs *tp_as_buffer */
+    /* Docstring */
+    .tp_doc = PyDoc_STR("The identity of a set of objects across revisions."),
 
-	/* Flags to define presence of optional/expanded features */
-	Py_TPFLAGS_DEFAULT,		/* long tp_flags */
+    /* GC and comparison */
+    .tp_traverse = NULL,
+    .tp_clear = NULL,
+    .tp_richcompare = NULL,
+    .tp_weaklistoffset = 0,
 
-	/* Documentation string */
-	PyDoc_STR("The identity of a set of objects across revisions."),
-					/* const char *tp_doc */
+    /* Iterators */
+    .tp_iter = NULL,
+    .tp_iternext = NULL,
 
-	/* Assigned meaning in release 2.0 */
-	/* call function for all accessible objects */
-	NULL,				/* traverseproc tp_traverse */
+    /* Class attributes */
+    .tp_methods = NULL,
+    .tp_members = NULL,
+    .tp_getset = NULL,
+    .tp_base = NULL,
+    .tp_dict = NULL,
+    .tp_descr_get = NULL,
+    .tp_descr_set = NULL,
+    .tp_dictoffset = 0,
+    .tp_init = NULL,
+    .tp_alloc = NULL,
+    .tp_new = NULL,
+    .tp_free = NULL,
+    .tp_is_gc = NULL,
 
-	/* delete references to contained objects */
-	NULL,				/* inquiry tp_clear */
+    /* Python 2.2+ subclassing internals */
+    .tp_bases = NULL,
+    .tp_mro = NULL,
+    .tp_cache = NULL,
+    .tp_subclasses = NULL,
+    .tp_weaklist = NULL,
+    .tp_del = NULL,
 
-	/* Assigned meaning in release 2.1 */
-	/* rich comparisons */
-	NULL,				/* richcmpfunc tp_richcompare */
+    /* Python 2.6+ */
+    .tp_version_tag = 0,
 
-	/* weak reference enabler */
-	0,				/* Py_ssize_t tp_weaklistoffset */
+    /* Python 3.4+ */
+#if PY_VERSION_HEX >= 0x03040000
+    .tp_finalize = NULL,
+#endif
 
-	/* Added in release 2.2 */
-	/* Iterators */
-	NULL,				/* getiterfunc tp_iter */
-	NULL,				/* iternextfunc tp_iternext */
-
-	/* Attribute descriptor and subclassing stuff */
-	NULL,				/* struct PyMethodDef *tp_methods */
-	NULL,				/* struct PyMemberDef *tp_members */
-	NULL,				/* struct PyGetSetDef *tp_getset */
-	NULL,				/* struct _typeobject *tp_base */
-	NULL,				/* PyObject *tp_dict */
-	NULL,				/* descrgetfunc tp_descr_get */
-	NULL,				/* descrsetfunc tp_descr_set */
-	0,				/* Py_ssize_t tp_dictoffset */
-	NULL,				/* initproc tp_init */
-	NULL,				/* allocfunc tp_alloc */
-	NULL,				/* newfunc tp_new */
-	NULL,		/* freefunc tp_free--Low-level free-memory routine */
-	NULL,		/* inquiry tp_is_gc--For PyObject_IS_GC */
-	NULL,				/* PyObject *tp_bases */
-	NULL,		/* PyObject *tp_mro--method resolution order */
-	NULL,				/* PyObject *tp_cache */
-	NULL,				/* PyObject *tp_subclasses */
-	NULL,				/* PyObject *tp_weaklist */
-	NULL,				/* destructor tp_del */
-
-	/* Type attribute cache version tag. Added in version 2.6 */
-	0,				/* unsigned int tp_version_tag */
+    /* Python 3.8+ */
+#if PY_VERSION_HEX >= 0x03080000
+    .tp_vectorcall = NULL,
+#endif
 };

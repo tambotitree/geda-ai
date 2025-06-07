@@ -1,311 +1,269 @@
-John Ryan of Aquana.bio:
+## 1. Forward
 
-I used to love and use this software all the time.  What makes it amazing
-for LLM use is that the files are in ASCII format so the LLM's can generate
-files interactively with the user.  But, let's be honest no one has been
-working on it so I am resurecting the code. All mistakes are mine, but if you
-want to join in on the journey please feel free.  It will always be a gnu-copyright
-and I want to acknowledge the hard work that made this possible so I have included
-the original README below.
+I used to love and use this software all the time. What makes it amazing for LLM use is that the files are in ASCII format so the LLMs can generate files interactively with the user. But, let's be honest — no one has been working on it, so I am resurrecting the code. All mistakes are mine, but if you want to join in on the journey, please feel free. It will always be under GNU copyright, and I want to acknowledge the hard work that made this possible, so I have included the original README below.
 
-==============================================
- 'gschem and Friends' Electronic Design Suite
-==============================================
+— John Ryan of Aquana.bio
 
-Copyright (C) 1998-2020 gEDA Developers
+## 2. Introduction
 
-Introduction
-============
+gEDA-AI is a modern resurrection of the gEDA tool suite, now enhanced to support AI-powered circuit design and analysis workflows. This toolkit empowers users to generate, manipulate, and analyze electronic design files using natural language prompts, LLMs, and a traditional graphical interface.
 
-The GPL Electronic Design Automation (gEDA) project has produced and
-continues working on a full GPL'd suite and toolkit of Electronic
-Design Automation tools. These tools are used for electrical circuit
-design, schematic capture, simulation, prototyping, and
-production. Currently, the gEDA project offers a mature suite of free
-software applications for electronics design, including schematic
-capture, attribute management, bill of materials (BOM) generation,
-netlisting into over 20 netlist formats, analog and digital
-simulation, and printed circuit board (PCB) layout.
+While rooted in the original gEDA/gaf toolchain, gEDA-AI extends its utility by supporting interactive workflows between humans and AI, allowing a user to type:
 
-The gEDA project was started because of the lack of free EDA tools for
-POSIX systems with the primary purpose of advancing the state of free
-hardware or open source hardware. The suite is mainly being developed
-on the GNU/Linux platform with some development effort going into
-making sure the tools run on other platforms as well.
+> "Create a DO sensor with a TPM chip and give me a BOM and .schem file."
 
-The gEDA/gaf suite (this package) provides schematic capture,
-netlisting, bill of materials generation, and many other features.
+...and get a usable design in seconds.
 
-Tools in the gEDA suite
-=======================
+We are improving support for modern systems like macOS and Conda Python environments while preserving GNU/Linux roots. Contributions are welcome!
 
-The major components of the gEDA suite are:
+## 3. Tools in the gEDA-AI Suite
 
-`libgeda'
-  A library of functions for manipulating gEDA schematics and symbols.
+gEDA-AI continues to provide the full gEDA schematic and netlist flow, with several enhancements:
 
-`gschem'
-  A schematic editor.
+### `libgeda`
 
-`gattrib'
-  A spreadsheet-like program for bulk editing of component attributes.
+A library of functions for manipulating gEDA schematics and symbols.
 
-`gnetlist'
-  A highly-flexible, hierarchy-aware utility which parses schematics
-  to generate a number of outputs, including netlists for a wide
-  variety of PCB layout tools.  It can also generate bills of
-  materials and DRC reports for your schematics.
+### `gschem`
 
-`gsch2pcb'
-  A command-line utility for streamlining the workflow where `PCB'
-  <http://pcb.geda-project.org/> and `gschem' are used together.
+A GTK-based schematic editor.
 
-`gsymcheck'
-  A utility for checking for common errors in schematic symbol files.
+### `gattrib`
 
-`gaf'
-  A utility for interactive and batch mode working with gEDA Scheme
-  API, exporting schematics into various formats, and
-  configuring all the programs of the suite.
+A spreadsheet-like bulk attribute editor.
 
-`xorn'
-  A commmand-line utility working with the new Python API which
-  converts gEDA files between formats and extracts embedded symbols
-  and pixmaps from a schematic.
+### `gnetlist`
 
-Installation
-============
+Generates netlists for over 20 PCB and simulation formats.
 
-The information in this section is intended to supplement the
-information in the `INSTALL' file.
+### `gsch2pcb`
 
-Dependencies
-------------
+A CLI tool to streamline workflows from schematic to PCB.
 
-Note: `xxx >= y is used as a shorthand for `xxx, version y or later'.
+### `gsymcheck`
 
-In order to compile gEDA from the distributed source archives, you
-*must* have the following tools installed:
+Validates symbol files.
 
- - A C/C++ compiler and standard library (GCC >= 8.3.0 and glibc >=
-   2.28 are recommended, but clang >= 7.0.1 should work, as well).
+### `gaf`
 
- - The `make' tool (GNU Make >= 4.2.1 is recommended).
-   <https://www.gnu.org/software/make/>
+A command-line wrapper for various gEDA tools and Scheme-based scripting.
 
- - The `pkg-config' tool for managing shared libraries >= 0.29.
-   <https://www.freedesktop.org/wiki/Software/pkg-config/>
+### `xorn`
 
- - GNU `gettext' >= 0.19.8 <https://www.gnu.org/software/gettext/>
+A Python-powered command-line utility for parsing and transforming gEDA schematics.
 
- - The `lex' tool for generating lexical scanners.  The `flex'
-   implementation >= 2.6.4 is recommended.
-   <https://github.com/westes/flex/releases>
+### `gedai/chat_with_geda.py`
 
- - The `awk' tool for data processing.  GNU Awk (`gawk') >= 4.2.1 or
-   mawk >= 1.3.3 are recommended.  <https://www.gnu.org/software/gawk/>
+An AI assistant that integrates natural language input with design generation.
 
-You *must* also have the following libraries installed, including
-their development files:
+## 4. Installing gEDA-AI
 
- - Guile 2.x ("GNU's Ubiquitous Intelligent Language for Extensions")
-   >= 2.0.10 <https://www.gnu.org/software/guile/>
+gEDA-AI is still under active development and is best built from source. However, quick-install options are emerging.
 
- - GLib 2.0 >= 2.41.1 <https://www.gtk.org/>
+### 4.1 macOS with Homebrew
 
- - GTK+ 2.0 (the Gimp Toolkit) >= 2.18.0 <https://www.gtk.org/>
+```bash
+brew install --HEAD tambotitree/geda/geda-ai
+```
 
- - GDK Pixbuf 2.0 >= 2.18.0 <https://www.gtk.org/>
+### 4.2 Ubuntu/Debian with apt-get
 
- - Pango >= 1.23.0 <https://pango.gnome.org/>
+```bash
+sudo apt-get update
+sudo apt-get install geda-ai
+```
 
- - Cairo >= 1.8.0 <https://cairographics.org/>
+### 4.3 Linux (Other Distros) with wget
 
- - CPython 2.7 >= 2.7.16 <https://www.python.org/downloads/>
+If you use WSL on Windows, or another Linux distribution:
 
- - libexpat1 >= 2.2.6 <https://libexpat.github.io/>
+```bash
+wget https://github.com/tambotitree/geda-ai/archive/refs/heads/main.zip
+unzip main.zip && cd geda-ai-main
+```
 
- - libpng >= 1.6.36 <http://libpng.org/pub/png/libpng.html>
+You can then follow the build instructions in Section 5.
 
-The following tools and libraries are *highly recommended*:
+### 4.4 Getting Started with AI Commands
 
- - The FAM or Gamin daemon and corresponding `libfam' or `libgamin'
-   client library (Gamin >= 0.1.10 is recommended).  If this is
-   available, gschem will detect if files have been changed on disk by
-   another application.  <https://people.gnome.org/~veillard/gamin/>
+Once installed, you can launch the AI assistant:
 
- - pygtk >= 2.24.0, the Python 2.7 bindings for GTK+.  Without this
-   package, netlisting errors are reported to the terminal where users
-   probably won't see them. <http://www.pygtk.org/>
+```bash
+python gedai/chat_with_geda.py
+```
 
- - GNU `troff' (`groff') >= 1.22.4.  This is package `groff' in Debian;
-   the default `groff' executable provided by the package `groff-base'
-   is lacking HTML support.  <https://www.gnu.org/software/groff/>
+This tool allows you to enter natural-language queries like:
 
- - The freedesktop.org MIME info database >= 1.10
-   <https://freedesktop.org/wiki/Software/shared-mime-info/>
+> "Design a DO sensor with a TMP chip and give me a BOM and schematic."
 
- - The freedesktop.org utilities for manipulating .desktop files >= 0.23
-   <https://www.freedesktop.org/software/desktop-file-utils/>
+and receive AI-generated design files.
 
-The following tools and libraries are optional:
+## 5. Building and Installing gEDA-AI from Source
 
- - The `doxygen' API documentation tool >= 1.8.13.  This is required for
-   building the gEDA developer API documentation, not for the regular
-   user documentation.  <http://www.stack.nl/~dimitri/doxygen/>
+Building gEDA-AI from source gives you full control over its features and ensures compatibility with your platform (macOS, Linux, etc.). This section walks you through acquiring the source, preparing dependencies, and building the tools.
 
- - `Inkscape' >= 0.92.4 or `ImageMagick' >= 6.9.10 for svg to png or
-   pdf conversion.  This is required for building the gEDA developer
-   API documentation, not for the regular user documentation.
-   <https://inkscape.org/>
-   <https://www.imagemagick.org/script/index.php>
+### 5.1 Cloning the Repository
 
- - `Graphviz' >= 2.40.1 for drawing directed graphs.
-   This is required for building the gEDA developer API documentation,
-   not for the regular user documentation.
-   <https://www.graphviz.org/>
+You can obtain the latest source from the `geda-ai` GitHub repository:
 
-Troubleshooting dependencies
-----------------------------
+```bash
+git clone https://github.com/tambotitree/geda-ai.git
+cd geda-ai
+```
 
-  "I've installed the `libfoo' library, but `./configure' isn't
-  picking it up!"
+### 5.2 Setting Up Python Environment
 
-Many modern operating system distributions split a library into two
-packages:
+`geda-ai` depends on Python 3.6 or higher and a few essential libraries. We recommend using a virtual environment via `conda` or `venv` to isolate dependencies:
 
-1. a `libfoo' package, which contains the files necessary to
-   *run* programs which use `libfoo'.
+#### Using Conda
 
-2. a `libfoo-dev' or `libfoo-devel' package, which contains the files
-   necessary to *compile* programs which use `libfoo'.
+```bash
+conda create -n geda-ai-env python=3.12
+conda activate geda-ai-env
+pip install -r requirements.txt  # (if present)
+```
 
-If you're having problems, make sure that you have all of the
-necessary `dev' or `devel' packages installed.
+Ensure the environment's Python is visible to autotools:
 
-Installation from a source archive
-----------------------------------
+```bash
+export PYTHON=$(which python3)
+```
 
-First extract the archive to a sensible place:
+### 5.3 Bootstrapping the Build System
 
-  tar -xzvf gEDA-gaf-<version>.tar.gz && cd gEDA-gaf-<version>
+If you cloned the repo, you'll need to bootstrap the `configure` script before building:
 
-Run the configuration script.  You'll probably want to specify silent
-rules and a custom directory to install gEDA to, for example:
+```bash
+./bootstrap.sh
+```
 
-  ./configure --prefix=$HOME/geda --enable-silent-rules
+This step prepares the `configure` script, macro files, and Makefiles for building on your machine. Once stabilized, this script will be renamed to `autogen.sh`.
 
-You can then compile gEDA:
+### 5.4 Configuring the Build
 
-  make
+To configure the build for a local install in `$HOME/geda`, run:
 
-And install it (if you used a `--prefix' outside your $HOME directory,
-you may need to run this as root):
+```bash
+./configure --prefix=$HOME/geda
+```
 
-  make install
+This will detect all required libraries and generate Makefiles. If a dependency is missing (such as Guile or GTK), the script will report it.
 
-For more information on installing gEDA, see the `INSTALL' document.
+If you’re on macOS and using Homebrew:
 
-Installation from the git repository
-------------------------------------
+```bash
+export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:/opt/homebrew/share/pkgconfig"
+```
 
-gEDA uses the `git' version control system.  If you wish to try out
-the very latest version of gEDA, you will need to install some extra
-tools *in addition to* the ones listed above:
+You may also need:
 
-  - The `git' version control tool. <https://git-scm.com/>
+```bash
+export LDFLAGS="-L/opt/homebrew/lib"
+export CPPFLAGS="-I/opt/homebrew/include"
+```
 
-  - GNU Automake >= 1.16.1 <https://www.gnu.org/software/automake/>
+### 5.5 Building and Installing
 
-  - GNU Autoconf >= 2.69 <https://www.gnu.org/software/autoconf/>
+To compile the suite:
 
-  - GNU Libtool >= 2.4.6 <https://www.gnu.org/software/libtool/>
+```bash
+make -j$(nproc)
+```
 
-  - GNU Texinfo documentation system >= 6.5.0
-    <https://www.gnu.org/software/texinfo/>
+And to install:
 
-    Note that on some distributions the TeX support for Texinfo is
-    packaged separately.
+```bash
+make install
+```
 
-Once you have these installed, you need to clone the gEDA `git'
-repository:
+Add the binaries to your `PATH`:
 
-  git clone git://git.geda-project.org/geda-gaf.git
+```bash
+export PATH="$HOME/geda/bin:$PATH"
+```
 
-To generate the configure script, run:
+Test it by launching:
 
-  ./autogen.sh
+```bash
+gschem
+```
 
-You can then procede to configure and build gEDA as described above.
-For more information on working with the gEDA `git' repository, see
-<http://wiki.geda-project.org/geda:scm>.
+If everything went well, you now have a working installation of gEDA-AI including modernized tools and experimental AI integration!
 
-Building gEDA developer API documentation
-=========================================
+## 6. Using the Tools
 
-Several of the gEDA libraries and applications have doxygen API
-documentation available.  To generate the API documentation from the
-source code, install doxygen (see `Dependencies' above).  Next, add
-`--enable-doxygen' to your configure command line, i.e.:
+Once gEDA-AI is installed, you can begin using the core tools:
 
-  ./configure --enable-doxygen
+### 6.1 Schematic Capture
 
-To compile the documentation (quite a slow process), run:
+Launch the graphical schematic editor:
 
-  make doxygen
+```bash
+gschem
+```
 
-The documentation can then be found in:
+Use the GUI to place symbols, wire components, and annotate your design.
 
-  */docs/html/index.html
+### 6.2 Netlist Generation
 
-The PDF version of the documentation isn't generated by default.
-If you want it, you have to build it explicitly, e.g.:
+Use gnetlist to create a PCB or simulation netlist:
 
-  cd $(srcdir)/libgeda/docs/latex && make
+```bash
+gnetlist -g bom2 -o bom.txt your_design.sch
+```
 
-Getting help
-============
+This generates a bill of materials.
 
-There are several ways to get help with installing and using gEDA:
+### 6.3 Attribute Editing
 
- - The gEDA website <http://www.geda-project.org> has more extensive
-   information on the gEDA tools, and links to some successful
-   projects which use gEDA.
+Bulk-edit attributes across your design:
 
- - The gEDA documentation wiki contains a large amount of helpful
-   information.  A static copy is included with this distribution; see
-   the `docs/wiki/index.html' file.  The wiki is accessible online at
-   <http://wiki.geda-project.org/>.
+```bash
+gattrib your_design.sch
+```
 
- - If the resources above didn't help you resolve your problem, or you
-   are having a *design* problem that you want to get help with,
-   consider subscribing to and posting your question to the
-   `geda-user' mailing list.
-   <http://wiki.geda-project.org/geda:mailinglists>
+### 6.4 Running the AI Assistant
 
- - Alternatively, you can add your question to the gEDA Answers page
-   on Launchpad. <https://answers.launchpad.net/geda>
+Generate new circuits using:
 
- - If you have discovered a bug, have a feature request, or have
-   written a patch to gEDA, please create an item on the gEDA Bugs
-   page on Launchpad. <https://bugs.launchpad.net/geda>
+```bash
+python gedai/chat_with_geda.py
+```
 
-License
-=======
+### 6.5 Converting and Extracting
 
-gEDA/gaf (this package) is freely distributable under the GNU Public
-License (GPL) version 2.0 or (at your option) any later version.  See
-the `COPYING' file for the full text of the license.
+Use `xorn` for command-line transformations:
 
-The programs and associated files are:
+```bash
+xorn your_design.sch --output-format=svg
+```
 
-  Copyright (C) 1998-2013 by Ales Hvezda and the respective original
-  authors.
+## 7. Extending and Contributing
 
-See the `AUTHORS' file for a more extensive list of contributors to
-gEDA.
+We welcome contributors of all kinds:
 
-..
-   Local Variables:
-   mode: text
-   End:
+* Help modernize the codebase (Python 3, Guile 3, GTK 3/4)
+* Write new macros for autotools
+* Improve documentation or translations
+* Add new AI templates and prompts
+
+To contribute:
+
+1. Fork the repo on GitHub
+2. Create a feature branch
+3. Submit a pull request
+
+See `CONTRIBUTING.md` for details.
+
+## 8. Developer Internals and Architecture
+
+gEDA-AI is divided into several interlocking modules:
+
+* `src/`: Core C and Scheme source code for traditional tools
+* `xorn/`: Python-based schematic interpreter
+* `gedai/`: Experimental AI assistant logic
+* `m4/`: Autotools macros including Python environment detection
+
+Build configuration is managed through autotools. Eventually, AI prompts will be managed using a plug-in architecture under `gedai/plugins`.
+
+This section will expand as tools are added and stabilized.

@@ -2,7 +2,7 @@ name: geda
 channels:
   - defaults
 dependencies:
-  - python=3.9
+  - python=3.12
   - guile
   - gtk2
   - cairo

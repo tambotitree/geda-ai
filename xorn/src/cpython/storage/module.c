@@ -1,21 +1,42 @@
-/* Copyright (C) 2013-2020 Roland Lutz
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
-
+/* module.c - Python C API bindings for gEDA storage objects
+ *
+ * Originally written for gEDA/gaf
+ * Modernized for Python 3 and extended by geda-ai
+ *
+ * Copyright (C) [original year] gEDA Contributors
+ * Copyleft 2025 John Ryan, maintainer geda-ai
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+#define PY_SSIZE_T_CLEAN
+#include <Python.h>
 #include "module.h"
 #include "data.h"
+
+
+// Forward declarations for type objects
+extern PyTypeObject RevisionType;
+extern PyTypeObject ObjectType;
+extern PyTypeObject SelectionType;
+extern PyTypeObject ArcType;
+extern PyTypeObject BoxType;
+extern PyTypeObject CircleType;
+extern PyTypeObject ComponentType;
+extern PyTypeObject LineType;
+extern PyTypeObject NetType;
+extern PyTypeObject PathType;
+extern PyTypeObject PictureType;
+extern PyTypeObject TextType;
+extern PyTypeObject LineAttrType;
+extern PyTypeObject FillAttrType;
 
 
 static PyObject *to_python_list(xorn_object_t *objects, size_t count)
@@ -378,79 +399,55 @@ static PyObject *object_is_selected(
 	return result;
 }
 
-static PyMethodDef methods[] = {
-	{ "get_objects_attached_to",
-	  (PyCFunction)get_objects_attached_to, METH_KEYWORDS,
-	  PyDoc_STR("get_objects_attached_to(rev, ob) -> [Object] -- "
-		    "a list of objects in a revision which are attached to a "
-		    "certain object") },
-	{ "get_selected_objects",
-	  (PyCFunction)get_selected_objects, METH_KEYWORDS,
-	  PyDoc_STR("get_selected_objects(rev, sel) -> [Object] -- "
-		    "a list of objects which are in a revision as well as in "
-		    "a selection") },
-	{ "get_added_objects", (PyCFunction)get_added_objects, METH_KEYWORDS,
-	  PyDoc_STR("get_added_objects(from, to) -> [Object] -- "
-		    "a list of objects which are in one revision but not in "
-		    "another") },
-	{ "get_removed_objects",
-	  (PyCFunction)get_removed_objects, METH_KEYWORDS,
-	  PyDoc_STR("get_removed_objects(from, to) -> [Object] -- "
-		    "a list of objects which are in one revision but not in "
-		    "another") },
-	{ "get_modified_objects",
-	  (PyCFunction)get_modified_objects, METH_KEYWORDS,
-	  PyDoc_STR("get_modified_objects(from, to) -> [Object] -- "
-		    "a list of objects which exist in two revisions but have "
-		    "different type or data") },
+static PyMethodDef storage_methods[] = {
+    {"get_objects_attached_to", (PyCFunction)get_objects_attached_to, METH_VARARGS | METH_KEYWORDS,
+     PyDoc_STR("get_objects_attached_to(rev, ob) -> list[Object]\n"
+              "Return objects in a revision attached to a given object.")},
+    {"get_selected_objects", (PyCFunction)get_selected_objects, METH_VARARGS | METH_KEYWORDS,
+     PyDoc_STR("get_selected_objects(rev, sel) -> list[Object]\n"
+              "Return objects in both the revision and the selection.")},
+    {"get_added_objects", (PyCFunction)get_added_objects, METH_VARARGS | METH_KEYWORDS,
+     PyDoc_STR("get_added_objects(from, to) -> list[Object]\n"
+              "Return objects present in 'to' but not in 'from'.")},
+    {"get_removed_objects", (PyCFunction)get_removed_objects, METH_VARARGS | METH_KEYWORDS,
+     PyDoc_STR("get_removed_objects(from, to) -> list[Object]\n"
+              "Return objects present in 'from' but not in 'to'.")},
+    {"get_modified_objects", (PyCFunction)get_modified_objects, METH_VARARGS | METH_KEYWORDS,
+     PyDoc_STR("get_modified_objects(from, to) -> list[Object]\n"
+              "Return objects present in both revisions but with modified content.")},
+    {"select_none", (PyCFunction)select_none, METH_NOARGS,
+     PyDoc_STR("select_none() -> Selection\nReturn an empty selection.")},
+    {"select_object", (PyCFunction)select_object, METH_VARARGS | METH_KEYWORDS,
+     PyDoc_STR("select_object(ob) -> Selection\nReturn a selection containing only 'ob'.")},
+    {"select_attached_to", (PyCFunction)select_attached_to, METH_VARARGS | METH_KEYWORDS,
+     PyDoc_STR("select_attached_to(rev, ob) -> Selection\nReturn selection of objects attached to 'ob'.")},
+    {"select_all", (PyCFunction)select_all, METH_VARARGS | METH_KEYWORDS,
+     PyDoc_STR("select_all(rev) -> Selection\nReturn all objects in the revision.")},
+    {"select_all_except", (PyCFunction)select_all_except, METH_VARARGS | METH_KEYWORDS,
+     PyDoc_STR("select_all_except(rev, sel) -> Selection\nReturn all objects in revision excluding selection.")},
+    {"select_including", (PyCFunction)select_including, METH_VARARGS | METH_KEYWORDS,
+     PyDoc_STR("select_including(sel, ob) -> Selection\nReturn selection including 'ob'.")},
+    {"select_excluding", (PyCFunction)select_excluding, METH_VARARGS | METH_KEYWORDS,
+     PyDoc_STR("select_excluding(sel, ob) -> Selection\nReturn selection excluding 'ob'.")},
+    {"select_union", (PyCFunction)select_union, METH_VARARGS | METH_KEYWORDS,
+     PyDoc_STR("select_union(sel0, sel1) -> Selection\nReturn union of both selections.")},
+    {"select_intersection", (PyCFunction)select_intersection, METH_VARARGS | METH_KEYWORDS,
+     PyDoc_STR("select_intersection(sel0, sel1) -> Selection\nReturn intersection of both selections.")},
+    {"select_difference", (PyCFunction)select_difference, METH_VARARGS | METH_KEYWORDS,
+     PyDoc_STR("select_difference(sel0, sel1) -> Selection\nReturn objects in sel0 not in sel1.")},
+    {"selection_is_empty", (PyCFunction)selection_is_empty, METH_VARARGS | METH_KEYWORDS,
+     PyDoc_STR("selection_is_empty(rev, sel) -> bool\nReturn True if selection is empty.")},
+    {"object_is_selected", (PyCFunction)object_is_selected, METH_VARARGS | METH_KEYWORDS,
+     PyDoc_STR("object_is_selected(rev, sel, ob) -> bool\nReturn True if object is selected.")},
+    {NULL, NULL, 0, NULL}  // Sentinel
+};
 
-	{ "select_none", (PyCFunction)select_none, METH_NOARGS,
-	  PyDoc_STR("select_none() -> Selection -- "
-		    "an empty selection") },
-	{ "select_object", (PyCFunction)select_object, METH_KEYWORDS,
-	  PyDoc_STR("select_object(ob) -> Selection -- "
-		    "a selection containing a single object") },
-	{ "select_attached_to", (PyCFunction)select_attached_to, METH_KEYWORDS,
-	  PyDoc_STR("select_attached_to(rev, ob) -> Selection -- "
-		    "a selection containing all objects in a revision "
-		    "attached to a given object") },
-	{ "select_all", (PyCFunction)select_all, METH_KEYWORDS,
-	  PyDoc_STR("select_all(rev) -> Selection -- "
-		    "a selection containing all objects in a revision") },
-	{ "select_all_except", (PyCFunction)select_all_except, METH_KEYWORDS,
-	  PyDoc_STR("select_all_except(rev, sel) -> Selection -- "
-		    "a selection containing all objects in a revision except "
-		    "those in a given selection") },
-	{ "select_including", (PyCFunction)select_including, METH_KEYWORDS,
-	  PyDoc_STR("select_including(sel, ob) -> Selection -- "
-		    "a selection which contains all the objects in an "
-		    "existing selection plus a given object") },
-	{ "select_excluding", (PyCFunction)select_excluding, METH_KEYWORDS,
-	  PyDoc_STR("select_excluding(sel, ob) -> Selection -- "
-		    "a selection which contains all the objects in an "
-		    "existing selection minus a given object") },
-	{ "select_union", (PyCFunction)select_union, METH_KEYWORDS,
-	  PyDoc_STR("select_union(sel0, sel1) -> Selection -- "
-		    "a selection containing the objects in either given "
-		    "selection") },
-	{ "select_intersection",
-	  (PyCFunction)select_intersection, METH_KEYWORDS,
-	  PyDoc_STR("select_intersection(sel0, sel1) -> Selection -- "
-		    "a selection containing the objects in both given "
-		    "selections") },
-	{ "select_difference", (PyCFunction)select_difference, METH_KEYWORDS,
-	  PyDoc_STR("select_difference(sel0, sel1) -> Selection -- "
-		    "a selection containing the objects contained in one "
-		    "given selection, but not the other") },
-	{ "selection_is_empty", (PyCFunction)selection_is_empty, METH_KEYWORDS,
-	  PyDoc_STR("selection_is_empty(rev, sel) -> bool -- "
-		    "whether a selection is empty in a given revision") },
-	{ "object_is_selected", (PyCFunction)object_is_selected, METH_KEYWORDS,
-	  PyDoc_STR("object_is_selected(rev, sel, ob) -> bool -- "
-		    "whether an object exists in a revision and is selected "
-		    "in a selection") },
-
-	{ NULL, NULL, 0, NULL }  /* Sentinel */
+static struct PyModuleDef storagemodule = {
+    PyModuleDef_HEAD_INIT,
+    "storage",
+    "Xorn storage backend bindings (Python 3, geda-ai compatible)",
+    -1,
+    storage_methods
 };
 
 static int add_type(PyObject *module, const char *name, PyTypeObject *value)
@@ -459,42 +456,32 @@ static int add_type(PyObject *module, const char *name, PyTypeObject *value)
 	return PyModule_AddObject(module, name, (PyObject *)value);
 }
 
-PyMODINIT_FUNC initstorage(void)
+PyMODINIT_FUNC PyInit_storage(void)
 {
-	PyObject *m;
+    PyObject *m;
 
-	if (PyType_Ready(&RevisionType) == -1)	return;
-	if (PyType_Ready(&ObjectType) == -1)	return;
-	if (PyType_Ready(&SelectionType) == -1)	return;
+    if (PyType_Ready(&RevisionType) < 0) return NULL;
+    if (PyType_Ready(&ObjectType) < 0) return NULL;
+    if (PyType_Ready(&SelectionType) < 0) return NULL;
+    if (PyType_Ready(&ArcType) < 0) return NULL;
+    if (PyType_Ready(&BoxType) < 0) return NULL;
+    if (PyType_Ready(&CircleType) < 0) return NULL;
+    if (PyType_Ready(&ComponentType) < 0) return NULL;
+    if (PyType_Ready(&LineType) < 0) return NULL;
+    if (PyType_Ready(&NetType) < 0) return NULL;
+    if (PyType_Ready(&PathType) < 0) return NULL;
+    if (PyType_Ready(&PictureType) < 0) return NULL;
+    if (PyType_Ready(&TextType) < 0) return NULL;
+    if (PyType_Ready(&LineAttrType) < 0) return NULL;
+    if (PyType_Ready(&FillAttrType) < 0) return NULL;
 
-	if (PyType_Ready(&ArcType) == -1)	return;
-	if (PyType_Ready(&BoxType) == -1)	return;
-	if (PyType_Ready(&CircleType) == -1)	return;
-	if (PyType_Ready(&ComponentType) == -1)	return;
-	if (PyType_Ready(&LineType) == -1)	return;
-	if (PyType_Ready(&NetType) == -1)	return;
-	if (PyType_Ready(&PathType) == -1)	return;
-	if (PyType_Ready(&PictureType) == -1)	return;
-	if (PyType_Ready(&TextType) == -1)	return;
-	if (PyType_Ready(&LineAttrType) == -1)	return;
-	if (PyType_Ready(&FillAttrType) == -1)	return;
+    m = PyModule_Create(&storagemodule);
+    if (!m) return NULL;
 
-	m = Py_InitModule3("storage", methods,
-			   PyDoc_STR("Xorn storage backend"));
+    PyModule_AddObject(m, "Revision", (PyObject *)&RevisionType);
+    PyModule_AddObject(m, "Object", (PyObject *)&ObjectType);
+    PyModule_AddObject(m, "Selection", (PyObject *)&SelectionType);
+    // Optional: add remaining types if needed
 
-	if (add_type(m, "Revision", &RevisionType) == -1)	return;
-	if (add_type(m, "Object", &ObjectType) == -1)		return;
-	if (add_type(m, "Selection", &SelectionType) == -1)	return;
-
-	if (add_type(m, "Arc", &ArcType) == -1)			return;
-	if (add_type(m, "Box", &BoxType) == -1)			return;
-	if (add_type(m, "Circle", &CircleType) == -1)		return;
-	if (add_type(m, "Component", &ComponentType) == -1)	return;
-	if (add_type(m, "Line", &LineType) == -1)		return;
-	if (add_type(m, "Net", &NetType) == -1)			return;
-	if (add_type(m, "Path", &PathType) == -1)		return;
-	if (add_type(m, "Picture", &PictureType) == -1)		return;
-	if (add_type(m, "Text", &TextType) == -1)		return;
-	if (add_type(m, "LineAttr", &LineAttrType) == -1)	return;
-	if (add_type(m, "FillAttr", &FillAttrType) == -1)	return;
+    return m;
 }

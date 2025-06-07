@@ -26,7 +26,7 @@ PyObject *scm2py(SCM value)
 		return Py_None;
 	}
 	if (scm_is_exact_integer(value))
-		return PyInt_FromLong(scm_to_long(value));
+		return PyLong_FromLong(scm_to_long(value));
 	if (scm_is_real(value))
 		return PyFloat_FromDouble(scm_to_double(value));
 	if (scm_is_bool(value)) {

@@ -18,6 +18,10 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 backenddir = $(pkglibdir)/backends
+
+AM_CPPFLAGS = @PYTHON_CFLAGS@
+AM_LDFLAGS = @PYTHON_LIBS@
+
 backend_PYTHON = \
 	util_alias.py \
 	util_getopt.py \

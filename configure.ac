@@ -8,7 +8,7 @@ AC_CONFIG_AUX_DIR([build-tools]) # Tell automake where helper scripts are
 AM_INIT_AUTOMAKE([foreign -Wall -Werror subdir-objects])
 AC_SUBST([PYTHON_VERSION], [3.9])
 AC_CONFIG_FILES([environment.yml])
-AX_GEDA_PYTHON_ENVIRONMENT_CHECK
+m4_include([m4/geda-python.m4])
 GEDA_PYTHON_SETUP
 
 AC_MSG_CHECKING([for reproducible build date])

@@ -29,16 +29,39 @@ PyObject *build_object(xorn_object_t ob)
 
 static void Object_dealloc(Object *self)
 {
-	self->ob_type->tp_free((PyObject *)self);
+	Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
-static int Object_compare(Object *obj0, Object *obj1)
+static PyObject *Object_richcompare(PyObject *a, PyObject *b, int op)
 {
-	if (obj0->ob < obj1->ob)
-		return -1;
-	if (obj0->ob > obj1->ob)
-		return 1;
-	return 0;
+    if (!PyObject_TypeCheck(a, &ObjectType) || !PyObject_TypeCheck(b, &ObjectType)) {
+        Py_RETURN_NOTIMPLEMENTED;
+    }
+
+    xorn_object_t ob_a = ((Object *)a)->ob;
+    xorn_object_t ob_b = ((Object *)b)->ob;
+
+    int cmp;
+    if (ob_a < ob_b) cmp = -1;
+    else if (ob_a > ob_b) cmp = 1;
+    else cmp = 0;
+
+    bool result = false;
+    switch (op) {
+        case Py_LT: result = (cmp < 0); break;
+        case Py_LE: result = (cmp <= 0); break;
+        case Py_EQ: result = (cmp == 0); break;
+        case Py_NE: result = (cmp != 0); break;
+        case Py_GT: result = (cmp > 0); break;
+        case Py_GE: result = (cmp >= 0); break;
+        default:
+            Py_RETURN_NOTIMPLEMENTED;
+    }
+
+    if (result)
+        Py_RETURN_TRUE;
+    else
+        Py_RETURN_FALSE;
 }
 
 static long Object_hash(Object *self)
@@ -47,86 +70,12 @@ static long Object_hash(Object *self)
 }
 
 PyTypeObject ObjectType = {
-	PyObject_HEAD_INIT(NULL)
-	0,                         /*ob_size*/
-
-	/* For printing, in format "<module>.<name>" */
-	"xorn.storage.Object",		/* const char *tp_name */
-
-	/* For allocation */
-	sizeof(Object),			/* Py_ssize_t tp_basicsize */
-	0,				/* Py_ssize_t tp_itemsize */
-
-	/* Methods to implement standard operations */
-	(destructor)Object_dealloc,	/* destructor tp_dealloc */
-	NULL,				/* printfunc tp_print */
-	NULL,				/* getattrfunc tp_getattr */
-	NULL,				/* setattrfunc tp_setattr */
-	(cmpfunc)Object_compare,	/* cmpfunc tp_compare */
-	NULL,				/* reprfunc tp_repr */
-
-	/* Method suites for standard classes */
-	NULL,				/* PyNumberMethods *tp_as_number */
-	NULL,				/* PySequenceMethods *tp_as_sequence */
-	NULL,				/* PyMappingMethods *tp_as_mapping */
-
-	/* More standard operations (here for binary compatibility) */
-	(hashfunc)Object_hash,		/* hashfunc tp_hash */
-	NULL,				/* ternaryfunc tp_call */
-	NULL,				/* reprfunc tp_str */
-	NULL,				/* getattrofunc tp_getattro */
-	NULL,				/* setattrofunc tp_setattro */
-
-	/* Functions to access object as input/output buffer */
-	NULL,				/* PyBufferProcs *tp_as_buffer */
-
-	/* Flags to define presence of optional/expanded features */
-	Py_TPFLAGS_DEFAULT,		/* long tp_flags */
-
-	/* Documentation string */
-	PyDoc_STR("The identity of an object across revisions."),
-					/* const char *tp_doc */
-
-	/* Assigned meaning in release 2.0 */
-	/* call function for all accessible objects */
-	NULL,				/* traverseproc tp_traverse */
-
-	/* delete references to contained objects */
-	NULL,				/* inquiry tp_clear */
-
-	/* Assigned meaning in release 2.1 */
-	/* rich comparisons */
-	NULL,				/* richcmpfunc tp_richcompare */
-
-	/* weak reference enabler */
-	0,				/* Py_ssize_t tp_weaklistoffset */
-
-	/* Added in release 2.2 */
-	/* Iterators */
-	NULL,				/* getiterfunc tp_iter */
-	NULL,				/* iternextfunc tp_iternext */
-
-	/* Attribute descriptor and subclassing stuff */
-	NULL,				/* struct PyMethodDef *tp_methods */
-	NULL,				/* struct PyMemberDef *tp_members */
-	NULL,				/* struct PyGetSetDef *tp_getset */
-	NULL,				/* struct _typeobject *tp_base */
-	NULL,				/* PyObject *tp_dict */
-	NULL,				/* descrgetfunc tp_descr_get */
-	NULL,				/* descrsetfunc tp_descr_set */
-	0,				/* Py_ssize_t tp_dictoffset */
-	NULL,				/* initproc tp_init */
-	NULL,				/* allocfunc tp_alloc */
-	NULL,				/* newfunc tp_new */
-	NULL,		/* freefunc tp_free--Low-level free-memory routine */
-	NULL,		/* inquiry tp_is_gc--For PyObject_IS_GC */
-	NULL,				/* PyObject *tp_bases */
-	NULL,		/* PyObject *tp_mro--method resolution order */
-	NULL,				/* PyObject *tp_cache */
-	NULL,				/* PyObject *tp_subclasses */
-	NULL,				/* PyObject *tp_weaklist */
-	NULL,				/* destructor tp_del */
-
-	/* Type attribute cache version tag. Added in version 2.6 */
-	0,				/* unsigned int tp_version_tag */
+    .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
+    .tp_name = "xorn.storage.Object",
+    .tp_basicsize = sizeof(Object),
+    .tp_dealloc = (destructor)Object_dealloc,
+    .tp_hash = (hashfunc)Object_hash,
+    .tp_richcompare = Object_richcompare,
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_doc = "The identity of an object across revisions.",
 };

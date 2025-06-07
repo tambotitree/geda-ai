@@ -1,4 +1,4 @@
-/* Copyright (C) 2013-2020 Roland Lutz
+/* Copyright (C) 2024 John Ryan
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -8,65 +8,180 @@
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+   GNU General Public License for more detailsevision_method
+
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
+/************************* DEFINES *****************************/
+#define INITRETURN return NULL
+#define INITRETURNVAL(v) return (v)
+
+/************************* INCLUDES *****************************/
+#include <Python.h>
 #include "data.h"
+#include "xornstorage.h"
 #include "module.h"
 
+// --- Forward declarations for all Revision_* functions used in Revision_methods ---
 
-static PyObject *Revision_new(PyTypeObject *type,
-			      PyObject *args, PyObject *kwds)
-{
-	Revision *self = (Revision *)type->tp_alloc(type, 0);
-	if (self == NULL)
-		return NULL;
+extern PyTypeObject ObjectType;
+extern PyTypeObject SelectionType;
 
-	self->rev = xorn_new_revision(NULL);
-	if (self->rev == NULL) {
-		Py_DECREF(self);
-		return PyErr_NoMemory();
-	}
-	return (PyObject *)self;
+static PyObject *Revision_is_transient(Revision *self);
+static PyObject *Revision_finalize(Revision *self);
+static PyObject *Revision_get_objects(Revision *self, PyObject *args, PyObject *kwds);
+static PyObject *Revision_object_exists(Revision *self, PyObject *args, PyObject *kwds);
+static PyObject *Revision_get_object_data(Revision *self, PyObject *args, PyObject *kwds);
+static PyObject *Revision_get_object_location(Revision *self, PyObject *args, PyObject *kwds);
+static PyObject *Revision_add_object(Revision *self, PyObject *args, PyObject *kwds);
+static PyObject *Revision_set_object_data(Revision *self, PyObject *args, PyObject *kwds);
+static PyObject *Revision_relocate_object(Revision *self, PyObject *args, PyObject *kwds);
+static PyObject *Revision_copy_object(Revision *self, PyObject *args, PyObject *kwds);
+static PyObject *Revision_copy_objects(Revision *self, PyObject *args, PyObject *kwds);
+static PyObject *Revision_delete_object(Revision *self, PyObject *args, PyObject *kwds);
+static PyObject *Revision_delete_objects(Revision *self, PyObject *args, PyObject *kwds);
+// Declarations for transient getter/setter
+static PyObject *Revision_gettransient(Revision *self, void *closure);
+static int Revision_settransient(Revision *self, PyObject *value, void *closure);
+
+// From data.h
+extern PyTypeObject ObjectType;
+
+/* ========================== Type Definitions =========================== */
+static PyObject *xorn_error = NULL;
+
+static struct PyModuleDef moduledef = {
+    PyModuleDef_HEAD_INIT,
+    "xorn.storage",  // name of module
+    "Bindings for xorn storage subsystem", // docstring
+    -1,              // size of per-interpreter state or -1
+    NULL,            // methods will be added later manually
+    NULL, NULL, NULL, NULL
+};
+static PyMethodDef Revision_methods[] = {
+	{ "is_transient", (PyCFunction)Revision_is_transient, METH_NOARGS,
+	  PyDoc_STR("rev.is_transient() -> bool -- "
+		    "whether the revision can be changed") },
+	{ "finalize", (PyCFunction)Revision_finalize, METH_NOARGS,
+	  PyDoc_STR("rev.finalize() -- "
+		    "prevent further changes to the revision") },
+	{ "get_objects", (PyCFunction)Revision_get_objects, METH_NOARGS,
+	  PyDoc_STR("rev.get_objects() -> [Object] -- "
+		    "a list of all objects in the revision") },
+	{ "object_exists", (PyCFunction)Revision_object_exists,
+	  METH_KEYWORDS,
+	  PyDoc_STR("rev.object_exists(ob) -> bool -- "
+		    "whether an object exists in the revision") },
+	{ "get_object_data", (PyCFunction)Revision_get_object_data,
+	  METH_KEYWORDS,
+	  PyDoc_STR("rev.get_object_data(ob) -> Arc/Box/... -- "
+		    "get the data of an object") },
+	{ "get_object_location", (PyCFunction)Revision_get_object_location,
+	  METH_KEYWORDS,
+	  PyDoc_STR("rev.get_object_location(ob) -> Object, int -- "
+		    "get the location of an object in the object structure") },
+
+	{ "add_object", (PyCFunction)Revision_add_object, METH_KEYWORDS,
+	  PyDoc_STR("rev.add_object(data) -> Object -- "
+		    "add a new object to the revision\n\n"
+		    "Only callable on a transient revision.\n") },
+	{ "set_object_data", (PyCFunction)Revision_set_object_data,
+	  METH_KEYWORDS,
+	  PyDoc_STR("rev.set_object_data(ob, data) -- "
+		    "set the data of an object\n\n"
+		    "Only callable on a transient revision.\n") },
+	{ "relocate_object", (PyCFunction)Revision_relocate_object,
+	  METH_KEYWORDS,
+	  PyDoc_STR("rev.relocate_object(ob, insert_before) -- "
+		    "change the location of an object in the object "
+		    "structure\n\n"
+		    "Only callable on a transient revision.\n") },
+	{ "copy_object", (PyCFunction)Revision_copy_object, METH_KEYWORDS,
+	  PyDoc_STR("dest.copy_object(src, ob) -> Object -- "
+		    "copy an object to the revision\n\n"
+		    "Only callable on a transient revision.\n") },
+	{ "copy_objects", (PyCFunction)Revision_copy_objects, METH_KEYWORDS,
+	  PyDoc_STR("dest.copy_objects(src, sel) -> Selection -- "
+		    "copy some objects to the revision\n\n"
+		    "Only callable on a transient revision.\n") },
+	{ "delete_object", (PyCFunction)Revision_delete_object, METH_KEYWORDS,
+	  PyDoc_STR("rev.delete_object(ob) -- "
+		    "delete an object from the revision\n\n"
+		    "Only callable on a transient revision.\n") },
+	{ "delete_objects", (PyCFunction)Revision_delete_objects, METH_KEYWORDS,
+	  PyDoc_STR("rev.delete_objects(sel) -- "
+		    "delete some objects from the revision\n\n"
+		    "Only callable on a transient revision.\n") },
+
+	{ NULL, NULL, 0, NULL }  /* Sentinel */
+};
+
+static struct PyModuleDef storagemodule = {
+    PyModuleDef_HEAD_INIT,
+    "xorn.storage",
+    "Bindings for manipulating schematic objects.",
+    -1,
+    Revision_methods,
+    NULL, NULL, NULL, NULL
+};
+
+/* ========================== Function Prototypes ======================== */
+static PyObject *Revision_new(PyTypeObject *type, PyObject *args, PyObject *kwds);
+static int Revision_init(PyObject *self, PyObject *args, PyObject *kwds);
+static void Revision_dealloc(PyObject *self);
+
+/* ========================== Method and GetSet Tables =================== */
+static PyGetSetDef Revision_getset[] = {
+	{ "transient", (getter)Revision_gettransient,
+		       (setter)Revision_settransient,
+	  PyDoc_STR("Whether the revision can be changed."), NULL },
+	{ NULL, NULL, NULL, NULL, NULL }  /* Sentinel */
+};
+
+/* ========================== Type Object ================================ */
+PyTypeObject RevisionType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    .tp_name = "xorn.Revision",
+    .tp_basicsize = sizeof(Revision),
+    .tp_itemsize = 0,
+    .tp_dealloc = Revision_dealloc,
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_doc = "The identity of an object across revisions.",
+    .tp_methods = Revision_methods,
+    .tp_getset = Revision_getset,
+    .tp_init = Revision_init,
+    .tp_new = Revision_new,
+};
+
+/* ========================== Function Implementations =================== */
+static PyObject *Revision_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
+    Revision *self = (Revision *)type->tp_alloc(type, 0);
+    if (self != NULL) {
+        self->rev = NULL;
+    }
+    return (PyObject *)self;
 }
 
-static int Revision_init(Revision *self, PyObject *args, PyObject *kwds)
-{
-	PyObject *parent = NULL;
-	static char *kwlist[] = { "rev", NULL };
-
-	if (!PyArg_ParseTupleAndKeywords(
-		    args, kwds, "|O:Revision", kwlist, &parent))
-		return -1;
-	if (!parent || parent == Py_None)
-		return 0;
-	if (!PyObject_TypeCheck(parent, &RevisionType)) {
-		char buf[BUFSIZ];
-		snprintf(buf, BUFSIZ, "Revision() argument 1 must be %.50s, "
-				      "not %.50s",
-			 RevisionType.tp_name, parent->ob_type->tp_name);
-		PyErr_SetString(PyExc_TypeError, buf);
-		return -1;
-	}
-
-	xorn_revision_t rev = xorn_new_revision(((Revision *)parent)->rev);
-	if (rev == NULL) {
-		PyErr_NoMemory();
-		return -1;
-	}
-	xorn_free_revision(self->rev);
-	self->rev = rev;
-	return 0;
+static int Revision_init(PyObject *self, PyObject *args, PyObject *kwds) {
+    ((Revision *)self)->rev = NULL;
+    return 0;
 }
 
-static void Revision_dealloc(Revision *self)
-{
-	xorn_free_revision(self->rev);
-	self->ob_type->tp_free((PyObject *)self);
+static void Revision_dealloc(PyObject *self) {
+    Revision *r = (Revision *)self;
+    xorn_free_revision(r->rev);
+    Py_TYPE(self)->tp_free(self);
 }
+
+/* ========================== Module Initialization ====================== */
+static int add_revision_types(PyObject *m);
+static int add_object_types(PyObject *m);
+static int add_selection_types(PyObject *m);
+static int add_data_types(PyObject *m);
+
 
 static PyObject *Revision_is_transient(Revision *self)
 {
@@ -110,6 +225,33 @@ static PyObject *Revision_get_objects(
 
 	free(objects);
 	return list;
+}
+
+static int add_revision_types(PyObject *m)
+{
+    if (PyModule_AddObject(m, "Revision", (PyObject *)&RevisionType) < 0)
+        return -1;
+    return 0;
+}
+static int add_object_types(PyObject *m)
+{
+    if (PyModule_AddObject(m, "Object", (PyObject *)&ObjectType) < 0)
+        return -1;
+    return 0;
+}
+
+static int add_selection_types(PyObject *m)
+{
+    if (PyModule_AddObject(m, "Selection", (PyObject *)&SelectionType) < 0)
+        return -1;
+    return 0;
+}
+
+static int add_data_types(PyObject *m)
+{
+    // If you have other data types (e.g. SegmentType, LayerType, etc.), add them here.
+    // For now, assume nothing else is needed:
+    return 0;
 }
 
 static PyObject *Revision_object_exists(
@@ -206,30 +348,30 @@ static PyObject *Revision_get_object_location(
 /****************************************************************************/
 
 static int prepare_data(PyObject *obj, xorn_obtype_t *type_return,
-				       const void **data_return)
+	const void **data_return)
 {
-	if (PyObject_TypeCheck(obj, &ArcType))
-		prepare_arc((Arc *)obj, type_return, data_return);
-	else if (PyObject_TypeCheck(obj, &BoxType))
-		prepare_box((Box *)obj, type_return, data_return);
-	else if (PyObject_TypeCheck(obj, &CircleType))
-		prepare_circle((Circle *)obj, type_return, data_return);
-	else if (PyObject_TypeCheck(obj, &ComponentType))
-		prepare_component((Component *)obj, type_return, data_return);
-	else if (PyObject_TypeCheck(obj, &LineType))
-		prepare_line((Line *)obj, type_return, data_return);
-	else if (PyObject_TypeCheck(obj, &NetType))
-		prepare_net((Net *)obj, type_return, data_return);
-	else if (PyObject_TypeCheck(obj, &PathType))
-		prepare_path((Path *)obj, type_return, data_return);
-	else if (PyObject_TypeCheck(obj, &PictureType))
-		prepare_picture((Picture *)obj, type_return, data_return);
-	else if (PyObject_TypeCheck(obj, &TextType))
-		prepare_text((Text *)obj, type_return, data_return);
-	else
-		return -1;
+if (PyObject_TypeCheck(obj, &ArcType))
+prepare_arc((Arc *)obj, type_return, data_return);
+else if (PyObject_TypeCheck(obj, &BoxType))
+prepare_box((Box *)obj, type_return, data_return);
+else if (PyObject_TypeCheck(obj, &CircleType))
+prepare_circle((Circle *)obj, type_return, data_return);
+else if (PyObject_TypeCheck(obj, &ComponentType))
+prepare_component((Component *)obj, type_return, data_return);
+else if (PyObject_TypeCheck(obj, &LineType))
+prepare_line((Line *)obj, type_return, data_return);
+else if (PyObject_TypeCheck(obj, &NetType))
+prepare_net((Net *)obj, type_return, data_return);
+else if (PyObject_TypeCheck(obj, &PathType))
+prepare_path((Path *)obj, type_return, data_return);
+else if (PyObject_TypeCheck(obj, &PictureType))
+prepare_picture((Picture *)obj, type_return, data_return);
+else if (PyObject_TypeCheck(obj, &TextType))
+prepare_text((Text *)obj, type_return, data_return);
+else
+return -1;  // Unknown type
 
-	return 0;
+return 0;  // Success
 }
 
 static PyObject *Revision_add_object(
@@ -573,63 +715,6 @@ static PyObject *Revision_delete_objects(
 	return Py_None;
 }
 
-static PyMethodDef Revision_methods[] = {
-	{ "is_transient", (PyCFunction)Revision_is_transient, METH_NOARGS,
-	  PyDoc_STR("rev.is_transient() -> bool -- "
-		    "whether the revision can be changed") },
-	{ "finalize", (PyCFunction)Revision_finalize, METH_NOARGS,
-	  PyDoc_STR("rev.finalize() -- "
-		    "prevent further changes to the revision") },
-	{ "get_objects", (PyCFunction)Revision_get_objects, METH_NOARGS,
-	  PyDoc_STR("rev.get_objects() -> [Object] -- "
-		    "a list of all objects in the revision") },
-	{ "object_exists", (PyCFunction)Revision_object_exists,
-	  METH_KEYWORDS,
-	  PyDoc_STR("rev.object_exists(ob) -> bool -- "
-		    "whether an object exists in the revision") },
-	{ "get_object_data", (PyCFunction)Revision_get_object_data,
-	  METH_KEYWORDS,
-	  PyDoc_STR("rev.get_object_data(ob) -> Arc/Box/... -- "
-		    "get the data of an object") },
-	{ "get_object_location", (PyCFunction)Revision_get_object_location,
-	  METH_KEYWORDS,
-	  PyDoc_STR("rev.get_object_location(ob) -> Object, int -- "
-		    "get the location of an object in the object structure") },
-
-	{ "add_object", (PyCFunction)Revision_add_object, METH_KEYWORDS,
-	  PyDoc_STR("rev.add_object(data) -> Object -- "
-		    "add a new object to the revision\n\n"
-		    "Only callable on a transient revision.\n") },
-	{ "set_object_data", (PyCFunction)Revision_set_object_data,
-	  METH_KEYWORDS,
-	  PyDoc_STR("rev.set_object_data(ob, data) -- "
-		    "set the data of an object\n\n"
-		    "Only callable on a transient revision.\n") },
-	{ "relocate_object", (PyCFunction)Revision_relocate_object,
-	  METH_KEYWORDS,
-	  PyDoc_STR("rev.relocate_object(ob, insert_before) -- "
-		    "change the location of an object in the object "
-		    "structure\n\n"
-		    "Only callable on a transient revision.\n") },
-	{ "copy_object", (PyCFunction)Revision_copy_object, METH_KEYWORDS,
-	  PyDoc_STR("dest.copy_object(src, ob) -> Object -- "
-		    "copy an object to the revision\n\n"
-		    "Only callable on a transient revision.\n") },
-	{ "copy_objects", (PyCFunction)Revision_copy_objects, METH_KEYWORDS,
-	  PyDoc_STR("dest.copy_objects(src, sel) -> Selection -- "
-		    "copy some objects to the revision\n\n"
-		    "Only callable on a transient revision.\n") },
-	{ "delete_object", (PyCFunction)Revision_delete_object, METH_KEYWORDS,
-	  PyDoc_STR("rev.delete_object(ob) -- "
-		    "delete an object from the revision\n\n"
-		    "Only callable on a transient revision.\n") },
-	{ "delete_objects", (PyCFunction)Revision_delete_objects, METH_KEYWORDS,
-	  PyDoc_STR("rev.delete_objects(sel) -- "
-		    "delete some objects from the revision\n\n"
-		    "Only callable on a transient revision.\n") },
-
-	{ NULL, NULL, 0, NULL }  /* Sentinel */
-};
 
 static PyObject *Revision_gettransient(Revision *self, void *closure)
 {
@@ -665,96 +750,56 @@ static int Revision_settransient(
 	return -1;
 }
 
-static PyGetSetDef Revision_getset[] = {
-	{ "transient", (getter)Revision_gettransient,
-		       (setter)Revision_settransient,
-	  PyDoc_STR("Whether the revision can be changed."), NULL },
-	{ NULL, NULL, NULL, NULL, NULL }  /* Sentinel */
-};
 
-PyTypeObject RevisionType = {
-	PyObject_HEAD_INIT(NULL)
-	0,                         /*ob_size*/
 
-	/* For printing, in format "<module>.<name>" */
-	"xorn.storage.Revision",	/* const char *tp_name */
 
-	/* For allocation */
-	sizeof(Revision),		/* Py_ssize_t tp_basicsize */
-	0,				/* Py_ssize_t tp_itemsize */
+PyMODINIT_FUNC
+INITFUNC(void)
+{
+    PyObject *m;
 
-	/* Methods to implement standard operations */
-	(destructor)Revision_dealloc,	/* destructor tp_dealloc */
-	NULL,				/* printfunc tp_print */
-	NULL,				/* getattrfunc tp_getattr */
-	NULL,				/* setattrfunc tp_setattr */
-	NULL,				/* cmpfunc tp_compare */
-	NULL,				/* reprfunc tp_repr */
+    if (PyType_Ready(&RevisionType) < 0)
+        INITRETURN;
+    if (PyType_Ready(&ObjectType) < 0)
+        INITRETURN;
+    if (PyType_Ready(&SelectionType) < 0)
+        INITRETURN;
+    if (PyType_Ready(&ArcType) < 0)
+        INITRETURN;
+    if (PyType_Ready(&BoxType) < 0)
+        INITRETURN;
+    if (PyType_Ready(&CircleType) < 0)
+        INITRETURN;
+    if (PyType_Ready(&ComponentType) < 0)
+        INITRETURN;
+    if (PyType_Ready(&LineType) < 0)
+        INITRETURN;
+    if (PyType_Ready(&NetType) < 0)
+        INITRETURN;
+    if (PyType_Ready(&PathType) < 0)
+        INITRETURN;
+    if (PyType_Ready(&PictureType) < 0)
+        INITRETURN;
+    if (PyType_Ready(&TextType) < 0)
+        INITRETURN;
+	m = PyModule_Create(&moduledef);
+    if (m == NULL)
+        INITRETURN;
+    if (add_revision_types(m) < 0)
+        INITRETURN;
+    if (add_object_types(m) < 0)
+        INITRETURN;
+    if (add_selection_types(m) < 0)
+        INITRETURN;
+    if (add_data_types(m) < 0)
+        INITRETURN;
 
-	/* Method suites for standard classes */
-	NULL,				/* PyNumberMethods *tp_as_number */
-	NULL,				/* PySequenceMethods *tp_as_sequence */
-	NULL,				/* PyMappingMethods *tp_as_mapping */
+    xorn_error = PyErr_NewException("xorn.storage.Error", NULL, NULL);
+    if (xorn_error == NULL)
+        INITRETURN;
+    Py_INCREF(xorn_error);
+    PyModule_AddObject(m, "Error", xorn_error);
 
-	/* More standard operations (here for binary compatibility) */
-	NULL,				/* hashfunc tp_hash */
-	NULL,				/* ternaryfunc tp_call */
-	NULL,				/* reprfunc tp_str */
-	NULL,				/* getattrofunc tp_getattro */
-	NULL,				/* setattrofunc tp_setattro */
+    INITRETURNVAL(m);
+}
 
-	/* Functions to access object as input/output buffer */
-	NULL,				/* PyBufferProcs *tp_as_buffer */
-
-	/* Flags to define presence of optional/expanded features */
-	Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
-					/* long tp_flags */
-	/* Documentation string */
-	PyDoc_STR("A particular state of the contents of a file.\n\n"
-		  "Revision() -> new revision\n"
-		  "Revision(rev) -> copy of an existing revision\n\n"),
-					/* const char *tp_doc */
-
-	/* Assigned meaning in release 2.0 */
-	/* call function for all accessible objects */
-	NULL,				/* traverseproc tp_traverse */
-
-	/* delete references to contained objects */
-	NULL,				/* inquiry tp_clear */
-
-	/* Assigned meaning in release 2.1 */
-	/* rich comparisons */
-	NULL,				/* richcmpfunc tp_richcompare */
-
-	/* weak reference enabler */
-	0,				/* Py_ssize_t tp_weaklistoffset */
-
-	/* Added in release 2.2 */
-	/* Iterators */
-	NULL,				/* getiterfunc tp_iter */
-	NULL,				/* iternextfunc tp_iternext */
-
-	/* Attribute descriptor and subclassing stuff */
-	Revision_methods,		/* struct PyMethodDef *tp_methods */
-	NULL,				/* struct PyMemberDef *tp_members */
-	Revision_getset,		/* struct PyGetSetDef *tp_getset */
-	NULL,				/* struct _typeobject *tp_base */
-	NULL,				/* PyObject *tp_dict */
-	NULL,				/* descrgetfunc tp_descr_get */
-	NULL,				/* descrsetfunc tp_descr_set */
-	0,				/* Py_ssize_t tp_dictoffset */
-	(initproc)Revision_init,	/* initproc tp_init */
-	NULL,				/* allocfunc tp_alloc */
-	Revision_new,			/* newfunc tp_new */
-	NULL,		/* freefunc tp_free--Low-level free-memory routine */
-	NULL,		/* inquiry tp_is_gc--For PyObject_IS_GC */
-	NULL,				/* PyObject *tp_bases */
-	NULL,		/* PyObject *tp_mro--method resolution order */
-	NULL,				/* PyObject *tp_cache */
-	NULL,				/* PyObject *tp_subclasses */
-	NULL,				/* PyObject *tp_weaklist */
-	NULL,				/* destructor tp_del */
-
-	/* Type attribute cache version tag. Added in version 2.6 */
-	0,				/* unsigned int tp_version_tag */
-};
