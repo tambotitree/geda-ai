@@ -14,7 +14,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import StringIO
+import io
 import xorn.xml_writer
 
 def throws(fun, *args):
@@ -25,26 +25,26 @@ def throws(fun, *args):
 
 assert throws(xorn.xml_writer.valid_name, int()) == TypeError
 assert throws(xorn.xml_writer.valid_name, str()) == TypeError
-assert throws(xorn.xml_writer.valid_name, unicode()) == None
+assert throws(xorn.xml_writer.valid_name, str()) == None
 
-assert xorn.xml_writer.valid_name(u'') == False
-assert xorn.xml_writer.valid_name(u'foo') == True
-assert xorn.xml_writer.valid_name(u'f\xf6\xf6') == True
-assert xorn.xml_writer.valid_name(u'!foo') == False
-assert xorn.xml_writer.valid_name(u'foo!') == False
-assert xorn.xml_writer.valid_name(u'-foo') == False
-assert xorn.xml_writer.valid_name(u'foo-') == True
+assert xorn.xml_writer.valid_name('') == False
+assert xorn.xml_writer.valid_name('foo') == True
+assert xorn.xml_writer.valid_name('f\xf6\xf6') == True
+assert xorn.xml_writer.valid_name('!foo') == False
+assert xorn.xml_writer.valid_name('foo!') == False
+assert xorn.xml_writer.valid_name('-foo') == False
+assert xorn.xml_writer.valid_name('foo-') == True
 
 assert throws(xorn.xml_writer.escape, int()) == TypeError
 assert throws(xorn.xml_writer.escape, str()) == TypeError
-assert throws(xorn.xml_writer.escape, unicode()) == None
+assert throws(xorn.xml_writer.escape, str()) == None
 
-assert xorn.xml_writer.escape(u'"&<>foo') == u'&quot;&amp;&lt;&gt;foo'
+assert xorn.xml_writer.escape('"&<>foo') == '&quot;&amp;&lt;&gt;foo'
 
-FIRST_LINE = u'<?xml version="1.0" encoding="UTF-8"?>'
+FIRST_LINE = '<?xml version="1.0" encoding="UTF-8"?>'
 
 def perform_test(*commands):
-    f = StringIO.StringIO()
+    f = io.StringIO()
     w = xorn.xml_writer.XMLWriter(f.write)
 
     for command in commands:
@@ -87,7 +87,7 @@ assert throws(perform_test,
 ) == ValueError
 
 # multiple root elements
-f = StringIO.StringIO()
+f = io.StringIO()
 w = xorn.xml_writer.XMLWriter(f.write)
 w.start_element('root')
 w.end_element()
@@ -360,7 +360,7 @@ assert throws(perform_test,
 ) == ValueError
 
 # character data after root element
-f = StringIO.StringIO()
+f = io.StringIO()
 w = xorn.xml_writer.XMLWriter(f.write)
 w.start_element('root')
 w.end_element()
@@ -397,7 +397,7 @@ assert throws(perform_test,
 ) == ValueError
 
 # CDATA section after root element
-f = StringIO.StringIO()
+f = io.StringIO()
 w = xorn.xml_writer.XMLWriter(f.write)
 w.start_element('root')
 w.end_element()

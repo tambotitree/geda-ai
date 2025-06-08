@@ -21,7 +21,8 @@
 # Instead of doing some magic with the package's load path, just do
 # the easy thing and install everything to `pkgpyexecdir'.
 
-nobase_pkgpyexec_PYTHON = \
+python3dir = $(pkgpythondir)
+python3_PYTHON = \
 	__init__.py \
 	base64.py \
 	command.py \
@@ -29,9 +30,10 @@ nobase_pkgpyexec_PYTHON = \
 	fixednum.py \
 	hybridnum.py \
 	proxy.py \
+	storage.py \
 	xml_writer.py
 
-noinst_PYTHON = guile.py storage.py
+noinst_PYTHON = guile.py
 
 nodist_pkgpyexec_PYTHON = config.py
 EXTRA_DIST = config.py.in

@@ -20,14 +20,14 @@
 ## \namespace gaf.netlist.reportgui
 ## Report errors, warnings, and exceptions in a GUI dialog.
 
-import collections, cStringIO, gtk, pango, re, traceback
+import collections, io, gtk, pango, re, traceback
 from gettext import gettext as _
 import xorn.config
 
 COLUMN_TYPE, \
 COLUMN_FILENAME, \
 COLUMN_WHAT, \
-COLUMN_MESSAGE = xrange(4)
+COLUMN_MESSAGE = range(4)
 
 Issue = collections.namedtuple('Issue', [
     'stock_id', 'filename', 'what', 'message'])
@@ -211,7 +211,7 @@ def report_messages(exit_code, log):
 
 
 def report_crash():
-    s = cStringIO.StringIO()
+    s = io.StringIO()
     traceback.print_exc(file = s)
 
     text_view = gtk.TextView()

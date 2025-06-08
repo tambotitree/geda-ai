@@ -14,7 +14,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import StringIO
+import io
 import xorn.base64
 
 def throws(fun, *args, **kwds):
@@ -38,7 +38,7 @@ lines = [''.join([
     '/akbCxv9GPu7xUWzZlQ8K56b/123ZDyS8tuMsAKW\n',
     'P1HQNW1wLLmMC4nGu835HcYnM1jVhDIR5dPSdzYX\n',
     'w6Ooyw4WTR3JImHtsLK7/tcDrgOoNxHaw1cR8TUB\n'
-][:i]) for i in xrange(5)]
+][:i]) for i in range(5)]
 
 expected = [
     lines[0],
@@ -164,25 +164,25 @@ expected = [
     lines[4]
 ]
 
-for count in xrange(len(expected)):
+for count in range(len(expected)):
     # encode
 
-    s = StringIO.StringIO()
+    s = io.StringIO()
     xorn.base64.encode(s, data[:count], columns = 40)
     assert s.getvalue() == expected[count]
 
-    s = StringIO.StringIO()
+    s = io.StringIO()
     xorn.base64.encode(s, data[:count], columns = None)
     if count == 0:
         assert s.getvalue() == ''
     else:
         assert s.getvalue() == expected[count].replace('\n', '') + '\n'
 
-    s = StringIO.StringIO()
+    s = io.StringIO()
     xorn.base64.encode(s, data[:count], columns = 40, delim = '@@@')
     assert s.getvalue() == expected[count] + '@@@\n'
 
-    s = StringIO.StringIO()
+    s = io.StringIO()
     xorn.base64.encode(s, data[:count], columns = None, delim = '@@@')
     if count == 0:
         assert s.getvalue() == '@@@\n'
@@ -191,18 +191,18 @@ for count in xrange(len(expected)):
 
     # decode
 
-    s = StringIO.StringIO(expected[count])
+    s = io.StringIO(expected[count])
     assert xorn.base64.decode(s) == data[:count]
-    assert throws(s.next) == StopIteration
+    assert throws(s.__next__) == StopIteration
 
-    s = StringIO.StringIO(expected[count])
+    s = io.StringIO(expected[count])
     assert throws(xorn.base64.decode, s, delim = '@@@') \
         == xorn.base64.DecodingError
 
-    s = StringIO.StringIO(expected[count] + '@@@\n%%%\n')
+    s = io.StringIO(expected[count] + '@@@\n%%%\n')
     assert xorn.base64.decode(s, delim = '@@@') == data[:count]
-    assert s.next() == '%%%\n'
-    assert throws(s.next) == StopIteration
+    assert next(s) == '%%%\n'
+    assert throws(s.__next__) == StopIteration
 
-    s = StringIO.StringIO(expected[count] + '=')
+    s = io.StringIO(expected[count] + '=')
     assert throws(xorn.base64.decode, s) == xorn.base64.DecodingError

@@ -47,9 +47,9 @@ class Net:
 
     def graphical_objs_with_attrib_get_attrib(
             self, has_attrib_name, has_attrib_value, wanted_attrib):
-        if not isinstance(has_attrib_name, basestring) or \
-           not isinstance(has_attrib_value, basestring) or \
-           not isinstance(wanted_attrib, basestring):
+        if not isinstance(has_attrib_name, str) or \
+           not isinstance(has_attrib_value, str) or \
+           not isinstance(wanted_attrib, str):
             raise ValueError
 
         # walk through the list of components, and through the list
@@ -112,7 +112,7 @@ def postproc_instances(netlist, flat_namespace, prefer_netname_attribute,
                     [(name, False) for name in local_net.blueprint.names] + \
                     [(net_name, True) for net_name in
                          local_net.blueprint.names_from_net_attribute]:
-                if not isinstance(net_name, basestring):
+                if not isinstance(net_name, str):
                     raise ValueError
 
                 if flat_namespace[from_netattrib]:

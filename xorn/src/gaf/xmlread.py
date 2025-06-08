@@ -17,7 +17,7 @@
 ## \namespace gaf.xmlread
 ## Reading gEDA schematic/symbol files in XML format.
 
-import cStringIO, xml.parsers.expat
+import io, xml.parsers.expat
 from gettext import gettext as _
 import xorn.base64
 import xorn.fixednum
@@ -383,7 +383,7 @@ class PixmapHandler(NullHandler):
         self.log = log
         self.pixmap = pixmap
         self.just_verify = just_verify
-        self.f = cStringIO.StringIO()
+        self.f = io.StringIO()
 
     def character_data(self, data):
         self.f.write(data)

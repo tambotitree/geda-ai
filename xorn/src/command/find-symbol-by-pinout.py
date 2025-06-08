@@ -62,7 +62,7 @@ def find_symbols(root, pinout):
                     ok = False
                     break
             if ok:
-                print path
+                print(path)
 
 def main():
     try:

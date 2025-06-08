@@ -31,7 +31,7 @@ import collections
 import xorn.proxy
 import xorn.storage
 
-CONN_ENDPOINT, CONN_MIDPOINT = xrange(2)
+CONN_ENDPOINT, CONN_MIDPOINT = range(2)
 
 ## A single connection between two objects.
 #
@@ -50,7 +50,8 @@ Connection = collections.namedtuple('Connection', [
 # \throws ValueError if \c path contains an object which is not a component
 # \throws ValueError if \c ob is not a net
 
-def endpoints((path, ob)):
+def endpoints(xxx_todo_changeme2):
+    (path, ob) = xxx_todo_changeme2
     data = ob.data()
     if not isinstance(data, xorn.storage.Net):
         raise ValueError
@@ -133,9 +134,10 @@ def all_net_instances_in_object(ob, path = ()):
 # instance <tt>(path, ob)</tt> to all other connectable objects in the
 # revision.
 
-def s_conn_update_line_object((path, ob), instances_by_endpoint,
+def s_conn_update_line_object(xxx_todo_changeme3, instances_by_endpoint,
                                           horizontal_instances,
                                           vertical_instances):
+    (path, ob) = xxx_todo_changeme3
     if path:
         rev = xorn.proxy.RevisionProxy(path[-1].rev)
     else:
@@ -156,12 +158,14 @@ def s_conn_update_line_object((path, ob), instances_by_endpoint,
     else:
         ends0 = [0, 1]
 
-    def can_connect((path0, ob0), (path1, ob1)):
+    def can_connect(xxx_todo_changeme, xxx_todo_changeme1):
         # An object inside a symbol can only be connected up to another
         # object if they are (a) both inside the same object, or (b)
         # the object inside a symbol is a pin.
 
         # 1. Both objects are inside a symbol
+        (path0, ob0) = xxx_todo_changeme
+        (path1, ob1) = xxx_todo_changeme1
         if path0 and path1:
             # If inside different symbols, both must be pins to connect.
             if path0 != path1 and not data0.is_pin or not data1.is_pin:

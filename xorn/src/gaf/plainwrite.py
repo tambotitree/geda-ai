@@ -297,8 +297,7 @@ def write_object(f, ob):
         if data.pixmap.embedded:
             xorn.base64.encode(f, data.pixmap.data, delim = '.')
     else:
-        raise ValueError, \
-            _("Encountered an object with unknown type %s") % type(data)
+        raise ValueError(_("Encountered an object with unknown type %s") % type(data))
 
     # save any attributes
     attribs = ob.attached_objects()

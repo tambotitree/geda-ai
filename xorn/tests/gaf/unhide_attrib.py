@@ -14,7 +14,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import StringIO
+import io
 import gaf.attrib
 import gaf.fileformat
 import gaf.read
@@ -39,7 +39,7 @@ d=y
 }
 """
 
-rev = gaf.read.read_file(StringIO.StringIO(data), '<test data>',
+rev = gaf.read.read_file(io.StringIO(data), '<test data>',
                          gaf.fileformat.FORMAT_SCH)
 ob, = rev.toplevel_objects()
 a, b, c, d = gaf.attrib.inherited_objects(ob)

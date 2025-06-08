@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import cStringIO, getopt, gettext, os, sys
+import io, getopt, gettext, os, sys
 from gettext import gettext as _
 
 import xorn.command
@@ -28,7 +28,7 @@ import gaf.netlist.backend
 import gaf.netlist.netlist
 import gaf.netlist.slib
 
-APPEND, PREPEND = xrange(2)
+APPEND, PREPEND = range(2)
 
 report_gui = None
 report_gui_buf = None
@@ -260,7 +260,7 @@ def enable_report_gui():
 
     report_gui = gaf.netlist.reportgui
     report_gui_stderr = sys.stderr
-    report_gui_buf = cStringIO.StringIO()
+    report_gui_buf = io.StringIO()
     sys.stderr = report_gui_buf
 
 def daemonize(fun):
@@ -285,7 +285,7 @@ def daemonize(fun):
             if pid > 0:
                 # exit from intermediate process
                 os._exit(0)
-        except OSError, e:
+        except OSError as e:
             sys.stderr.write("fork: %s\n" % e.strerror)
             # can't fork second time: call fun() in intermediate process
 
@@ -570,7 +570,7 @@ def inner_main():
                   "backends.\n") % xorn.command.program_name)
             sys.exit(1)
 
-        if m.run.func_code.co_argcount == 2 and backend_params:
+        if m.run.__code__.co_argcount == 2 and backend_params:
             sys.stderr.write(
                 _("%s: The `%s' backend doesn't take arguments.\n")
                 % (xorn.command.program_short_name, backend_name))
@@ -605,7 +605,7 @@ def inner_main():
         pass
 
     def write(f):
-        if m.run.func_code.co_argcount == 2:
+        if m.run.__code__.co_argcount == 2:
             m.run(f, netlist)
         else:
             m.run(f, netlist, backend_params)

@@ -215,7 +215,7 @@ PINTYPE_COUNT = 12
  PINTYPE_TRI,
  PINTYPE_CLK,
  PINTYPE_PWR,
- PINTYPE_UNDEFINED) = xrange(PINTYPE_COUNT)
+ PINTYPE_UNDEFINED) = range(PINTYPE_COUNT)
 
 pintype_names = [
     'unknown', 'in', 'out', 'io', 'oc', 'oe', 'pas', 'tp', 'tri', 'clk', 'pwr',
@@ -325,7 +325,7 @@ def check_unused_slots(f, netlist):
 
         slots_list = get_unique_slots(package)
 
-        for slot_number in xrange(numslots):
+        for slot_number in range(numslots):
             if slot_number + 1 in slots_list:
                 continue
 
@@ -499,12 +499,12 @@ def check_connection_of_two_pintypes(
 
 def check_pintypes_of_single_net(
         f, netlist, net, pintypes, pintype_count):
-    for type1 in xrange(PINTYPE_COUNT - 1):
+    for type1 in range(PINTYPE_COUNT - 1):
         type1_count = pintype_count[type1]
         if type1_count == 0:
             continue
 
-        for type2 in xrange(type1, PINTYPE_COUNT - 1):
+        for type2 in range(type1, PINTYPE_COUNT - 1):
             type2_count = pintype_count[type2]
             if type2_count == 0:
                 continue
@@ -520,7 +520,7 @@ def check_pintypes_of_single_net(
 #                by pintype.
 
 def check_if_net_is_driven(pintype_count):
-    for position in xrange(PINTYPE_COUNT - 1):
+    for position in range(PINTYPE_COUNT - 1):
         if pintype_count[position] > 0 and pintype_can_drive[position] == 1:
             return True
 
@@ -601,10 +601,10 @@ def run(f, netlist, args):
     # Perform DRC-matrix sanity checks.
     # See if all elements of the matrix are chars
 
-    for row in xrange(PINTYPE_COUNT):
-        for column in xrange(row + 1):
+    for row in range(PINTYPE_COUNT):
+        for column in range(row + 1):
             c = drc_matrix[row][column]
-            if not isinstance(c, basestring) or len(c) != 1:
+            if not isinstance(c, str) or len(c) != 1:
                 sys.stderr.write("INTERNAL ERROR: DRC matrix has unknown "
                                  "value on position %s,%s\n" % (row, column))
                 sys.exit(3)

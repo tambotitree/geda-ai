@@ -159,7 +159,7 @@ class DirectorySource:
         if path is not None:
             return gaf.read.read(path, load_pixmaps = load_pixmaps)
 
-        raise ValueError, 'symbol "%s" not found in library' % symbol
+        raise ValueError('symbol "%s" not found in library' % symbol)
 
 
 ## Source object representing a pair of symbol-generating commands.
@@ -200,11 +200,11 @@ class CommandSource:
 
         for line in lines:
             if not line or line[-1] != '\n':
-                raise ValueError, "Missing newline at end of command output"
+                raise ValueError("Missing newline at end of command output")
             if line == '\n':
-                raise ValueError, "Command printed an empty line"
+                raise ValueError("Command printed an empty line")
             if line[0] == '.':
-                raise ValueError, "Command printed line starting with '.'"
+                raise ValueError("Command printed line starting with '.'")
 
         return (line[:-1] for line in lines)
 
@@ -244,11 +244,11 @@ def _run_source_command(args, callback):
         finally:
             p.wait()
             if p.returncode < 0:
-                raise ValueError, "Library command failed [%s]: " \
-                    "Uncaught signal %i" % (args[0], -p.returncode)
+                raise ValueError("Library command failed [%s]: " \
+                    "Uncaught signal %i" % (args[0], -p.returncode))
             if p.returncode != 0:
-                raise ValueError, "Library command failed [%s]: "\
-                    "returned exit status %d" % (args[0], p.returncode)
+                raise ValueError("Library command failed [%s]: "\
+                    "returned exit status %d" % (args[0], p.returncode))
 
 ## Update list of symbols available from a component source.
 #
@@ -264,16 +264,16 @@ def _update_symbol_list(source):
     try:
         symbols = list(source.callback.list())
     except TypeError:
-        raise TypeError, "Failed to scan library [%s]: " \
-            "Python function returned non-list" % source.name
+        raise TypeError("Failed to scan library [%s]: " \
+            "Python function returned non-list" % source.name)
 
     found = set()
     duplicate = set()
     for symbol in symbols:
         if not isinstance(symbol, str) and \
-           not isinstance(symbol, unicode):
-            raise TypeError, "Non-string symbol name " \
-                "while scanning library [%s]" % source.name
+           not isinstance(symbol, str):
+            raise TypeError("Non-string symbol name " \
+                "while scanning library [%s]" % source.name)
         if symbol in found:
             duplicate.add(symbol)
         found.add(symbol)
@@ -305,10 +305,10 @@ def _update_symbol_list(source):
 
 def add_source(callback, name):
     if name is None:
-        raise ValueError, "Cannot add source: name not specified"
+        raise ValueError("Cannot add source: name not specified")
     for source in _sources:
         if source.name == name:
-            raise ValueError, "There is already a source called '%s'" % name
+            raise ValueError("There is already a source called '%s'" % name)
 
     # Sources added later get scanned earlier
     source = Source(callback, [], name)
@@ -397,8 +397,8 @@ def get_symbol(source, symbol):
     if isinstance(data, xorn.proxy.RevisionProxy):
         data = data.rev
     if not isinstance(data, xorn.storage.Revision):
-        raise ValueError, "Failed to load symbol data [%s] " \
-            "from source [%s]" % (symbol, source.name)
+        raise ValueError("Failed to load symbol data [%s] " \
+            "from source [%s]" % (symbol, source.name))
     data.finalize()
 
     symbol_ = gaf.ref.Symbol(symbol, data, False)
@@ -441,8 +441,7 @@ def search(pattern, glob = False):
                 result.append((source, symbol))
         elif pattern in source.symbols:
             if source.symbols.count(pattern) > 1:
-                raise DuplicateError, \
-                    "More than one component found with name [%s]" % pattern
+                raise DuplicateError("More than one component found with name [%s]" % pattern)
             result.append((source, pattern))
 
     _search_cache[pattern, glob] = result
@@ -460,8 +459,8 @@ def lookup_symbol_source(name):
     symlist = search(name)
 
     if not symlist:
-        raise NotFoundError, "Component [%s] was not found in the " \
-            "component library" % name
+        raise NotFoundError("Component [%s] was not found in the " \
+            "component library" % name)
 
     if len(symlist) > 1:
         sys.stderr.write(_("More than one component found "
@@ -534,5 +533,5 @@ def used_symbols1(rev):
             continue
         result.append(symlist[0])
 
-    result.sort(key = lambda (source, symbol): symbol)
+    result.sort(key = lambda source_symbol: source_symbol[1])
     return result

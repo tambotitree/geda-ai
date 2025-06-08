@@ -77,7 +77,7 @@ def umask():
     # I don't see a way to read the umask without a potential race
     # condition.  To avoid at least the resulting security risk, I'll
     # set the umask temporarily to the most restrictive value.
-    saved = os.umask(0777)
+    saved = os.umask(0o777)
     os.umask(saved)
     return saved
 
@@ -145,8 +145,7 @@ def write(filename, write_func, overwrite = False,
             raise IOError(errno.EACCES, os.strerror(errno.EACCES), filename)
 
         if not stat.S_ISREG(st.st_mode):
-            raise Exception, \
-                'Refusing to overwrite non-regular file: ' + filename
+            raise Exception('Refusing to overwrite non-regular file: ' + filename)
 
     # Get the directory in which the real filename lives
     dirname, basename = os.path.split(filename)
@@ -158,7 +157,7 @@ def write(filename, write_func, overwrite = False,
 
     if st is None:
         # Use default permissions
-        mode = 0666 & ~umask()
+        mode = 0o666 & ~umask()
         uid = os.getuid()
 
         dir_st = os.stat(dirname)

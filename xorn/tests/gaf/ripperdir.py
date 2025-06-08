@@ -14,7 +14,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import cStringIO, sys
+import io, sys
 import gaf.fileformat
 import gaf.read
 import gaf.write
@@ -23,11 +23,11 @@ f = open(sys.argv[0][:-3] + '.sch')
 data = f.read()
 f.close()
 
-f = cStringIO.StringIO(data)
+f = io.StringIO(data)
 rev = gaf.read.read_file(f, '<test data>', gaf.fileformat.FORMAT_SCH)
 f.close()
 
-f = cStringIO.StringIO()
+f = io.StringIO()
 gaf.write.write_file(f, rev, gaf.fileformat.FORMAT_SCH)
 assert f.getvalue() == data
 f.close()

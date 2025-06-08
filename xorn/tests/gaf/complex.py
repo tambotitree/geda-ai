@@ -14,7 +14,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import StringIO
+import io
 import xorn.proxy
 import xorn.storage
 import gaf.fileformat
@@ -78,7 +78,7 @@ class MockupSource:
         if symbol != 'symbol.sym':
             raise ValueError
         rev = gaf.read.read_file(
-            StringIO.StringIO(SYMBOL_SYM), '<test data>',
+            io.StringIO(SYMBOL_SYM), '<test data>',
             gaf.fileformat.FORMAT_SYM)
         assert rev.is_transient()
         return rev
@@ -89,7 +89,7 @@ for data, load_symbols, embedded in [(COMPONENT0_SCH, False, False),
                                      (COMPONENT1_SCH, False, True),
                                      (COMPONENT0_SCH, True, False),
                                      (COMPONENT1_SCH, True, True)]:
-    rev = gaf.read.read_file(StringIO.StringIO(data), '<test data>',
+    rev = gaf.read.read_file(io.StringIO(data), '<test data>',
                              gaf.fileformat.FORMAT_SCH,
                              load_symbols = load_symbols)
     ob, = rev.toplevel_objects()
@@ -113,7 +113,7 @@ for data in [COMPONENT0_SCH.replace('symbol.sym', 'EMBEDDEDsymbol.sym'),
              COMPONENT1_SCH.replace('EMBEDDEDsymbol.sym', 'symbol.sym')]:
     # Test if inconsistencies trigger an exception
     try:
-        gaf.read.read_file(StringIO.StringIO(data), '<test data>',
+        gaf.read.read_file(io.StringIO(data), '<test data>',
                            gaf.fileformat.FORMAT_SCH)
     except gaf.read.ParseError:
         pass
@@ -122,7 +122,7 @@ for data in [COMPONENT0_SCH.replace('symbol.sym', 'EMBEDDEDsymbol.sym'),
 
 for data, embedded in [(PICTURE0_SCH, False),
                        (PICTURE1_SCH, True)]:
-    rev = gaf.read.read_file(StringIO.StringIO(data), '<test data>',
+    rev = gaf.read.read_file(io.StringIO(data), '<test data>',
                              gaf.fileformat.FORMAT_SCH)
     ob, = rev.toplevel_objects()
     pixmap = ob.data().pixmap

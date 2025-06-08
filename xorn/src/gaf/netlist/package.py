@@ -49,7 +49,7 @@ class Package:
     # \returns a list of attribute values as strings and \c None
 
     def get_all_attributes(self, name):
-        if not isinstance(name, basestring):
+        if not isinstance(name, str):
             raise ValueError
 
         # search for refdes instances and through the entire list
@@ -63,7 +63,7 @@ class Package:
                 if component.sheet.instantiating_component is not None:
                     for param_name, param_value in \
                             component.sheet.instantiating_component \
-                                .blueprint.parameters.iteritems():
+                                .blueprint.parameters.items():
                         value = value.replace(
                             '$(%s)' % param_name, param_value)
                 l.append(value)
@@ -96,7 +96,7 @@ class Package:
                 return default
             raise KeyError
 
-        assert isinstance(values[0], basestring)
+        assert isinstance(values[0], str)
         return values[0]
 
     ## Takes a pinseq string and returns that pinseq pin of this package.
@@ -153,7 +153,7 @@ class PackagePin:
     # \returns a list of attribute values as strings and \c None
 
     def get_all_attributes(self, name):
-        if not isinstance(name, basestring):
+        if not isinstance(name, str):
             raise ValueError
 
         l = []
@@ -208,7 +208,7 @@ class PackagePin:
                 return default
             raise KeyError
 
-        assert isinstance(values[0], basestring)
+        assert isinstance(values[0], str)
         return values[0]
 
     def error(self, msg):

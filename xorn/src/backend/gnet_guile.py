@@ -35,9 +35,9 @@ import gaf.netlist.guile
 
 def get_package_attribute(refdes, name):
     gaf.netlist.guile.check_argument_type(
-        'gnetlist:get-package-attribute', 1, refdes, basestring)
+        'gnetlist:get-package-attribute', 1, refdes, str)
     gaf.netlist.guile.check_argument_type(
-        'gnetlist:get-package-attribute', 2, name, basestring)
+        'gnetlist:get-package-attribute', 2, name, str)
 
     try:
         return gaf.netlist.guile.the_netlist \

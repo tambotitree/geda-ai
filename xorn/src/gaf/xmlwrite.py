@@ -233,7 +233,7 @@ class Writer:
 
     def write_symbol(self, symbol):
         if symbol.prim_objs is None and not self.omit_symbols:
-            raise ValueError, 'symbol contents missing'
+            raise ValueError('symbol contents missing')
         self.w.start_element('symbol')
         self.w.write_attribute('id', self.symbol_ids[symbol])
         self.w.write_attribute('name', symbol.basename)
@@ -249,7 +249,7 @@ class Writer:
 
     def write_pixmap(self, pixmap):
         if pixmap.data is None and not self.omit_pixmaps:
-            raise ValueError, 'pixmap contents missing'
+            raise ValueError('pixmap contents missing')
         self.w.start_element('pixmap', preserve_whitespace = True)
         self.w.write_attribute('id', self.pixmap_ids[pixmap])
         self.w.write_attribute('name', pixmap.filename)

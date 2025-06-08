@@ -30,12 +30,12 @@
 # TODO: For efficiency reasons, this should be ported to C.
 
 def format(x, decimal_digits):
-    if not isinstance(x, int) and not isinstance(x, long):
-        raise TypeError, 'invalid argument type (must be int or long)'
+    if not isinstance(x, int) and not isinstance(x, int):
+        raise TypeError('invalid argument type (must be int or long)')
     if not isinstance(decimal_digits, int):
-        raise TypeError, 'number of decimals must be an integer'
+        raise TypeError('number of decimals must be an integer')
     if decimal_digits < 0:
-        raise ValueError, 'number of decimals must be non-negative'
+        raise ValueError('number of decimals must be non-negative')
 
     s = str(x)
 
@@ -72,12 +72,12 @@ def format(x, decimal_digits):
 # TODO: For efficiency reasons, this should be ported to C.
 
 def parse(s, decimal_digits):
-    if not isinstance(s, str) and not isinstance(s, unicode):
-        raise TypeError, 'invalid argument type (must be str or unicode)'
+    if not isinstance(s, str) and not isinstance(s, str):
+        raise TypeError('invalid argument type (must be str or unicode)')
     if not isinstance(decimal_digits, int):
-        raise TypeError, 'number of decimals must be an integer'
+        raise TypeError('number of decimals must be an integer')
     if decimal_digits < 0:
-        raise ValueError, 'number of decimals must be non-negative'
+        raise ValueError('number of decimals must be non-negative')
 
     if s and s[0] == '-':
         sign = -1

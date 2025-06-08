@@ -19,13 +19,13 @@
 #
 # See the documentation of the class XMLWriter for more information.
 
-STATE_IDLE, STATE_CHARACTER_DATA, STATE_START_TAG = xrange(3)
+STATE_IDLE, STATE_CHARACTER_DATA, STATE_START_TAG = range(3)
 
 ## Checks whether a string is a valid XML name.
 
 def valid_name(name):
-    if not isinstance(name, unicode):
-        raise TypeError, "invalid argument type (must be unicode)"
+    if not isinstance(name, str):
+        raise TypeError("invalid argument type (must be unicode)")
 
     if not name:
         return False
@@ -44,19 +44,19 @@ def valid_name(name):
                 not (c >= '0' and c <= '9') and c != ':' and \
                 not (c >= 'A' and c <= 'Z') and c != '_' and \
                 not (c >= 'a' and c <= 'z') and c != 0xb7 and \
-                not (c >= u'\u00c0' and c <= u'\u00d6') and \
-                not (c >= u'\u00d8' and c <= u'\u00f6') and \
-                not (c >= u'\u00f8' and c <= u'\u02ff') and \
-                not (c >= u'\u0300' and c <= u'\u036f') and \
-                not (c >= u'\u0370' and c <= u'\u037d') and \
-                not (c >= u'\u037f' and c <= u'\u1fff') and \
-                not (c >= u'\u200c' and c <= u'\u200d') and \
-                not (c >= u'\u203f' and c <= u'\u2040') and \
-                not (c >= u'\u2070' and c <= u'\u218f') and \
-                not (c >= u'\u2c00' and c <= u'\u2fef') and \
-                not (c >= u'\u3001' and c <= u'\ud7ff') and \
-                not (c >= u'\uf900' and c <= u'\ufdcf') and \
-                not (c >= u'\ufdf0' and c <= u'\ufffd'):
+                not (c >= '\u00c0' and c <= '\u00d6') and \
+                not (c >= '\u00d8' and c <= '\u00f6') and \
+                not (c >= '\u00f8' and c <= '\u02ff') and \
+                not (c >= '\u0300' and c <= '\u036f') and \
+                not (c >= '\u0370' and c <= '\u037d') and \
+                not (c >= '\u037f' and c <= '\u1fff') and \
+                not (c >= '\u200c' and c <= '\u200d') and \
+                not (c >= '\u203f' and c <= '\u2040') and \
+                not (c >= '\u2070' and c <= '\u218f') and \
+                not (c >= '\u2c00' and c <= '\u2fef') and \
+                not (c >= '\u3001' and c <= '\ud7ff') and \
+                not (c >= '\uf900' and c <= '\ufdcf') and \
+                not (c >= '\ufdf0' and c <= '\ufffd'):
             # and not (c >= 0x10000 and c <= 0xeffff)
             return False
 
@@ -65,8 +65,8 @@ def valid_name(name):
 ## Escape XML metacharacters in a string.
 
 def escape(data):
-    if not isinstance(data, unicode):
-        raise TypeError, "invalid argument type (must be unicode)"
+    if not isinstance(data, str):
+        raise TypeError("invalid argument type (must be unicode)")
 
     return data.replace('&', '&amp;') \
                .replace('<', '&lt;') \
@@ -144,13 +144,13 @@ class XMLWriter:
     # will be inserted inside this element.
 
     def start_element(self, name, preserve_whitespace = False):
-        name = unicode(name)
+        name = str(name)
         if not valid_name(name):
-            raise ValueError, "invalid element name '%s'" % name
+            raise ValueError("invalid element name '%s'" % name)
 
         if not self.stack:
             if self.has_root_element:
-                raise ValueError, "only one root element allowed"
+                raise ValueError("only one root element allowed")
             self.has_root_element = True
 
         self._prepare_for_data()
@@ -176,7 +176,7 @@ class XMLWriter:
                 self.write('  ' * (len(self.stack) - 1))
             self.write('</%s>' % self.stack[-1])
         else:
-            raise ValueError, "can't end element at root level"
+            raise ValueError("can't end element at root level")
 
         self.state = STATE_IDLE
 
@@ -197,18 +197,18 @@ class XMLWriter:
     # CDATA sections, or child elements are written.
 
     def write_attribute(self, name, value):
-        name = unicode(name)
-        value = unicode(value)
+        name = str(name)
+        value = str(value)
         if self.state != STATE_START_TAG:
-            raise ValueError, "can't write attributes right now"
+            raise ValueError("can't write attributes right now")
         if not valid_name(name):
-            raise ValueError, "invalid attribute name '%s'" % name
+            raise ValueError("invalid attribute name '%s'" % name)
         if '\n' in value:
-            raise ValueError, "line feed character in attribute value"
+            raise ValueError("line feed character in attribute value")
         # TODO: validate value
 
         if name in self.current_attrs:
-            raise ValueError, "duplicate attribute name '%s'" % name
+            raise ValueError("duplicate attribute name '%s'" % name)
         self.current_attrs.add(name)
 
         self.write(' %s="%s"' % (name, escape(value)))
@@ -219,11 +219,10 @@ class XMLWriter:
     # with their entity representations.
 
     def write_character_data(self, data):
-        data = unicode(data)
+        data = str(data)
         # TODO: validate data
         if not self.stack:
-            raise ValueError, \
-                "can't write character data outside of root element"
+            raise ValueError("can't write character data outside of root element")
 
         self._prepare_for_data()
         if self.state == STATE_IDLE and self.preserve_depth is None:
@@ -238,11 +237,10 @@ class XMLWriter:
     # the character sequence <tt>']]>'</tt>.
 
     def write_cdata_section(self, data):
-        data = unicode(data)
+        data = str(data)
         # TODO: validate data
         if not self.stack:
-            raise ValueError, \
-                "can't write CDATA section outside of root element"
+            raise ValueError("can't write CDATA section outside of root element")
 
         self._prepare_for_data()
         if self.state == STATE_IDLE and self.preserve_depth is None:

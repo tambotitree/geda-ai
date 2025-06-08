@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # gnetlist - wrapper script for invoking the gEDA netlister
 # Copyright (C) 1998-2010 Ales Hvezda
 # Copyright (C) 1998-2010 gEDA Contributors (see ChangeLog for details)
@@ -45,7 +45,7 @@ import xorn.command
 import xorn.config
 import xorn.guile
 
-APPEND, PREPEND = xrange(2)
+APPEND, PREPEND = range(2)
 
 
 ## Expand environment variables in a string.
@@ -130,8 +130,8 @@ def expand_env_variables(s):
 
 def check_argument_type(fun, i, arg, t):
     if not isinstance(arg, t):
-        raise TypeError, '"%s" argument %d must be %s, not %s' % (
-            fun, i, t.__name__, arg.__class__.__name__)
+        raise TypeError('"%s" argument %d must be %s, not %s' % (
+            fun, i, t.__name__, arg.__class__.__name__))
 
 ## Helper function for checking whether an API function argument is
 ## callable.
@@ -143,9 +143,9 @@ def check_argument_type(fun, i, arg, t):
 
 def _check_argument_callable(fun, i, arg):
     if not callable(arg):
-        raise TypeError, "'%s' argument %d must be callable, " \
+        raise TypeError("'%s' argument %d must be callable, " \
                          "but '%s' object is not" % (
-            fun, i, arg.__class__.__name__)
+            fun, i, arg.__class__.__name__))
 
 # ========================== Configuration options ===========================
 
@@ -191,7 +191,7 @@ traverse_hierarchy = True
 # \returns \c True
 
 def rc_scheme_directory(path):
-    check_argument_type('scheme-directory', 1, path, basestring)
+    check_argument_type('scheme-directory', 1, path, str)
 
     # take care of any shell variables
     path = expand_env_variables(path)
@@ -212,7 +212,7 @@ def rc_print_color_map(map = None):
         raise NotImplementedError
 
 def rc_gnetlist_version(version):
-    check_argument_type('gnetlist-version', 1, version, basestring)
+    check_argument_type('gnetlist-version', 1, version, str)
     return False  # this is Xorn, so the versions never match
 
 # ------------------------- RC functions: libraries --------------------------
@@ -223,9 +223,9 @@ def rc_gnetlist_version(version):
 # \returns \c True on success, \c False otherwise
 
 def rc_component_library(path, name = None):
-    check_argument_type('component-library', 1, path, basestring)
+    check_argument_type('component-library', 1, path, str)
     if name is not None:
-        check_argument_type('component-library', 2, name, basestring)
+        check_argument_type('component-library', 2, name, str)
 
     # take care of any shell variables
     path = expand_env_variables(path)
@@ -249,9 +249,9 @@ def rc_component_library(path, name = None):
 # \returns \c True on success, \c False otherwise
 
 def rc_component_library_search(path, prefix = None):
-    check_argument_type('component-library-search', 1, path, basestring)
+    check_argument_type('component-library-search', 1, path, str)
     if prefix is not None:
-        check_argument_type('component-library-search', 2, prefix, basestring)
+        check_argument_type('component-library-search', 2, prefix, str)
 
     # take care of any shell variables
     path = expand_env_variables(path)
@@ -281,9 +281,9 @@ def rc_component_library_search(path, prefix = None):
 # \returns \c True
 
 def rc_component_library_command(listcmd, getcmd, name):
-    check_argument_type('component-library-command', 1, listcmd, basestring)
-    check_argument_type('component-library-command', 2, getcmd, basestring)
-    check_argument_type('component-library-command', 3, name, basestring)
+    check_argument_type('component-library-command', 1, listcmd, str)
+    check_argument_type('component-library-command', 2, getcmd, str)
+    check_argument_type('component-library-command', 3, name, str)
 
     # take care of any shell variables
     # \bug this may be a security risk!
@@ -313,7 +313,7 @@ def rc_component_library_command(listcmd, getcmd, name):
 def rc_component_library_funcs(listfunc, getfunc, name):
     check_argument_callable('component-library-funcs', 1, listfunc)
     check_argument_callable('component-library-funcs', 2, getfunc)
-    check_argument_type('component-library-funcs', 3, name, basestring)
+    check_argument_type('component-library-funcs', 3, name, str)
 
     raise NotImplementedError
 
@@ -326,7 +326,7 @@ def rc_reset_component_library():
 # \returns \c True on success, \c False otherwise
 
 def rc_source_library(path):
-    check_argument_type('source-library', 1, path, basestring)
+    check_argument_type('source-library', 1, path, str)
 
     # take care of any shell variables
     path = expand_env_variables(path)
@@ -348,7 +348,7 @@ def rc_source_library(path):
 # \returns \c True on success, \c False otherwise
 
 def rc_source_library_search(path):
-    check_argument_type('source-library-search', 1, path, basestring)
+    check_argument_type('source-library-search', 1, path, str)
 
     # take care of any shell variables
     path = expand_env_variables(path)
@@ -378,7 +378,7 @@ def rc_reset_source_library():
 # \returns \c True on success, \c False otherwise
 
 def rc_bitmap_directory(path):
-    check_argument_type('bitmap-directory', 1, path, basestring)
+    check_argument_type('bitmap-directory', 1, path, str)
 
     # take care of any shell variables
     path = expand_env_variables(path)
@@ -397,7 +397,7 @@ def rc_bitmap_directory(path):
 # \returns \c True
 
 def rc_bus_ripper_symname(symname):
-    check_argument_type('bus-ripper-symname', 1, symname, basestring)
+    check_argument_type('bus-ripper-symname', 1, symname, str)
 
     global bus_ripper_symname
     bus_ripper_symname = symname
@@ -405,7 +405,7 @@ def rc_bus_ripper_symname(symname):
     return True
 
 def rc_attribute_promotion(mode):
-    check_argument_type('attribute-promotion', 1, mode, basestring)
+    check_argument_type('attribute-promotion', 1, mode, str)
     try:
         global attribute_promotion
         attribute_promotion = { 'enabled': True, 'disabled': False }[mode]
@@ -416,7 +416,7 @@ def rc_attribute_promotion(mode):
         return False
 
 def rc_promote_invisible(mode):
-    check_argument_type('promote-invisible', 1, mode, basestring)
+    check_argument_type('promote-invisible', 1, mode, str)
     try:
         global promote_invisible
         promote_invisible = { 'enabled': True, 'disabled': False }[mode]
@@ -427,7 +427,7 @@ def rc_promote_invisible(mode):
         return False
 
 def rc_keep_invisible(mode):
-    check_argument_type('keep-invisible', 1, mode, basestring)
+    check_argument_type('keep-invisible', 1, mode, str)
     try:
         global keep_invisible
         keep_invisible = { 'enabled': True, 'disabled': False }[mode]
@@ -442,7 +442,7 @@ def rc_keep_invisible(mode):
 def rc_always_promote_attributes(attrlist):
     global always_promote_attributes
 
-    if isinstance(attrlist, basestring):
+    if isinstance(attrlist, str):
         sys.stderr.write(
             _("WARNING: using a string for 'always-promote-attributes' is "
               "deprecated. Use a list of strings instead\n"))
@@ -454,10 +454,10 @@ def rc_always_promote_attributes(attrlist):
         check_argument_type('always-promote-attributes', 1, attrlist, tuple)
 
         for i, attr in enumerate(attrlist):
-            if not isinstance(attr, basestring):
-                raise TypeError, "'always-promote-attributes' argument 1 " \
+            if not isinstance(attr, str):
+                raise TypeError("'always-promote-attributes' argument 1 " \
                                  "index %d must be basestring, not %s" % (
-                    i, attr.__class__.__name__)
+                    i, attr.__class__.__name__))
 
         always_promote_attributes = list(attrlist)
 
@@ -473,7 +473,7 @@ def rc_always_promote_attributes(attrlist):
 # \returns \c False if \a mode is not a valid mode, \c True if it is
 
 def rc_make_backup_files(mode):
-    check_argument_type('make-backup-files', 1, mode, basestring)
+    check_argument_type('make-backup-files', 1, mode, str)
     try:
         global make_backup_files
         make_backup_files = { 'enabled': True, 'disabled': False }[mode]
@@ -486,7 +486,7 @@ def rc_make_backup_files(mode):
 # ----------------------------------------------------------------------------
 
 def rc_hierarchy_uref_mangle(mode):
-    check_argument_type('hierarchy-uref-mangle', 1, mode, basestring)
+    check_argument_type('hierarchy-uref-mangle', 1, mode, str)
     try:
         global hierarchy_refdes_mangle
         hierarchy_refdes_mangle = { 'enabled': True, 'disabled': False }[mode]
@@ -497,7 +497,7 @@ def rc_hierarchy_uref_mangle(mode):
         return False
 
 def rc_hierarchy_netname_mangle(mode):
-    check_argument_type('hierarchy-netname-mangle', 1, mode, basestring)
+    check_argument_type('hierarchy-netname-mangle', 1, mode, str)
     try:
         global hierarchy_netname_mangle
         hierarchy_netname_mangle = { 'enabled': True, 'disabled': False }[mode]
@@ -508,7 +508,7 @@ def rc_hierarchy_netname_mangle(mode):
         return False
 
 def rc_hierarchy_netattrib_mangle(mode):
-    check_argument_type('hierarchy-netattrib-mangle', 1, mode, basestring)
+    check_argument_type('hierarchy-netattrib-mangle', 1, mode, str)
     try:
         global hierarchy_netattrib_mangle
         hierarchy_netattrib_mangle = {
@@ -520,7 +520,7 @@ def rc_hierarchy_netattrib_mangle(mode):
         return False
 
 def rc_hierarchy_uref_separator(name):
-    check_argument_type('hierarchy-uref-separator', 1, name, basestring)
+    check_argument_type('hierarchy-uref-separator', 1, name, str)
 
     global hierarchy_refdes_separator
     hierarchy_refdes_separator = name
@@ -528,7 +528,7 @@ def rc_hierarchy_uref_separator(name):
     return True
 
 def rc_hierarchy_netname_separator(name):
-    check_argument_type('hierarchy-netname-separator', 1, name, basestring)
+    check_argument_type('hierarchy-netname-separator', 1, name, str)
 
     global hierarchy_netname_separator
     hierarchy_netname_separator = name
@@ -536,7 +536,7 @@ def rc_hierarchy_netname_separator(name):
     return True
 
 def rc_hierarchy_netattrib_separator(name):
-    check_argument_type('hierarchy-netattrib-separator', 1, name, basestring)
+    check_argument_type('hierarchy-netattrib-separator', 1, name, str)
 
     global hierarchy_netattrib_separator
     hierarchy_netattrib_separator = name
@@ -544,7 +544,7 @@ def rc_hierarchy_netattrib_separator(name):
     return True
 
 def rc_hierarchy_netattrib_order(mode):
-    check_argument_type('hierarchy-netattrib-order', 1, mode, basestring)
+    check_argument_type('hierarchy-netattrib-order', 1, mode, str)
     try:
         global hierarchy_netattrib_order
         hierarchy_netattrib_order = {
@@ -556,7 +556,7 @@ def rc_hierarchy_netattrib_order(mode):
         return False
 
 def rc_hierarchy_netname_order(mode):
-    check_argument_type('hierarchy-netname-order', 1, mode, basestring)
+    check_argument_type('hierarchy-netname-order', 1, mode, str)
     try:
         global hierarchy_netname_order
         hierarchy_netname_order = {
@@ -568,7 +568,7 @@ def rc_hierarchy_netname_order(mode):
         return False
 
 def rc_hierarchy_uref_order(mode):
-    check_argument_type('hierarchy-uref-order', 1, mode, basestring)
+    check_argument_type('hierarchy-uref-order', 1, mode, str)
     try:
         global hierarchy_refdes_order
         hierarchy_refdes_order = { 'prepend': PREPEND, 'append': APPEND }[mode]
@@ -581,22 +581,22 @@ def rc_hierarchy_uref_order(mode):
 # ----------------------------------------------------------------------------
 
 def rc_unnamed_netname(name):
-    check_argument_type('unnamed-netname', 1, name, basestring)
+    check_argument_type('unnamed-netname', 1, name, str)
     global default_net_name
     default_net_name = name
 
 def rc_unnamed_busname(name):
-    check_argument_type('unnamed-busname', 1, name, basestring)
+    check_argument_type('unnamed-busname', 1, name, str)
     global default_bus_name
     default_bus_name = name
 
 def rc_hierarchy_traversal(mode):
-    check_argument_type('hierarchy-traversal', 1, mode, basestring)
+    check_argument_type('hierarchy-traversal', 1, mode, str)
     global traverse_hierarchy
     traverse_hierarchy = mode == 'enabled'
 
 def rc_net_naming_priority(mode):
-    check_argument_type('net-naming-priority', 1, mode, basestring)
+    check_argument_type('net-naming-priority', 1, mode, str)
     global prefer_netname_attribute
     prefer_netname_attribute = mode == 'netname'
 
@@ -809,7 +809,7 @@ for name, value in {
         'eda-config-get-user-context': eda_config_get_user_context,
         'eda-config-get-context-for-path': eda_config_get_context_for_path,
         'eda-config-get-context-for-file': eda_config_get_context_for_file,
-    }.iteritems():
+    }.items():
     xorn.guile.define(name, value)
 
 xorn.guile.eval_string('''

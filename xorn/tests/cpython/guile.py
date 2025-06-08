@@ -35,14 +35,14 @@ assert throws(xorn.guile.eval_string, '(') == xorn.guile.GuileError
 assert throws(xorn.guile.eval_string, 'foo') == None
 assert throws(xorn.guile.eval_string, 'bar') == xorn.guile.GuileError
 
-for value in [None, False, True, 1, 1., 'foo', u'fo\xf6', (), (0, 1, 'foo')]:
+for value in [None, False, True, 1, 1., 'foo', 'fo\xf6', (), (0, 1, 'foo')]:
     xorn.guile.define('foo', value)
 
     for fn in [xorn.guile.lookup, xorn.guile.eval_string]:
         returned = fn('foo')
         assert returned == value
         if isinstance(value, str):
-            assert type(returned) == unicode
+            assert type(returned) == str
         else:
             assert type(returned) == type(value)
 
@@ -68,7 +68,7 @@ assert xorn.guile.eval_string('(simple-format #f "~S" foo)') \
 
 # calling Python functions from Guile, argument count
 
-state = u'foo'
+state = 'foo'
 def update_state(value):
     global state
     result = state
@@ -77,11 +77,11 @@ def update_state(value):
 xorn.guile.define('update-state!', update_state)
 
 returned = xorn.guile.eval_string('(update-state! "bar")')
-assert returned == u'foo'
-assert type(returned) == unicode
+assert returned == 'foo'
+assert type(returned) == str
 returned = xorn.guile.eval_string('(update-state! "bar")')
-assert returned == u'bar'
-assert type(returned) == unicode
+assert returned == 'bar'
+assert type(returned) == str
 
 assert throws(
     xorn.guile.eval_string, '(update-state!)') == xorn.guile.GuileError
@@ -128,6 +128,6 @@ xorn.guile.define('foo', 0)
 assert xorn.guile.eval_string('foo') == 0
 assert xorn.guile.load(str(f.name)) == 2
 assert xorn.guile.eval_string('foo') == 1
-assert xorn.guile.load(unicode(f.name)) == 4
+assert xorn.guile.load(str(f.name)) == 4
 assert xorn.guile.eval_string('foo') == 2
 f.close()

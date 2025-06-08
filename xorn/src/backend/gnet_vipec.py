@@ -78,7 +78,7 @@ def run(f, netlist):
             f.write('\t%s\t' % template.keyword)
 
             # write net name of node
-            for i in xrange(len(package.pins)):
+            for i in range(len(package.pins)):
                 try:
                     pin = package.get_pin_by_pinseq(i + 1)
                 except KeyError:

@@ -175,7 +175,7 @@ def run(f, netlist):
         else:
             c_p = True
         f.write('    %s("%s' % (package.refdes, package.refdes))
-        for lp in xrange(32):
+        for lp in range(32):
             attr = 'attr%d' % (lp + 1)
             description = package.get_attribute(attr, None)
             if description is not None:

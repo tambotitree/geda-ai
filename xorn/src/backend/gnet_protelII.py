@@ -145,10 +145,10 @@ def run(f, netlist):
 
         f.write('DESCRIPTION\n')
         f.write(device + '\n')
-        for i in xrange(16):
+        for i in range(16):
             f.write('Part Field %d\n' % (i + 1))
             f.write('*\n')
-        for i in xrange(8):
+        for i in range(8):
             f.write('LIBRARYFIELD%d\n' % (i + 1))
             f.write('\n')
         f.write(']\n')

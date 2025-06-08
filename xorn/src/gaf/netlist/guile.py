@@ -69,8 +69,8 @@ the_spice_mode = None
 
 def check_argument_type(fun, i, arg, t):
     if not isinstance(arg, t):
-        raise TypeError, '"%s" argument %d must be %s, not %s' % (
-            fun, i, t.__name__, arg.__class__.__name__)
+        raise TypeError('"%s" argument %d must be %s, not %s' % (
+            fun, i, t.__name__, arg.__class__.__name__))
 
 ## Return the net name visible through the API.
 #
@@ -96,7 +96,7 @@ def spicified_net_name(net):
 # reversed order.
 
 def get_packages(level):
-    check_argument_type('gnetlist:get-packages', 1, level, basestring)
+    check_argument_type('gnetlist:get-packages', 1, level, str)
     return [package.refdes for package in reversed(the_netlist.packages)]
 
 ## Return a list of all package refdes's in the design; might return
@@ -113,7 +113,7 @@ def get_packages(level):
 
 def get_non_unique_packages(level):
     check_argument_type('gnetlist:get-non-unique-packages', 1,
-                        level, basestring)
+                        level, str)
     return [component.refdes
             for component in reversed(the_netlist.components)
             # filter out power symbols
@@ -128,7 +128,7 @@ def get_non_unique_packages(level):
 # reversed order.
 
 def get_pins(refdes):
-    check_argument_type('gnetlist:get-pins', 1, refdes, basestring)
+    check_argument_type('gnetlist:get-pins', 1, refdes, str)
     try:
         package = the_netlist.packages_by_refdes[refdes]
     except KeyError:
@@ -154,7 +154,7 @@ def get_pins(refdes):
 # reversed order.
 
 def get_all_nets(level):
-    check_argument_type('gnetlist:get-all-nets', 1, level, basestring)
+    check_argument_type('gnetlist:get-all-nets', 1, level, str)
 
     # g_get_all_nets doesn't seem to filter out power symbols, but for
     # a flat hierarchy, the corresponding net names are omitted from
@@ -176,7 +176,7 @@ def get_all_nets(level):
 # reversed order.
 
 def get_all_unique_nets(level):
-    check_argument_type('gnetlist:get-all-unique-nets', 1, level, basestring)
+    check_argument_type('gnetlist:get-all-unique-nets', 1, level, str)
     return [spicified_net_name(net) for net in reversed(the_netlist.nets)]
 
 ## Return a list of pins connected to the a given net.
@@ -191,7 +191,7 @@ def get_all_unique_nets(level):
 
 def get_all_connections(wanted_net_name):
     check_argument_type('gnetlist:get-all-connections', 1,
-                        wanted_net_name, basestring)
+                        wanted_net_name, str)
     try:
         net = the_netlist.nets_by_name[wanted_net_name]
     except KeyError:
@@ -222,8 +222,8 @@ def get_all_connections(wanted_net_name):
 # reversed order.
 
 def get_nets(wanted_refdes, wanted_pin):
-    check_argument_type('gnetlist:get-nets', 1, wanted_refdes, basestring)
-    check_argument_type('gnetlist:get-nets', 2, wanted_pin, basestring)
+    check_argument_type('gnetlist:get-nets', 1, wanted_refdes, str)
+    check_argument_type('gnetlist:get-nets', 2, wanted_pin, str)
 
     try:
         package = the_netlist.packages_by_refdes[wanted_refdes]
@@ -263,7 +263,7 @@ def get_nets(wanted_refdes, wanted_pin):
 # This function *does not* return its results in reversed order.
 
 def get_pins_nets(wanted_refdes):
-    check_argument_type('gnetlist:get-pins-nets', 1, wanted_refdes, basestring)
+    check_argument_type('gnetlist:get-pins-nets', 1, wanted_refdes, str)
     try:
         package = the_netlist.packages_by_refdes[wanted_refdes]
     except KeyError:
@@ -294,9 +294,9 @@ def get_pins_nets(wanted_refdes):
 
 def get_all_package_attributes(refdes, wanted_attrib):
     check_argument_type('gnetlist:get-all-package-attributes', 1,
-                        refdes, basestring)
+                        refdes, str)
     check_argument_type('gnetlist:get-all-package-attributes', 2,
-                        wanted_attrib, basestring)
+                        wanted_attrib, str)
     try:
         package = the_netlist.packages_by_refdes[refdes]
     except KeyError:
@@ -317,7 +317,7 @@ def get_all_package_attributes(refdes, wanted_attrib):
 
 def get_toplevel_attribute(wanted_attrib):
     check_argument_type('gnetlist:get-toplevel-attribute', 1,
-                        wanted_attrib, basestring)
+                        wanted_attrib, str)
     return the_netlist.get_toplevel_attribute(wanted_attrib, 'not found')
 
 ## Take a refdes and pinseq number and return wanted_attribute
@@ -325,11 +325,11 @@ def get_toplevel_attribute(wanted_attrib):
 
 def get_attribute_by_pinseq(refdes, pinseq, wanted_attrib):
     check_argument_type('gnetlist:get-attribute-by-pinseq', 1,
-                        refdes, basestring)
+                        refdes, str)
     check_argument_type('gnetlist:get-attribute-by-pinseq', 2,
-                        pinseq, basestring)
+                        pinseq, str)
     check_argument_type('gnetlist:get-attribute-by-pinseq', 3,
-                        wanted_attrib, basestring)
+                        wanted_attrib, str)
 
     try:
         pinseq = int(pinseq)
@@ -349,11 +349,11 @@ def get_attribute_by_pinseq(refdes, pinseq, wanted_attrib):
 
 def get_attribute_by_pinnumber(refdes, pin, wanted_attrib):
     check_argument_type('gnetlist:get-attribute-by-pinnumber', 1,
-                        refdes, basestring)
+                        refdes, str)
     check_argument_type('gnetlist:get-attribute-by-pinnumber', 2,
-                        pin, basestring)
+                        pin, str)
     check_argument_type('gnetlist:get-attribute-by-pinnumber', 3,
-                        wanted_attrib, basestring)
+                        wanted_attrib, str)
 
     try:
         package = the_netlist.packages_by_refdes[refdes]
@@ -367,7 +367,7 @@ def get_attribute_by_pinnumber(refdes, pin, wanted_attrib):
 
 def vams_get_package_attributes(refdes):
     check_argument_type('gnetlist:vams-get-package-attributes', 1,
-                        refdes, basestring)
+                        refdes, str)
 
     try:
         package = the_netlist.packages_by_refdes[refdes]
@@ -389,13 +389,13 @@ def graphical_objs_in_net_with_attrib_get_attrib(
         wanted_net_name, has_attrib, wanted_attrib):
     check_argument_type(
         'gnetlist:graphical-objs-in-net-with-attrib-get-attrib', 1,
-        wanted_net_name, basestring)
+        wanted_net_name, str)
     check_argument_type(
         'gnetlist:graphical-objs-in-net-with-attrib-get-attrib', 2,
-        has_attrib, basestring)
+        has_attrib, str)
     check_argument_type(
         'gnetlist:graphical-objs-in-net-with-attrib-get-attrib', 3,
-        wanted_attrib, basestring)
+        wanted_attrib, str)
 
     try:
         has_attrib_name, has_attrib_value = \
@@ -469,7 +469,7 @@ for name, value in {
         'get-backend-arguments': get_backend_arguments,
         'get-input-files': get_input_files,
         'get-verbosity': get_verbosity
-    }.iteritems():
+    }.items():
     xorn.guile.define('gnetlist:' + name, value)
 
 xorn.guile.eval_string('''

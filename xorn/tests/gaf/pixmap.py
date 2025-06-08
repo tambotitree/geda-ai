@@ -14,7 +14,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import StringIO, os, sys
+import io, os, sys
 import gaf.fileformat
 import gaf.read
 import gaf.ref
@@ -59,7 +59,7 @@ oqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX
 
 for load_pixmaps in [False, True]:
     rev = gaf.read.read_file(
-        StringIO.StringIO(PICTURES_SCH), '<test data>',
+        io.StringIO(PICTURES_SCH), '<test data>',
         gaf.fileformat.FORMAT_SCH,
         load_pixmaps = load_pixmaps,
         pixmap_basepath = os.path.dirname(sys.argv[0]))

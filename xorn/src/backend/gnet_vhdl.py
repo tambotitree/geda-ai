@@ -130,7 +130,8 @@ def write_port_list(f, port_list):
 # These lists will be transformed into a single list containing the full
 # pin information. Currently is this done with hardwired to Std_Logic.
 
-def write_port_clause(f, (in_ports, out_ports, inout_ports)):
+def write_port_clause(f, xxx_todo_changeme):
+    (in_ports, out_ports, inout_ports) = xxx_todo_changeme
     write_port_list(f,
         [(a, 'in', 'Std_Logic', b) for a, b in in_ports] +
         [(a, 'out', 'Std_Logic', b) for a, b in out_ports] +

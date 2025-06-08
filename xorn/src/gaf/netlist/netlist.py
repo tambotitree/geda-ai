@@ -20,6 +20,7 @@
 ## \namespace gaf.netlist.netlist
 ## Main entry point for netlist generation.
 #
+# Updated for Python 3 compliance and clarity.
 # See the class Netlist for details.
 
 import os, sys
@@ -402,7 +403,7 @@ class Netlist:
     #                    default was given
 
     def get_toplevel_attribute(self, name, default = KeyError):
-        if not isinstance(name, basestring):
+        if not isinstance(name, str):
             raise ValueError
 
         values = []

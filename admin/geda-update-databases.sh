@@ -54,12 +54,16 @@ echo "Raw Target Directory (from Makefile): ${RAW_TARGET_DIR}"
 GEDA_AI_APP_ROOT=$(dirname "${RAW_TARGET_DIR}")
 
 # set our expectations to be ${GEDADATADIR} . because who knows what kind of legacy troble we could get into?
-if [ "$(basename "${GEDA_AI_APP_ROOT}")" != "geda" ]; then
-    echo "Error: RAW_TARGET_DIR '${RAW_TARGET_DIR}' does not appear to be directly under a 'geda-ai' directory." >&2
-    echo "       Expected parent of RAW_TARGET_DIR to be 'geda', but found '$(basename "${GEDA_AI_APP_ROOT}")'." >&2
-    echo "       Full path to expected 'geda-ai' parent: ${GEDA_AI_APP_ROOT}" >&2
+# Flexible check: look for geda/share in path
+case "${RAW_TARGET_DIR}" in
+  */geda/share/*)
+    echo "Detected valid geda directory layout."
+    ;;
+  *)
+    echo "Error: RAW_TARGET_DIR '${RAW_TARGET_DIR}' does not appear to be under a 'geda/share/' hierarchy." >&2
     exit 1
-fi
+    ;;
+esac
 
 GEDA_AI_INTERNAL_DB_DIR="${GEDA_AI_APP_ROOT}/db"
 mkdir -p "${GEDA_AI_INTERNAL_DB_DIR}" || { echo "Error: Could not create internal database directory ${GEDA_AI_INTERNAL_DB_DIR}" >&2; exit 1; }

@@ -27,7 +27,7 @@
 # your PYTHONPATH.  This means you have to either
 # - build Xorn and add the directory `built-packages' inside the build
 #   tree to your PYTHONPATH,
-# - build and install Xorn and add PREFIX/lib/python2.7/site-packages
+# - build and install Xorn and add PREFIX/lib/python3.12/site-packages
 #   to your PYTHONPATH, or
 # - build and install Xorn to a default prefix (usually /usr/local).
 

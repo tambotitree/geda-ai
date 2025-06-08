@@ -105,8 +105,8 @@ Report %s bugs to %s
                 sys.stdout.write(filename + '\n')
 
     if extract_all:
-        filenames = list(set(embedded_symbols.keys() +
-                             embedded_pixmaps.keys()))
+        filenames = list(set(list(embedded_symbols.keys()) +
+                             list(embedded_pixmaps.keys())))
         filenames.sort()
     else:
         filenames = args[1:]

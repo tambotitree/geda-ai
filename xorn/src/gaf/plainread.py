@@ -106,7 +106,7 @@ def parse_token(s, fmt):
     if fmt == '%s':
         return s
 
-    raise ValueError, "Invalid format token: '%s'" % fmt
+    raise ValueError("Invalid format token: '%s'" % fmt)
 
 ## Parse a string of space-separated values.
 #
@@ -256,7 +256,7 @@ def read_file(f, name, log, load_symbol, load_pixmap,
 
             while True:
                 try:
-                    line = f.next()
+                    line = next(f)
                 except StopIteration:
                     log.error(_("unterminated attribute list"))
                     break
@@ -799,9 +799,9 @@ def read_path(first_line, f, format, log):
         color = DEFAULT_COLOR
 
     pathstr = ''
-    for i in xrange(0, num_lines):
+    for i in range(0, num_lines):
         try:
-            line = f.next()
+            line = next(f)
         except StopIteration:
             log.error(_("unexpected end of file after %d lines "
                         "while reading path") % i)
@@ -864,7 +864,7 @@ def read_picture(first_line, f, format, log, load_pixmap):
         angle = 0
 
     try:
-        filename = f.next()
+        filename = next(f)
     except StopIteration:
         log.error(_("unexpected end of file while reading picture file name"))
         filename = ''
@@ -1015,9 +1015,9 @@ def read_text(first_line, f, format, log):
         log.error(_("text has invalid number of lines (%d)") % num_lines)
 
     text = ''
-    for i in xrange(0, num_lines):
+    for i in range(0, num_lines):
         try:
-            line = f.next()
+            line = next(f)
         except StopIteration:
             log.error(_("unexpected end of file after %d lines of text") % i)
             break

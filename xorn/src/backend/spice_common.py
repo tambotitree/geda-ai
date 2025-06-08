@@ -34,7 +34,7 @@ def write_two_pin_names(f, package, pin_a, pin_b):
 #      problem is slotted components e.g. ../examples/singlenet_1.sch
 
 def write_net_names_on_component(f, package):
-    for i in xrange(len(package.pins)):
+    for i in range(len(package.pins)):
         try:
             pin = package.get_pin_by_pinseq(i + 1)
         except KeyError:

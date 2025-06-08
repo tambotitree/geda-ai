@@ -56,7 +56,7 @@ mod_attrs = {
     'object_is_selected': types.BuiltinMethodType,
 }
 
-a = mod_attrs.keys()
+a = list(mod_attrs.keys())
 a.sort()
 b = [name for name in dir(xorn.storage) if not name.startswith('_')]
 b.sort()
@@ -67,7 +67,7 @@ for name in mod_attrs:
     assert type(xorn.storage.__dict__[name]) == mod_attrs[name]
 
 def assert_attributes(ob, attrs):
-    a = attrs.keys()
+    a = list(attrs.keys())
     b = [name for name in dir(ob) if not name.startswith('_')]
     a.sort()
     b.sort()
@@ -127,7 +127,7 @@ assert_attributes(xorn.storage.Component(symbol = None), {
         'selectable': bool,
         'angle': int,
         'mirror': bool,
-        'symbol': types.NoneType,
+        'symbol': type(None),
 })
 assert_attributes(xorn.storage.Line(), {
         'x': float,
@@ -160,7 +160,7 @@ assert_attributes(xorn.storage.Picture(pixmap = None), {
         'height': float,
         'angle': int,
         'mirror': bool,
-        'pixmap': types.NoneType,
+        'pixmap': type(None),
 })
 assert_attributes(xorn.storage.Text(), {
         'x': float,

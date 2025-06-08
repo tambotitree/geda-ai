@@ -14,7 +14,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import cStringIO
+import io
 import gaf.fileformat
 import gaf.read
 
@@ -25,13 +25,13 @@ class TestLog:
 
     def error(self, message):
         message = '%d: error: %s' % (self.lineno + 1, message)
-        print message
+        print(message)
         assert self.messages[0] == message
         del self.messages[0]
 
     def warn(self, message):
         message = '%d: warning: %s' % (self.lineno + 1, message)
-        print message
+        print(message)
         assert self.messages[0] == message
         del self.messages[0]
 
@@ -39,7 +39,7 @@ def assert_read(data, messages, **kwds):
     log = TestLog(messages)
     try:
         rev = gaf.read.read_file(
-            cStringIO.StringIO(data), '<test data>',
+            io.StringIO(data), '<test data>',
             gaf.fileformat.FORMAT_SCH, log, **kwds)
     except gaf.read.ParseError:
         pass

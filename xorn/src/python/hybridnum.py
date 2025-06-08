@@ -41,9 +41,9 @@
 
 def format(x, decimal_digits):
     if not isinstance(decimal_digits, int):
-        raise TypeError, 'number of decimals must be an integer'
+        raise TypeError('number of decimals must be an integer')
     if decimal_digits < 0:
-        raise ValueError, 'number of decimals must be non-negative'
+        raise ValueError('number of decimals must be non-negative')
 
     s = float(x).hex()
 
@@ -91,7 +91,7 @@ def format(x, decimal_digits):
 
     before = str(sum(b << i for i, b in enumerate(reversed(bits_before))))
     after = ''
-    for i in xrange(0, len(bits_after), 4):
+    for i in range(0, len(bits_after), 4):
         after += '0123456789abcdef'[(bits_after[i] << 3) +
                                     (bits_after[i + 1] << 2) +
                                     (bits_after[i + 2] << 1) +
@@ -131,12 +131,12 @@ def format(x, decimal_digits):
 # TODO: For efficiency reasons, this should probably be ported to C.
 
 def parse(s, decimal_digits):
-    if not isinstance(s, str) and not isinstance(s, unicode):
-        raise TypeError, 'invalid argument type (must be str or unicode)'
+    if not isinstance(s, str) and not isinstance(s, str):
+        raise TypeError('invalid argument type (must be str or unicode)')
     if not isinstance(decimal_digits, int):
-        raise TypeError, 'number of decimals must be an integer'
+        raise TypeError('number of decimals must be an integer')
     if decimal_digits < 0:
-        raise ValueError, 'number of decimals must be non-negative'
+        raise ValueError('number of decimals must be non-negative')
 
     if s and s[0] == '-':
         sign = -1

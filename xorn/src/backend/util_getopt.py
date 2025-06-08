@@ -37,7 +37,7 @@ import collections, sys
 class OptionError(Exception):
     pass
 
-NO_ARGUMENT, REQUIRED_ARGUMENT, OPTIONAL_ARGUMENT = xrange(3)
+NO_ARGUMENT, REQUIRED_ARGUMENT, OPTIONAL_ARGUMENT = range(3)
 
 Option = collections.namedtuple(
     'Option', ['required', 'argument', 'predicate'])
@@ -78,7 +78,7 @@ Option = collections.namedtuple(
 def backend_getopt(args, grammar, raise_exception = False):
     def error(msg):
         if raise_exception:
-            raise OptionError, msg
+            raise OptionError(msg)
         sys.stderr.write(msg + "\n")
         sys.exit(3)
 

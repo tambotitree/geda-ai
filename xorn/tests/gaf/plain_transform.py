@@ -14,7 +14,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import cStringIO, subprocess, sys, tempfile
+import io, subprocess, sys, tempfile
 import xorn.proxy
 import xorn.storage
 import gaf.fileformat
@@ -42,7 +42,7 @@ f = open(sys.argv[0][:-3] + '.sch')
 reference_sch = 'v 20121203 2' + f.read()[12:]
 f.close()
 
-f = cStringIO.StringIO()
+f = io.StringIO()
 gaf.write.write_file(f, rev, gaf.fileformat.FORMAT_SCH)
 diff(reference_sch, f.getvalue())
 f.close()
@@ -56,7 +56,7 @@ for ob in rev.toplevel_objects():
         symbols.add(data.symbol)
 symbol, = symbols
 
-f = cStringIO.StringIO()
+f = io.StringIO()
 gaf.write.write_file(
     f, xorn.proxy.RevisionProxy(symbol.prim_objs),
     gaf.fileformat.FORMAT_SYM)
@@ -66,7 +66,7 @@ f.close()
 # extract symbols from libgeda schematic
 # and match them against known-good symbol
 
-f = cStringIO.StringIO(reference_sch)
+f = io.StringIO(reference_sch)
 rev = gaf.read.read_file(f, '<reference data>', gaf.fileformat.FORMAT_SCH)
 f.close()
 
@@ -74,7 +74,7 @@ for ob in rev.toplevel_objects():
     data = ob.data()
     assert isinstance(data, xorn.storage.Component)
 
-    f = cStringIO.StringIO()
+    f = io.StringIO()
     gaf.write.write_file(
         f, xorn.proxy.RevisionProxy(data.symbol.prim_objs),
         gaf.fileformat.FORMAT_SCH)

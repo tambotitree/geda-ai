@@ -70,7 +70,7 @@ def encode(f, src, columns = 72, delim = None):
     blen = len(src) - len(src) % 3
     ocnt = 0
 
-    for pos in xrange(0, blen, 3):
+    for pos in range(0, blen, 3):
         # Convert 3 bytes of src to 4 bytes of output
         #
         # output[0] = input[0] 7:2
@@ -144,10 +144,10 @@ def decode(f, delim = None):
 
     while True:
       try:
-        line = f.next()
+        line = next(f)
       except StopIteration:
         if delim is not None:
-          raise DecodingError, _("Unexpected end-of-file")
+          raise DecodingError(_("Unexpected end-of-file"))
         break
 
       if delim is not None and line == delim + '\n':
