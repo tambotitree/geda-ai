@@ -198,80 +198,107 @@ get_first_baseline (PangoLayout *layout)
   return PANGO_PIXELS (result);
 }
 
+/**
+ * gschem_accel_label_expose_event:
+ * @widget: The GtkWidget (cast from GschemAccelLabel)
+ * @event:  The GdkEventExpose event (ignored in GTK 3, can be NULL)
+ *
+ * Draws the accelerator text (like "Ctrl+R") next to a label widget.
+ * This function adjusts the layout if ellipsizing is enabled, computes
+ * alignment, and renders the accelerator text using Cairo and Pango.
+ *
+ * Returns: FALSE to propagate the event further.
+ */
 static gboolean
-gschem_accel_label_expose_event (GtkWidget      *widget,
-                                 GdkEventExpose *event)
+gschem_accel_label_expose_event(GtkWidget      *widget,
+                                GdkEventExpose *event)
 {
-  GschemAccelLabel *accel_label = GSCHEM_ACCEL_LABEL (widget);
-  GtkMisc *misc = GTK_MISC (accel_label);
-  GtkTextDirection direction;
+  GschemAccelLabel *accel_label = GSCHEM_ACCEL_LABEL(widget);
+  GtkTextDirection direction = gtk_widget_get_direction(widget);
+  GtkStyleContext *context = gtk_widget_get_style_context(widget);
+  GtkLabel *label = GTK_LABEL(widget);
 
-  direction = gtk_widget_get_direction (widget);
+  // Check if widget is drawable (mapped, visible, etc.)
+  if (!gtk_widget_is_drawable(widget)) {
+    return FALSE;
+  }
 
-  if (gtk_widget_is_drawable (GTK_WIDGET (accel_label)))
-    {
-      guint ac_width;
+  // Get allocation
+  GtkAllocation allocation;
+  gtk_widget_get_allocation(widget, &allocation);
 
-      ac_width = gschem_accel_label_get_accel_width (accel_label);
+  // Get required label size
+  GtkRequisition requisition;
+  gtk_widget_get_preferred_size(widget, &requisition, NULL);
 
-      if (widget->allocation.width >= widget->requisition.width + ac_width)
-        {
-          PangoLayout *label_layout;
-          PangoLayout *accel_layout;
-          GtkLabel *label = GTK_LABEL (widget);
+  // Accelerator width
+  guint ac_width = gschem_accel_label_get_accel_width(accel_label);
 
-          gint x;
-          gint y;
-
-          label_layout = gtk_label_get_layout (GTK_LABEL (accel_label));
-
-          if (direction == GTK_TEXT_DIR_RTL)
-            widget->allocation.x += ac_width;
-          widget->allocation.width -= ac_width;
-          if (gtk_label_get_ellipsize (label))
-            pango_layout_set_width (label_layout,
-                                    pango_layout_get_width (label_layout)
-                                    - ac_width * PANGO_SCALE);
-
-          if (GTK_WIDGET_CLASS (gschem_accel_label_parent_class)->expose_event)
-            GTK_WIDGET_CLASS (gschem_accel_label_parent_class)->expose_event (widget, event);
-          if (direction == GTK_TEXT_DIR_RTL)
-            widget->allocation.x -= ac_width;
-          widget->allocation.width += ac_width;
-          if (gtk_label_get_ellipsize (label))
-            pango_layout_set_width (label_layout,
-                                    pango_layout_get_width (label_layout)
-                                    + ac_width * PANGO_SCALE);
-
-          if (direction == GTK_TEXT_DIR_RTL)
-            x = widget->allocation.x + misc->xpad;
-          else
-            x = widget->allocation.x + widget->allocation.width - misc->xpad - ac_width;
-
-          gtk_label_get_layout_offsets (GTK_LABEL (accel_label), NULL, &y);
-
-          accel_layout = gtk_widget_create_pango_layout (widget, gschem_accel_label_get_string (accel_label));
-
-          y += get_first_baseline (label_layout) - get_first_baseline (accel_layout);
-
-          gtk_paint_layout (widget->style,
-                            widget->window,
-                            gtk_widget_get_state (widget),
-                            FALSE,
-                            &event->area,
-                            widget,
-                            "accellabel",
-                            x, y,
-                            accel_layout);
-
-          g_object_unref (accel_layout);
-        }
-      else
-        {
-          if (GTK_WIDGET_CLASS (gschem_accel_label_parent_class)->expose_event)
-            GTK_WIDGET_CLASS (gschem_accel_label_parent_class)->expose_event (widget, event);
-        }
+  // If there's not enough room, skip drawing
+  if (allocation.width < requisition.width + ac_width) {
+    GtkWidgetClass *parent = GTK_WIDGET_CLASS(gschem_accel_label_parent_class);
+    if (parent->draw) {
+      return parent->draw(widget, cairo_create(gtk_widget_get_window(widget)));
     }
+    return FALSE;
+  }
+
+  // Get layout of main label
+  PangoLayout *label_layout = gtk_label_get_layout(label);
+
+  // Adjust ellipsize if needed
+  gboolean ellipsize = gtk_label_get_ellipsize(label);
+  if (ellipsize) {
+    pango_layout_set_width(label_layout,
+      pango_layout_get_width(label_layout) - ac_width * PANGO_SCALE);
+  }
+
+  // Chain up to parent class to draw the base label
+  GtkWidgetClass *parent = GTK_WIDGET_CLASS(gschem_accel_label_parent_class);
+  if (parent->draw) {
+    parent->draw(widget, cairo_create(gtk_widget_get_window(widget)));
+  }
+
+  if (ellipsize) {
+    pango_layout_set_width(label_layout,
+      pango_layout_get_width(label_layout) + ac_width * PANGO_SCALE);
+  }
+
+  // Compute X position based on text direction
+  gint x;
+  gint xpad = 6;  // Approximate padding since GtkMisc is deprecated
+  if (direction == GTK_TEXT_DIR_RTL) {
+    x = allocation.x + xpad;
+  } else {
+    x = allocation.x + allocation.width - xpad - ac_width;
+  }
+
+  // Get Y offset for text baseline alignment
+  gint y;
+  gtk_label_get_layout_offsets(label, NULL, &y);
+
+  // Create Pango layout for accelerator text
+  const gchar *accel_str = gschem_accel_label_get_string(accel_label);
+  PangoLayout *accel_layout = gtk_widget_create_pango_layout(widget, accel_str);
+
+  // Adjust Y offset based on font baselines
+  y += get_first_baseline(label_layout) - get_first_baseline(accel_layout);
+
+  // Create drawing context
+  cairo_t *cr = cairo_create(gtk_widget_get_window(widget));
+
+  // Apply foreground color from theme context
+  GdkRGBA fg_color;
+  gtk_style_context_get_color(context, gtk_style_context_get_state(context), &fg_color);
+  cairo_set_source_rgba(cr, fg_color.red, fg_color.green, fg_color.blue, fg_color.alpha);
+
+  // Draw the accelerator text
+  cairo_move_to(cr, x, y);
+  pango_cairo_show_layout(cr, accel_layout);
+
+  // Cleanup
+  cairo_destroy(cr);
+  g_object_unref(accel_layout);
 
   return FALSE;
 }

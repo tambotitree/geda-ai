@@ -39,14 +39,14 @@ typedef struct {
 static GArray *stroke_points = NULL;
 
 
-/*! \brief Initializes the stroke interface.
- *  \par Function Description
- *  This is the initialization function for the stroke interface. It
- *  initializes the libstroke library and prepare an array of points
- *  for the mouse footprints.
+/*! \brief Initialize the stroke recognition system.
  *
- *  This function has to be called only once at application
- *  initialization before any use of the stroke interface.
+ * This must be called once during application startup. It initializes:
+ * - The libstroke gesture recognition engine (`stroke_init()`), and
+ * - An internal array (`stroke_points`) for recording mouse strokes.
+ *
+ * \note This function must only be called once. Subsequent calls are ignored or rejected.
+ * \warning Not thread-safe.
  */
 void
 x_stroke_init (void)
@@ -60,10 +60,13 @@ x_stroke_init (void)
                                sizeof (StrokePoint));
 }
 
-/*! \brief Frees memory of the stroke interface.
- *  \par Function Description
- *  This function frees the memory used for the mouse footprint
- *  points. It terminates the use of the stroke interface.
+/*! \brief Finalize the stroke recognition system.
+ *
+ * This function frees the internal `stroke_points` array used to track mouse gestures.
+ * It should be called during application shutdown to release memory.
+ *
+ * \note After this call, stroke input must not be recorded until `x_stroke_init()` is called again.
+ * \warning Not idempotent. Will fail if stroke system was not initialized.
  */
 void
 x_stroke_free (void)
@@ -74,16 +77,17 @@ x_stroke_free (void)
   stroke_points = NULL;
 }
 
-/*! \brief Records a new point for the stroke.
- *  \par Function Description
- *  This function adds the point (<B>x</B>,<B>y</B>) as a new point in
- *  the stroke.
+/*! \brief Record and draw a stroke gesture point.
  *
- * The footprint is updated and the new point is drawn on the drawing area.
+ * Appends a new (x, y) point to the stroke trail, sends it to libstroke,
+ * and draws a line to the previous point for visual feedback.
  *
- *  \param [in] w_current The GschemToplevel object.
- *  \param [in] x        The X coord of the new point.
- *  \param [in] Y        The X coord of the new point.
+ * \param [in] w_current The active GschemToplevel.
+ * \param [in] x         The current X coordinate (device pixels).
+ * \param [in] y         The current Y coordinate (device pixels).
+ *
+ * \note Drawing uses the world-to-screen matrix from page geometry.
+ *       Function is a no-op for the first point (no prior segment to draw).
  */
 void
 x_stroke_record (GschemToplevel *w_current, gint x, gint y)
@@ -101,7 +105,6 @@ x_stroke_record (GschemToplevel *w_current, gint x, gint y)
 
   if (stroke_points->len < STROKE_MAX_POINTS) {
     StrokePoint point = { x, y };
-
     g_array_append_val (stroke_points, point);
 
     if (stroke_points->len == 1)
@@ -110,51 +113,52 @@ x_stroke_record (GschemToplevel *w_current, gint x, gint y)
     StrokePoint *last_point = &g_array_index (stroke_points, StrokePoint,
                                               stroke_points->len - 2);
 
-    cairo_t *cr = gdk_cairo_create (gtk_widget_get_window (GTK_WIDGET(view)));
-    COLOR *color = x_color_lookup (STROKE_COLOR);
-    cairo_set_source_rgba (cr,
-                           color->r / 255.0,
-                           color->g / 255.0,
-                           color->b / 255.0,
-                           color->a / 255.0);
+    GtkWidget *widget = GTK_WIDGET(view);
+    if (gtk_widget_get_window(widget) != NULL) {
+      cairo_t *cr = gdk_cairo_create(gtk_widget_get_window(widget));
+      g_return_if_fail(cr != NULL);
 
-    cairo_set_matrix (cr, gschem_page_geometry_get_world_to_screen_matrix (geometry));
-    x0 = last_point->x;
-    y0 = last_point->y;
-    x1 = x;
-    y1 = y;
-    cairo_device_to_user (cr, &x0, &y0);
-    cairo_device_to_user (cr, &x1, &y1);
-    cairo_get_matrix (cr, &user_to_device_matrix);
-    cairo_save (cr);
-    cairo_identity_matrix (cr);
+      COLOR *color = x_color_lookup (STROKE_COLOR);
+      cairo_set_source_rgba (cr,
+                             color->r / 255.0,
+                             color->g / 255.0,
+                             color->b / 255.0,
+                             color->a / 255.0);
 
-    cairo_matrix_transform_point (&user_to_device_matrix, &x0, &y0);
-    cairo_matrix_transform_point (&user_to_device_matrix, &x1, &y1);
+      cairo_set_matrix (cr, gschem_page_geometry_get_world_to_screen_matrix (geometry));
 
-    cairo_move_to (cr, x0, y0);
-    cairo_line_to (cr, x1, y1);
-    cairo_stroke (cr);
-    cairo_restore (cr);
-    cairo_destroy (cr);
-  }
+      x0 = last_point->x;
+      y0 = last_point->y;
+      x1 = x;
+      y1 = y;
 
+      cairo_device_to_user (cr, &x0, &y0);
+      cairo_device_to_user (cr, &x1, &y1);
+
+      cairo_get_matrix (cr, &user_to_device_matrix);
+      cairo_save (cr);
+      cairo_identity_matrix (cr);
+
+      cairo_matrix_transform_point (&user_to_device_matrix, &x0, &y0);
+      cairo_matrix_transform_point (&user_to_device_matrix, &x1, &y1);
+
+      cairo_move_to (cr, x0, y0);
+      cairo_line_to (cr, x1, y1);
+      cairo_stroke (cr);
+      cairo_restore (cr);
+      cairo_destroy (cr);
+    }
+  } // <-- closes STROKE_MAX_POINTS guard
 }
 
-/*! \brief Evaluates the stroke.
- *  \par Function Description
- *  This function transforms the stroke input so far in an action.
+/*! \brief Translate and evaluate the current stroke sequence.
  *
- *  It makes use of the guile procedure <B>eval-stroke</B> to evaluate
- *  the stroke sequence into a possible action. The mouse footprint is
- *  erased in this function.
+ * Converts the list of recorded stroke points into a gesture string,
+ * evaluates it using the embedded Guile interpreter, and erases the
+ * temporary on-screen stroke trace.
  *
- *  It returns 1 if the stroke has been successfully evaluated as an
- *  action. It returns 0 if libstroke failed to transform the stroke
- *  or there is no action attached to the stroke.
- *
- *  \param [in] w_current The GschemToplevel object.
- *  \returns 1 on success, 0 otherwise.
+ * \param [in] w_current The active GschemToplevel.
+ * \return 1 if stroke was successfully translated and evaluated, 0 otherwise.
  */
 gint
 x_stroke_translate_and_execute (GschemToplevel *w_current)
@@ -166,39 +170,47 @@ x_stroke_translate_and_execute (GschemToplevel *w_current)
 
   g_assert (stroke_points != NULL);
 
+  // No points = no stroke
   if (stroke_points->len == 0)
     return 0;
 
+  // Initialize bounding box
   point = &g_array_index (stroke_points, StrokePoint, 0);
   min_x = max_x = point->x;
   min_y = max_y = point->y;
 
+  // Expand bounding box over all points
   for (i = 1; i < stroke_points->len; i++) {
     point = &g_array_index (stroke_points, StrokePoint, i);
-    min_x = min (min_x, point->x);
-    min_y = min (min_y, point->y);
-    max_x = max (max_x, point->x);
-    max_y = max (max_y, point->y);
+    min_x = MIN (min_x, point->x);
+    min_y = MIN (min_y, point->y);
+    max_x = MAX (max_x, point->x);
+    max_y = MAX (max_y, point->y);
   }
 
+  // Erase stroke trail by invalidating the region
   o_invalidate_rect (w_current, min_x, min_y, max_x + 1, max_y + 1);
 
-  /* resets length of array */
+  // Reset the stroke buffer
   stroke_points->len = 0;
 
-  /* try evaluating stroke */
-  if (stroke_trans ((char*)&sequence)) {
-    gchar *guile_string =
-      g_strdup_printf("(eval-stroke \"%s\")", sequence);
+  // Ask libstroke to translate the recorded gesture into a sequence
+  if (stroke_trans ((char *)sequence)) {
+    gchar *guile_string = g_strdup_printf("(eval-stroke \"%s\")", sequence);
     SCM ret;
 
     scm_dynwind_begin (0);
     scm_dynwind_unwind_handler (g_free, guile_string, SCM_F_WIND_EXPLICITLY);
+
+    // Execute Scheme expression and capture result
     ret = g_scm_c_eval_string_protected (guile_string);
+
     scm_dynwind_end ();
 
+    // Return true if expression was not false
     return (SCM_NFALSEP (ret));
   }
 
+  // Stroke could not be interpreted
   return 0;
 }

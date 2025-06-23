@@ -147,8 +147,8 @@ if test "x$have_pango" = "xno"; then
   AC_MSG_ERROR([Pango/PangoCairo >= 1.10.0 not found. Please install the Pango development package (e.g., libpango1.0-dev).])
 fi
 
-# Check for GTK+ 2.x (includes GDK, needed by libgedacairo and gschem, gattrib etc.)
-PKG_CHECK_MODULES(GTK, gtk+-2.0 >= 2.10.0,
+# Check for GTK+ 3.x (includes GDK, needed by libgedacairo and gschem, gattrib etc.)
+PKG_CHECK_MODULES(GTK, gtk+-3.0 >= 3.24.0,
                   [have_gtk=yes], [have_gtk=no])
 if test "x$have_gtk" = "xno"; then
   AC_MSG_ERROR([GTK+ 2.x (>= 2.10.0) not found. Please install the GTK+ 2 development package (e.g., libgtk2.0-dev).])

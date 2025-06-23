@@ -42,9 +42,6 @@
 
 
 
-#define INVALIDATE_MARGIN 1
-
-
 
 enum
 {
@@ -176,20 +173,29 @@ dispose (GObject *object)
 
 
 
-/*! \brief Event handler for window realized
+/*! \brief Event handler for the "realize" signal on a page view widget.
+ *
+ *  \par Function Description
+ *  This function is called when the GtkWidget backing the GschemPageView
+ *  is realized. At this point, the GdkWindow exists and the widget has a valid
+ *  allocation. We cache the widget's allocation (position and size) for use
+ *  in later layout operations (e.g., size comparisons or redraw heuristics).
+ *
+ *  \param [in] widget  The GtkWidget being realized, castable to GschemPageView.
+ *  \param [in] unused  User data (unused).
  */
 static void
 event_realize(GtkWidget *widget, gpointer unused)
 {
   GschemPageView *view = GSCHEM_PAGE_VIEW(widget);
-  GdkWindow *window = gtk_widget_get_window (widget);
+  GdkWindow *window = gtk_widget_get_window(widget);
 
-  g_return_if_fail (view != NULL);
-  g_return_if_fail (window != NULL);
+  g_return_if_fail(view != NULL);
+  g_return_if_fail(window != NULL);
 
-  gtk_widget_get_allocation (widget, &(view->previous_allocation));
+  // Store the widget's allocation (size and position) for later comparison
+  gtk_widget_get_allocation(widget, &view->previous_allocation);
 }
-
 
 
 /*! \brief Event handler for window unrealized
@@ -1151,41 +1157,49 @@ gschem_page_view_update_vadjustment (GschemPageView *view)
 }
 
 
-/*! \brief Get absolute WORLD coordinate.
- *  \par Function Description
- *  Get absolute WORLD coordinate.
+/*! \brief Convert a screen-space coordinate to absolute WORLD coordinates.
  *
- *  \param [in,out] view The view
- *  \param [in]     val        The coordinate to convert.
- *  \return The converted WORLD coordinate.
+ *  \par Function Description
+ *  Given an integer pixel value (`val`) relative to the GtkWidget width,
+ *  this function calculates the corresponding absolute WORLD coordinate
+ *  using the viewport geometry stored in `page_view`.
+ *
+ *  The formula is:
+ *      world_coord = val * (viewport_right - viewport_left) / widget_width
+ *
+ *  \param [in,out] page_view The GschemPageView instance.
+ *  \param [in]     val        The pixel-based coordinate to convert.
+ *  \return        The computed absolute WORLD coordinate.
  */
 int
 gschem_page_view_WORLDabs(GschemPageView *page_view, int val)
 {
   GtkAllocation allocation;
-  double fw0,fw1,fw,fval;
-  double i;
-  int j;
+  double viewport_left, viewport_right, widget_width, pixel_pos, world_coord;
+  int result;
 
-  GschemPageGeometry *geometry = gschem_page_view_get_page_geometry (page_view);
+  GschemPageGeometry *geometry = gschem_page_view_get_page_geometry(page_view);
+  gtk_widget_get_allocation(GTK_WIDGET(page_view), &allocation);
 
-  gtk_widget_get_allocation (GTK_WIDGET(page_view), &allocation);
+  // Viewport horizontal limits in WORLD units
+  viewport_left = geometry->viewport_left;
+  viewport_right = geometry->viewport_right;
 
-  fw1 = geometry->viewport_right;
-  fw0 = geometry->viewport_left;
-  fw  = allocation.width;
-  fval = val;
-  i = fval * (fw1 - fw0) / fw;
+  // Widget width in pixels
+  widget_width = allocation.width;
+
+  // Convert screen-space `val` into WORLD coordinate
+  pixel_pos = val;
+  world_coord = pixel_pos * (viewport_right - viewport_left) / widget_width;
 
 #ifdef HAS_RINT
-  j = rint(i);
+  result = rint(world_coord);  // round to nearest integer if available
 #else
-  j = i;
+  result = world_coord;        // implicit cast truncates
 #endif
 
-  return(j);
+  return result;
 }
-
 
 
 /*! \brief
@@ -1396,35 +1410,47 @@ gschem_page_view_zoom_text (GschemPageView *view, OBJECT *object, gboolean zoom_
   }
 }
 
-
-/*! \brief Redraw page on the view
+/*!
+ * \brief Redraw the current page onto the view widget.
  *
- *  \param [in] view      The GschemPageView object which page to redraw
+ * This function is invoked during the GtkWidget::draw signal and is responsible
+ * for rendering the schematic page to the screen. It assumes the drawing context
+ * has already been clipped to the region that requires redrawing.
+ *
+ * Since GTK 3 no longer provides a GdkEventExpose with a clipping area, this function
+ * instead queries the widget's full allocation and redraws the entire area.
+ *
+ * \param [in] view       A pointer to the GschemPageView widget.
+ * \param [in] cr         A valid Cairo drawing context.
+ * \param [in] w_current  The associated GschemToplevel instance managing application state.
  */
 void
-gschem_page_view_redraw (GschemPageView *view, GdkEventExpose *event, GschemToplevel *w_current)
+gschem_page_view_redraw(GschemPageView *view, cairo_t *cr, GschemToplevel *w_current)
 {
-  GschemPageGeometry *geometry;
-  PAGE *page;
+  g_return_if_fail(view != NULL);
+  g_return_if_fail(w_current != NULL);
 
 #if DEBUG
-  printf("EXPOSE\n");
+  printf("DRAW EVENT\n");
 #endif
 
-  g_return_if_fail (view != NULL);
-  g_return_if_fail (w_current != NULL);
-
-  page = gschem_page_view_get_page (view);
+  PAGE *page = gschem_page_view_get_page(view);
 
   if (page != NULL) {
-    geometry = gschem_page_view_get_page_geometry (view);
+    GschemPageGeometry *geometry = gschem_page_view_get_page_geometry(view);
 
-    g_return_if_fail (view != NULL);
+    // GTK 3: No event->area, so redraw the full widget
+    GtkAllocation allocation;
+    gtk_widget_get_allocation(GTK_WIDGET(view), &allocation);
 
-    o_redraw_rect (w_current,
-                   gtk_widget_get_window (GTK_WIDGET(view)),
-                   page,
-                   geometry,
-                   &(event->area));
+    GdkRectangle rect = {
+      .x = 0,
+      .y = 0,
+      .width = allocation.width,
+      .height = allocation.height
+    };
+
+    // Perform the redraw using the backend renderer
+    o_redraw_rect(w_current, cr, page, geometry, &rect);
   }
 }

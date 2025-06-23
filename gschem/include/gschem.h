@@ -1,6 +1,7 @@
 /* System headers which gschem headers rely on */
 #include <glib.h>
 #include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>  // For GDK_KEY_* constants (GTK 3+)
 #include <libguile.h>
 #include <libgeda/libgeda.h>
 #include <libgeda/libgedaguile.h>

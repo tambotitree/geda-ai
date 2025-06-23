@@ -59,7 +59,7 @@ static void create_size_menu (GtkComboBox *combo)
   for (i=0; x_image_sizes[i] != NULL;i++) {
     /* Create a new string and add it as an option*/
     buf = g_strdup (x_image_sizes[i]);
-    gtk_combo_box_append_text (GTK_COMBO_BOX (combo), buf);
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), buf);
 
     /* Compare with the default size, to get the default index */
     if (strcasecmp(buf, default_size ) == 0) {
@@ -94,7 +94,7 @@ static void create_type_menu(GtkComboBox *combo)
     if (gdk_pixbuf_format_is_writable (ptr->data)) {
       /* Get the format description and add it to the menu */
       buf = g_strdup (gdk_pixbuf_format_get_description(ptr->data));
-      gtk_combo_box_append_text (GTK_COMBO_BOX (combo), buf);
+      gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), buf);
 
       /* Compare the name with "png" and store the index */
       buf = g_strdup (gdk_pixbuf_format_get_name(ptr->data));
@@ -108,7 +108,7 @@ static void create_type_menu(GtkComboBox *combo)
     ptr = ptr->next;
   }
   g_slist_free (formats);
-  gtk_combo_box_append_text(GTK_COMBO_BOX(combo), "Portable Document Format");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), "Portable Document Format");
 
   /* Set the default menu */
   gtk_combo_box_set_active(GTK_COMBO_BOX(combo), default_index);
@@ -359,7 +359,7 @@ void x_image_setup (GschemToplevel *w_current)
   gtk_box_pack_start (GTK_BOX (vbox1),
       label1, FALSE, FALSE, 0);
 
-  size_combo =  gtk_combo_box_new_text ();
+  size_combo =  gtk_combo_box_text_new ();
   create_size_menu (GTK_COMBO_BOX(size_combo));
 
   gtk_widget_show (size_combo);
@@ -375,7 +375,7 @@ void x_image_setup (GschemToplevel *w_current)
   gtk_box_pack_start (GTK_BOX (vbox2),
       label2, FALSE, FALSE, 0);
 
-  type_combo = gtk_combo_box_new_text ();
+  type_combo = gtk_combo_box_text_new ();
   gtk_box_pack_start (GTK_BOX (vbox2), type_combo, TRUE, TRUE, 0);
   create_type_menu (GTK_COMBO_BOX(type_combo));
 
@@ -458,20 +458,14 @@ static void x_image_convert_to_greyscale(GdkPixbuf *pixbuf)
 
   n_channels = gdk_pixbuf_get_n_channels (pixbuf);
 
-  if (n_channels != 3)
-  {
+  if (n_channels < 3)
     return;
-  }
 
   if (gdk_pixbuf_get_colorspace (pixbuf) != GDK_COLORSPACE_RGB)
-  {
     return;
-  }
 
   if (gdk_pixbuf_get_bits_per_sample (pixbuf) != 8)
-  {
     return;
-  }
 
   width = gdk_pixbuf_get_width (pixbuf);
   height = gdk_pixbuf_get_height (pixbuf);
@@ -479,104 +473,88 @@ static void x_image_convert_to_greyscale(GdkPixbuf *pixbuf)
   rowstride = gdk_pixbuf_get_rowstride (pixbuf);
   pixels = gdk_pixbuf_get_pixels (pixbuf);
 
-  for (j = 0; j < height; j++)
-  {
-    for (i = 0; i < width; i++)
-    {
+  for (j = 0; j < height; j++) {
+    for (i = 0; i < width; i++) {
       p = pixels + j * rowstride + i * n_channels;
 
       new_value = 0.3 * p[0] + 0.59 * p[1] + 0.11 * p[2];
       p[0] = new_value;
       p[1] = new_value;
       p[2] = new_value;
+      // Leave alpha channel (p[3]) unchanged, if present
     }
   }
 }
 
 /*! \todo Finish function documentation!!!
- *  \brief
+ *  \brief Renders the current page to a GdkPixbuf.
  *  \par Function Description
- *
+ *  This function creates an offscreen pixmap and draws the current schematic
+ *  page into it using o_redraw_rect(). It then extracts a GdkPixbuf for export
+ *  or use elsewhere.
  */
-GdkPixbuf
-*x_image_get_pixbuf (GschemToplevel *w_current, int width, int height)
+GdkPixbuf *
+x_image_get_pixbuf(GschemToplevel *w_current, int width, int height)
 {
-  GdkPixbuf *pixbuf;
+  GdkPixbuf *pixbuf = NULL;
+  cairo_surface_t *surface = NULL;
+  cairo_t *cr = NULL;
   GschemPageView *page_view;
-  int origin_x, origin_y, bottom, right;
+  GtkWidget *widget;
+  GdkRectangle rect;
+  int origin_x = 0, origin_y = 0;
+  GschemPageGeometry *old_geometry, *new_geometry;
   GschemToplevel new_w_current;
   GschemOptions options;
   TOPLEVEL toplevel;
-  GdkRectangle rect;
-  GschemPageGeometry *old_geometry, *new_geometry;
-  GdkPixmap *window = NULL;
 
-  page_view = gschem_toplevel_get_current_page_view (w_current);
+  page_view = gschem_toplevel_get_current_page_view(w_current);
+  widget = GTK_WIDGET(page_view);
 
-  old_geometry = gschem_page_view_get_page_geometry (page_view);
-
-  /* Do a copy of the w_current struct and work with it */
-  memcpy(&new_w_current, w_current, sizeof(GschemToplevel));
-  /* Do a copy of the options struct and work with it */
-  memcpy(&options, w_current->options, sizeof(GschemOptions));
-  /* Do a copy of the toplevel struct and work with it */
-  memcpy(&toplevel, w_current->toplevel, sizeof(TOPLEVEL));
-
-  new_w_current.toplevel = &toplevel;
-  new_w_current.options = &options;
-
-  window = gdk_pixmap_new (gtk_widget_get_window (GTK_WIDGET(page_view)), width, height, -1);
-
-  gschem_options_set_grid_mode (new_w_current.options, GRID_MODE_NONE);
-
-  if (toplevel.image_color == FALSE)
-  {
-    /*! \bug Need to handle image color setting properly. See
-     * Launchpad bug 1086530. */
-  }
-
-  origin_x = origin_y = 0;
-  right = width;
-  bottom = height;
+  old_geometry = gschem_page_view_get_page_geometry(page_view);
 
   rect.x = origin_x;
   rect.y = origin_y;
-  rect.width = right - origin_x;
-  rect.height = bottom - origin_y;
+  rect.width = width;
+  rect.height = height;
 
-  new_geometry = gschem_page_geometry_new_with_values (width,
-                                                   height,
-                                                   old_geometry->viewport_left,
-                                                   old_geometry->viewport_top,
-                                                   old_geometry->viewport_right,
-                                                   old_geometry->viewport_bottom,
-                                                   toplevel.init_left,
-                                                   toplevel.init_top,
-                                                   toplevel.init_right,
-                                                   toplevel.init_bottom);
+  // Copy structures
+  memcpy(&new_w_current, w_current, sizeof(GschemToplevel));
+  memcpy(&options, w_current->options, sizeof(GschemOptions));
+  memcpy(&toplevel, w_current->toplevel, sizeof(TOPLEVEL));
 
-  o_redraw_rect (&new_w_current,
-                 window,
-                 toplevel.page_current,
-                 new_geometry,
-                 &rect);
+  new_w_current.options = &options;
+  new_w_current.toplevel = &toplevel;
 
-  gschem_page_geometry_free (new_geometry);
+  gschem_options_set_grid_mode(new_w_current.options, GRID_MODE_NONE);
 
-  /* Get the pixbuf */
-  pixbuf = gdk_pixbuf_get_from_drawable (NULL, window, NULL,
-                                        origin_x, origin_y, 0, 0,
-                                        right-origin_x,
-                                        bottom-origin_y);
+  // Create an image surface in ARGB32
+  cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+  if (cairo_surface_status(surface) != CAIRO_STATUS_SUCCESS) {
+    fprintf(stderr, "Failed to create Cairo surface\n");
+    return NULL;
+  }
 
-  if (toplevel.image_color == FALSE)
-  {
+  cairo_t *cr = cairo_create(surface);
+  if (cairo_status(cr) != CAIRO_STATUS_SUCCESS) {
+    fprintf(stderr, "Failed to create Cairo context\n");
+    cairo_surface_destroy(surface);
+    return NULL;
+  }
+
+  gschem_page_geometry_free(new_geometry);
+
+  /* Render into the Cairo context (instead of a pixmap) */
+  o_redraw_cairo_rect(&new_w_current, cr, toplevel.page_current, &rect);  // <== you must write or adapt this function
+
+  cairo_destroy(cr);
+
+  /* Convert Cairo surface to pixbuf */
+  GdkPixbuf *pixbuf = gdk_pixbuf_get_from_surface(surface, 0, 0, width, height);
+  cairo_surface_destroy(surface);
+
+  if (pixbuf != NULL && !toplevel.image_color) {
     x_image_convert_to_greyscale(pixbuf);
   }
 
-  if (window != NULL) {
-    g_object_unref(window);
-  }
-
-  return(pixbuf);
-}
+  return pixbuf;

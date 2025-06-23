@@ -69,16 +69,16 @@ void gschem_action_set_strings (GschemAction *action,
                                 gchar *name, gchar *label, gchar *menu_label,
                                 GschemToplevel *w_current);
 
-GschemAction *gschem_action_register (gchar *id,
-                                      gchar *icon_name,
-                                      gchar *name,
-                                      gchar *label,
-                                      gchar *menu_label,
-                                      gchar *tooltip,
-                                      GschemActionType type,
-                                      void (*activate) (GschemAction *,
-                                                        GschemToplevel *));
-
+GschemAction *gschem_action_register (const gchar *id,
+    const gchar *icon_name,
+    const gchar *name,
+    const gchar *label,
+    const gchar *menu_label,
+    const gchar *tooltip,
+    GschemActionType type,
+    void (*activate) (GschemAction *,
+        GschemToplevel *));
+        
 void gschem_action_init (void);
 
 #endif /* GSCHEM_ACTION_H */

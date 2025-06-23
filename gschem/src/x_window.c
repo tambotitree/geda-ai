@@ -287,54 +287,75 @@ x_window_state_event (GtkWidget *widget,
   return FALSE;  /* propagate the event further */
 }
 
+/*!
+ * \brief Save geometry of torn-off submenus (GTK 2 legacy)
+ *
+ * GTK 3 has removed tear-off menus, so this function now only
+ * saves menu geometry if the menu has a stored `settings-name`
+ * and is associated with a detachable window (for compatibility).
+ *
+ * \param [in] menu_shell   The menu shell to recurse through.
+ * \param [in] w_current    Current top-level window context.
+ */
 static void
 x_window_save_menu_geometry (GtkMenuShell *menu_shell,
                              GschemToplevel *w_current)
 {
-  for (GList *l = gtk_container_get_children (GTK_CONTAINER (menu_shell));
-       l != NULL; l = l->next) {
+  GList *children = gtk_container_get_children (GTK_CONTAINER (menu_shell));
+  for (GList *l = children; l != NULL; l = l->next) {
     GtkMenuItem *menu_item = GTK_MENU_ITEM (l->data);
+    GtkWidget *menu = gtk_menu_item_get_submenu (menu_item);
+    if (menu == NULL) continue;
 
-    GtkWidget *menu = menu_item->submenu;
-    if (menu == NULL)
-      /* not a submenu */
-      continue;
+    gchar *settings_name = g_object_get_data (G_OBJECT (menu), "settings-name");
+    if (settings_name == NULL) continue;
 
-    char *settings_name = g_object_get_data (G_OBJECT (menu), "settings-name");
-    if (settings_name == NULL)
-      /* menu doesn't have a settings name set */
-      continue;
+    // Tear-off menus are removed in GTK 3, but retain legacy logic if any window is set
+    GtkWidget *toplevel = gtk_widget_get_toplevel (menu);
+    if (!GTK_IS_WINDOW (toplevel)) continue;
 
-    gint coords[4];
-    gsize length = 0;
-
-    if (GTK_MENU (menu)->torn_off) {
-      GtkWidget *window = GTK_MENU (menu)->tearoff_window;
-      g_return_if_fail (window != NULL);
-
-      gtk_window_get_position (GTK_WINDOW (window), &coords[0], &coords[1]);
-      gtk_window_get_size (GTK_WINDOW (window), &coords[2], &coords[3]);
-      length = 4;
-    }
+    gint coords[4] = {-1, -1, -1, -1};
+    gtk_window_get_position (GTK_WINDOW (toplevel), &coords[0], &coords[1]);
+    gtk_window_get_size (GTK_WINDOW (toplevel), &coords[2], &coords[3]);
 
     eda_config_set_int_list (
       eda_config_get_user_context (),
-      "gschem.menu-geometry", settings_name, coords, length);
+      "gschem.menu-geometry", settings_name, coords, 4);
 
+    // Recursively save geometry for nested menus
     x_window_save_menu_geometry (GTK_MENU_SHELL (menu), w_current);
   }
+  g_list_free (children);
 }
 
+/*!
+ * \brief Save current window and dock geometry
+ *
+ * \par Function Description
+ * This function stores the current geometry of the main window and the
+ * docked areas (left, bottom, right) into persistent user configuration.
+ *
+ * If the main window is in a "normal" (non-maximized, non-fullscreen)
+ * state, its dimensions are saved. Additionally, it saves the dimensions
+ * of torn-off menus (if present) and the widths/heights of docked notebooks.
+ *
+ * Allocation is retrieved using `gtk_widget_get_allocation()` in GTK 3.
+ *
+ * \param [in] w_current  The current toplevel context (main application state)
+ */
 static void
 x_window_save_geometry (GschemToplevel *w_current)
 {
   gchar *window_state;
   GtkAllocation allocation;
 
-  /* save window geometry */
-  window_state = eda_config_get_string (eda_config_get_user_context (),
-                                        "gschem.window-geometry",
-                                        "state", NULL);
+  // Retrieve saved window state string ("normal", "maximized", etc.)
+  window_state = eda_config_get_string (
+                   eda_config_get_user_context (),
+                   "gschem.window-geometry",
+                   "state", NULL);
+
+  // Save main window size only if in "normal" (not maximized/fullscreen) state
   if (window_state != NULL && strcmp (window_state, "normal") == 0) {
     gint width = -1, height = -1;
     gtk_window_get_size (GTK_WINDOW (w_current->main_window), &width, &height);
@@ -347,48 +368,58 @@ x_window_save_geometry (GschemToplevel *w_current)
   }
   g_free (window_state);
 
-  /* save torn-off menus */
-  if (w_current->menubar != NULL)
+  // Save geometry of torn-off menus (if any)
+  if (w_current->menubar != NULL) {
     x_window_save_menu_geometry (
       GTK_MENU_SHELL (w_current->menubar), w_current);
+  }
 
-  /* save dock area geometry */
+  // Save width of the left docked notebook pane
   gtk_widget_get_allocation (w_current->left_notebook, &allocation);
-  if (allocation.width > 0)
+  if (allocation.width > 0) {
     eda_config_set_int (eda_config_get_user_context (),
                         "gschem.dock-geometry.left",
                         "size", allocation.width);
+  }
 
+  // Save height of the bottom docked notebook pane
   gtk_widget_get_allocation (w_current->bottom_notebook, &allocation);
-  if (allocation.height > 0)
+  if (allocation.height > 0) {
     eda_config_set_int (eda_config_get_user_context (),
                         "gschem.dock-geometry.bottom",
                         "size", allocation.height);
+  }
 
+  // Save width of the right docked notebook pane
   gtk_widget_get_allocation (w_current->right_notebook, &allocation);
-  if (allocation.width > 0)
+  if (allocation.width > 0) {
     eda_config_set_int (eda_config_get_user_context (),
                         "gschem.dock-geometry.right",
                         "size", allocation.width);
+  }
 }
 
+/*!
+ * \brief Restore geometry of previously torn-off menus (legacy)
+ *
+ * GTK 3 removed tear-off menus, so this function now restores geometry
+ * only if the submenu has a known settings name and is a top-level window.
+ *
+ * \param [in] menu_shell  The menu shell to walk through recursively.
+ * \param [in] w_current   Current top-level window context.
+ */
 static void
 x_window_restore_menu_geometry (GtkMenuShell *menu_shell,
                                 GschemToplevel *w_current)
 {
-  for (GList *l = gtk_container_get_children (GTK_CONTAINER (menu_shell));
-       l != NULL; l = l->next) {
+  GList *children = gtk_container_get_children (GTK_CONTAINER (menu_shell));
+  for (GList *l = children; l != NULL; l = l->next) {
     GtkMenuItem *menu_item = GTK_MENU_ITEM (l->data);
+    GtkWidget *menu = gtk_menu_item_get_submenu (menu_item);
+    if (menu == NULL) continue;
 
-    GtkWidget *menu = menu_item->submenu;
-    if (menu == NULL)
-      /* not a submenu */
-      continue;
-
-    char *settings_name = g_object_get_data (G_OBJECT (menu), "settings-name");
-    if (settings_name == NULL)
-      /* menu doesn't have a settings name set */
-      continue;
+    gchar *settings_name = g_object_get_data (G_OBJECT (menu), "settings-name");
+    if (settings_name == NULL) continue;
 
     gsize length = 0;
     gint *coords = eda_config_get_int_list (
@@ -396,20 +427,30 @@ x_window_restore_menu_geometry (GtkMenuShell *menu_shell,
       "gschem.menu-geometry", settings_name, &length, NULL);
 
     if (coords != NULL && length == 4) {
-      gtk_menu_set_tearoff_state (GTK_MENU (menu), TRUE);
-
-      GtkWidget *window = GTK_MENU (menu)->tearoff_window;
-      g_return_if_fail (window != NULL);
-
-      gtk_window_move (GTK_WINDOW (window), coords[0], coords[1]);
-      gtk_window_resize (GTK_WINDOW (window), coords[2], coords[3]);
+      GtkWidget *window = gtk_widget_get_toplevel (menu);
+      if (GTK_IS_WINDOW (window)) {
+        gtk_window_move (GTK_WINDOW (window), coords[0], coords[1]);
+        gtk_window_resize (GTK_WINDOW (window), coords[2], coords[3]);
+      }
     }
-    g_free(coords);
+    g_free (coords);
 
+    // Recurse into nested menus
     x_window_restore_menu_geometry (GTK_MENU_SHELL (menu), w_current);
   }
+  g_list_free (children);
 }
 
+/*!
+ * \brief Restore geometry of all top-level menus.
+ *
+ * This is typically scheduled as an idle function to run once after the UI
+ * is fully realized. It disconnects itself and calls the recursive
+ * restoration logic for menu geometry.
+ *
+ * \param [in] w_current The GschemToplevel context.
+ * \returns FALSE to remove the idle function from the main loop.
+ */
 static gboolean
 x_window_restore_all_menu_geometry (GschemToplevel *w_current)
 {
@@ -417,20 +458,31 @@ x_window_restore_all_menu_geometry (GschemToplevel *w_current)
     G_OBJECT (w_current->main_window),
     G_CALLBACK (x_window_restore_all_menu_geometry), w_current);
 
-  if (w_current->menubar != NULL)
-    x_window_restore_menu_geometry (
+  if (w_current->menubar != NULL) {
+    x_window_restore_menu_geometry(
       GTK_MENU_SHELL (w_current->menubar), w_current);
+  }
 
   return FALSE;
 }
 
+/*!
+ * \brief Restores the main window and dock area geometry from saved configuration.
+ *
+ * This function restores the main window's size and state (normal, maximized,
+ * or fullscreen), and resizes each docking pane to its saved dimension. It also
+ * sets up a deferred restoration of torn-off menu geometries after the window
+ * receives focus.
+ *
+ * \param [in] w_current The current GschemToplevel instance.
+ */
 static void
 x_window_restore_geometry (GschemToplevel *w_current)
 {
   gint width, height, dock_size;
   gchar *window_state;
 
-  /* restore main window size */
+  /* Restore main window size from config */
   width = eda_config_get_int (eda_config_get_user_context (),
                               "gschem.window-geometry", "width", NULL);
   height = eda_config_get_int (eda_config_get_user_context (),
@@ -439,73 +491,74 @@ x_window_restore_geometry (GschemToplevel *w_current)
     width = 1320;
     height = 990;
   }
+
   g_object_set (w_current->main_window,
                 "default-width", width,
                 "default-height", height,
                 NULL);
 
-  /* restore main window state */
+  /* Restore window state (fullscreen, maximized) */
   window_state = eda_config_get_string (eda_config_get_user_context (),
                                         "gschem.window-geometry",
                                         "state", NULL);
-  if (window_state != NULL && strcmp (window_state, "fullscreen") == 0)
+  if (window_state != NULL && strcmp (window_state, "fullscreen") == 0) {
     gtk_window_fullscreen (GTK_WINDOW (w_current->main_window));
-  else if (window_state != NULL && strcmp (window_state, "maximized") == 0)
+  } else if (window_state != NULL && strcmp (window_state, "maximized") == 0) {
     gtk_window_maximize (GTK_WINDOW (w_current->main_window));
+  }
   g_free (window_state);
 
-  /* defer restoring torn-off menus until main window is shown */
+  /* Defer menu geometry restoration until focus-in */
   g_signal_connect_swapped (
     G_OBJECT (w_current->main_window), "focus-in-event",
     G_CALLBACK (x_window_restore_all_menu_geometry), w_current);
 
-  /* restore docking area dimensions */
+  /* Restore dock pane sizes from config */
   dock_size = eda_config_get_int (eda_config_get_user_context (),
                                   "gschem.dock-geometry.left", "size", NULL);
-  if (dock_size <= 0)
-    dock_size = 330;
-  gtk_widget_set_size_request (w_current->left_notebook, dock_size, 0);
+  gtk_widget_set_size_request (w_current->left_notebook,
+                               dock_size > 0 ? dock_size : 330, 0);
 
   dock_size = eda_config_get_int (eda_config_get_user_context (),
                                   "gschem.dock-geometry.bottom", "size", NULL);
-  if (dock_size <= 0)
-    dock_size = 165;
-  gtk_widget_set_size_request (w_current->bottom_notebook, 0, dock_size);
+  gtk_widget_set_size_request (w_current->bottom_notebook,
+                               0, dock_size > 0 ? dock_size : 165);
 
   dock_size = eda_config_get_int (eda_config_get_user_context (),
                                   "gschem.dock-geometry.right", "size", NULL);
-  if (dock_size <= 0)
-    dock_size = 330;
-  gtk_widget_set_size_request (w_current->right_notebook, dock_size, 0);
+  gtk_widget_set_size_request (w_current->right_notebook,
+                               dock_size > 0 ? dock_size : 330, 0);
 }
 
-
-/*! \todo Finish function documentation!!!
- *  \brief
- *  \par Function Description
+/*!
+ * \brief Handler for the window manager's close request (WM delete event).
  *
- *  \note
- *  When invoked (via signal delete_event), closes the current window
- *  if this is the last window, quit gschem
- *  used when you click the close button on the window which sends a DELETE
- *  signal to the app
+ * \par Function Description
+ * This function is connected to the `delete-event` signal of the main application window.
+ * It is triggered when the user attempts to close the window via the window manager 
+ * (e.g., clicking the window's close button). It handles cleanup and determines
+ * whether to quit the application.
+ *
+ * \param [in] widget The widget receiving the event (should be a GtkWindow).
+ * \param [in] event  The event that triggered the signal (usually GdkEventAny).
+ * \param [in] data   Pointer to the current GschemToplevel instance.
+ *
+ * \returns TRUE to stop further signal propagation (prevents default GTK handling).
  */
 static gboolean
 x_window_close_wm (GtkWidget *widget, GdkEvent *event, gpointer data)
 {
   GschemToplevel *w_current = GSCHEM_TOPLEVEL (data);
-  g_return_val_if_fail ((w_current != NULL), TRUE);
+  g_return_val_if_fail (w_current != NULL, TRUE);
 
+  // Attempt to close the window and perform shutdown if appropriate
   x_window_close(w_current);
 
-  /* stop further propagation of the delete_event signal for window: */
-  /*   - if user has cancelled the close the window should obvioulsy */
-  /*   not be destroyed */
-  /*   - otherwise window has already been destroyed, nothing more to */
-  /*   do */
+  // Stop further propagation of the delete-event:
+  // - If user canceled, window should remain open.
+  // - If closed, GTK has already destroyed the window.
   return TRUE;
 }
-
 
 void
 x_window_update_file_change_notification (GschemToplevel *w_current,
@@ -629,11 +682,66 @@ x_window_patch_change_response (GschemChangeNotification *chnot,
   }
 }
 
-
-/*! \todo Finish function documentation!!!
- *  \brief
- *  \par Function Description
+/**
+ * \brief Initialize and configure the main gschem window.
  *
+ * \param w_current The top-level gschem context.
+ *
+ * This function creates the main GtkWindow, sets its name and size policy,
+ * connects the delete-event handler, and ensures it is displayed. 
+ * If auto_place_mode is enabled, the window is positioned after realization.
+ */
+static void
+x_window_setup_main_window(GschemToplevel *w_current)
+{
+  w_current->main_window = GTK_WIDGET(gschem_main_window_new());
+
+  gtk_widget_set_name(w_current->main_window, "gschem");
+
+  /* GTK 3 deprecated gtk_window_set_policy; safe to remove */
+  // gtk_window_set_policy(GTK_WINDOW(w_current->main_window), TRUE, TRUE, TRUE);
+
+  /* Signal connection for window close (delete-event) */
+  g_signal_connect(G_OBJECT(w_current->main_window), "delete-event",
+                   G_CALLBACK(x_window_close_wm), w_current);
+
+  /* Realize the window so we can position it later if needed */
+  gtk_widget_realize(w_current->main_window);
+  gtk_widget_show(w_current->main_window);  // now safe to position in GTK 3
+
+  /*
+   * Normally we let the window manager handle window location.
+   * But for batch runs (like rendering PDFs), auto_place_mode overrides this.
+   */
+  if (auto_place_mode) {
+    gtk_window_move(GTK_WINDOW(w_current->main_window), 10, 10);
+  }
+}
+
+/*!
+ * \brief Constructs and lays out the main gschem window and all UI components.
+ *
+ * \par Function Description
+ * This function is responsible for creating the main user interface of gschem.
+ * It sets up the primary window, menubar, toolbar, dockable panels, drawing area,
+ * notification bars, and other auxiliary widgets. All elements are composed into a
+ * nested container hierarchy using paned widgets (`GtkHPaned`, `GtkVPaned`) and boxes
+ * (`GtkVBox`), providing an extensible and flexible UI layout.
+ *
+ * This includes:
+ * - Initializing the main GtkWindow and connecting signals (e.g., close handlers)
+ * - Creating the menu and toolbar, optionally placing them in GtkHandleBoxes
+ * - Creating left, right, and bottom dockable notebooks for additional UI panels
+ * - Constructing the work area with a scrolled drawing widget
+ * - Adding custom GObject-based widgets for file change notifications, find/hide/show text,
+ *   macro controls, and dockables like Options, Patch, Pagesel, etc.
+ * - Initializing adjustments for scrollbars, which are optionally visible
+ * - Restoring saved window geometry and visibility settings for notebooks and dockables
+ *
+ * \note This function makes extensive use of gschem-specific custom widgets and 
+ * application-level settings stored in `w_current`.
+ *
+ * \param w_current A pointer to the current GschemToplevel object representing the top-level state.
  */
 void x_window_create_main(GschemToplevel *w_current)
 {
@@ -653,96 +761,103 @@ void x_window_create_main(GschemToplevel *w_current)
   w_current->main_window = GTK_WIDGET (gschem_main_window_new ());
 
   gtk_widget_set_name (w_current->main_window, "gschem");
-  gtk_window_set_policy (GTK_WINDOW (w_current->main_window), TRUE, TRUE, TRUE);
+  // gtk_window_set_policy is deprecated and removed; do not use.
+
 
   /* We want the widgets to flow around the drawing area, so we don't
    * set a size of the main window.  The drawing area's size is fixed,
    * see below
    */
 
-   /*
-    * normally we let the window manager handle locating and sizing
-    * the window.  However, for some batch processing of schematics
-    * (generating a pdf of all schematics for example) we want to
-    * override this.  Hence "auto_place_mode".
-    */
-   if( auto_place_mode )
-   	gtk_widget_set_uposition (w_current->main_window, 10, 10);
+  /*
+  * By default, we let the window manager handle window placement.
+  * However, for batch-mode schematic rendering (e.g., exporting PDFs),
+  * we override this using `auto_place_mode`. In that case, the window
+  * will be moved to a fixed location (e.g., top-left of the screen).
+  *
+  * NOTE: gtk_widget_set_uposition() is deprecated; we now use
+  * gtk_window_move(), which must be called after the window is shown.
+  */
 
-  /* this should work fine */
-  g_signal_connect (G_OBJECT (w_current->main_window), "delete_event",
-                    G_CALLBACK (x_window_close_wm), w_current);
+  g_signal_connect (w_current->main_window, "delete_event",
+    G_CALLBACK (x_window_close_wm), w_current);
+
+  /* Show everything before moving the window manually */
+  gtk_widget_show_all (w_current->main_window);
+  if (auto_place_mode) {
+      gtk_window_move(GTK_WINDOW(w_current->main_window), 10, 10);
+  }
+  /* Don't connect 'delete_event' twice */
 
   /* Containers first */
-  main_box = gtk_vbox_new(FALSE, 1);
-  gtk_container_set_border_width (GTK_CONTAINER (main_box), 0);
+  main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 1);
+  gtk_container_set_border_width(GTK_CONTAINER(main_box), 0);
   gtk_container_add(GTK_CONTAINER(w_current->main_window), main_box);
 
-  x_menus_create_main_menu (w_current);
+  x_menus_create_main_menu(w_current);
   if (w_current->menubar != NULL) {
     if (w_current->handleboxes) {
-      handlebox = gtk_handle_box_new ();
-      gtk_box_pack_start (GTK_BOX (main_box), handlebox, FALSE, FALSE, 0);
-      gtk_container_add (GTK_CONTAINER (handlebox), w_current->menubar);
+      handlebox = gtk_handle_box_new();  // Deprecated, but keep for now
+      gtk_container_add(GTK_CONTAINER(handlebox), w_current->menubar);
+      gtk_box_pack_start(GTK_BOX(main_box), handlebox, FALSE, FALSE, 0);
     } else {
-      gtk_box_pack_start (GTK_BOX (main_box), w_current->menubar,
-                          FALSE, FALSE, 0);
+      gtk_box_pack_start(GTK_BOX(main_box), w_current->menubar, FALSE, FALSE, 0);
     }
   }
-  gschem_action_set_sensitive (action_view_menubar, w_current->menubar != NULL,
-                               w_current);
-  gschem_action_set_active (action_view_menubar, w_current->menubar != NULL,
-                            w_current);
 
-  gtk_widget_realize (w_current->main_window);
+  gschem_action_set_sensitive(action_view_menubar, w_current->menubar != NULL, w_current);
+  gschem_action_set_active(action_view_menubar, w_current->menubar != NULL, w_current);
+                            
+  // gtk_widget_realize (w_current->main_window);
+  // gtk_widget_realize is rarely needed in GTK 3+, remove unless you depend on windowing internals
 
-  x_menus_create_toolbar (w_current);
+  x_menus_create_toolbar(w_current);
   if (w_current->toolbar != NULL) {
     if (w_current->handleboxes) {
-      handlebox = gtk_handle_box_new ();
-      gtk_box_pack_start (GTK_BOX (main_box), handlebox, FALSE, FALSE, 0);
-      gtk_container_add (GTK_CONTAINER (handlebox), w_current->toolbar);
-      gtk_widget_set_visible (handlebox, w_current->toolbars);
-      gtk_widget_set_no_show_all (handlebox, TRUE);
+      handlebox = gtk_handle_box_new();  // Deprecated, but keep for now
+      gtk_container_add(GTK_CONTAINER(handlebox), w_current->toolbar);
+      gtk_box_pack_start(GTK_BOX(main_box), handlebox, FALSE, FALSE, 0);
+      gtk_widget_set_visible(handlebox, w_current->toolbars);
+      gtk_widget_set_no_show_all(handlebox, TRUE);
     } else {
-      gtk_box_pack_start (GTK_BOX (main_box), w_current->toolbar,
-                          FALSE, FALSE, 0);
-      gtk_widget_set_visible (w_current->toolbar, w_current->toolbars);
-      gtk_widget_set_no_show_all (w_current->toolbar, TRUE);
+      gtk_box_pack_start(GTK_BOX(main_box), w_current->toolbar, FALSE, FALSE, 0);
+      gtk_widget_set_visible(w_current->toolbar, w_current->toolbars);
+      gtk_widget_set_no_show_all(w_current->toolbar, TRUE);
     }
   }
-  gschem_action_set_sensitive (action_view_toolbar, w_current->toolbar != NULL,
-                               w_current);
-  gschem_action_set_active (action_view_toolbar,
-                            w_current->toolbars && w_current->toolbar != NULL,
-                            w_current);
 
-  left_hpaned = gtk_hpaned_new ();
-  gtk_container_add (GTK_CONTAINER(main_box), left_hpaned);
+  gschem_action_set_sensitive(action_view_toolbar, w_current->toolbar != NULL, w_current);
+    gschem_action_set_active(action_view_toolbar,
+                             w_current->toolbars && w_current->toolbar != NULL,
+                             w_current);
 
-  w_current->left_notebook = gtk_notebook_new ();
-  gtk_paned_pack1 (GTK_PANED (left_hpaned),
-                   w_current->left_notebook,
-                   FALSE,
-                   TRUE);
-  gtk_notebook_set_group_name (GTK_NOTEBOOK (w_current->left_notebook),
-                               "gschem-dock");
+  left_hpaned = gtk_hpaned_new(); // GTK 3: OK, deprecated in GTK 4
+  gtk_container_add(GTK_CONTAINER(main_box), left_hpaned);
 
-  right_hpaned = gtk_hpaned_new ();
+  w_current->left_notebook = gtk_notebook_new();
+  gtk_paned_pack1(GTK_PANED(left_hpaned),
+                  w_current->left_notebook,
+                  FALSE,
+                  TRUE);
+  gtk_notebook_set_group_name(GTK_NOTEBOOK(w_current->left_notebook),
+                              "gschem-dock");
+
+
+  right_hpaned = gtk_hpaned_new (); // GT3 OK
   gtk_paned_pack2 (GTK_PANED (left_hpaned),
                    right_hpaned,
                    TRUE,
                    TRUE);
 
-  w_current->right_notebook = gtk_notebook_new ();
-  gtk_paned_pack2 (GTK_PANED (right_hpaned),
-                   w_current->right_notebook,
-                   FALSE,
-                   TRUE);
-  gtk_notebook_set_group_name (GTK_NOTEBOOK (w_current->right_notebook),
-                               "gschem-dock");
+  w_current->right_notebook = gtk_notebook_new();
+  gtk_paned_pack2(GTK_PANED(right_hpaned),
+                        w_current->right_notebook,
+                        FALSE,
+                        TRUE);
+  gtk_notebook_set_group_name(GTK_NOTEBOOK(w_current->right_notebook),
+                        "gschem-dock");
 
-  vpaned = gtk_vpaned_new ();
+  vpaned = gtk_vpaned_new (); // GT3 OK
   gtk_paned_pack1 (GTK_PANED (right_hpaned),
                    vpaned,
                    TRUE,
@@ -756,37 +871,36 @@ void x_window_create_main(GschemToplevel *w_current)
   gtk_notebook_set_group_name (GTK_NOTEBOOK (w_current->bottom_notebook),
                                "gschem-dock");
 
-  work_box = gtk_vbox_new (FALSE, 0);
-  gtk_paned_pack1 (GTK_PANED (vpaned),
-                   work_box,
-                   TRUE,
-                   TRUE);
+  work_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+  gtk_paned_pack1(GTK_PANED(vpaned),
+                      work_box,
+                      TRUE,
+                      TRUE);
 
   w_current->file_change_notification =
-    g_object_new (GSCHEM_TYPE_CHANGE_NOTIFICATION,
-                  "gschem-toplevel", w_current,
-                  "message-type", GTK_MESSAGE_QUESTION,
-                  NULL);
-  g_signal_connect (w_current->file_change_notification, "response",
-                    G_CALLBACK (x_window_file_change_response), NULL);
-  gtk_box_pack_start (GTK_BOX (work_box),
-                      w_current->file_change_notification->info_bar,
-                      FALSE, FALSE, 0);
+        g_object_new(GSCHEM_TYPE_CHANGE_NOTIFICATION,
+                           "gschem-toplevel", w_current,
+                           "message-type", GTK_MESSAGE_QUESTION,
+                           NULL);
+  g_signal_connect(w_current->file_change_notification, "response",
+                      G_CALLBACK(x_window_file_change_response), NULL);
+  gtk_box_pack_start(GTK_BOX(work_box),
+                         w_current->file_change_notification->info_bar,
+                         FALSE, FALSE, 0);
 
   w_current->patch_change_notification =
-    g_object_new (GSCHEM_TYPE_CHANGE_NOTIFICATION,
-                  "gschem-toplevel", w_current,
-                  "message-type", GTK_MESSAGE_INFO,
-                  NULL);
-  g_signal_connect (w_current->patch_change_notification, "response",
-                    G_CALLBACK (x_window_patch_change_response), NULL);
-  gtk_box_pack_start (GTK_BOX (work_box),
-                      w_current->patch_change_notification->info_bar,
-                      FALSE, FALSE, 0);
+    g_object_new(GSCHEM_TYPE_CHANGE_NOTIFICATION,
+                     "gschem-toplevel", w_current,
+                     "message-type", GTK_MESSAGE_INFO,
+                     NULL);
+  g_signal_connect(w_current->patch_change_notification, "response",
+                       G_CALLBACK(x_window_patch_change_response), NULL);
+  gtk_box_pack_start(GTK_BOX(work_box),
+                         w_current->patch_change_notification->info_bar,
+                         FALSE, FALSE, 0);
 
   /*  Try to create popup menu (appears in right mouse button  */
   x_menus_create_main_popup (w_current);
-
 
   /* Setup a GtkScrolledWindow for the drawing area */
   hadjustment = GTK_ADJUSTMENT (gtk_adjustment_new (0.0,
@@ -803,7 +917,9 @@ void x_window_create_main(GschemToplevel *w_current)
                                                     100.0,
                                                     10.0));
 
-  scrolled = gtk_scrolled_window_new (hadjustment, vadjustment);
+  scrolled = gtk_scrolled_window_new (NULL, NULL);
+  gtk_scrolled_window_set_hadjustment(GTK_SCROLLED_WINDOW(scrolled), hadjustment);
+  gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scrolled), vadjustment);
   gtk_container_add (GTK_CONTAINER (work_box), scrolled);
   x_window_create_drawing(scrolled, w_current);
   x_window_setup_draw_events(w_current);

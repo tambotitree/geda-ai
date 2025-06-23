@@ -649,20 +649,19 @@ compselect_callback_filter_button_clicked (GtkButton *button,
 
 }
 
-/*! \brief Handles changes of behavior.
+/*! \brief Handles changes in component placement behavior.
+ *
  *  \par Function Description
- *  This function is called every time the value of the option menu
- *  for behaviors is modified.
+ *  This callback is triggered when the user changes the behavior selection
+ *  from the combo box. It notifies the component selection dockable
+ *  that the placement behavior has changed, typically to adjust
+ *  how a component will be inserted into the schematic.
  *
- *  It calls compselect_place to let the parent know that the
- *  requested behavior for the next adding of a component has been
- *  changed.
- *
- *  \param [in] optionmenu The behavior option menu.
- *  \param [in] user_data  The component selection dockable.
+ *  \param [in] combobox   The combo box for selecting component behavior.
+ *  \param [in] user_data  Pointer to the GschemCompselectDockable instance.
  */
 static void
-compselect_callback_behavior_changed (GtkOptionMenu *optionmenu,
+compselect_callback_behavior_changed (GtkComboBoxText *combobox,
                                       gpointer user_data)
 {
   GschemCompselectDockable *compselect = GSCHEM_COMPSELECT_DOCKABLE (user_data);
@@ -1296,17 +1295,17 @@ create_behaviors_combo_box (void)
 {
   GtkWidget *combobox;
 
-  combobox = gtk_combo_box_new_text ();
+  combobox = gtk_combo_box_text_new ();
 
   /* Note: order of items in menu is important */
   /* BEHAVIOR_REFERENCE */
-  gtk_combo_box_append_text (GTK_COMBO_BOX (combobox),
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(show_options), _("Show Value Only")),
                              _("Reference symbol (default)"));
   /* BEHAVIOR_EMBED */
-  gtk_combo_box_append_text (GTK_COMBO_BOX (combobox),
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox),
                              _("Embed symbol in schematic"));
   /* BEHAVIOR_INCLUDE */
-  gtk_combo_box_append_text (GTK_COMBO_BOX (combobox),
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox),
                              _("Include symbol as individual objects"));
 
   gtk_combo_box_set_active (GTK_COMBO_BOX (combobox), 0);
@@ -1622,18 +1621,20 @@ compselect_unprelight_expander (GschemCompselectDockable *compselect,
   gdk_event_free(event);
 }
 
-/*! \brief Callback function: Size of the whole dockable changed.
+/*! \brief Callback: Size of the whole dockable changed.
  *
  * Changes from and to tiled layout when the aspect ratio of the
  * dockable becomes wider and taller than 1:2, respectively.
  */
 static void
 compselect_top_size_allocate (GtkWidget *widget,
-                              GdkRectangle *allocation,
+                              GtkAllocation *alloc,
                               gpointer user_data)
 {
-  compselect_set_tiled (GSCHEM_COMPSELECT_DOCKABLE (user_data),
-                        allocation->width * 2 > allocation->height);
+  // Aspect ratio logic: width / height > 0.5 triggers tiled layout
+  gboolean is_tiled = (alloc->width * 2 > alloc->height);
+
+  compselect_set_tiled (GSCHEM_COMPSELECT_DOCKABLE (user_data), is_tiled);
 }
 
 /*! \brief Callback function: Pointer hovers over expander.
@@ -1681,59 +1682,71 @@ compselect_expander_notify_expanded (GObject *expander,
  *
  * - When the content widgets are assigned a size for the first time,
  *   it calculates the difference between the stored and actual size
- *   and moves the corresponding vpaned's handle accordingly.  (This
- *   is necessary because there is no direct way to set the handle
+ *   and moves the corresponding vpaned's handle accordingly. (This is
+ *   necessary because there is no direct way to set the handle
  *   position relative to the far end of the paned.)
  *
  * - On subsequent size changes, it updates the stored size for that
  *   widget.
+ *
+ * Connected to the "size-allocate" signal.
  */
 static void
 compselect_content_size_allocate (GtkWidget *widget,
-                                  GdkRectangle *allocation,
+                                  GtkAllocation *allocation,
                                   gpointer user_data)
 {
-  GschemCompselectDockable *compselect = GSCHEM_COMPSELECT_DOCKABLE (user_data);
-  if (compselect_is_tiled (compselect))
+  GschemCompselectDockable *compselect = GSCHEM_COMPSELECT_DOCKABLE(user_data);
+
+  // If in tiled layout, do nothing — vertical space isn't used for preview/attribs panes
+  if (compselect_is_tiled(compselect)) {
     return;
+  }
 
   gboolean *size_allocated;
   const gchar *key;
   gint default_height;
   GtkPaned *vpaned;
 
+  // Determine which widget triggered the callback and set references accordingly
   if (widget == compselect->preview_content) {
     size_allocated = &compselect->preview_size_allocated;
     key = "preview-height";
     default_height = 150;
-    vpaned = GTK_PANED (compselect->preview_paned);
+    vpaned = GTK_PANED(compselect->preview_paned);
   } else if (widget == compselect->attribs_content) {
     size_allocated = &compselect->attribs_size_allocated;
     key = "attribs-height";
     default_height = 150;
-    vpaned = GTK_PANED (compselect->attribs_paned);
-  } else
-    g_assert_not_reached ();
+    vpaned = GTK_PANED(compselect->attribs_paned);
+  } else {
+    g_assert_not_reached();  // Should never happen
+  }
 
+  // First-time allocation: adjust pane position relative to stored value
   if (*size_allocated == FALSE) {
-    gint height = eda_config_get_int (eda_config_get_user_context (),
-                                      GSCHEM_DOCKABLE (compselect)->group_name,
-                                      key, NULL);
+    gint height = eda_config_get_int(eda_config_get_user_context(),
+                                     GSCHEM_DOCKABLE(compselect)->group_name,
+                                     key, NULL);
     if (height <= 0)
       height = default_height;
 
-    gtk_paned_set_position (vpaned,
-                            gtk_paned_get_position (vpaned)
-                              - height
-                              + allocation->height);
+    gtk_paned_set_position(vpaned,
+                           gtk_paned_get_position(vpaned)
+                             - height
+                             + allocation->height);
+
     *size_allocated = TRUE;
     return;
   }
 
-  if (allocation->height > 0)
-    eda_config_set_int (eda_config_get_user_context (),
-                        GSCHEM_DOCKABLE (compselect)->group_name,
-                        key, allocation->height);
+  // Otherwise, save the most recent height
+  if (allocation->height > 0) {
+    eda_config_set_int(eda_config_get_user_context(),
+                       GSCHEM_DOCKABLE(compselect)->group_name,
+                       key,
+                       allocation->height);
+  }
 }
 
 static GtkWidget *
@@ -1743,85 +1756,58 @@ compselect_create_widget (GschemDockable *dockable)
   GtkWidget *inuseview, *libview, *notebook;
   GtkWidget *combobox, *preview;
 
-  /* notebook for library and inuse views */
+  // Create notebook tabs
   inuseview = create_inuse_treeview (compselect);
   libview = create_lib_treeview (compselect);
   notebook = gtk_notebook_new ();
   compselect->viewtabs = GTK_NOTEBOOK (notebook);
-  gtk_notebook_append_page (GTK_NOTEBOOK (notebook), inuseview,
-                            gtk_label_new (_("In Use")));
-  gtk_notebook_append_page (GTK_NOTEBOOK (notebook), libview,
-                            gtk_label_new (_("Libraries")));
 
-  /* vertical pane containing preview and attributes */
+  gtk_notebook_append_page (compselect->viewtabs, inuseview, gtk_label_new (_("In Use")));
+  gtk_notebook_append_page (compselect->viewtabs, libview, gtk_label_new (_("Libraries")));
+
+  // Create frames
   compselect->preview_frame = gtk_frame_new (_("Preview"));
   compselect->attribs_frame = gtk_frame_new (_("Attributes"));
-  compselect->vpaned = gtk_vpaned_new ();
+
+  // Vertical paned layout
+  compselect->vpaned = gtk_paned_new (GTK_ORIENTATION_VERTICAL);
   gtk_widget_set_size_request (compselect->vpaned, 25, -1);
-  gtk_paned_pack1 (GTK_PANED (compselect->vpaned), compselect->preview_frame,
-                   FALSE, FALSE);
-  gtk_paned_pack2 (GTK_PANED (compselect->vpaned), compselect->attribs_frame,
-                   FALSE, FALSE);
+  gtk_paned_pack1 (GTK_PANED (compselect->vpaned), compselect->preview_frame, FALSE, FALSE);
+  gtk_paned_pack2 (GTK_PANED (compselect->vpaned), compselect->attribs_frame, FALSE, FALSE);
 
-  /* horizontal pane containing selection and preview/attributes */
-  compselect->hpaned = gtk_hpaned_new ();
+  // Horizontal paned layout
+  compselect->hpaned = gtk_paned_new (GTK_ORIENTATION_HORIZONTAL);
   gtk_paned_pack1 (GTK_PANED (compselect->hpaned), notebook, TRUE, FALSE);
-  gtk_paned_pack2 (GTK_PANED (compselect->hpaned), compselect->vpaned,
-                   TRUE, FALSE);
+  gtk_paned_pack2 (GTK_PANED (compselect->hpaned), compselect->vpaned, TRUE, FALSE);
 
-  /* behavior combo box at the bottom */
+  // Behavior combo box
   combobox = create_behaviors_combo_box ();
   compselect->combobox_behaviors = GTK_COMBO_BOX (combobox);
   g_signal_connect (combobox, "changed",
                     G_CALLBACK (compselect_callback_behavior_changed),
                     compselect);
 
-  /* top-level vbox */
-  compselect->vbox = gtk_vbox_new (FALSE, DIALOG_V_SPACING);
-  gtk_box_pack_start (GTK_BOX (compselect->vbox), compselect->hpaned,
-                      TRUE, TRUE, 0);
+  // Top-level VBox → replace with gtk_box_new (vertical)
+  compselect->vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, DIALOG_V_SPACING);
+  gtk_box_pack_start (GTK_BOX (compselect->vbox), compselect->hpaned, TRUE, TRUE, 0);
   gtk_box_pack_start (GTK_BOX (compselect->vbox), combobox, FALSE, FALSE, 0);
   gtk_widget_show_all (compselect->vbox);
   g_object_ref (compselect->vbox);
 
-
-  /* preview area */
+  // Preview
   preview = gschem_preview_new ();
   compselect->preview = GSCHEM_PREVIEW (preview);
-  gtk_widget_set_size_request (preview, 160, 120);
+  gtk_widget_set_size_request (GTK_WIDGET (preview), 160, 120);
 
-  compselect->preview_content = gtk_alignment_new (.5, .5, 1., 1.);
+  compselect->preview_content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   gtk_widget_set_size_request (compselect->preview_content, 0, 15);
   g_signal_connect (compselect->preview_content, "size-allocate",
                     G_CALLBACK (compselect_content_size_allocate), compselect);
-  gtk_container_add (GTK_CONTAINER (compselect->preview_content), preview);
+  gtk_container_add (GTK_CONTAINER (compselect->preview_content), GTK_WIDGET (preview));
   gtk_widget_show_all (compselect->preview_content);
   g_object_ref (compselect->preview_content);
 
-  compselect->preview_box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (compselect->preview_box);
-  g_object_ref (compselect->preview_box);
-
-  compselect->preview_paned = gtk_vpaned_new ();
-  gtk_widget_show (compselect->preview_paned);
-  g_object_ref (compselect->preview_paned);
-
-  compselect->preview_expander = gtk_expander_new_with_mnemonic (_("Preview"));
-  gtk_expander_set_spacing (GTK_EXPANDER (compselect->preview_expander), 3);
-  g_signal_connect (compselect->preview_expander, "enter-notify-event",
-                    G_CALLBACK (compselect_expander_enter_notify_event),
-                    compselect);
-  g_signal_connect (compselect->preview_expander, "notify::expanded",
-                    G_CALLBACK (compselect_expander_notify_expanded),
-                    compselect);
-  gtk_widget_show (compselect->preview_expander);
-  g_object_ref (compselect->preview_expander);
-
-  compselect->preview_expander_event_window = NULL;
-  compselect->preview_size_allocated = FALSE;
-
-
-  /* attributes area */
+  // Attributes
   compselect->attribs_content = create_attributes_treeview (compselect);
   gtk_widget_set_size_request (compselect->attribs_content, -1, 20);
   g_signal_connect (compselect->attribs_content, "size-allocate",
@@ -1829,38 +1815,17 @@ compselect_create_widget (GschemDockable *dockable)
   gtk_widget_show_all (compselect->attribs_content);
   g_object_ref (compselect->attribs_content);
 
-  compselect->attribs_box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (compselect->attribs_box);
-  g_object_ref (compselect->attribs_box);
-
-  compselect->attribs_paned = gtk_vpaned_new ();
-  gtk_widget_show (compselect->attribs_paned);
-  g_object_ref (compselect->attribs_paned);
-
-  compselect->attribs_expander =
-    gtk_expander_new_with_mnemonic (_("Attributes"));
-  gtk_expander_set_spacing (GTK_EXPANDER (compselect->attribs_expander), 3);
-  g_signal_connect (compselect->attribs_expander, "enter-notify-event",
-                    G_CALLBACK (compselect_expander_enter_notify_event),
-                    compselect);
-  g_signal_connect (compselect->attribs_expander, "notify::expanded",
-                    G_CALLBACK (compselect_expander_notify_expanded),
-                    compselect);
-  gtk_widget_show (compselect->attribs_expander);
-  g_object_ref (compselect->attribs_expander);
-
-  compselect->attribs_expander_event_window = NULL;
-  compselect->attribs_size_allocated = FALSE;
-
-
-  /* top-level container widget (will contain one of the other widgets
-     according to the selected layout) */
-  compselect->top = gtk_alignment_new (.5, .5, 1., 1.);
-  gtk_container_set_border_width (GTK_CONTAINER (compselect->top),
-                                  DIALOG_BORDER_SPACING);
+  // Use a simple top-level GtkBox to replace deprecated GtkAlignment
+  compselect->top = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+  gtk_widget_set_margin_top (compselect->top, DIALOG_BORDER_SPACING);
+  gtk_widget_set_margin_bottom (compselect->top, DIALOG_BORDER_SPACING);
+  gtk_widget_set_margin_start (compselect->top, DIALOG_BORDER_SPACING);
+  gtk_widget_set_margin_end (compselect->top, DIALOG_BORDER_SPACING);
   g_signal_connect (compselect->top, "size-allocate",
                     G_CALLBACK (compselect_top_size_allocate), compselect);
+  gtk_box_pack_start (GTK_BOX (compselect->top), compselect->vbox, TRUE, TRUE, 0);
   gtk_widget_show (compselect->top);
+
   return compselect->top;
 }
 

@@ -87,14 +87,14 @@ static scm_t_bits action_tag;
  *       action in actions.c.
  */
 GschemAction *
-gschem_action_register (gchar *id,
-                        gchar *icon_name,
-                        gchar *name,
-                        gchar *label,
-                        gchar *menu_label,
-                        gchar *tooltip,
-                        GschemActionType type,
-                        void (*activate) (GschemAction *, GschemToplevel *))
+gschem_action_register (const gchar *id,
+  const gchar *icon_name,
+  const gchar *name,
+  const gchar *label,
+  const gchar *menu_label,
+  const gchar *tooltip,
+  GschemActionType type,
+  GschemActionCallback callback)
 {
   GschemAction *action = g_new0 (GschemAction, 1);
 
@@ -1011,18 +1011,14 @@ gschem_action_create_tool_button (GschemAction *action,
     g_free (tooltip_text);
   }
 
-  GtkWidget *image = gtk_image_new ();
-  gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (button), image);
+  GtkWidget *image = gtk_image_new_from_icon_name(action->icon_name, GTK_ICON_SIZE_LARGE_TOOLBAR);
 
-  /* If there's a matching stock item, use it.
-     Otherwise lookup the name in the icon theme. */
-  GtkStockItem stock_item;
-  if (gtk_stock_lookup (action->icon_name, &stock_item))
-    gtk_image_set_from_stock (GTK_IMAGE (image), action->icon_name,
-                              GTK_ICON_SIZE_LARGE_TOOLBAR);
-  else
-    gtk_image_set_from_icon_name (GTK_IMAGE (image), action->icon_name,
-                                  GTK_ICON_SIZE_LARGE_TOOLBAR);
+  // Fallback if the icon wasn't found
+  if (!gtk_image_get_storage_type(GTK_IMAGE(image))) {
+    gtk_image_set_from_icon_name(GTK_IMAGE(image), "image-missing", GTK_ICON_SIZE_LARGE_TOOLBAR);
+  }
+
+  gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(button), image);
 
   /* register callback so the action gets run */
   g_object_set_data (G_OBJECT (button), "action", action);

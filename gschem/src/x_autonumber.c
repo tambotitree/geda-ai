@@ -1027,7 +1027,7 @@ void autonumber_set_state(AUTONUMBER_TEXT *autotext)
   gtk_list_store_clear(GTK_LIST_STORE(model));
 
   for (el= autotext->scope_text; el != NULL; el=g_list_next(el)) {
-    gtk_combo_box_append_text(GTK_COMBO_BOX(widget), el->data);
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(widget), el->data);
   }
 
   widget = gtk_bin_get_child(GTK_BIN(widget));
@@ -1280,23 +1280,24 @@ GtkWidget* autonumber_create_dialog(GschemToplevel *w_current)
                     (GtkAttachOptions) (0), 0, 0);
   gtk_misc_set_alignment (GTK_MISC (label6), 0, 0.5);
 
-  scope_number = gtk_combo_box_new_text ();
-  gtk_widget_show (scope_number);
-  gtk_table_attach (GTK_TABLE (table1), scope_number, 1, 2, 1, 2,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (GTK_FILL), 0, 0);
-  gtk_combo_box_append_text (GTK_COMBO_BOX (scope_number), _("Selected objects"));
-  gtk_combo_box_append_text (GTK_COMBO_BOX (scope_number), _("Current page"));
-  gtk_combo_box_append_text (GTK_COMBO_BOX (scope_number), _("Whole hierarchy"));
+  scope_number = gtk_combo_box_text_new();
+  gtk_widget_show(scope_number);
+  gtk_table_attach(GTK_TABLE(table1), scope_number, 1, 2, 1, 2,
+                 GTK_FILL, GTK_FILL, 0, 0);
 
-  scope_skip = gtk_combo_box_new_text ();
-  gtk_widget_show (scope_skip);
-  gtk_table_attach (GTK_TABLE (table1), scope_skip, 1, 2, 2, 3,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (GTK_FILL), 0, 0);
-  gtk_combo_box_append_text (GTK_COMBO_BOX (scope_skip), _("Selected objects"));
-  gtk_combo_box_append_text (GTK_COMBO_BOX (scope_skip), _("Current page"));
-  gtk_combo_box_append_text (GTK_COMBO_BOX (scope_skip), _("Whole hierarchy"));
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scope_number), _("Selected objects"));
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scope_number), _("Current page"));
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scope_number), _("Whole hierarchy"));
+
+
+  scope_skip = gtk_combo_box_text_new();
+  gtk_widget_show(scope_skip);
+  gtk_table_attach(GTK_TABLE(table1), scope_skip, 1, 2, 2, 3,
+                 GTK_FILL, GTK_FILL, 0, 0);
+
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scope_skip), _("Selected objects"));
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scope_skip), _("Current page"));
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scope_skip), _("Whole hierarchy"));
 
   scope_overwrite = gtk_check_button_new_with_mnemonic (_("Overwrite existing numbers"));
   gtk_widget_show (scope_overwrite);

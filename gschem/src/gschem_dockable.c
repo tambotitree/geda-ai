@@ -806,58 +806,80 @@ restore_current_page (GschemToplevel *w_current,
 }
 
 
+/*!
+ * \brief Restore detached dockable windows on application startup.
+ *
+ * This function iterates over all dockables in the current top-level
+ * window and restores their layout state based on the user's config file.
+ *
+ * - If a dockable was previously detached (floating), it is re-detached.
+ * - If the log window is set to open on startup, its display state is
+ *   handled with special care due to a historical GTK rendering bug.
+ *
+ * This function must be called after all dockables have been registered.
+ */
 static void
-restore_detached_dockables (GschemToplevel *w_current)
+restore_detached_dockables(GschemToplevel *w_current)
 {
-  EdaConfig *cfg = eda_config_get_user_context ();
-  g_return_if_fail (cfg != NULL);
+  EdaConfig *cfg = eda_config_get_user_context();
+  g_return_if_fail(cfg != NULL);
 
+  // Loop over all dockables and reapply saved layout state
   for (GList *l = w_current->dockables; l != NULL; l = l->next) {
-    GschemDockable *dockable = GSCHEM_DOCKABLE (l->data);
-    gchar *state = eda_config_get_string (
+    GschemDockable *dockable = GSCHEM_DOCKABLE(l->data);
+    gchar *state = eda_config_get_string(
       cfg, dockable->group_name, "state", NULL);
 
-    if (state != NULL ? strcmp (state, "detached") == 0 :
-          dockable->initial_state == GSCHEM_DOCKABLE_STATE_WINDOW)
-      gschem_dockable_detach (dockable, FALSE);
+    gboolean should_detach =
+      (state != NULL && strcmp(state, "detached") == 0) ||
+      (state == NULL && dockable->initial_state == GSCHEM_DOCKABLE_STATE_WINDOW);
 
-    g_free (state);
+    if (should_detach)
+      gschem_dockable_detach(dockable, FALSE);
+
+    g_free(state);
   }
 
-  /* open up log window on startup */
-  if (w_current->log_window == MAP_ON_STARTUP)
-    switch (gschem_dockable_get_state (w_current->log_dockable)) {
-      case GSCHEM_DOCKABLE_STATE_HIDDEN:
-        /* For whatever reason, this only works if the action area is
-         * hidden while showing the log window.  Otherwise, scrolling
-         * down to the bottom of the log will cause drawing the main
-         * window toolbar icons to break [sic]; but only if the log
-         * window height is about the length of the log or smaller.
-         *
-         * I suspect this may somehow be connected to widget size
-         * allocation, but I'm giving up on debugging this now and
-         * just accept that it may flicker a bit. */
+  // Special case: log window startup behavior
+  if (w_current->log_window == MAP_ON_STARTUP) {
+    switch (gschem_dockable_get_state(w_current->log_dockable)) {
 
-        gschem_dockable_detach (w_current->log_dockable, FALSE);
-        gtk_widget_show (w_current->log_dockable->action_area);
+      case GSCHEM_DOCKABLE_STATE_HIDDEN:
+        /*!
+         * GTK 2-era workaround:
+         *
+         * Showing the log window with the action area *visible* caused
+         * strange side effects:
+         * - main window toolbar icons failed to render
+         * - only when log content height ≈ window height
+         *
+         * Likely due to improper size allocation or queue_draw timing
+         * on child widgets in floating windows.
+         *
+         * Modern GTK 3 may or may not exhibit this. We keep the
+         * workaround for now, but this should be retested.
+         */
+        gschem_dockable_detach(w_current->log_dockable, FALSE);
+        gtk_widget_show(w_current->log_dockable->action_area);
         break;
 
       case GSCHEM_DOCKABLE_STATE_DIALOG:
       case GSCHEM_DOCKABLE_STATE_WINDOW:
-        gtk_window_present (GTK_WINDOW (w_current->log_dockable->window));
+        gtk_window_present(GTK_WINDOW(w_current->log_dockable->window));
         break;
 
       case GSCHEM_DOCKABLE_STATE_DOCKED_LEFT:
-      case GSCHEM_DOCKABLE_STATE_DOCKED_BOTTOM:
       case GSCHEM_DOCKABLE_STATE_DOCKED_RIGHT:
-        present_in_notebook (w_current->log_dockable);
+      case GSCHEM_DOCKABLE_STATE_DOCKED_BOTTOM:
+        present_in_notebook(w_current->log_dockable);
         break;
     }
-  else if (w_current->log_dockable->widget == NULL)
-    /* create the widget so the log window can auto-show if necessary */
-    create_widget (w_current->log_dockable);
-}
 
+  } else if (w_current->log_dockable->widget == NULL) {
+    // Ensure widget is instantiated for later conditional display
+    create_widget(w_current->log_dockable);
+  }
+}
 
 /******************************************************************************/
 

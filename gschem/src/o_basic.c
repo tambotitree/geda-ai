@@ -22,8 +22,6 @@
 #include <math.h>
 #include "gschem.h"
 
-#define INVALIDATE_MARGIN 1
-
 extern COLOR display_colors[MAX_COLORS];
 extern COLOR display_outline_colors[MAX_COLORS];
 
@@ -31,284 +29,300 @@ extern COLOR display_outline_colors[MAX_COLORS];
  * readability issues
  */
 
-/*! \todo Finish function documentation!!!
- *  \brief
- *  \par Function Description
+/**
+ * \brief Redraw a specified rectangular region of the schematic canvas.
  *
+ * This function triggers a redraw of a given rectangular area on the schematic editor's canvas.
+ * It uses the provided Cairo graphics context and renders all relevant objects, overlays, cues,
+ * and selection grips within the region. This allows for efficient partial screen updates.
+ *
+ * \param w_current   The current GschemToplevel context.
+ * \param cr          A Cairo drawing context associated with the target surface.
+ * \param page        The schematic page containing the objects to render.
+ * \param geometry    The page geometry (world-to-screen transformation data).
+ * \param rectangle   The rectangular screen region (in device coordinates) to redraw.
  */
-void o_redraw_rect (GschemToplevel *w_current,
-                    GdkDrawable *drawable,
-                    PAGE *page,
-                    GschemPageGeometry *geometry,
-                    GdkRectangle *rectangle)
+void o_redraw_rect(GschemToplevel *w_current,
+                   cairo_t *cr,
+                   PAGE *page,
+                   GschemPageGeometry *geometry,
+                   GdkRectangle *rectangle)
 {
-  TOPLEVEL *toplevel = gschem_toplevel_get_toplevel (w_current);
+  TOPLEVEL *toplevel = gschem_toplevel_get_toplevel(w_current);
   gboolean draw_selected;
   int grip_half_size;
   double cue_half_size;
   int bloat;
   double dummy = 0.0;
-  GList *obj_list;
-  GList *iter;
+  GList *obj_list, *iter;
   BOX *world_rect;
   EdaRenderer *renderer;
   int render_flags;
   GArray *render_color_map = NULL;
   GArray *render_outline_color_map = NULL;
-  cairo_t *cr;
 
-  g_return_if_fail (w_current != NULL);
-  g_return_if_fail (toplevel != NULL);
-  g_return_if_fail (w_current->toplevel == toplevel);
-  g_return_if_fail (page != NULL);
-  g_return_if_fail (geometry != NULL);
+  g_return_if_fail(w_current != NULL);
+  g_return_if_fail(toplevel != NULL);
+  g_return_if_fail(w_current->toplevel == toplevel);
+  g_return_if_fail(page != NULL);
+  g_return_if_fail(geometry != NULL);
+  g_return_if_fail(cr != NULL);
 
-  cr = gdk_cairo_create (drawable);
+  gdk_cairo_rectangle(cr, rectangle);
+  cairo_clip(cr);
 
-  gdk_cairo_rectangle (cr, rectangle);
-  cairo_clip (cr);
-
-  cairo_save (cr);
-  cairo_set_matrix (cr, gschem_page_geometry_get_world_to_screen_matrix (geometry));
+  cairo_save(cr);
+  cairo_set_matrix(cr, gschem_page_geometry_get_world_to_screen_matrix(geometry));
 
   grip_half_size = GRIP_SIZE / 2;
   cue_half_size = CUE_BOX_SIZE;
-  cairo_user_to_device (cr, &cue_half_size, &dummy);
-  bloat = MAX (grip_half_size, (int)cue_half_size);
+  cairo_user_to_device(cr, &cue_half_size, &dummy);
+  bloat = MAX(grip_half_size, (int)cue_half_size);
 
-
-  world_rect = g_new (BOX, 1);
+  world_rect = g_new(BOX, 1);
 
   double lower_x = rectangle->x - bloat;
   double lower_y = rectangle->y + rectangle->height + bloat;
   double upper_x = rectangle->x + rectangle->width + bloat;
   double upper_y = rectangle->y - bloat;
 
-  cairo_device_to_user (cr, &lower_x, &lower_y);
-  cairo_device_to_user (cr, &upper_x, &upper_y);
+  cairo_device_to_user(cr, &lower_x, &lower_y);
+  cairo_device_to_user(cr, &upper_x, &upper_y);
 
-  world_rect->lower_x = floor (lower_x);
-  world_rect->lower_y = floor (lower_y);
-  world_rect->upper_x = ceil (upper_x);
-  world_rect->upper_y = ceil (upper_y);
+  world_rect->lower_x = floor(lower_x);
+  world_rect->lower_y = floor(lower_y);
+  world_rect->upper_x = ceil(upper_x);
+  world_rect->upper_y = ceil(upper_y);
 
-  obj_list = s_page_objects_in_regions (toplevel,
-                                        page,
-                                        world_rect,
-                                        1);
+  obj_list = s_page_objects_in_regions(toplevel, page, world_rect, 1);
+  g_free(world_rect);
 
-  g_free (world_rect);
-
-  /* Set up renderer based on configuration in w_current */
   render_flags = EDA_RENDERER_FLAG_HINTING;
   if (toplevel->show_hidden_text)
     render_flags |= EDA_RENDERER_FLAG_TEXT_HIDDEN;
   if (w_current->fast_mousepan &&
       gschem_toplevel_get_current_page_view(w_current)->doing_pan)
-    render_flags |= (EDA_RENDERER_FLAG_TEXT_OUTLINE
-                     | EDA_RENDERER_FLAG_PICTURE_OUTLINE);
+    render_flags |= (EDA_RENDERER_FLAG_TEXT_OUTLINE |
+                     EDA_RENDERER_FLAG_PICTURE_OUTLINE);
 
-  /* This color map is used for "normal" rendering. */
-  render_color_map =
-    g_array_sized_new (FALSE, FALSE, sizeof(COLOR), MAX_COLORS);
-  render_color_map =
-    g_array_append_vals (render_color_map, display_colors, MAX_COLORS);
+  render_color_map = g_array_sized_new(FALSE, FALSE, sizeof(COLOR), MAX_COLORS);
+  render_color_map = g_array_append_vals(render_color_map, display_colors, MAX_COLORS);
 
-  /* This color map is used for rendering rubberbanding nets and
-     buses, and objects which are in the process of being placed. */
-  render_outline_color_map =
-    g_array_sized_new (FALSE, FALSE, sizeof(COLOR), MAX_COLORS);
-  render_outline_color_map =
-    g_array_append_vals (render_outline_color_map, display_outline_colors,
-                         MAX_COLORS);
+  render_outline_color_map = g_array_sized_new(FALSE, FALSE, sizeof(COLOR), MAX_COLORS);
+  render_outline_color_map = g_array_append_vals(render_outline_color_map, display_outline_colors, MAX_COLORS);
 
-  /* Set up renderer */
-  renderer = g_object_ref (w_current->renderer);
-  g_object_set (G_OBJECT (renderer),
-                "cairo-context", cr,
-                "grip-size", ((double) grip_half_size * geometry->to_world_x_constant),
-                "render-flags", render_flags,
-                "color-map", render_color_map,
-                NULL);
+  renderer = g_object_ref(w_current->renderer);
+  g_object_set(G_OBJECT(renderer),
+               "cairo-context", cr,
+               "grip-size", ((double)grip_half_size * geometry->to_world_x_constant),
+               "render-flags", render_flags,
+               "color-map", render_color_map,
+               NULL);
 
-  /* Paint background */
-  COLOR *color = x_color_lookup (BACKGROUND_COLOR);
+  COLOR *color = x_color_lookup(BACKGROUND_COLOR);
+  cairo_set_source_rgba(cr,
+                        color->r / 255.0,
+                        color->g / 255.0,
+                        color->b / 255.0,
+                        color->a / 255.0);
+  cairo_paint(cr);
 
-  cairo_set_source_rgba (cr,
-                         color->r / 255.0,
-                         color->g / 255.0,
-                         color->b / 255.0,
-                         color->a / 255.0);
+  x_grid_draw_region(w_current, cr,
+                     rectangle->x, rectangle->y,
+                     rectangle->width, rectangle->height);
 
-  cairo_paint (cr);
-
-  /* Draw grid lines */
-  x_grid_draw_region (w_current, cr,
-                      rectangle->x, rectangle->y,
-                      rectangle->width, rectangle->height);
-
-  /* Determine whether we should draw the selection at all */
   draw_selected = !(w_current->inside_action &&
                     (w_current->event_state == MOVEMODE));
 
-  /* First pass -- render non-selected objects */
-  for (iter = obj_list; iter != NULL; iter = g_list_next (iter)) {
+  for (iter = obj_list; iter != NULL; iter = g_list_next(iter))
+  {
     OBJECT *o_current = iter->data;
-
-    if (!(o_current->dont_redraw || o_current->selected)) {
-      eda_renderer_draw (renderer, o_current);
+    if (!(o_current->dont_redraw || o_current->selected))
+    {
+      eda_renderer_draw(renderer, o_current);
     }
   }
 
-  /* Second pass -- render cues */
-  for (iter = obj_list; iter != NULL; iter = g_list_next (iter)) {
+  for (iter = obj_list; iter != NULL; iter = g_list_next(iter))
+  {
     OBJECT *o_current = iter->data;
-
-    if (!(o_current->dont_redraw || o_current->selected)) {
-      eda_renderer_draw_cues (renderer, o_current);
+    if (!(o_current->dont_redraw || o_current->selected))
+    {
+      eda_renderer_draw_cues(renderer, o_current);
     }
   }
 
-  /* Second pass -- render selected objects, cues & grips. This is
-   * done in a separate pass to non-selected items to make sure that
-   * the selection and grips are never obscured by other objects. */
-  if (draw_selected) {
-    g_object_set (G_OBJECT (renderer),
-                  "override-color", SELECT_COLOR,
-                  NULL);
-    for (iter = geda_list_get_glist (page->selection_list);
-         iter != NULL; iter = g_list_next (iter)) {
+  if (draw_selected)
+  {
+    g_object_set(G_OBJECT(renderer), "override-color", SELECT_COLOR, NULL);
+    for (iter = geda_list_get_glist(page->selection_list);
+         iter != NULL; iter = g_list_next(iter))
+    {
       OBJECT *o_current = iter->data;
-      if (!o_current->dont_redraw) {
-        eda_renderer_draw (renderer, o_current);
-        eda_renderer_draw_cues (renderer, o_current);
-        eda_renderer_draw_grips (renderer, o_current);
+      if (!o_current->dont_redraw)
+      {
+        eda_renderer_draw(renderer, o_current);
+        eda_renderer_draw_cues(renderer, o_current);
+        eda_renderer_draw_grips(renderer, o_current);
       }
     }
-    g_object_set (G_OBJECT (renderer),
-                  "override-color", -1,
-                  NULL);
+    g_object_set(G_OBJECT(renderer), "override-color", -1, NULL);
   }
 
-  if (w_current->inside_action) {
-
-    /* Redraw the rubberband objects (if they were previously visible) */
-    if (page->place_list != NULL) {
-      switch (w_current->event_state) {
-        case COMPMODE:
-        case TEXTMODE:
-        case COPYMODE:
-        case MCOPYMODE:
-        case PASTEMODE:
-          if (w_current->rubber_visible) {
-            /* FIXME shouldn't need to save/restore colormap here */
-            cairo_save (cr);
-            eda_renderer_set_color_map (renderer, render_outline_color_map);
-
-            o_place_draw_rubber (w_current, renderer);
-
-            eda_renderer_set_color_map (renderer, render_color_map);
-            cairo_restore (cr);
-          }
+  if (w_current->inside_action)
+  {
+    if (page->place_list != NULL)
+    {
+      switch (w_current->event_state)
+      {
+      case COMPMODE:
+      case TEXTMODE:
+      case COPYMODE:
+      case MCOPYMODE:
+      case PASTEMODE:
+        if (w_current->rubber_visible)
+        {
+          cairo_save(cr);
+          eda_renderer_set_color_map(renderer, render_outline_color_map);
+          o_place_draw_rubber(w_current, renderer);
+          eda_renderer_set_color_map(renderer, render_color_map);
+          cairo_restore(cr);
+        }
         break;
-        case MOVEMODE:
-          if (w_current->last_drawb_mode != -1) {
-            /* FIXME shouldn't need to save/restore colormap here */
-            cairo_save (cr);
-            eda_renderer_set_color_map (renderer, render_outline_color_map);
-
-            o_move_draw_rubber (w_current, renderer);
-
-            eda_renderer_set_color_map (renderer, render_color_map);
-            cairo_restore (cr);
-          }
-          break;
-        default: break;
+      case MOVEMODE:
+        if (w_current->last_drawb_mode != -1)
+        {
+          cairo_save(cr);
+          eda_renderer_set_color_map(renderer, render_outline_color_map);
+          o_move_draw_rubber(w_current, renderer);
+          eda_renderer_set_color_map(renderer, render_color_map);
+          cairo_restore(cr);
+        }
+        break;
+      default:
+        break;
       }
     }
 
-    if (w_current->rubber_visible) {
-      switch (w_current->event_state) {
-        case ARCMODE    : o_arc_draw_rubber (w_current, renderer); break;
-        case BOXMODE    : o_box_draw_rubber (w_current, renderer); break;
-        case CIRCLEMODE : o_circle_draw_rubber (w_current, renderer); break;
-        case LINEMODE   : o_line_draw_rubber (w_current, renderer); break;
-        case PATHMODE   : o_path_draw_rubber (w_current, renderer); break;
-        case PICTUREMODE: o_picture_draw_rubber (w_current, renderer); break;
-        case PINMODE    : o_pin_draw_rubber (w_current, renderer); break;
-        case BUSMODE:
-          /* FIXME shouldn't need to save/restore colormap here */
-          cairo_save (cr);
-          eda_renderer_set_color_map (renderer, render_outline_color_map);
-
-          o_bus_draw_rubber(w_current, renderer);
-
-          eda_renderer_set_color_map (renderer, render_color_map);
-          cairo_restore (cr);
-          break;
-        case NETMODE:
-          /* FIXME shouldn't need to save/restore colormap here */
-          cairo_save (cr);
-          eda_renderer_set_color_map (renderer, render_outline_color_map);
-
-          o_net_draw_rubber (w_current, renderer);
-
-          eda_renderer_set_color_map (renderer, render_color_map);
-          cairo_restore (cr);
-          break;
-        case GRIPS      : o_grips_draw_rubber (w_current, renderer); break;
-        case SBOX       : o_select_box_draw_rubber (w_current, renderer); break;
-        case ZOOMBOX    : a_zoom_box_draw_rubber (w_current, renderer); break;
-        case OGNRSTMODE : o_ognrst_draw_rubber (w_current, renderer,
-                            rectangle->x, rectangle->y,
-                            rectangle->width, rectangle->height); break;
-        default: break;
+    if (w_current->rubber_visible)
+    {
+      switch (w_current->event_state)
+      {
+      case ARCMODE:
+        o_arc_draw_rubber(w_current, renderer);
+        break;
+      case BOXMODE:
+        o_box_draw_rubber(w_current, renderer);
+        break;
+      case CIRCLEMODE:
+        o_circle_draw_rubber(w_current, renderer);
+        break;
+      case LINEMODE:
+        o_line_draw_rubber(w_current, renderer);
+        break;
+      case PATHMODE:
+        o_path_draw_rubber(w_current, renderer);
+        break;
+      case PICTUREMODE:
+        o_picture_draw_rubber(w_current, renderer);
+        break;
+      case PINMODE:
+        o_pin_draw_rubber(w_current, renderer);
+        break;
+      case BUSMODE:
+        cairo_save(cr);
+        eda_renderer_set_color_map(renderer, render_outline_color_map);
+        o_bus_draw_rubber(w_current, renderer);
+        eda_renderer_set_color_map(renderer, render_color_map);
+        cairo_restore(cr);
+        break;
+      case NETMODE:
+        cairo_save(cr);
+        eda_renderer_set_color_map(renderer, render_outline_color_map);
+        o_net_draw_rubber(w_current, renderer);
+        eda_renderer_set_color_map(renderer, render_color_map);
+        cairo_restore(cr);
+        break;
+      case GRIPS:
+        o_grips_draw_rubber(w_current, renderer);
+        break;
+      case SBOX:
+        o_select_box_draw_rubber(w_current, renderer);
+        break;
+      case ZOOMBOX:
+        a_zoom_box_draw_rubber(w_current, renderer);
+        break;
+      case OGNRSTMODE:
+        o_ognrst_draw_rubber(w_current, renderer,
+                             rectangle->x, rectangle->y,
+                             rectangle->width, rectangle->height);
+        break;
+      default:
+        break;
       }
     }
   }
 
-  g_list_free (obj_list);
-  g_object_unref (G_OBJECT (renderer));
-  g_array_free (render_color_map, TRUE);
-  g_array_free (render_outline_color_map, TRUE);
-
-  cairo_destroy (cr);
+  g_list_free(obj_list);
+  g_object_unref(renderer);
+  g_array_free(render_color_map, TRUE);
+  g_array_free(render_outline_color_map, TRUE);
+  cairo_restore(cr); // matches cairo_save(cr) earlier
 }
-
 
 /*! \todo Finish function documentation!!!
  *  \brief
  *  \par Function Description
  *
  */
-int o_invalidate_rubber (GschemToplevel *w_current)
+int o_invalidate_rubber(GschemToplevel *w_current)
 {
   /* return FALSE if it did not erase anything */
 
   if (!w_current->inside_action)
-    return(FALSE);
+    return (FALSE);
 
-  switch(w_current->event_state) {
+  switch (w_current->event_state)
+  {
 
-    case (ARCMODE)    : o_arc_invalidate_rubber (w_current); break;
-    case (BOXMODE)    : o_box_invalidate_rubber (w_current); break;
-    case (BUSMODE)    : o_bus_invalidate_rubber (w_current); break;
-    case (CIRCLEMODE) : o_circle_invalidate_rubber (w_current); break;
-    case (LINEMODE)   : o_line_invalidate_rubber (w_current); break;
-    case (NETMODE)    : o_net_invalidate_rubber (w_current); break;
-    case (PATHMODE)   : o_path_invalidate_rubber (w_current); break;
-    case (PICTUREMODE): o_picture_invalidate_rubber (w_current); break;
-    case (PINMODE)    : o_pin_invalidate_rubber (w_current); break;
-    case (OGNRSTMODE) : o_ognrst_invalidate_rubber (w_current); break;
+  case (ARCMODE):
+    o_arc_invalidate_rubber(w_current);
+    break;
+  case (BOXMODE):
+    o_box_invalidate_rubber(w_current);
+    break;
+  case (BUSMODE):
+    o_bus_invalidate_rubber(w_current);
+    break;
+  case (CIRCLEMODE):
+    o_circle_invalidate_rubber(w_current);
+    break;
+  case (LINEMODE):
+    o_line_invalidate_rubber(w_current);
+    break;
+  case (NETMODE):
+    o_net_invalidate_rubber(w_current);
+    break;
+  case (PATHMODE):
+    o_path_invalidate_rubber(w_current);
+    break;
+  case (PICTUREMODE):
+    o_picture_invalidate_rubber(w_current);
+    break;
+  case (PINMODE):
+    o_pin_invalidate_rubber(w_current);
+    break;
+  case (OGNRSTMODE):
+    o_ognrst_invalidate_rubber(w_current);
+    break;
 
-    default:
-      return(FALSE);
+  default:
+    return (FALSE);
     break;
   }
 
-  return(TRUE);
+  return (TRUE);
 }
-
 
 /*! \todo Finish function documentation!!!
  *  \brief
@@ -322,72 +336,75 @@ int o_invalidate_rubber (GschemToplevel *w_current)
  */
 int o_redraw_cleanstates(GschemToplevel *w_current)
 {
-  TOPLEVEL *toplevel = gschem_toplevel_get_toplevel (w_current);
+  TOPLEVEL *toplevel = gschem_toplevel_get_toplevel(w_current);
   /* returns FALSE if the function was'nt nessecary */
-  if (w_current->inside_action == 0) {
+  if (w_current->inside_action == 0)
+  {
     return FALSE;
   }
 
-  switch (w_current->event_state) {
-    /* all states with something on the dc */
-    case(COMPMODE):
-      /* De-select the lists in the component selector */
-      x_compselect_deselect (w_current);
+  switch (w_current->event_state)
+  {
+  /* all states with something on the dc */
+  case (COMPMODE):
+    /* De-select the lists in the component selector */
+    x_compselect_deselect(w_current);
 
-      /* Fall through */
-    case(ARCMODE):
-    case(BOXMODE):
-    case(BUSMODE):
-    case(CIRCLEMODE):
-    case(LINEMODE):
-    case(NETMODE):
-    case(PATHMODE):
-    case(PICTUREMODE):
-    case(PINMODE):
-    case(COPYMODE):
-    case(MCOPYMODE):
-    case(MOVEMODE):
-    case(PASTEMODE):
-    case(TEXTMODE):
-    case(GRIPS):
-    case(ZOOMBOX):
-    case(OGNRSTMODE):
-      /* it is possible to cancel in the middle of a place,
-       * so lets be sure to clean up the place_list structure */
+    /* Fall through */
+  case (ARCMODE):
+  case (BOXMODE):
+  case (BUSMODE):
+  case (CIRCLEMODE):
+  case (LINEMODE):
+  case (NETMODE):
+  case (PATHMODE):
+  case (PICTUREMODE):
+  case (PINMODE):
+  case (COPYMODE):
+  case (MCOPYMODE):
+  case (MOVEMODE):
+  case (PASTEMODE):
+  case (TEXTMODE):
+  case (GRIPS):
+  case (ZOOMBOX):
+  case (OGNRSTMODE):
+    /* it is possible to cancel in the middle of a place,
+     * so lets be sure to clean up the place_list structure */
 
-      /* If we're cancelling from a move action, re-wind the
-       * page contents back to their state before we started. */
-      if (w_current->event_state == MOVEMODE) {
-        o_move_cancel (w_current);
-      }
+    /* If we're cancelling from a move action, re-wind the
+     * page contents back to their state before we started. */
+    if (w_current->event_state == MOVEMODE)
+    {
+      o_move_cancel(w_current);
+    }
 
-      /* If we're cancelling from a grip action, call the specific cancel
-       * routine to reset the visibility of the object being modified */
-      if (w_current->event_state == GRIPS)
-        o_grips_cancel (w_current);
+    /* If we're cancelling from a grip action, call the specific cancel
+     * routine to reset the visibility of the object being modified */
+    if (w_current->event_state == GRIPS)
+      o_grips_cancel(w_current);
 
-      /* Free the place list and its contents. If we were in a move
-       * action, the list (refering to objects on the page) would
-       * already have been cleared in o_move_cancel(), so this is OK. */
-      s_delete_object_glist(toplevel, toplevel->page_current->place_list);
-      toplevel->page_current->place_list = NULL;
+    /* Free the place list and its contents. If we were in a move
+     * action, the list (refering to objects on the page) would
+     * already have been cleared in o_move_cancel(), so this is OK. */
+    s_delete_object_glist(toplevel, toplevel->page_current->place_list);
+    toplevel->page_current->place_list = NULL;
 
-      i_action_stop (w_current);
+    i_action_stop(w_current);
 
-      /* touch the select state */
-      i_set_state(w_current, SELECT);
+    /* touch the select state */
+    i_set_state(w_current, SELECT);
 
-      /* from i_cancel() */
-      gschem_page_view_invalidate_all (gschem_toplevel_get_current_page_view (w_current));
-      return TRUE;
+    /* from i_cancel() */
+    gschem_page_view_invalidate_all(gschem_toplevel_get_current_page_view(w_current));
+    return TRUE;
 
-    /* all remaining states without dc changes */
-    case(SELECT):
-    case(PAN):
-    case(MIRRORMODE):
-    case(ROTATEMODE):
-    case(SBOX):
-      return FALSE;
+  /* all remaining states without dc changes */
+  case (SELECT):
+  case (PAN):
+  case (MIRRORMODE):
+  case (ROTATEMODE):
+  case (SBOX):
+    return FALSE;
   }
 
   return FALSE;
@@ -422,18 +439,33 @@ int o_redraw_cleanstates(GschemToplevel *w_current)
  *  \param [in] x2         X coord for corner 2 (SCREEN units)
  *  \param [in] y2         Y coord for corner 2 (SCREEN units)
  */
-void o_invalidate_rect (GschemToplevel *w_current,
-                        int x1, int y1, int x2, int y2)
+
+void o_invalidate_rect(GschemToplevel *w_current,
+                       int x1, int y1,
+                       int x2, int y2)
 {
-  GschemPageView *page_view = gschem_toplevel_get_current_page_view (w_current);
+  g_return_if_fail(w_current != NULL);
 
-  gschem_page_view_invalidate_screen_rect (page_view,
-                                           x1,
-                                           y1,
-                                           x2,
-                                           y2);
+  GschemPageView *view = gschem_toplevel_get_current_page_view(w_current);
+  g_return_if_fail(view != NULL);
+
+  int x = MIN(x1, x2);
+  int y = MIN(y1, y2);
+  int width = ABS(x2 - x1) + 1;
+  int height = ABS(y2 - y1) + 1;
+
+  // Apply conservative redraw padding
+  x -= (INVALIDATE_MARGIN + GRIP_MARGIN);
+  y -= (INVALIDATE_MARGIN + GRIP_MARGIN);
+  width += 2 * (INVALIDATE_MARGIN + GRIP_MARGIN);
+  height += 2 * (INVALIDATE_MARGIN + GRIP_MARGIN);
+
+  GtkWidget *widget = GTK_WIDGET(view);
+  if (!gtk_widget_get_realized(widget))
+    return;
+
+  gschem_page_view_invalidate_screen_rect(view, x, y, width, height);
 }
-
 
 /*! \brief Invalidate on-screen area for an object
  *
@@ -444,30 +476,32 @@ void o_invalidate_rect (GschemToplevel *w_current,
  *  \param [in] w_current  The GschemToplevel object.
  *  \param [in] object     The OBJECT invalidated on screen.
  */
-void o_invalidate (GschemToplevel *w_current, OBJECT *object)
+void o_invalidate(GschemToplevel *w_current, OBJECT *object)
 {
-  if (w_current == NULL || w_current->dont_invalidate) return;
+  if (w_current == NULL || w_current->dont_invalidate)
+    return;
 
   int left, top, bottom, right;
 
-  GschemPageView *page_view = gschem_toplevel_get_current_page_view (w_current);
-  PAGE *page = gschem_page_view_get_page (page_view);
+  GschemPageView *page_view = gschem_toplevel_get_current_page_view(w_current);
+  PAGE *page = gschem_page_view_get_page(page_view);
 
   /* this function may be called before a page is created */
-  if (page == NULL) {
+  if (page == NULL)
+  {
     return;
   }
 
-  if (world_get_single_object_bounds(page->toplevel, object, &left,  &top,
-                                                       &right, &bottom)) {
-    gschem_page_view_invalidate_world_rect (page_view,
-                                            left,
-                                            top,
-                                            right,
-                                            bottom);
+  if (world_get_single_object_bounds(page->toplevel, object, &left, &top,
+                                     &right, &bottom))
+  {
+    gschem_page_view_invalidate_world_rect(page_view,
+                                           left,
+                                           top,
+                                           right,
+                                           bottom);
   }
 }
-
 
 /*! \brief Invalidate on-screen area for a GList of objects
  *
@@ -478,24 +512,23 @@ void o_invalidate (GschemToplevel *w_current, OBJECT *object)
  *  \param [in] w_current  The GschemToplevel object.
  *  \param [in] list       The glist objects invalidated on screen.
  */
-void o_invalidate_glist (GschemToplevel *w_current, GList *list)
+void o_invalidate_glist(GschemToplevel *w_current, GList *list)
 {
   int left, top, bottom, right;
 
-  GschemPageView *page_view = gschem_toplevel_get_current_page_view (w_current);
-  g_return_if_fail (page_view != NULL);
+  GschemPageView *page_view = gschem_toplevel_get_current_page_view(w_current);
+  g_return_if_fail(page_view != NULL);
 
-  PAGE *page = gschem_page_view_get_page (page_view);
-  g_return_if_fail (page != NULL);
+  PAGE *page = gschem_page_view_get_page(page_view);
+  g_return_if_fail(page != NULL);
 
-  if (world_get_object_glist_bounds (page->toplevel, list, &left,  &top,
-                                                     &right, &bottom)) {
-    gschem_page_view_invalidate_world_rect (page_view,
-                                            left,
-                                            top,
-                                            right,
-                                            bottom);
+  if (world_get_object_glist_bounds(page->toplevel, list, &left, &top,
+                                    &right, &bottom))
+  {
+    gschem_page_view_invalidate_world_rect(page_view,
+                                           left,
+                                           top,
+                                           right,
+                                           bottom);
   }
 }
-
-

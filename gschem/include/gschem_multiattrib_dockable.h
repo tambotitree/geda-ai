@@ -61,10 +61,11 @@ struct _GschemMultiattribDockable {
                     *column_name, *column_value;
 
   GtkWidget      *show_inherited;
-  GtkCombo       *combo_name;
+  // GtkCombo       *combo_name;  // Deprecated, use GtkComboBoxText Hopefully it is a text box!
+  GtkComboBoxText *combo_name;
   GtkTextView    *textview_value;
   GtkCheckButton *button_visible;
-  GtkOptionMenu  *optionmenu_shownv;
+  GtkComboBoxText *combobox_visible_types;
   GtkWidget      *list_frame;
   GtkWidget      *add_frame;
 

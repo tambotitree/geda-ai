@@ -146,7 +146,7 @@ void o_attrib_toggle_visibility(GschemToplevel *w_current, OBJECT *object);
 void o_attrib_toggle_show_name_value(GschemToplevel *w_current, OBJECT *object, int new_show_name_value);
 OBJECT *o_attrib_add_attrib(GschemToplevel *w_current, const char *text_string, int visibility, int show_name_value, OBJECT *object);
 /* o_basic.c */
-void o_redraw_rect (GschemToplevel *w_current, GdkDrawable *drawable, PAGE *page, GschemPageGeometry *geometry, GdkRectangle *rectangle);
+void o_redraw_rect (GschemToplevel *w_current, cairo_t *cr, PAGE *page, GschemPageGeometry *geometry, const GdkRectangle *rectangle);
 int o_invalidate_rubber(GschemToplevel *w_current);
 int o_redraw_cleanstates(GschemToplevel *w_current);
 void o_invalidate_rect(GschemToplevel *w_current, int x1, int y1, int x2, int y2);
@@ -332,7 +332,7 @@ GtkWidget* gschem_alignment_combo_new ();
 int gschem_alignment_combo_get_align (GtkWidget *widget);
 void gschem_alignment_combo_set_align (GtkWidget *widget, int align);
 /* x_attribedit.c */
-gint option_menu_get_history(GtkOptionMenu *option_menu);
+gint option_menu_get_history(GtkComboBoxText *combo_box);
 void attrib_edit_dialog_ok(GtkWidget *w, GschemToplevel *w_current);
 void attrib_edit_dialog(GschemToplevel *w_current, OBJECT *attr_obj, int flag);
 /* x_autonumber.c */

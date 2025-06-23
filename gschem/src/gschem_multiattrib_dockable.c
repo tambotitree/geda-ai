@@ -1699,16 +1699,32 @@ multiattrib_callback_value_grab_focus (GtkWidget *widget, gpointer user_data)
 }
 
 
-/*! \todo Finish function documentation
- *  \brief
- *  \par Function Description
+/*!
+ * \brief Callback for the "Add" button in the multiattrib dock.
  *
+ * \details
+ * This function retrieves user input from the "Add Attribute" frame and
+ * attempts to add a new attribute to the object list managed by the
+ * GschemMultiattribDockable.
+ *
+ * The following UI components are read:
+ *  - The attribute name from the GtkComboBoxText (entry text)
+ *  - The attribute value from the GtkTextView
+ *  - Visibility checkbox state
+ *  - Visibility type (name/value display mode) from GtkComboBoxText
+ *
+ * After validation, the attribute is added via `multiattrib_action_add_attribute()`,
+ * followed by an update of the UI through `multiattrib_update()`.
+ *
+ * \param button     The GTK button that was clicked (unused).
+ * \param user_data  Pointer to the GschemMultiattribDockable structure.
  */
 static void
 multiattrib_callback_button_add (GtkButton *button, gpointer user_data)
 {
   GschemMultiattribDockable *multiattrib =
     GSCHEM_MULTIATTRIB_DOCKABLE (user_data);
+
   GtkTextBuffer *buffer;
   GtkTextIter start, end;
   const gchar *name;
@@ -1716,32 +1732,31 @@ multiattrib_callback_button_add (GtkButton *button, gpointer user_data)
   gboolean visible;
   gint shownv;
 
-  buffer   = gtk_text_view_get_buffer (multiattrib->textview_value);
-
-  /* retrieve information from the Add/Edit frame */
-  /*   - attribute's name */
-  name = gtk_entry_get_text (
-    GTK_ENTRY (GTK_COMBO (multiattrib->combo_name)->entry));
-  /*   - attribute's value */
+  // Get value text from GtkTextView
+  buffer = gtk_text_view_get_buffer (multiattrib->textview_value);
   gtk_text_buffer_get_bounds (buffer, &start, &end);
   value = gtk_text_buffer_get_text (buffer, &start, &end, FALSE);
-  /*   - attribute's visibility status */
-  visible = gtk_toggle_button_get_active (
-    (GtkToggleButton*)multiattrib->button_visible);
-  /*   - visibility type */
-  shownv = (gint)gtk_option_menu_get_history (multiattrib->optionmenu_shownv);
 
-  if (name[0] == '\0' || name[0] == ' ') {
-    /* name not allowed for an attribute */
+  // Get attribute name from GtkComboBoxText entry
+  name = gtk_combo_box_text_get_active_text (multiattrib->combo_name);
+  if (!name || name[0] == '\0' || name[0] == ' ') {
     g_free (value);
-    return;
+    return;  // invalid name
   }
 
-  multiattrib_action_add_attribute (multiattrib,
-                                    name, value,
-                                    visible, shownv);
-  g_free (value);
+  // Get visibility checkbox state
+  visible = gtk_toggle_button_get_active (
+    (GtkToggleButton *)multiattrib->button_visible);
 
+  // Get selected visibility type (0=Name+Value, 1=Value, 2=Name)
+  shownv = gtk_combo_box_get_active (
+    GTK_COMBO_BOX (multiattrib->combobox_visible_types));
+
+  // Add the new attribute
+  multiattrib_action_add_attribute (multiattrib, name, value, visible, shownv);
+
+  // Clean up and refresh
+  g_free (value);
   multiattrib_update (multiattrib);
 }
 
@@ -1768,27 +1783,23 @@ multiattrib_init_attrib_names (GtkCombo *combo)
   g_list_free (items);
 }
 
-/*! \todo Finish function documentation
- *  \brief
- *  \par Function Description
+/**
+ * \brief Initialize the visibility type combo box with options.
+ * 
+ * This function sets up the options for displaying attributes in the 
+ * multiattrib dockable (e.g., "Show Name & Value", "Show Value only", etc.).
  *
+ * \param combobox A GtkComboBoxText widget where the options will be inserted.
  */
 static void
-multiattrib_init_visible_types (GtkOptionMenu *optionmenu)
+multiattrib_init_visible_types (GtkComboBoxText *combobox)
 {
-  GtkWidget *menu, *item;
+  gtk_combo_box_text_append_text(combobox, _("Show Name & Value"));
+  gtk_combo_box_text_append_text(combobox, _("Show Value only"));
+  gtk_combo_box_text_append_text(combobox, _("Show Name only"));
 
-  menu = gtk_menu_new ();
-  item = gtk_menu_item_new_with_label (_("Show Name & Value"));
-  gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
-  item = gtk_menu_item_new_with_label (_("Show Value only"));
-  gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
-  item = gtk_menu_item_new_with_label (_("Show Name only"));
-  gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
-
-  gtk_option_menu_set_menu (optionmenu, menu);
+  gtk_combo_box_set_active(GTK_COMBO_BOX(combobox), 0); // Default to first option
 }
-
 
 /*! \brief Popup a context-sensitive menu.
  *  \par Function Description
@@ -2531,14 +2542,6 @@ multiattrib_create_widget (GschemDockable *dockable)
                     0, 1, 2, 3, GTK_FILL, 0, 3, 0);
 
   /*   - the visibility type */
-  optionm = GTK_WIDGET (g_object_new (GTK_TYPE_OPTION_MENU,
-                                      NULL));
-  multiattrib_init_visible_types (GTK_OPTION_MENU (optionm));
-  multiattrib->optionmenu_shownv = GTK_OPTION_MENU (optionm);
-  /* prevent optionm from forcing the add button out of add_frame */
-  gtk_widget_set_size_request (optionm, 0, -1);
-  gtk_table_attach (GTK_TABLE (table), optionm,
-                    1, 2, 2, 3, GTK_EXPAND | GTK_FILL, 0, 6, 3);
   gtk_widget_show_all (table);
 
   /* create the add button */

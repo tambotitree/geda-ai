@@ -33,7 +33,10 @@
  * Kazu Hirata <kazu@seul.org> on July 16, 1999 - Added these absolute
  * defaults used when default_... is NULL.
  */
+/*
 #define DEFAULT_BITMAP_DIRECTORY "../lib/bitmaps"
+*/
+#define DEFAULT_BITMAP_DIRECTORY "/Users/johnryan/geda/share/geda/bitmap"
 #define DEFAULT_BUS_RIPPER_SYMNAME "busripper-1.sym"
 
 /* These values are the default extents of the schematic drawing area.
@@ -89,6 +92,7 @@ void i_vars_libgeda_set(TOPLEVEL *toplevel)
   /* you cannot free the default* strings here since new windows */
   /* need them */
   INIT_STR(toplevel, bitmap_directory, DEFAULT_BITMAP_DIRECTORY);
+  fprintf(stderr, "🧠 BITMAP DIR SET TO: %s\n", toplevel->bitmap_directory);
   INIT_STR(toplevel, bus_ripper_symname, DEFAULT_BUS_RIPPER_SYMNAME);
 }
 

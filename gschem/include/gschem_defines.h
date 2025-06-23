@@ -70,6 +70,12 @@
 #define SINGLE                  0
 #define MULTIPLE                1
 
+/* Margin (in screen pixels) to compensate for rounding, AA, or overdraw */
+#define INVALIDATE_MARGIN 4
+
+/* Margin (in screen pixels) to include space for grips/handles */
+#define GRIP_MARGIN 6
+
 /* for grid */
 typedef enum
 {

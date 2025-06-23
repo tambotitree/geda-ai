@@ -548,81 +548,95 @@ x_event_motion (GschemPageView *page_view, GdkEventMotion *event, GschemToplevel
   return(0);
 }
 
-/*! \brief Updates the display when drawing area is configured.
- *  \par Function Description
- *  This is the callback function connected to the configure event of
- *  the GschemPageView of the main window.
+/*!
+ * \brief Updates the display when the drawing area is reconfigured.
  *
- *  It re-pans each of its pages to keep their contents centered in the
- *  GschemPageView.
+ * \details
+ * This is the callback connected to the `configure-event` of the `GschemPageView`
+ * widget. It ensures that pages remain centered or properly zoomed when the view
+ * area size changes (e.g., due to resizing or maximization).
  *
- *  When the window is maximised, the zoom of every page is changed to
- *  best fit the previously displayed area of the page in the new
- *  area. Otherwise the current zoom level is left unchanged.
+ * - If the widget is resized, each page is re-centered or zoomed to fit.
+ * - If no size change is detected, no action is taken.
  *
- *  \param [in] widget    The GschemPageView which received the signal.
- *  \param [in] event     The event structure of signal configure-event.
- *  \param [in] unused
- *  \returns FALSE to propagate the event further.
+ * \param [in] page_view A pointer to the GschemPageView widget.
+ * \param [in] event     A pointer to the GdkEventConfigure structure (unused).
+ * \param [in] unused    Unused user data.
+ * \return FALSE to propagate the event further.
  */
 gboolean
-x_event_configure (GschemPageView    *page_view,
-                   GdkEventConfigure *event,
-                   gpointer           unused)
+x_event_configure(GschemPageView *page_view,
+                  GdkEventConfigure *event,
+                  gpointer unused)
 {
   GtkAllocation current_allocation;
   GList *iter;
-  PAGE *p_current = gschem_page_view_get_page (page_view);
+  PAGE *p_current = gschem_page_view_get_page(page_view);
 
   if (p_current == NULL) {
-    /* don't want to call this if the current page isn't setup yet */
+    // Current page isn't set up yet — nothing to update
     return FALSE;
   }
 
-  g_return_val_if_fail (p_current->toplevel != NULL, FALSE);
+  g_return_val_if_fail(p_current->toplevel != NULL, FALSE);
 
-  gtk_widget_get_allocation (GTK_WIDGET(page_view), &current_allocation);
+  // Query the current widget dimensions
+  gtk_widget_get_allocation(GTK_WIDGET(page_view), &current_allocation);
 
-  if ((current_allocation.width == page_view->previous_allocation.width) &&
-      (current_allocation.height == page_view->previous_allocation.height)) {
-    /* the size of the drawing area has not changed -- nothing to do here */
+  // Skip if size hasn't changed
+  if (current_allocation.width == page_view->previous_allocation.width &&
+      current_allocation.height == page_view->previous_allocation.height) {
     return FALSE;
   }
 
+  // Store new allocation to detect future size changes
   page_view->previous_allocation = current_allocation;
 
-  /* re-pan each page of the TOPLEVEL */
-  for ( iter = geda_list_get_glist (p_current->toplevel->pages);
-        iter != NULL;
-        iter = g_list_next (iter) ) {
+  // Re-center or zoom pages depending on configured state
+  for (iter = geda_list_get_glist(p_current->toplevel->pages);
+       iter != NULL;
+       iter = g_list_next(iter)) {
 
-    gschem_page_view_set_page (page_view, (PAGE *)iter->data);
+    gschem_page_view_set_page(page_view, (PAGE *) iter->data);
 
     if (page_view->configured) {
-      gschem_page_view_pan_mouse (page_view, 0, 0);
+      gschem_page_view_pan_mouse(page_view, 0, 0);  // Pan to preserve center
     } else {
-      gschem_page_view_zoom_extents (page_view, NULL);
+      gschem_page_view_zoom_extents(page_view, NULL);  // Zoom to fit contents
     }
   }
 
   page_view->configured = TRUE;
 
-  gschem_page_view_set_page (page_view, p_current);
+  // Restore view to original current page
+  gschem_page_view_set_page(page_view, p_current);
 
   return FALSE;
 }
 
-/*! \todo Finish function documentation!!!
- *  \brief
- *  \par Function Description
+/*!
+ * \brief Handle pointer enter events for the drawing area.
  *
+ * \details
+ * This function is triggered when the mouse pointer enters the
+ * `GschemPageView` drawing area. Currently, it performs no
+ * actions but is present as a placeholder for future event handling,
+ * such as UI highlighting, focus management, or tool-specific behavior.
+ *
+ * \param [in] widget     The GtkWidget receiving the enter event (typically a GschemPageView).
+ * \param [in] event      The GdkEventCrossing containing pointer event details.
+ * \param [in] w_current  Pointer to the current GschemToplevel.
+ *
+ * \return Always returns 0 to propagate the event further.
  */
-gint x_event_enter(GtkWidget *widget, GdkEventCrossing *event,
-                   GschemToplevel *w_current)
+gint
+x_event_enter(GtkWidget *widget, GdkEventCrossing *event,
+              GschemToplevel *w_current)
 {
-  g_return_val_if_fail ((w_current != NULL), 0);
-  /* do nothing or now */
-  return(0);
+  g_return_val_if_fail(w_current != NULL, 0);
+
+  // Currently unused; placeholder for future hover-related behavior
+  return 0;
 }
 
 /*! \brief Callback to handle key events in the drawing area.
