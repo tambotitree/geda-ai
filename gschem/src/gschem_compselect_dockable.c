@@ -1299,16 +1299,16 @@ create_behaviors_combo_box (void)
 
   /* Note: order of items in menu is important */
   /* BEHAVIOR_REFERENCE */
-  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(show_options), _("Show Value Only")),
-                             _("Reference symbol (default)"));
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox),
+                                 _("Reference symbol (default)"));
   /* BEHAVIOR_EMBED */
   gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox),
-                             _("Embed symbol in schematic"));
+                                 _("Embed symbol in schematic"));
   /* BEHAVIOR_INCLUDE */
   gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox),
-                             _("Include symbol as individual objects"));
+                                 _("Include symbol as individual objects"));
 
-  gtk_combo_box_set_active (GTK_COMBO_BOX (combobox), 0);
+  gtk_combo_box_set_active(GTK_COMBO_BOX(combobox), 0);
 
   return combobox;
 }
@@ -1583,44 +1583,6 @@ compselect_is_tiled (GschemCompselectDockable *compselect)
          top_widget != compselect->attribs_box;
 }
 
-/*! \brief Remove prelight state from an expander.
- *
- * Expanders are prelit (painted in a shaded color) while the pointer
- * hovers over them.  This prelight state is not correctly removed
- * when the widget hierarchy changes.  This function synthesizes a
- * leave event to un-prelight the expander explicitly.
- */
-static void
-compselect_unprelight_expander (GschemCompselectDockable *compselect,
-                                GtkWidget *expander)
-{
-  GdkWindow *window = NULL;
-  if (expander == compselect->preview_expander)
-    window = compselect->preview_expander_event_window;
-  if (expander == compselect->attribs_expander)
-    window = compselect->attribs_expander_event_window;
-
-  if (window == NULL)
-    return;
-
-  GdkEvent *event = gdk_event_new (GDK_LEAVE_NOTIFY);
-  event->crossing.window = g_object_ref (window);
-  event->crossing.send_event = TRUE;
-  event->crossing.subwindow = g_object_ref (window);
-  event->crossing.time = GDK_CURRENT_TIME;
-  event->crossing.x = 0;
-  event->crossing.y = 0;
-  event->crossing.x_root = 0;
-  event->crossing.y_root = 0;
-  event->crossing.mode = GDK_CROSSING_STATE_CHANGED;
-  event->crossing.detail = GDK_NOTIFY_UNKNOWN;
-  event->crossing.focus = FALSE;
-  event->crossing.state = 0;
-
-  gtk_widget_event (expander, event);
-  gdk_event_free(event);
-}
-
 /*! \brief Callback: Size of the whole dockable changed.
  *
  * Changes from and to tiled layout when the aspect ratio of the
@@ -1635,45 +1597,6 @@ compselect_top_size_allocate (GtkWidget *widget,
   gboolean is_tiled = (alloc->width * 2 > alloc->height);
 
   compselect_set_tiled (GSCHEM_COMPSELECT_DOCKABLE (user_data), is_tiled);
-}
-
-/*! \brief Callback function: Pointer hovers over expander.
- *
- * In order to synthesize leave notify events for the expanders, we
- * need pointers to their event windows.  These can't be accessed
- * directly, so as a workaround, wait for an enter notify event and
- * store the pointers for later.
- */
-static gboolean
-compselect_expander_enter_notify_event (GtkWidget *widget,
-                                        GdkEvent *event,
-                                        gpointer user_data)
-{
-  GschemCompselectDockable *compselect = GSCHEM_COMPSELECT_DOCKABLE (user_data);
-
-  if (widget == compselect->preview_expander)
-    compselect->preview_expander_event_window = event->crossing.window;
-  if (widget == compselect->attribs_expander)
-    compselect->attribs_expander_event_window = event->crossing.window;
-
-  return FALSE;
-}
-
-/*! \brief Callback function: Expander activated.
- *
- * Update the widget hierarchy and prelight state of the expanders.
- */
-static void
-compselect_expander_notify_expanded (GObject *expander,
-                                     GParamSpec *pspec,
-                                     gpointer user_data)
-{
-  GschemCompselectDockable *compselect = GSCHEM_COMPSELECT_DOCKABLE (user_data);
-
-  if (!compselect_is_tiled (compselect)) {
-    compselect_unprelight_expander (compselect, GTK_WIDGET (expander));
-    compselect_update_vertical_hierarchy (compselect);
-  }
 }
 
 /*! \brief Callback function: Size of preview/attribute area changed.

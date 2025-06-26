@@ -33,38 +33,53 @@
 
 /*********** Start of misc support functions for dialog boxes *******/
 
-/*! \todo Finish function documentation!!!
- *  \brief
- *  \par Function Description
+/*! \brief Raise all dialog windows associated with the GschemToplevel instance.
  *
+ *  \par Function Description
+ *  This function ensures that all open secondary dialog windows (such as 
+ *  symbol selection, text input, attribute editors, etc.) are raised to 
+ *  the top of the window stack. This is useful when a user action or script 
+ *  needs to refocus attention on all auxiliary UI elements that may otherwise 
+ *  be buried under other windows.
+ *
+ *  GTK 3 adaptation note: Direct access to GtkWidget's `window` field is no longer allowed.
+ *  Instead, use gtk_widget_get_window() and ensure the widget is realized.
+ *
+ *  \param [in] w_current The top-level gschem window context.
  */
 void x_dialog_raise_all(GschemToplevel *w_current)
 {
-  if(w_current->sowindow) {
-    gdk_window_raise(w_current->sowindow->window);
+  if (w_current->sowindow && gtk_widget_get_window(w_current->sowindow)) {
+    gdk_window_raise(gtk_widget_get_window(w_current->sowindow));
   }
-  if(w_current->tiwindow) {
-    gdk_window_raise(w_current->tiwindow->window);
+
+  if (w_current->tiwindow && gtk_widget_get_window(w_current->tiwindow)) {
+    gdk_window_raise(gtk_widget_get_window(w_current->tiwindow));
   }
-  if(w_current->sewindow) {
-    gdk_window_raise(w_current->sewindow->window);
+
+  if (w_current->sewindow && gtk_widget_get_window(w_current->sewindow)) {
+    gdk_window_raise(gtk_widget_get_window(w_current->sewindow));
   }
-  if(w_current->aawindow) {
-    gdk_window_raise(w_current->aawindow->window);
+
+  if (w_current->aawindow && gtk_widget_get_window(w_current->aawindow)) {
+    gdk_window_raise(gtk_widget_get_window(w_current->aawindow));
   }
-  if(w_current->aewindow) {
-    gdk_window_raise(w_current->aewindow->window);
+
+  if (w_current->aewindow && gtk_widget_get_window(w_current->aewindow)) {
+    gdk_window_raise(gtk_widget_get_window(w_current->aewindow));
   }
-  if(w_current->hkwindow) {
-    gdk_window_raise(w_current->hkwindow->window);
+
+  if (w_current->hkwindow && gtk_widget_get_window(w_current->hkwindow)) {
+    gdk_window_raise(gtk_widget_get_window(w_current->hkwindow));
   }
+
   for (GList *l = w_current->dockables; l != NULL; l = l->next) {
-    GtkWidget *window = GSCHEM_DOCKABLE (l->data)->window;
-    if (window != NULL && gtk_widget_get_visible (window))
-      gdk_window_raise (window->window);
+    GtkWidget *window = GSCHEM_DOCKABLE(l->data)->window;
+    if (window && gtk_widget_get_visible(window) && gtk_widget_get_window(window)) {
+      gdk_window_raise(gtk_widget_get_window(window));
+    }
   }
 }
-
 /*********** End of misc support functions for dialog boxes *******/
 
 /***************** Start of generic message dialog box *******************/

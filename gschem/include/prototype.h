@@ -104,6 +104,8 @@ typedef void (*gschem_atexit_func)(gpointer data);
 void gschem_atexit(gschem_atexit_func func, gpointer data);
 void main_prog(void *closure, int argc, char *argv[]);
 int main(int argc, char *argv[]);
+/* gschem_action.c*/
+typedef void (*GschemActionCallback)(GschemAction *action, GschemToplevel *w_current);
 /* i_basic.c */
 void i_action_start(GschemToplevel *w_current);
 void i_action_stop(GschemToplevel *w_current);
@@ -146,7 +148,12 @@ void o_attrib_toggle_visibility(GschemToplevel *w_current, OBJECT *object);
 void o_attrib_toggle_show_name_value(GschemToplevel *w_current, OBJECT *object, int new_show_name_value);
 OBJECT *o_attrib_add_attrib(GschemToplevel *w_current, const char *text_string, int visibility, int show_name_value, OBJECT *object);
 /* o_basic.c */
-void o_redraw_rect (GschemToplevel *w_current, cairo_t *cr, PAGE *page, GschemPageGeometry *geometry, const GdkRectangle *rectangle);
+// Old GTK 2 ... void o_redraw_rect (GschemToplevel *w_current, cairo_t *cr, PAGE *page, GschemPageGeometry *geometry, const GdkRectangle *rectangle);
+void o_redraw_rect (GschemToplevel *w_current,
+	cairo_t *cr,
+	PAGE *page,
+	GschemPageGeometry *geometry,
+	GdkRectangle *rectangle);
 int o_invalidate_rubber(GschemToplevel *w_current);
 int o_redraw_cleanstates(GschemToplevel *w_current);
 void o_invalidate_rect(GschemToplevel *w_current, int x1, int y1, int x2, int y2);
@@ -349,7 +356,7 @@ GList *x_clipboard_get (GschemToplevel *w_current);
 void x_color_init (void);
 void x_color_free (void);
 void x_color_allocate (void);
-GdkColor *x_get_color(int color);
+const GdkRGBA *x_get_color(int color);
 COLOR *x_color_lookup(int color);
 gboolean x_color_display_enabled (int index);
 /* x_colorcb.c */
@@ -382,8 +389,8 @@ gboolean x_dialog_close_window (GschemToplevel *w_current);
 int x_dialog_validate_attribute(GtkWindow* parent, char *attribute);
 gboolean x_dialog_confirm_create (GtkWindow *parent, const gchar *message, const gchar *filename);
 /* x_event.c */
-gint x_event_expose(GschemPageView *widget, GdkEventExpose *event, GschemToplevel *w_current);
-gint x_event_raise_dialog_boxes (GschemPageView *view, GdkEventExpose *event, GschemToplevel *w_current);
+gboolean x_event_expose(GtkWidget *widget, cairo_t *cr, gpointer user_data);
+gboolean x_event_raise_dialog_boxes(GtkWidget *widget, cairo_t *cr, gpointer user_data);
 gint x_event_button_pressed(GschemPageView *page_view, GdkEventButton *event, GschemToplevel *w_current);
 gint x_event_button_released(GschemPageView *page_view, GdkEventButton *event, GschemToplevel *w_current);
 gint x_event_motion(GschemPageView *page_view, GdkEventMotion *event, GschemToplevel *w_current);
@@ -391,7 +398,7 @@ gboolean x_event_faked_motion (GschemPageView *view, GdkEventKey *event);
 gboolean x_event_configure (GschemPageView *page_view, GdkEventConfigure *event, gpointer user_data);
 gint x_event_enter(GtkWidget *widget, GdkEventCrossing *event, GschemToplevel *w_current);
 gboolean x_event_key(GschemPageView *page_view, GdkEventKey *event, GschemToplevel *w_current);
-gint x_event_scroll(GtkWidget *widget, GdkEventScroll *event, GschemToplevel *w_current);
+gint x_event_scroll(GschemPageView *page_view, GdkEventScroll *event, GschemToplevel *w_current);
 gboolean x_event_get_pointer_position (GschemToplevel *w_current, gboolean snapped, gint *wx, gint *wy);
 /* gschem_compselect_dockable.c */
 void x_compselect_deselect (GschemToplevel *w_current);

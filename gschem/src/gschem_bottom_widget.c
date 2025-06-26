@@ -627,7 +627,7 @@ gschem_bottom_widget_set_status_text_color (GschemBottomWidget *widget, gboolean
 {
   g_return_if_fail (widget != NULL);
 
-  GdkColor color;
+  GdkRGBA color;
 
   if (active) {
     gdk_color_parse ("green", &color);
@@ -635,7 +635,10 @@ gschem_bottom_widget_set_status_text_color (GschemBottomWidget *widget, gboolean
     gdk_color_parse ("black", &color);
   }
 
-  gtk_widget_modify_fg (GTK_WIDGET (widget->status_label), GTK_STATE_NORMAL, &color);
+  // Old
+  // gtk_widget_modify_fg (GTK_WIDGET (widget->status_label), GTK_STATE_NORMAL, &color);
+  // New GTK 3
+  gtk_widget_override_background_color(widget, GTK_STATE_FLAG_NORMAL, &color);
 }
 
 

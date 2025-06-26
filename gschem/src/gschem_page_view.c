@@ -38,7 +38,6 @@
 #include "gschem.h"
 #include <gdk/gdkkeysyms.h>
 
-#include "gtk/gtkmarshal.h"
 
 
 
@@ -87,9 +86,6 @@ page_deleted (PAGE *page, GschemPageView *view);
 
 static void
 set_property (GObject *object, guint param_id, const GValue *value, GParamSpec *pspec);
-
-static void
-set_scroll_adjustments (GschemPageView *view, GtkAdjustment *hadjustment, GtkAdjustment *vadjustment);
 
 static void
 vadjustment_value_changed (GtkAdjustment *vadjustment, GschemPageView *view);
@@ -312,19 +308,6 @@ gschem_page_view_class_init (GschemPageViewClass *klass)
                                                         GTK_TYPE_ADJUSTMENT,
                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 
-  GTK_WIDGET_CLASS (klass)->set_scroll_adjustments_signal = g_signal_new (
-    "set-scroll-adjustments",
-    G_OBJECT_CLASS_TYPE (klass),
-    G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
-    0,
-    NULL,
-    NULL,
-    cclosure_marshal_VOID__OBJECT_OBJECT,
-    G_TYPE_NONE,
-    2,
-    GTK_TYPE_ADJUSTMENT,
-    GTK_TYPE_ADJUSTMENT);
-
   g_signal_new (
     "update-grid-info",
     G_OBJECT_CLASS_TYPE (klass),
@@ -497,8 +480,6 @@ gschem_page_view_invalidate_all (GschemPageView *view)
   gdk_window_invalidate_rect (window, NULL, FALSE);
 }
 
-
-
 /*! \brief Schedule redraw of the given object
  *
  *  \param [in,out] view   The Gschem page view to redraw
@@ -510,7 +491,7 @@ gschem_page_view_invalidate_object (GschemPageView *view, OBJECT *object)
   g_return_if_fail (object != NULL);
   g_return_if_fail (view != NULL);
 
-  if (!GTK_WIDGET_REALIZED (GTK_WIDGET (view))) {
+  if (!gtk_widget_get_realized (GTK_WIDGET(view))) {
     return;
   }
 
@@ -539,8 +520,6 @@ gschem_page_view_invalidate_object (GschemPageView *view, OBJECT *object)
     }
   }
 }
-
-
 
 /*! \brief Schedule redraw of the given rectange
  *
@@ -635,11 +614,6 @@ gschem_page_view_init (GschemPageView *view)
   view->pan_x = 0;
   view->pan_y = 0;
   view->throttle = 0;
-
-  g_signal_connect (view,
-                    "set-scroll-adjustments",
-                    G_CALLBACK (set_scroll_adjustments),
-                    NULL);
 
   g_signal_connect(view,
                    "realize",
@@ -987,9 +961,6 @@ gschem_page_view_set_vadjustment (GschemPageView *view, GtkAdjustment *vadjustme
 
   g_object_notify (G_OBJECT (view), "vadjustment");
 }
-
-
-
 /*! \brief Signal handler for a horizontal scroll adjustment change
  */
 static void
@@ -1006,8 +977,8 @@ hadjustment_value_changed (GtkAdjustment *hadjustment, GschemPageView *view)
 
     g_return_if_fail (view->hadjustment == hadjustment);
 
-    current_left = gschem_page_geometry_get_viewport_left (geometry),
-    new_left = (int) hadjustment->value;
+    current_left = gschem_page_geometry_get_viewport_left (geometry);
+    new_left = (int) gtk_adjustment_get_value(hadjustment);  // ✅ GTK 3-safe
 
     geometry->viewport_left = new_left;
     geometry->viewport_right = geometry->viewport_right - (current_left - new_left);
@@ -1015,8 +986,6 @@ hadjustment_value_changed (GtkAdjustment *hadjustment, GschemPageView *view)
     gschem_page_view_invalidate_all (view);
   }
 }
-
-
 
 /*! \brief Set a gobject property
  */
@@ -1091,26 +1060,24 @@ gschem_page_view_update_hadjustment (GschemPageView *view)
   GschemPageGeometry *geometry = gschem_page_view_get_page_geometry (view);
 
   if (view->hadjustment != NULL && geometry != NULL) {
+    const int width = abs (geometry->viewport_right - geometry->viewport_left);
 
-    gtk_adjustment_set_page_increment (view->hadjustment,
-                                       abs (geometry->viewport_right - geometry->viewport_left) - 100.0);
-
-    gtk_adjustment_set_page_size (view->hadjustment,
-                                  abs (geometry->viewport_right - geometry->viewport_left));
-
-    gtk_adjustment_set_value (view->hadjustment,
-                               geometry->viewport_left);
+    gtk_adjustment_set_page_increment (view->hadjustment, width - 100.0);
+    gtk_adjustment_set_page_size (view->hadjustment, width);
+    gtk_adjustment_set_value (view->hadjustment, geometry->viewport_left);
 
 #if DEBUG
-    printf("H %f %f\n", view->hadjustment->lower, view->hadjustment->upper);
-    printf("Hp %f\n", view->hadjustment->page_size);
+    g_print("H lower: %f upper: %f\n", 
+            gtk_adjustment_get_lower(view->hadjustment),
+            gtk_adjustment_get_upper(view->hadjustment));
+    g_print("Hp (page size): %f\n",
+            gtk_adjustment_get_page_size(view->hadjustment));
 #endif
 
-    gtk_adjustment_changed(view->hadjustment);
-    gtk_adjustment_value_changed (view->hadjustment);
+    gtk_adjustment_set_lower(view->hadjustment, 0); // If needed
+    gtk_adjustment_set_upper(view->hadjustment, geometry->world_right); // ← or other logic
   }
 }
-
 
 
 /*! \brief Update the scroll adjustments
@@ -1233,22 +1200,6 @@ page_deleted (PAGE *page, GschemPageView *view)
     gschem_page_view_set_page (view, NULL);
 }
 
-
-
-/*! \brief Signal handler for setting the scroll adjustments
- *
- *  Sent from the GtkScrolledWindow to set the adjustments for the
- *  corresponding scroll bars.
- */
-static void
-set_scroll_adjustments (GschemPageView *view, GtkAdjustment *hadjustment, GtkAdjustment *vadjustment)
-{
-  gschem_page_view_set_hadjustment (view, hadjustment);
-  gschem_page_view_set_vadjustment (view, vadjustment);
-}
-
-
-
 /*! \brief Signal handler for a vertical scroll adjustment change
  */
 static void
@@ -1266,7 +1217,7 @@ vadjustment_value_changed (GtkAdjustment *vadjustment, GschemPageView *view)
     g_return_if_fail (view->vadjustment == vadjustment);
 
     current_bottom = geometry->viewport_bottom;
-    new_bottom = geometry->world_bottom - (int) vadjustment->value;
+    new_bottom = geometry->world_bottom - (int) gtk_adjustment_get_value(vadjustment);  // ✅ GTK 3-safe
 
     geometry->viewport_bottom = new_bottom;
     geometry->viewport_top = geometry->viewport_top - (current_bottom - new_bottom);
@@ -1274,7 +1225,6 @@ vadjustment_value_changed (GtkAdjustment *vadjustment, GschemPageView *view)
     gschem_page_view_invalidate_all (view);
   }
 }
-
 
 
 /*! \brief Transform WORLD coordinates to SCREEN coordinates

@@ -79,7 +79,7 @@ void slot_edit_dialog_response(GtkWidget *widget, gint response, GschemToplevel 
  *  \par Function Description
  *  This function creates the slot edit dialog.
  */
-void slot_edit_dialog (GschemToplevel *w_current, const char *count, const char *string)
+void slot_edit_dialog(GschemToplevel *w_current, const char *count, const char *string)
 {
   GtkWidget *label[2];
   GtkWidget *table;
@@ -91,72 +91,66 @@ void slot_edit_dialog (GschemToplevel *w_current, const char *count, const char 
                                                          GTK_WINDOW(w_current->main_window),
                                                          GTK_DIALOG_MODAL,
                                                          "slot-edit", w_current,
-                                                         GTK_STOCK_CANCEL,
-                                                         GTK_RESPONSE_REJECT,
-                                                         GTK_STOCK_OK,
-                                                         GTK_RESPONSE_ACCEPT,
+                                                         "gtk-cancel", GTK_RESPONSE_REJECT,
+                                                         "gtk-ok", GTK_RESPONSE_ACCEPT,
                                                          NULL);
 
-  /* Set the alternative button order (ok, cancel, help) for other systems */
-    gtk_dialog_set_alternative_button_order(GTK_DIALOG(w_current->sewindow),
-                                            GTK_RESPONSE_ACCEPT,
-                                            GTK_RESPONSE_REJECT,
-                                            -1);
+    // Set default button order (OK first)
+    gtk_dialog_set_default_response(GTK_DIALOG(w_current->sewindow),
+                                    GTK_RESPONSE_ACCEPT);
 
-    gtk_window_set_position (GTK_WINDOW (w_current->sewindow), GTK_WIN_POS_MOUSE);
+    gtk_window_set_position(GTK_WINDOW(w_current->sewindow), GTK_WIN_POS_MOUSE);
 
-    gtk_dialog_set_default_response (GTK_DIALOG (w_current->sewindow),
-                                     GTK_RESPONSE_ACCEPT);
+    g_signal_connect(G_OBJECT(w_current->sewindow), "response",
+                     G_CALLBACK(slot_edit_dialog_response),
+                     w_current);
 
-    g_signal_connect (G_OBJECT (w_current->sewindow), "response",
-                      G_CALLBACK (slot_edit_dialog_response),
-                      w_current);
+    gtk_container_set_border_width(GTK_CONTAINER(w_current->sewindow),
+                                   DIALOG_BORDER_SPACING);
 
-    gtk_container_set_border_width (GTK_CONTAINER (w_current->sewindow),
-                                    DIALOG_BORDER_SPACING);
-    vbox = GTK_DIALOG(w_current->sewindow)->vbox;
+    // ✅ GTK 3: use gtk_dialog_get_content_area instead of ->vbox
+    vbox = gtk_dialog_get_content_area(GTK_DIALOG(w_current->sewindow));
     gtk_box_set_spacing(GTK_BOX(vbox), DIALOG_V_SPACING);
 
-    label[0] = gschem_dialog_misc_create_property_label (_("Number of Slots:"));
-    label[1] = gschem_dialog_misc_create_property_label (_("Slot Number:"));
+    label[0] = gschem_dialog_misc_create_property_label(_("Number of Slots:"));
+    label[1] = gschem_dialog_misc_create_property_label(_("Slot Number:"));
 
     widget[0] = gtk_entry_new();
     gtk_entry_set_max_length(GTK_ENTRY(widget[0]), 80);
-    gtk_editable_set_editable (GTK_EDITABLE(widget[0]), FALSE);
-	gtk_widget_set_sensitive (GTK_WIDGET(widget[0]), FALSE);
+    gtk_editable_set_editable(GTK_EDITABLE(widget[0]), FALSE);
+    gtk_widget_set_sensitive(widget[0], FALSE);
 
-	widget[1] = gtk_entry_new();
+    widget[1] = gtk_entry_new();
     gtk_entry_set_max_length(GTK_ENTRY(widget[1]), 80);
-    gtk_entry_set_activates_default (GTK_ENTRY(widget[1]),TRUE);
+    gtk_entry_set_activates_default(GTK_ENTRY(widget[1]), TRUE);
 
     table = gschem_dialog_misc_create_property_table(label, widget, 2);
 
-	gtk_box_pack_start (GTK_BOX (vbox),                          /* box     */
-                        table,                                   /* child   */
-                        FALSE,                                   /* expand  */
-                        FALSE,                                   /* fill    */
-                        0);                                      /* padding */
+    gtk_box_pack_start(GTK_BOX(vbox),
+                       table,
+                       FALSE,
+                       FALSE,
+                       0);
 
-	GLADE_HOOKUP_OBJECT(w_current->sewindow, widget[0], "countentry");
-    GLADE_HOOKUP_OBJECT(w_current->sewindow, widget[1], "textentry");
-    gtk_widget_show_all (w_current->sewindow);
+    // ✅ Use g_object_set_data() instead of ref/unref
+    g_object_set_data(G_OBJECT(w_current->sewindow), "countentry", widget[0]);
+    g_object_set_data(G_OBJECT(w_current->sewindow), "textentry", widget[1]);
+
+    gtk_widget_show_all(w_current->sewindow);
+  } else {
+    gtk_window_present(GTK_WINDOW(w_current->sewindow));
   }
 
-  else { /* dialog already created */
-    gtk_window_present (GTK_WINDOW(w_current->sewindow));
-  }
-
+  // Load initial values
   if (count != NULL) {
-    widget[0] = g_object_get_data(G_OBJECT(w_current->sewindow),"countentry");
+    widget[0] = g_object_get_data(G_OBJECT(w_current->sewindow), "countentry");
     gtk_entry_set_text(GTK_ENTRY(widget[0]), count);
   }
 
-  /* always set the current text and select the number of the slot */
   if (string != NULL) {
-    widget[1] = g_object_get_data(G_OBJECT(w_current->sewindow),"textentry");
+    widget[1] = g_object_get_data(G_OBJECT(w_current->sewindow), "textentry");
     gtk_entry_set_text(GTK_ENTRY(widget[1]), string);
-    gtk_editable_select_region (GTK_EDITABLE(widget[1]), 0, -1);
+    gtk_editable_select_region(GTK_EDITABLE(widget[1]), 0, -1);
   }
 }
-
 /***************** End of Slot Edit dialog box ***********************/

@@ -79,35 +79,27 @@ void x_window_setup (GschemToplevel *w_current)
                                w_current);
 }
 
-/*!
- * \brief Create and initialize the schematic drawing area.
+/*! \todo Finish function documentation!!!
+ *  \brief
+ *  \par Function Description
  *
- * \par Function Description
- * This function creates a new drawing widget for the current page view
- * and embeds it into the given scrolled window container. It sets a fixed
- * aspect ratio (approximately 4:3) to maintain a consistent view.
- *
- * The drawing area will receive keyboard focus and is configured to be focusable.
- * It is shown immediately after being added.
- *
- * \param [in] scrolled   The GtkScrolledWindow to which the drawing widget is added.
- * \param [in] w_current  The active GschemToplevel instance managing the view.
  */
 void x_window_create_drawing(GtkWidget *scrolled, GschemToplevel *w_current)
 {
-  /* Create the drawing area from the current page */
-  w_current->drawing_area = GTK_WIDGET(
-      gschem_page_view_new_with_page(w_current->toplevel->page_current));
+  /* drawing next */
+  w_current->drawing_area = GTK_WIDGET (gschem_page_view_new_with_page (w_current->toplevel->page_current));
+  /* Set the size here.  Be sure that it has an aspect ratio of 1.333
+   * We could calculate this based on root window size, but for now
+   * lets just set it to:
+   * Width = root_width*3/4   Height = Width/1.3333333333
+   * 1.3333333 is the desired aspect ratio!
+   */
 
-  /* Add drawing widget to scrolled window container */
   gtk_container_add(GTK_CONTAINER(scrolled), w_current->drawing_area);
 
-  /* Allow keyboard focus and request it immediately */
-  gtk_widget_set_can_focus(w_current->drawing_area, TRUE);
-  gtk_widget_grab_focus(w_current->drawing_area);
-
-  /* Show the widget */
-  gtk_widget_show(w_current->drawing_area);
+  GTK_WIDGET_SET_FLAGS (w_current->drawing_area, GTK_CAN_FOCUS );
+  gtk_widget_grab_focus (w_current->drawing_area);
+  gtk_widget_show (w_current->drawing_area);
 }
 
 /*! \brief Set up callbacks for window events that affect drawing.
@@ -1350,17 +1342,16 @@ x_window_set_current_page (GschemToplevel *w_current, PAGE *page)
  */
 void x_window_present (GschemToplevel *w_current)
 {
+  //gdk_window_show (w_current->main_window->window);  /* the culprit */
+
 #ifdef GDK_WINDOWING_X11
-  GdkDisplay *display = gtk_widget_get_display(w_current->main_window);
-  guint32 timestamp = gdk_x11_display_get_user_time(display);
+  GdkDisplay *display = gtk_widget_get_display (w_current->main_window);
+  guint32 timestamp = gdk_x11_display_get_user_time (display);
 #else
-  guint32 timestamp = gtk_get_current_event_time();
+  guint32 timestamp = gtk_get_current_event_time ();
 #endif
 
-  GdkWindow *gdk_window = gtk_widget_get_window(GTK_WIDGET(w_current->main_window));
-  if (gdk_window != NULL) {
-    gdk_window_focus(gdk_window, timestamp);
-  }
+  gdk_window_focus (w_current->main_window->window, timestamp);
 }
 
 /*! \brief Setup default icon for GTK windows

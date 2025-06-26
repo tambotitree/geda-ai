@@ -23,22 +23,31 @@
 #include <math.h>
 
 #include "gschem.h"
-
-/*! \todo Finish function documentation!!!
- *  \brief
- *  \par Function Description
+/*!
+ * \brief Warp the mouse pointer to a widget-relative coordinate.
  *
+ * \param widget A pointer to the GtkWidget to warp within.
+ * \param x Horizontal offset from the widget origin.
+ * \param y Vertical offset from the widget origin.
+ *
+ * This function moves the pointer to a given (x, y) coordinate within
+ * the toplevel window containing `widget`. It updates the device pointer
+ * using GDK APIs.
  */
-void x_basic_warp_cursor (GtkWidget* widget, gint x, gint y)
+void x_basic_warp_cursor(GtkWidget* widget, gint x, gint y)
 {
-  GdkScreen *screen;
   GdkDisplay *display;
-  int window_x, window_y;
+  GdkScreen *screen;
+  GdkSeat *seat;
+  GdkDevice *pointer;
+  gint window_x, window_y;
 
-  gdk_window_get_origin (widget->window, &window_x, &window_y);
+  gdk_window_get_origin(gtk_widget_get_window(widget), &window_x, &window_y);
+  screen = gtk_widget_get_screen(widget);
+  display = gdk_screen_get_display(screen);
 
-  screen = gtk_widget_get_screen (widget);
-  display = gdk_screen_get_display (screen);
+  seat = gdk_display_get_default_seat(display);
+  pointer = gdk_seat_get_pointer(seat);
 
-  gdk_display_warp_pointer (display, screen, window_x + x, window_y + y);
+  gdk_device_warp(pointer, screen, window_x + x, window_y + y);
 }

@@ -30,151 +30,82 @@
 COLOR display_colors[MAX_COLORS];
 COLOR display_outline_colors[MAX_COLORS];
 
-static GdkColor* gdk_colors[MAX_COLORS];
-static GdkColor* gdk_outline_colors[MAX_COLORS];
+// Previously GdkColor*, now we store actual RGBA structs
+static GdkRGBA gdk_colors[MAX_COLORS];
+static GdkRGBA gdk_outline_colors[MAX_COLORS];
 
-static GdkColormap *colormap = NULL;
+// Default foreground/background colors
+GdkRGBA black;
+GdkRGBA white;
 
-/*! \brief Initializes the color system for the application.
- *  \par Function Documentation
- *
- *  Initialises the color maps to defaults.
- */
 void
 x_color_init (void)
 {
-  colormap = gdk_colormap_get_system ();
-
-  /* Initialise default color maps */
   s_color_map_defaults (display_colors);
   s_color_map_defaults (display_outline_colors);
 }
 
-/*! \brief Frees memory used by the color system.
- *  \par Function Documentation
- *  This function frees the colors from colormap along with
- *  \b black and \b white.
- */
 void
 x_color_free (void)
 {
-  int i;
-
-  gdk_colormap_free_colors (colormap, &black, 1);
-  gdk_colormap_free_colors (colormap, &white, 1);
-
-  for (i = 0; i < MAX_COLORS; i++) {
-    if (display_colors[i].enabled)
-      gdk_colormap_free_colors (colormap, gdk_colors[i], 1);
-    if (display_outline_colors[i].enabled)
-      gdk_colormap_free_colors (colormap, gdk_outline_colors[i], 1);
-  }
+  // Nothing to free: GdkRGBA is a value type (no allocation)
 }
 
-/*! \todo Finish function documentation!!!
- *  \brief
- *  \par Function Documentation
- *
- */
-void x_color_allocate (void)
+void
+x_color_allocate (void)
 {
-  int error;
-  int i;		
+  int i;
   COLOR c;
 
-  gdk_color_parse ("black", &black);
-  if (!gdk_colormap_alloc_color (colormap,
-                                 &black,
-                                 FALSE,
-                                 TRUE)) {
-    fprintf (stderr, _("Could not allocate the color %s!\n"), _("black"));
-    exit (-1);
-  }
-
-  gdk_color_parse ("white", &white);
-  if (!gdk_colormap_alloc_color (colormap,
-                                 &white,
-                                 FALSE,
-                                 TRUE)) {
-    fprintf (stderr, _("Could not allocate the color %s!\n"), _("white"));
-    exit (-1);
-  }
+  // Parse static named colors
+  gdk_rgba_parse(&black, "black");
+  gdk_rgba_parse(&white, "white");
 
   for (i = 0; i < MAX_COLORS; i++) {
-
     if (display_colors[i].enabled) {
-      gdk_colors[i] = (GdkColor *)
-        g_malloc(sizeof(GdkColor));
-
       c = display_colors[i];
 
-      /* Interpolate 8-bpp colours into 16-bpp GDK color
-       * space. N.b. ignore transparency because GDK doesn't
-       * understand it. */
-      gdk_colors[i]->red = c.r + (c.r<<8);
-      gdk_colors[i]->green = c.g + (c.g<<8);
-      gdk_colors[i]->blue = c.b + (c.b<<8);
-
-      error = gdk_color_alloc(colormap, gdk_colors[i]);
-
-      if (error == FALSE) {
-        g_error (_("Could not allocate display color %i!\n"), i);
-      }
+      gdk_colors[i].red   = c.r / 255.0;
+      gdk_colors[i].green = c.g / 255.0;
+      gdk_colors[i].blue  = c.b / 255.0;
+      gdk_colors[i].alpha = 1.0;
     } else {
-      gdk_colors[i] = NULL;
+      // alpha = 0 → disabled
+      gdk_colors[i].red = gdk_colors[i].green = gdk_colors[i].blue = 0;
+      gdk_colors[i].alpha = 0.0;
     }
 
     if (display_outline_colors[i].enabled) {
-      gdk_outline_colors[i] = (GdkColor *)
-        g_malloc(sizeof(GdkColor));
-
       c = display_outline_colors[i];
 
-      /* Interpolate 8-bpp colours into 16-bpp GDK color
-       * space. N.b. ignore transparency because GDK doesn't
-       * understand it. */
-      gdk_outline_colors[i]->red = c.r + (c.r<<8);
-      gdk_outline_colors[i]->green = c.g + (c.g<<8);
-      gdk_outline_colors[i]->blue = c.b + (c.b<<8);
-
-      error = gdk_color_alloc(colormap, gdk_outline_colors[i]);
-
-      if (error == FALSE) {
-        g_error (_("Could not allocate outline color %i!\n"), i);
-      }
+      gdk_outline_colors[i].red   = c.r / 255.0;
+      gdk_outline_colors[i].green = c.g / 255.0;
+      gdk_outline_colors[i].blue  = c.b / 255.0;
+      gdk_outline_colors[i].alpha = 1.0;
     } else {
-      gdk_outline_colors[i] = NULL;
+      gdk_outline_colors[i].red = gdk_outline_colors[i].green = gdk_outline_colors[i].blue = 0;
+      gdk_outline_colors[i].alpha = 0.0;
     }
   }
 
-  x_colorcb_update_store ();
+  x_colorcb_update_store();
 }
 
-/*! \todo Finish function documentation!!!
- *  \brief
- *  \par Function Documentation
- *
- */
-GdkColor *x_get_color(int color)
+const GdkRGBA *
+x_get_color(int color)
 {
-  if ((color < 0) || (color >= MAX_COLORS)
-      || (gdk_colors[color] == NULL)) {
+  if ((color < 0) || (color >= MAX_COLORS) || gdk_colors[color].alpha == 0.0) {
     g_warning (_("Tried to get an invalid color: %d\n"), color);
-    return(&white);
+    return &white;
   } else {
-    return(gdk_colors[color]);
+    return &gdk_colors[color];
   }
 }
 
-/*! \todo Finish function documentation!!!
- *  \brief
- *  \par Function Documentation
- *
- */
-COLOR *x_color_lookup (int color)
+COLOR *
+x_color_lookup (int color)
 {
-  if (color < 0 || color >= MAX_COLORS ||
-      !display_colors[color].enabled) {
+  if (color < 0 || color >= MAX_COLORS || !display_colors[color].enabled) {
     fprintf(stderr, _("Tried to get an invalid color: %d\n"), color);
     return &display_colors[DEFAULT_COLOR];
   } else {
@@ -185,5 +116,5 @@ COLOR *x_color_lookup (int color)
 gboolean
 x_color_display_enabled (int index)
 {
-  return (gdk_colors[index] != NULL);
+  return (gdk_colors[index].alpha != 0.0);
 }

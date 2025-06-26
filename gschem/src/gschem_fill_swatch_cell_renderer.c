@@ -66,12 +66,11 @@ instance_init (GschemFillSwatchCellRenderer *swatch);
 
 static void
 render (GtkCellRenderer      *cell,
-        GdkWindow            *window,
+        cairo_t              *cr,
         GtkWidget            *widget,
-        GdkRectangle         *background_area,
-        GdkRectangle         *cell_area,
-        GdkRectangle         *expose_area,
-        GtkCellRendererState flags);
+        const GdkRectangle   *background_area,
+        const GdkRectangle   *cell_area,
+        GtkCellRendererState  flags);
 
 static void
 set_property (GObject      *object,
@@ -219,107 +218,89 @@ get_property (GObject    *object,
  *  \param [in] flags
  */
 static void
-render (GtkCellRenderer      *cell,
-        GdkWindow            *window,
-        GtkWidget            *widget,
-        GdkRectangle         *background_area,
-        GdkRectangle         *cell_area,
-        GdkRectangle         *expose_area,
-        GtkCellRendererState flags)
+render(GtkCellRenderer      *cell,
+       cairo_t              *cr,
+       GtkWidget            *widget,
+       const GdkRectangle   *background_area,
+       const GdkRectangle   *cell_area,
+       GtkCellRendererState  flags)
 {
-  GschemFillSwatchCellRenderer *swatch = GSCHEM_FILL_SWATCH_CELL_RENDERER (cell);
+  GschemFillSwatchCellRenderer *swatch = GSCHEM_FILL_SWATCH_CELL_RENDERER(cell);
 
-  if (swatch->enabled) {
-    GdkColor color;
-    cairo_t *cr = gdk_cairo_create (window);
-    double offset = SWATCH_BORDER_WIDTH / 2.0;
-    gboolean success;
+  if (!swatch->enabled) return;
 
-    if (expose_area) {
-      gdk_cairo_rectangle (cr, expose_area);
-      cairo_clip (cr);
+  double offset = SWATCH_BORDER_WIDTH / 2.0;
+
+  /* Use the widget's style context to get the current color */
+  GdkRGBA color;
+  gtk_style_context_get_color(gtk_widget_get_style_context(widget),
+                              gtk_widget_get_state_flags(widget),
+                              &color);
+
+  cairo_set_source_rgba(cr, color.red, color.green, color.blue, color.alpha);
+
+  cairo_move_to(cr,
+                (double)cell_area->x + offset,
+                (double)cell_area->y + offset);
+
+  cairo_line_to(cr,
+                (double)cell_area->x + cell_area->width - offset,
+                (double)cell_area->y + offset);
+
+  cairo_line_to(cr,
+                (double)cell_area->x + cell_area->width - offset,
+                (double)cell_area->y + cell_area->height - offset);
+
+  cairo_line_to(cr,
+                (double)cell_area->x + offset,
+                (double)cell_area->y + cell_area->height - offset);
+
+  cairo_close_path(cr);
+
+  if ((swatch->fill_type == FILLING_HATCH) || (swatch->fill_type == FILLING_MESH)) {
+    BOX box;
+    int index;
+    GArray *lines = g_array_new(FALSE, FALSE, sizeof(LINE));
+    cairo_path_t *save_path = cairo_copy_path(cr);
+
+    cairo_save(cr);
+    cairo_clip(cr);
+
+    box.lower_x = cell_area->x;
+    box.lower_y = cell_area->y;
+    box.upper_x = cell_area->x + cell_area->width;
+    box.upper_y = cell_area->y + cell_area->height;
+
+    m_hatch_box(&box, 135, SWATCH_LINE_PITCH, lines);
+
+    if (swatch->fill_type == FILLING_MESH) {
+      m_hatch_box(&box, 45, SWATCH_LINE_PITCH, lines);
     }
 
-    /* Paint the swatch using the text color to match the user's desktop theme.
-     */
+    for (index = 0; index < lines->len; index++) {
+      LINE *line = &g_array_index(lines, LINE, index);
 
-    success = gtk_style_lookup_color (gtk_widget_get_style (widget),
-                                      "text_color",
-                                      &color);
-
-    if (success) {
-      cairo_set_source_rgb (cr,
-                            color.red   / 65535.0,
-                            color.green / 65535.0,
-                            color.blue  / 65535.0);
+      cairo_move_to(cr, line->x[0], line->y[0]);
+      cairo_line_to(cr, line->x[1], line->y[1]);
     }
 
-    cairo_move_to (cr,
-                   (double) cell_area->x + offset,
-                   (double) cell_area->y + offset);
+    g_array_free(lines, TRUE);
 
-    cairo_line_to (cr,
-                   (double) cell_area->x + (double) cell_area->width - offset,
-                   (double) cell_area->y + offset);
+    cairo_set_line_width(cr, SWATCH_LINE_WIDTH);
+    cairo_stroke(cr);
+    cairo_restore(cr);
 
-    cairo_line_to (cr,
-                   (double) cell_area->x + (double) cell_area->width - offset,
-                   (double) cell_area->y + (double) cell_area->height - offset);
-
-    cairo_line_to (cr,
-                   (double) cell_area->x + offset,
-                   (double) cell_area->y + (double) cell_area->height - offset);
-
-    cairo_close_path (cr);
-
-    if ((swatch->fill_type == FILLING_HATCH) || (swatch->fill_type == FILLING_MESH)) {
-      BOX box;
-      int index;
-      GArray *lines = g_array_new (FALSE, FALSE, sizeof (LINE));
-      cairo_path_t *save_path = cairo_copy_path (cr);
-
-      cairo_save (cr);
-      cairo_clip (cr);
-
-      box.lower_x = cell_area->x;
-      box.lower_y = cell_area->y;
-      box.upper_x = cell_area->x + cell_area->width;
-      box.upper_y = cell_area->y + cell_area->height;
-
-      m_hatch_box (&box, 135, SWATCH_LINE_PITCH, lines);
-
-      if (swatch->fill_type == FILLING_MESH) {
-        m_hatch_box (&box, 45, SWATCH_LINE_PITCH, lines);
-      }
-
-      for (index=0; index<lines->len; index++) {
-        LINE *line = &g_array_index (lines, LINE, index);
-
-        cairo_move_to (cr, line->x[0], line->y[0]);
-        cairo_line_to (cr, line->x[1], line->y[1]);
-      }
-
-      g_array_free (lines, TRUE);
-
-      cairo_set_line_width (cr, SWATCH_LINE_WIDTH);
-      cairo_stroke (cr);
-      cairo_restore (cr);
-
-      cairo_append_path (cr, save_path);
-      cairo_path_destroy (save_path);
-    }
-
-    if (swatch->fill_type == FILLING_FILL) {
-      cairo_fill_preserve (cr);
-    }
-
-    cairo_set_line_width (cr, SWATCH_BORDER_WIDTH);
-    cairo_stroke (cr);
-    cairo_destroy (cr);
+    cairo_append_path(cr, save_path);
+    cairo_path_destroy(save_path);
   }
+
+  if (swatch->fill_type == FILLING_FILL) {
+    cairo_fill_preserve(cr);
+  }
+
+  cairo_set_line_width(cr, SWATCH_BORDER_WIDTH);
+  cairo_stroke(cr);
 }
-
-
 
 /*! \private
  *  \brief Set a property.

@@ -88,13 +88,13 @@ static scm_t_bits action_tag;
  */
 GschemAction *
 gschem_action_register (const gchar *id,
-  const gchar *icon_name,
-  const gchar *name,
-  const gchar *label,
-  const gchar *menu_label,
-  const gchar *tooltip,
-  GschemActionType type,
-  GschemActionCallback callback)
+                        const gchar *icon_name,
+                        const gchar *name,
+                        const gchar *label,
+                        const gchar *menu_label,
+                        const gchar *tooltip,
+                        GschemActionType type,
+                        GschemActionCallback callback)
 {
   GschemAction *action = g_new0 (GschemAction, 1);
 
@@ -105,7 +105,7 @@ gschem_action_register (const gchar *id,
   action->menu_label = menu_label;
   action->tooltip = tooltip;
   action->type = type;
-  action->activate = activate;
+  action->activate = callback;
 
   action->thunk = SCM_UNDEFINED;
 
@@ -126,7 +126,6 @@ gschem_action_register (const gchar *id,
 
   return action;
 }
-
 
 /*! \brief Run an action.
  *

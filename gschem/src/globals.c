@@ -35,8 +35,8 @@ char *rc_filename     = NULL;
 char *output_filename = NULL;
 
 /* colors */
-GdkColor white;
-GdkColor black;
+GdkRGBA white;
+GdkRGBA black;
 
 int logging_dest = LOG_WINDOW;
 

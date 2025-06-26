@@ -63,14 +63,12 @@ set_property (GObject      *object,
               GParamSpec   *pspec);
 
 static void
-render (GtkCellRenderer      *cell,
-        GdkWindow            *window,
-        GtkWidget            *widget,
-        GdkRectangle         *background_area,
-        GdkRectangle         *cell_area,
-        GdkRectangle         *expose_area,
-        GtkCellRendererState flags);
-
+gschem_swatch_column_renderer_render (GtkCellRenderer *cell,
+              cairo_t *cr,
+              GtkWidget *widget,
+              const GdkRectangle *background_area,
+              const GdkRectangle *cell_area,
+              GtkCellRendererState flags);
 
 
 /*! \private
@@ -122,7 +120,9 @@ swatchcr_class_init (GschemSwatchColumnRendererClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  klass->parent_class.parent_class.render = render;
+  // klass->parent_class.parent_class.render = render; // OLD GTK 2 way
+  GTK_CELL_RENDERER_CLASS(klass)->render = 
+       gschem_swatch_column_renderer_render;   // new GTK 3 way
 
   object_class->get_property = get_property;
   object_class->set_property = set_property;
@@ -172,61 +172,65 @@ swatchcr_init (GschemSwatchColumnRenderer *swatch)
  *  \param [in] expose_area
  *  \param [in] flags
  */
+/*! \brief Render the swatch into the cell
+ *
+ *  GTK 3 version: uses cairo_t *cr instead of GdkWindow
+ */
 static void
-render (GtkCellRenderer      *cell,
-        GdkWindow            *window,
+gschem_swatch_column_renderer_render (GtkCellRenderer      *cell,
+        cairo_t              *cr,
         GtkWidget            *widget,
-        GdkRectangle         *background_area,
-        GdkRectangle         *cell_area,
-        GdkRectangle         *expose_area,
+        const GdkRectangle   *background_area,
+        const GdkRectangle   *cell_area,
         GtkCellRendererState flags)
 {
   GschemSwatchColumnRenderer *swatch = GSCHEM_SWATCH_COLUMN_RENDERER (cell);
 
   if (swatch->enabled) {
-    cairo_t *cr = gdk_cairo_create (window);
     double offset = SWATCH_BORDER_WIDTH / 2.0;
 
-    if (expose_area) {
-      gdk_cairo_rectangle (cr, expose_area);
-      cairo_clip (cr);
-    }
+    // Clip to cell_area (optional, depending on redraw artifacts)
+    cairo_save(cr);
+    cairo_rectangle(cr,
+                    (double) cell_area->x,
+                    (double) cell_area->y,
+                    (double) cell_area->width,
+                    (double) cell_area->height);
+    cairo_clip(cr);
 
-    cairo_move_to (cr,
-                   (double) cell_area->x + offset,
-                   (double) cell_area->y + offset);
+    // Draw filled rounded rectangle or square
+    cairo_move_to(cr,
+                  (double) cell_area->x + offset,
+                  (double) cell_area->y + offset);
 
-    cairo_line_to (cr,
-                   (double) cell_area->x + (double) cell_area->width - offset,
-                   (double) cell_area->y + offset);
+    cairo_line_to(cr,
+                  (double) cell_area->x + (double) cell_area->width - offset,
+                  (double) cell_area->y + offset);
 
-    cairo_line_to (cr,
-                   (double) cell_area->x + (double) cell_area->width - offset,
-                   (double) cell_area->y + (double) cell_area->height - offset);
+    cairo_line_to(cr,
+                  (double) cell_area->x + (double) cell_area->width - offset,
+                  (double) cell_area->y + (double) cell_area->height - offset);
 
-    cairo_line_to (cr,
-                   (double) cell_area->x + offset,
-                   (double) cell_area->y + (double) cell_area->height - offset);
+    cairo_line_to(cr,
+                  (double) cell_area->x + offset,
+                  (double) cell_area->y + (double) cell_area->height - offset);
 
-    cairo_close_path (cr);
+    cairo_close_path(cr);
 
-    cairo_set_line_width (cr, SWATCH_BORDER_WIDTH);
+    cairo_set_line_width(cr, SWATCH_BORDER_WIDTH);
 
-    cairo_set_source_rgb (cr,
-                          swatch->color.red   / 65535.0,
-                          swatch->color.green / 65535.0,
-                          swatch->color.blue  / 65535.0);
+    cairo_set_source_rgb(cr,
+                         swatch->color.red   / 65535.0,
+                         swatch->color.green / 65535.0,
+                         swatch->color.blue  / 65535.0);
+    cairo_fill_preserve(cr);
 
-    cairo_fill_preserve (cr);
+    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);  // Border: black
+    cairo_stroke(cr);
 
-    cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
-
-    cairo_stroke (cr);
-
-    cairo_destroy (cr);
+    cairo_restore(cr);
   }
 }
-
 
 
 /*! \private
@@ -236,15 +240,15 @@ render (GtkCellRenderer      *cell,
  *  \param [in]     color  The color of the swatch
  */
 static void
-set_color (GschemSwatchColumnRenderer *swatch, const GdkColor *color)
+set_color (GschemSwatchColumnRenderer *swatch, const GdkRGBA *color)
 {
   if (color) {
-    swatch->color.red = color->red;
+    swatch->color.red   = color->red;
     swatch->color.green = color->green;
-    swatch->color.blue = color->blue;
+    swatch->color.blue  = color->blue;
+    swatch->color.alpha = color->alpha;  // Recommended: include alpha now
   }
 }
-
 
 
 /*! \private

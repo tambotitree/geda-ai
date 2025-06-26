@@ -40,7 +40,7 @@ struct _GschemSwatchColumnRenderer
 {
   GtkCellRendererText parent;
 
-  GdkColor color;
+  GdkRGBA color;
   gboolean enabled;
 };
 

@@ -1199,7 +1199,8 @@ GtkWidget* autonumber_create_dialog(GschemToplevel *w_current)
   GtkWidget *table3;
   GtkWidget *label12;
   GtkWidget *label13;
-  GtkObject *opt_startnum_adj;
+  // Old GTK 2 ...GtkObject *opt_startnum_adj;
+  GtkAdjustment *opt_startnum_adj;
   GtkWidget *opt_startnum;
   GtkWidget *sort_order;
   GtkWidget *opt_removenum;
@@ -1226,7 +1227,7 @@ GtkWidget* autonumber_create_dialog(GschemToplevel *w_current)
   
   gtk_container_set_border_width (GTK_CONTAINER (autonumber_text),
                                   DIALOG_BORDER_SPACING);
-  vbox1 = GTK_DIALOG(autonumber_text)->vbox;
+  vbox1 = gtk_dialog_get_content_area(GTK_DIALOG(autonumber_text));
   gtk_box_set_spacing(GTK_BOX(vbox1), DIALOG_V_SPACING);
 
   /* scope section */
@@ -1259,7 +1260,10 @@ GtkWidget* autonumber_create_dialog(GschemToplevel *w_current)
                     (GtkAttachOptions) (0), 0, 0);
   gtk_misc_set_alignment (GTK_MISC (label4), 0, 0.5);
 
-  scope_text = gtk_combo_box_entry_new_text ();
+  // scope_text = gtk_combo_box_entry_new_text ();
+  scope_text = gtk_combo_box_text_new_with_entry(); // Change for GTK 3:w
+  // gtk_entry_set_activates_default(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(scope_text))), TRUE);
+  // gtk_entry_set_activates_default(GTK_ENTRY(gtk_combo_box_get_child(GTK_COMBO_BOX(scope_text))), TRUE);
   gtk_entry_set_activates_default(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(scope_text))), TRUE);
   gtk_widget_show (scope_text);
   gtk_table_attach (GTK_TABLE (table1), scope_text, 1, 2, 0, 1,

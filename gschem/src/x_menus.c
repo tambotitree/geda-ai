@@ -34,11 +34,9 @@ build_menu (SCM s_menu, gboolean is_main_menu, GschemToplevel *w_current)
 {
   GtkWidget *menu = gtk_menu_new ();
 
-  if (is_main_menu) {
-    GtkWidget *tearoff_menu_item = gtk_tearoff_menu_item_new ();
-    gtk_menu_shell_append (GTK_MENU_SHELL (menu), tearoff_menu_item);
-    gtk_widget_show (tearoff_menu_item);
-  }
+  GtkWidget *placeholder = gtk_separator_menu_item_new();
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu), placeholder);
+  gtk_widget_show(placeholder);
 
   for (SCM l0 = s_menu; scm_is_pair (l0); l0 = scm_cdr (l0)) {
     SCM s_section = scm_car (l0);
@@ -196,7 +194,7 @@ create_recent_chooser_menu (GschemToplevel *w_current)
   gtk_recent_chooser_set_limit(GTK_RECENT_CHOOSER(menuitem_file_recent_items), MAX_RECENT_FILES);
   gtk_recent_chooser_set_local_only(GTK_RECENT_CHOOSER(menuitem_file_recent_items), FALSE);
   gtk_recent_chooser_menu_set_show_numbers(GTK_RECENT_CHOOSER_MENU(menuitem_file_recent_items), TRUE);
-  g_signal_connect(GTK_OBJECT(menuitem_file_recent_items), "item-activated",
+  g_signal_connect(menuitem_file_recent_items, "item-activated",
                    G_CALLBACK(recent_chooser_item_activated), w_current);
 
   return menuitem_file_recent_items;
@@ -218,24 +216,18 @@ x_menus_create_submenus (GschemToplevel *w_current)
   w_current->left_docking_area_menu = gtk_menu_new ();
   g_object_set_data (G_OBJECT (w_current->left_docking_area_menu),
                      "settings-name", "left-docking-area");
-  gtk_menu_shell_append (GTK_MENU_SHELL (w_current->left_docking_area_menu),
-                         gtk_tearoff_menu_item_new ());
   gtk_widget_show_all (w_current->left_docking_area_menu);
 
   /* create bottom docking area menu */
   w_current->bottom_docking_area_menu = gtk_menu_new ();
   g_object_set_data (G_OBJECT (w_current->bottom_docking_area_menu),
                      "settings-name", "bottom-docking-area");
-  gtk_menu_shell_append (GTK_MENU_SHELL (w_current->bottom_docking_area_menu),
-                         gtk_tearoff_menu_item_new ());
   gtk_widget_show_all (w_current->bottom_docking_area_menu);
 
   /* create right docking area menu */
   w_current->right_docking_area_menu = gtk_menu_new ();
   g_object_set_data (G_OBJECT (w_current->right_docking_area_menu),
                      "settings-name", "right-docking-area");
-  gtk_menu_shell_append (GTK_MENU_SHELL (w_current->right_docking_area_menu),
-                         gtk_tearoff_menu_item_new ());
   gtk_widget_show_all (w_current->right_docking_area_menu);
 }
 

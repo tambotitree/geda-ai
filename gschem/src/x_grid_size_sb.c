@@ -113,19 +113,20 @@ update_spin_button_internal (GtkSpinButton *spin_button,
 GtkWidget *
 x_grid_size_sb_new (GschemToplevel *w_current)
 {
-  GtkObject *adjustment = gtk_adjustment_new (1, MINIMUM_SNAP_SIZE,
-                                                 MAXIMUM_SNAP_SIZE, 1, 1, 0);
-  GtkWidget *spin_button = g_object_new (GTK_TYPE_SPIN_BUTTON, NULL);
-  gtk_spin_button_set_adjustment (GTK_SPIN_BUTTON (spin_button),
-                                  GTK_ADJUSTMENT (adjustment));
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_button),
-                             gschem_options_get_snap_size (w_current->options));
-  gtk_entry_set_width_chars (GTK_ENTRY (spin_button), 5);
+  GtkAdjustment *adjustment = gtk_adjustment_new(1,
+                                                 MINIMUM_SNAP_SIZE,
+                                                 MAXIMUM_SNAP_SIZE,
+                                                 1, 1, 0);
+  GtkWidget *spin_button = gtk_spin_button_new(adjustment, 1, 0);
 
-  g_signal_connect (spin_button, "value-changed",
-                    G_CALLBACK (spin_button_value_changed), w_current);
-  g_signal_connect (w_current->options, "notify::snap-size",
-                    G_CALLBACK (update_spin_button), spin_button);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin_button),
+                            gschem_options_get_snap_size(w_current->options));
+  gtk_entry_set_width_chars(GTK_ENTRY(spin_button), 5);
+
+  g_signal_connect(spin_button, "value-changed",
+                   G_CALLBACK(spin_button_value_changed), w_current);
+  g_signal_connect(w_current->options, "notify::snap-size",
+                   G_CALLBACK(update_spin_button), spin_button);
 
   return spin_button;
 }

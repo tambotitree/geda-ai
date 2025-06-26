@@ -30,8 +30,8 @@ extern GList *global_window_list;
 extern GtkRecentManager *recent_manager;
 
 /* colors */
-extern GdkColor white;
-extern GdkColor black;
+extern GdkRGBA  white;
+extern GdkRGBA  black;
 
 extern char *rc_filename;
 extern char *output_filename;

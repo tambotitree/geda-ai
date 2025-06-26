@@ -69,10 +69,10 @@ struct _GschemMultiattribDockable {
   GtkWidget      *list_frame;
   GtkWidget      *add_frame;
 
-  GdkColor       value_normal_text_color;   /* Workaround for lameness in GtkTextView */
-  GdkColor       insensitive_text_color;
-  GdkColor       not_identical_value_text_color;
-  GdkColor       not_present_in_all_text_color;
+  GdkRGBA       value_normal_text_color;   /* Workaround for lameness in GtkTextView */
+  GdkRGBA       insensitive_text_color;
+  GdkRGBA 	 not_identical_value_text_color;
+  GdkRGBA       not_present_in_all_text_color;
 
   gulong object_list_changed_id;
 };

@@ -63,6 +63,7 @@ static void preview_get_property (GObject *object,
                                   GValue *value,
                                   GParamSpec *pspec);
 static void preview_dispose (GObject *self);
+static gboolean preview_callback_draw(GtkWidget *widget, cairo_t *cr, gpointer user_data);
 
 
 /*! \brief create a new preview widget
@@ -108,20 +109,32 @@ preview_callback_realize (GtkWidget *widget, gpointer user_data)
 /*! \brief Trigger deferred zoom and redraw preview widget.
  */
 static gboolean
-preview_callback_expose_event (GtkWidget *widget,
-                               GdkEvent *event,
-                               gpointer user_data)
+preview_callback_draw(GtkWidget *widget,
+                      cairo_t *cr,
+                      gpointer user_data)
 {
-  GschemPreview *preview = GSCHEM_PREVIEW (widget);
+  GschemPreview *preview = GSCHEM_PREVIEW(widget);
 
   if (preview->needs_zoom) {
-    preview_zoom (preview);
+    preview_zoom(preview);
     preview->needs_zoom = FALSE;
   }
 
-  return x_event_expose (GSCHEM_PAGE_VIEW (widget), &event->expose, user_data);
-}
+  // Simulate the old expose_event using the current allocation rectangle
+  GtkAllocation allocation;
+  gtk_widget_get_allocation(widget, &allocation);
 
+  GdkRectangle rect = {
+    .x = allocation.x,
+    .y = allocation.y,
+    .width = allocation.width,
+    .height = allocation.height
+  };
+
+  // Old -> return x_event_expose(GSCHEM_PAGE_VIEW(widget), cr, &rect, user_data);
+  return x_event_expose(widget, cr, user_data);
+
+}
 
 /*! \brief Handles the press on a mouse button.
  *  \par Function Description
@@ -348,7 +361,7 @@ preview_init (GschemPreview *preview)
     GCallback c_handler;
   } drawing_area_events[] = {
     { "realize",              G_CALLBACK (preview_callback_realize)       },
-    { "expose_event",         G_CALLBACK (preview_callback_expose_event)  },
+    { "draw",         G_CALLBACK (preview_callback_draw)  },
     { "button_press_event",   G_CALLBACK (preview_callback_button_press)  },
     { "configure_event",      G_CALLBACK (x_event_configure)              },
     { "scroll_event",         G_CALLBACK (preview_event_scroll)           },

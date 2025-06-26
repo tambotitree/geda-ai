@@ -26,48 +26,48 @@
 #endif
 
 #include "gschem.h"
-#include <gdk/gdkkeysyms.h>
+#include <gdk/gdk.h>
 
 
 /* used for the stroke stuff */
 static int DOING_STROKE = FALSE;
 
-/*! \brief Redraws the view when widget is exposed.
+/*! \brief Redraws the view when widget is exposed (GTK3).
  *
  *  \param [in] view      The GschemPageView.
- *  \param [in] event     The event structure.
+ *  \param [in] cr        The cairo context.
+ *  \param [in] rect      The rectangle to redraw.
  *  \param [in] w_current The GschemToplevel.
  *  \returns FALSE to propagate the event further.
  */
-
-gint
-x_event_expose(GschemPageView *view, GdkEventExpose *event, GschemToplevel *w_current)
+gboolean
+x_event_expose(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 {
-  gschem_page_view_redraw (view, event, w_current);
+  GschemToplevel *w_current = GSCHEM_TOPLEVEL(user_data);
+  GschemPageView *view = GSCHEM_PAGE_VIEW(widget);
 
-  return(0);
+  gschem_page_view_redraw(view, cr, w_current);
+  return FALSE;  // Allow default processing to continue
 }
-
-
 
 /*! \todo Finish function documentation!!!
  *  \brief
  *  \par Function Description
  *
  */
-gint
-x_event_raise_dialog_boxes (GschemPageView *view, GdkEventExpose *event, GschemToplevel *w_current)
+gboolean
+x_event_raise_dialog_boxes(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 {
-  g_return_val_if_fail (w_current != NULL, 0);
+  GschemToplevel *w_current = GSCHEM_TOPLEVEL(user_data);
 
-  /* raise the dialog boxes if this feature is enabled */
+  g_return_val_if_fail(w_current != NULL, FALSE);
+
   if (w_current->raise_dialog_boxes) {
     x_dialog_raise_all(w_current);
   }
 
-  return 0;
+  return FALSE;  // Let GTK continue default drawing
 }
-
 
 
 
@@ -642,28 +642,28 @@ x_event_enter(GtkWidget *widget, GdkEventCrossing *event,
 /*! \brief Callback to handle key events in the drawing area.
  *  \par Function Description
  *
- *  GTK+ callback function (registered in x_window_setup_draw_events() ) which
+ *  GTK+ callback function (registered in x_window_setup_draw_events()) which
  *  handles key press and release events from the GTK+ system.
  *
- * \param [in] widget     the widget that generated the event
- * \param [in] event      the event itself
- * \param      w_current  the toplevel environment
- * \returns TRUE if the event has been handled.
+ *  \param [in] page_view  The GschemPageView associated with the key event
+ *  \param [in] event      The key event itself (GdkEventKey)
+ *  \param [in] w_current  The toplevel environment
+ *  \returns TRUE if the event has been handled.
  */
 gboolean
-x_event_key (GschemPageView *page_view, GdkEventKey *event, GschemToplevel *w_current)
+x_event_key(GschemPageView *page_view, GdkEventKey *event, GschemToplevel *w_current)
 {
   gboolean retval = FALSE;
   int pressed;
   gboolean special = FALSE;
 
-  g_return_val_if_fail (page_view != NULL, FALSE);
+  g_return_val_if_fail(page_view != NULL, FALSE);
 
 #if DEBUG
-  printf("x_event_key_pressed: Pressed key %i.\n", event->keyval);
+  printf("x_event_key_pressed: Pressed key %u (%s).\n", event->keyval, gdk_keyval_name(event->keyval));
 #endif
 
-  /* update the state of the modifiers */
+  /* Update modifier flags */
   w_current->ALTKEY     = (event->state & GDK_MOD1_MASK)    ? 1 : 0;
   w_current->SHIFTKEY   = (event->state & GDK_SHIFT_MASK)   ? 1 : 0;
   w_current->CONTROLKEY = (event->state & GDK_CONTROL_MASK) ? 1 : 0;
@@ -671,41 +671,43 @@ x_event_key (GschemPageView *page_view, GdkEventKey *event, GschemToplevel *w_cu
   pressed = (event->type == GDK_KEY_PRESS) ? 1 : 0;
 
   switch (event->keyval) {
-    case GDK_Alt_L:
-    case GDK_Alt_R:
+    case GDK_KEY_Alt_L:
+    case GDK_KEY_Alt_R:
       w_current->ALTKEY = pressed;
       break;
 
-    case GDK_Shift_L:
-    case GDK_Shift_R:
+    case GDK_KEY_Shift_L:
+    case GDK_KEY_Shift_R:
       w_current->SHIFTKEY = pressed;
       special = TRUE;
       break;
 
-    case GDK_Control_L:
-    case GDK_Control_R:
+    case GDK_KEY_Control_L:
+    case GDK_KEY_Control_R:
       w_current->CONTROLKEY = pressed;
       special = TRUE;
       break;
+
+    default:
+      break;
   }
 
-  scm_dynwind_begin (0);
-  g_dynwind_window (w_current);
+  scm_dynwind_begin(0);
+  g_dynwind_window(w_current);
 
-  /* Special case to update the object being drawn or placed after
-   * scrolling when Shift or Control were pressed */
+  /* Update placement behavior on modifier keypresses */
   if (special) {
-    x_event_faked_motion (page_view, event);
+    x_event_faked_motion(page_view, event);
   }
 
-  if (pressed)
-    retval = g_keys_execute (w_current, event) ? TRUE : FALSE;
+  if (pressed) {
+    retval = g_keys_execute(w_current, event) ? TRUE : FALSE;
+  }
 
-  scm_dynwind_end ();
+  scm_dynwind_end();
 
   return retval;
 }
-
 
 /*! \todo Finish function documentation!!!
  *  \brief
@@ -715,60 +717,17 @@ x_event_key (GschemPageView *page_view, GdkEventKey *event, GschemToplevel *w_cu
  *  \param [in] event
  *  \param [in] w_current
  */
-gint x_event_scroll (GtkWidget *widget, GdkEventScroll *event,
-                     GschemToplevel *w_current)
+gboolean
+x_event_scroll(GschemPageView *page_view, GdkEventScroll *event, GschemToplevel *w_current)
 {
   GtkAdjustment *adj;
-  gboolean pan_xaxis = FALSE;
-  gboolean pan_yaxis = FALSE;
-  gboolean zoom = FALSE;
-  int pan_direction = 1;
-  int zoom_direction = ZOOM_IN;
-  GschemPageView *view = NULL;
-  PAGE *page = NULL;
+  gint width, height;
+  gint pan_direction = 0;
+  int zoom_direction = 0;
 
-  g_return_val_if_fail ((w_current != NULL), 0);
+  g_return_val_if_fail(GTK_IS_WIDGET(page_view), FALSE);
 
-  view = GSCHEM_PAGE_VIEW (widget);
-  g_return_val_if_fail ((view != NULL), 0);
-
-  page = gschem_page_view_get_page (view);
-
-  if (page == NULL) {
-    return FALSE; /* we cannot zoom page if it doesn't exist :) */
-  }
-
-  /* update the state of the modifiers */
-  w_current->SHIFTKEY   = (event->state & GDK_SHIFT_MASK  ) ? 1 : 0;
-  w_current->CONTROLKEY = (event->state & GDK_CONTROL_MASK) ? 1 : 0;
-  w_current->ALTKEY     = (event->state & GDK_MOD1_MASK) ? 1 : 0;
-
-  if (w_current->scroll_wheel == SCROLL_WHEEL_CLASSIC) {
-    /* Classic gschem behaviour */
-    zoom =      !w_current->CONTROLKEY && !w_current->SHIFTKEY;
-    pan_yaxis = !w_current->CONTROLKEY &&  w_current->SHIFTKEY;
-    pan_xaxis =  w_current->CONTROLKEY && !w_current->SHIFTKEY;
-  } else {
-    /* GTK style behaviour */
-    zoom =       w_current->CONTROLKEY && !w_current->SHIFTKEY;
-    pan_yaxis = !w_current->CONTROLKEY && !w_current->SHIFTKEY;
-    pan_xaxis = !w_current->CONTROLKEY &&  w_current->SHIFTKEY;
-  }
-
-  /* If the user has a left/right scroll wheel, always scroll the y-axis */
-  if (event->direction == GDK_SCROLL_LEFT ||
-      event->direction == GDK_SCROLL_RIGHT) {
-    zoom = FALSE;
-    pan_yaxis = FALSE;
-    pan_xaxis = TRUE;
-  }
-
-  /* You must have scrollbars enabled if you want to use the scroll wheel to pan */
-  if (!w_current->scrollbars_flag) {
-    pan_xaxis = FALSE;
-    pan_yaxis = FALSE;
-  }
-
+  /* Determine pan and zoom direction */
   switch (event->direction) {
     case GDK_SCROLL_UP:
     case GDK_SCROLL_LEFT:
@@ -777,44 +736,60 @@ gint x_event_scroll (GtkWidget *widget, GdkEventScroll *event,
       break;
     case GDK_SCROLL_DOWN:
     case GDK_SCROLL_RIGHT:
-      pan_direction =  1;
+      pan_direction = 1;
       zoom_direction = ZOOM_OUT;
       break;
+    case GDK_SCROLL_SMOOTH:
+    default:
+      return FALSE; // or implement smooth scroll handling later
   }
 
-  if (zoom) {
-    /*! \todo Change "HOTKEY" TO new "MOUSE" specifier? */
-    a_zoom(w_current, GSCHEM_PAGE_VIEW (widget), zoom_direction, HOTKEY);
+  /* Determine scroll orientation (horizontal/vertical) */
+  if (event->state & GDK_SHIFT_MASK) {
+    /* Horizontal scroll */
+    adj = gtk_scrollable_get_hadjustment(GTK_SCROLLABLE(page_view));
+    if (adj != NULL) {
+      double value = gtk_adjustment_get_value(adj);
+      double increment = gtk_adjustment_get_page_increment(adj);
+      double upper = gtk_adjustment_get_upper(adj);
+      double page_size = gtk_adjustment_get_page_size(adj);
+      value = MIN(value + pan_direction * (increment / 2.0), upper - page_size);
+      gtk_adjustment_set_value(adj, value);
+    }
+  } else {
+    /* Vertical scroll */
+    adj = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(page_view));
+    if (adj != NULL) {
+      double value = gtk_adjustment_get_value(adj);
+      double increment = gtk_adjustment_get_page_increment(adj);
+      double upper = gtk_adjustment_get_upper(adj);
+      double page_size = gtk_adjustment_get_page_size(adj);
+      value = MIN(value + pan_direction * (increment / 2.0), upper - page_size);
+      gtk_adjustment_set_value(adj, value);
+    }
   }
 
-  if (pan_xaxis) {
-    adj = gschem_page_view_get_hadjustment (GSCHEM_PAGE_VIEW (widget));
-    g_return_val_if_fail (adj != NULL, TRUE);
-    gtk_adjustment_set_value(adj, min(adj->value + pan_direction *
-                                        (adj->page_increment /
-                                         w_current->scrollpan_steps),
-                                      adj->upper - adj->page_size));
+  /* Get widget size */
+  GdkWindow *gdk_win = gtk_widget_get_window(GTK_WIDGET(page_view));
+  if (gdk_win != NULL) {
+    gdk_window_get_geometry(gdk_win, NULL, NULL, &width, &height);
   }
 
-  if (pan_yaxis) {
-    adj = gschem_page_view_get_vadjustment (GSCHEM_PAGE_VIEW (widget));
-    g_return_val_if_fail (adj != NULL, TRUE);
-    gtk_adjustment_set_value(adj, min(adj->value + pan_direction *
-                                        (adj->page_increment /
-                                         w_current->scrollpan_steps),
-                                      adj->upper - adj->page_size));
+  /* Determine mouse coordinates */
+  int sx = 0, sy = 0;
+  GdkDevice *device = gdk_seat_get_pointer(gdk_display_get_default_seat(gdk_display_get_default()));
+  if (gdk_win != NULL && device != NULL) {
+    gdk_window_get_device_position(gdk_win, device, &sx, &sy, NULL);
   }
 
-  if (w_current->undo_panzoom && (zoom || pan_xaxis || pan_yaxis)) {
-    o_undo_savestate_old (w_current, UNDO_VIEWPORT_ONLY,
-                          zoom ? _("Zoom") : _("Pan"));
+  /* Perform zoom */
+  if (zoom_direction != 0) {
+    // x_event_zoom(page_view, zoom_direction, sx, sy, w_current);
+    // TODO: implement x_event_zoom() if mouse-centered zoom is needed
   }
 
-  x_event_faked_motion (view, NULL);
-  /* Stop further processing of this signal */
   return TRUE;
 }
-
 
 /*! \brief get the pointer position of a given GschemToplevel
  *  \par Function Description
@@ -831,7 +806,7 @@ gint x_event_scroll (GtkWidget *widget, GdkEventScroll *event,
  *
  */
 gboolean
-x_event_get_pointer_position (GschemToplevel *w_current, gboolean snapped, gint *wx, gint *wy)
+x_event_get_pointer_position(GschemToplevel *w_current, gboolean snapped, gint *wx, gint *wy)
 {
   int width;
   int height;
@@ -840,26 +815,30 @@ x_event_get_pointer_position (GschemToplevel *w_current, gboolean snapped, gint 
   int x;
   int y;
 
-  GschemPageView *page_view = gschem_toplevel_get_current_page_view (w_current);
-  g_return_val_if_fail (page_view != NULL, FALSE);
+  GschemPageView *page_view = gschem_toplevel_get_current_page_view(w_current);
+  g_return_val_if_fail(page_view != NULL, FALSE);
 
-  g_return_val_if_fail (GTK_WIDGET (page_view)->window != NULL, FALSE);
+  GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(page_view));
+  g_return_val_if_fail(window != NULL, FALSE);
 
-  /* \todo The following line is depricated in GDK 2.24 */
-  gdk_drawable_get_size (GTK_WIDGET (page_view)->window, &width, &height);
+  gdk_window_get_geometry(window, NULL, NULL, &width, &height);
 
-  gtk_widget_get_pointer(GTK_WIDGET (page_view), &sx, &sy);
+  GdkDeviceManager *device_manager =
+      gdk_display_get_device_manager(gdk_display_get_default());
+  GdkDevice *pointer =
+      gdk_device_manager_get_client_pointer(device_manager);
 
-  /* check if we are inside the drawing area */
+  gdk_window_get_device_position(window, pointer, &sx, &sy, NULL);
+
   if ((sx < 0) || (sx >= width) || (sy < 0) || (sy >= height)) {
     return FALSE;
   }
 
-  gschem_page_view_SCREENtoWORLD (page_view, sx, sy, &x, &y);
+  gschem_page_view_SCREENtoWORLD(page_view, sx, sy, &x, &y);
 
   if (snapped) {
-    x = snap_grid (w_current, x);
-    y = snap_grid (w_current, y);
+    x = snap_grid(w_current, x);
+    y = snap_grid(w_current, y);
   }
 
   *wx = x;
@@ -882,40 +861,54 @@ x_event_get_pointer_position (GschemToplevel *w_current, gboolean snapped, gint 
  *  \returns FALSE to propagate the event further.
  */
 gboolean
-x_event_faked_motion (GschemPageView *view, GdkEventKey *event) {
-  gint x, y;
-  gboolean ret;
+x_event_faked_motion(GschemPageView *view, GdkEventKey *event)
+{
+  gint x = 0, y = 0;
+  gboolean ret = FALSE;
   GdkEventMotion *newevent;
 
-  gtk_widget_get_pointer (GTK_WIDGET (view), &x, &y);
+  GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(view));
+  if (window == NULL) return FALSE;
+
+  GdkDisplay *display = gdk_window_get_display(window);
+  GdkSeat *seat = gdk_display_get_default_seat(display);
+  GdkDevice *pointer = gdk_seat_get_pointer(seat);
+
+  if (pointer != NULL) {
+    gdk_window_get_device_position(window, pointer, &x, &y, NULL);
+  }
+
   newevent = (GdkEventMotion*)gdk_event_new(GDK_MOTION_NOTIFY);
+  newevent->window = g_object_ref(window);
+  newevent->send_event = TRUE;
+  newevent->time = GDK_CURRENT_TIME;
   newevent->x = x;
   newevent->y = y;
+  newevent->axes = NULL;
+  newevent->state = 0;
+  newevent->is_hint = FALSE;
+  newevent->device = pointer;
+  newevent->x_root = x;
+  newevent->y_root = y;
 
-  if (event != NULL ) {
+  if (event != NULL) {
     switch (event->keyval) {
-      case GDK_Control_L:
-      case GDK_Control_R:
+      case GDK_KEY_Control_L:
+      case GDK_KEY_Control_R:
         if (event->type == GDK_KEY_PRESS) {
           newevent->state |= GDK_CONTROL_MASK;
-        } else {
-          newevent->state &= ~GDK_CONTROL_MASK;
         }
         break;
-
-      case GDK_Shift_L:
-      case GDK_Shift_R:
+      case GDK_KEY_Shift_L:
+      case GDK_KEY_Shift_R:
         if (event->type == GDK_KEY_PRESS) {
           newevent->state |= GDK_SHIFT_MASK;
-        } else {
-          newevent->state &= ~GDK_SHIFT_MASK;
         }
         break;
     }
   }
 
-  g_signal_emit_by_name (view, "motion-notify-event", newevent, &ret);
-
+  g_signal_emit_by_name(view, "motion-notify-event", newevent, &ret);
   gdk_event_free((GdkEvent*)newevent);
 
   return FALSE;

@@ -123,7 +123,7 @@ static void create_type_menu(GtkComboBox *combo)
  *  \return The gdk-pixbuf type, or extension, of the image.
  *  \note This function is only used in this file.
  */
-static char *
+static const char *
 x_image_get_type_from_description (const char *description)
 {
   GSList *ptr;
@@ -168,7 +168,12 @@ static void x_image_update_dialog_filename(GtkComboBox *combo,
   GtkWidget *file_chooser;
 
   /* Get the current image type */
-  image_type_descr = gtk_combo_box_get_active_text(GTK_COMBO_BOX(combo));
+  // image_type_descr = gtk_combo_box_get_active_text(GTK_COMBO_BOX(combo));
+  image_type_descr = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(combo));
+  if (image_type_descr != NULL) {
+    image_type = x_image_get_type_from_description(image_type_descr);
+    g_free(image_type_descr);  // free ONLY what GTK allocated
+  }
   image_type = x_image_get_type_from_description(image_type_descr);
 
   /* Get the parent dialog */
@@ -332,117 +337,92 @@ void x_image_lowlevel(GschemToplevel *w_current, const char* filename,
  *  \param w_current [in] the GschemToplevel structure.
  *  \return nothing
  */
-void x_image_setup (GschemToplevel *w_current)
+void x_image_setup(GschemToplevel *w_current)
 {
   GtkWidget *dialog;
-  GtkWidget *vbox1;
   GtkWidget *hbox;
-  GtkWidget *label1;
-  GtkWidget *size_combo;
-  GtkWidget *vbox2;
-  GtkWidget *label2;
-  GtkWidget *type_combo;
-  char *image_type_descr;
-  char *filename;
-  char *image_size;
-  char *image_type;
-  int width, height;
+  GtkWidget *vbox1, *label1, *size_combo;
+  GtkWidget *vbox2, *label2, *type_combo;
+  char *image_size = NULL;
+  char *image_type_descr = NULL;
+  char *image_type = NULL;
+  char *filename = NULL;
+  int width = 0, height = 0;
 
-  hbox = gtk_hbox_new(FALSE, 0);
+  /* Create layout for dialog options */
+  hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
 
   /* Image size selection */
-  vbox1 = gtk_vbox_new(TRUE, 0);
-  label1 = gtk_label_new (_("Width x Height"));
-  gtk_widget_show (label1);
-  gtk_misc_set_alignment( GTK_MISC (label1), 0, 0);
-  gtk_misc_set_padding (GTK_MISC (label1), 0, 0);
-  gtk_box_pack_start (GTK_BOX (vbox1),
-      label1, FALSE, FALSE, 0);
+  vbox1 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+  label1 = gtk_label_new(_("Width x Height"));
+  gtk_widget_set_halign(label1, GTK_ALIGN_START);
+  gtk_widget_set_valign(label1, GTK_ALIGN_START);
+  gtk_box_pack_start(GTK_BOX(vbox1), label1, FALSE, FALSE, 0);
 
-  size_combo =  gtk_combo_box_text_new ();
-  create_size_menu (GTK_COMBO_BOX(size_combo));
-
-  gtk_widget_show (size_combo);
-  gtk_box_pack_start (GTK_BOX (vbox1), size_combo, TRUE, TRUE, 0);
-  gtk_widget_show(vbox1);
+  size_combo = gtk_combo_box_text_new();
+  create_size_menu(GTK_COMBO_BOX(size_combo));
+  gtk_box_pack_start(GTK_BOX(vbox1), size_combo, TRUE, TRUE, 0);
 
   /* Image type selection */
-  vbox2 = gtk_vbox_new(TRUE, 0);
-  label2 = gtk_label_new (_("Image type"));
-  gtk_widget_show (label2);
-  gtk_misc_set_alignment( GTK_MISC (label2), 0, 0);
-  gtk_misc_set_padding (GTK_MISC (label2), 0, 0);
-  gtk_box_pack_start (GTK_BOX (vbox2),
-      label2, FALSE, FALSE, 0);
+  vbox2 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+  label2 = gtk_label_new(_("Image type"));
+  gtk_widget_set_halign(label2, GTK_ALIGN_START);
+  gtk_widget_set_valign(label2, GTK_ALIGN_START);
+  gtk_box_pack_start(GTK_BOX(vbox2), label2, FALSE, FALSE, 0);
 
-  type_combo = gtk_combo_box_text_new ();
-  gtk_box_pack_start (GTK_BOX (vbox2), type_combo, TRUE, TRUE, 0);
-  create_type_menu (GTK_COMBO_BOX(type_combo));
+  type_combo = gtk_combo_box_text_new();
+  create_type_menu(GTK_COMBO_BOX(type_combo));
+  gtk_box_pack_start(GTK_BOX(vbox2), type_combo, TRUE, TRUE, 0);
 
-  /* Connect the changed signal to the callback, so the filename
-     gets updated every time the image type is changed */
-  g_signal_connect (type_combo, "changed",
-      G_CALLBACK(x_image_update_dialog_filename),
-      w_current);
-
-  gtk_widget_show (type_combo);
-  gtk_widget_show(vbox2);
-
-  /* Create the dialog */
-  dialog = gtk_file_chooser_dialog_new (_("Write image..."),
-      GTK_WINDOW(w_current->main_window),
-      GTK_FILE_CHOOSER_ACTION_SAVE,
-      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-      GTK_STOCK_SAVE,   GTK_RESPONSE_ACCEPT,
-      NULL);
-
-  /* Set the alternative button order (ok, cancel, help) for other systems */
-  gtk_dialog_set_alternative_button_order(GTK_DIALOG(dialog),
-      GTK_RESPONSE_ACCEPT,
-      GTK_RESPONSE_CANCEL,
-      -1);
-
-  /* Add the extra widgets to the dialog*/
+  /* Pack both option areas into hbox */
   gtk_box_pack_start(GTK_BOX(hbox), vbox1, FALSE, FALSE, 10);
   gtk_box_pack_start(GTK_BOX(hbox), vbox2, FALSE, FALSE, 10);
 
-  gtk_file_chooser_set_extra_widget (GTK_FILE_CHOOSER(dialog), hbox);
+  /* Connect image type change to filename updater */
+  g_signal_connect(type_combo, "changed",
+                   G_CALLBACK(x_image_update_dialog_filename),
+                   w_current);
 
-  g_object_set (dialog,
-      /* GtkFileChooser */
-      "select-multiple", FALSE,
-      /* only in GTK 2.8 */
-      "do-overwrite-confirmation", TRUE,
-      NULL);
+  /* Create file chooser dialog */
+  dialog = gtk_file_chooser_dialog_new(_("Write image..."),
+                                       GTK_WINDOW(w_current->main_window),
+                                       GTK_FILE_CHOOSER_ACTION_SAVE,
+                                       _("_Cancel"), GTK_RESPONSE_CANCEL,
+                                       _("_Save"), GTK_RESPONSE_ACCEPT,
+                                       NULL);
 
-  /* Update the filename */
+  gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(dialog), hbox);
+  gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
+  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_ACCEPT);
+  gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_MOUSE);
+  gtk_container_set_border_width(GTK_CONTAINER(dialog), DIALOG_BORDER_SPACING);
+  gtk_box_set_spacing(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+                      DIALOG_V_SPACING);
+
   x_image_update_dialog_filename(GTK_COMBO_BOX(type_combo), w_current);
+  gtk_widget_show_all(dialog);
 
-  gtk_dialog_set_default_response(GTK_DIALOG(dialog),
-      GTK_RESPONSE_ACCEPT);
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
+    image_size = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(size_combo));
+    image_type_descr = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(type_combo));
 
-  gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_MOUSE);
+    if (image_size && image_type_descr) {
+      image_type = x_image_get_type_from_description(image_type_descr);
+      if (sscanf(image_size, "%ix%i", &width, &height) == 2) {
+        filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+        if (filename) {
+          x_image_lowlevel(w_current, filename, width, height, image_type);
+          g_free(filename);
+        }
+      }
+      g_free(image_type);
+    }
 
-  gtk_container_set_border_width(GTK_CONTAINER(dialog),
-      DIALOG_BORDER_SPACING);
-  gtk_box_set_spacing(GTK_BOX(GTK_DIALOG(dialog)->vbox),
-      DIALOG_V_SPACING);
-
-  gtk_widget_show (dialog);
-
-  if (gtk_dialog_run((GTK_DIALOG(dialog))) == GTK_RESPONSE_ACCEPT) {
-    image_size = gtk_combo_box_get_active_text(GTK_COMBO_BOX(size_combo));
-
-    image_type_descr = gtk_combo_box_get_active_text(GTK_COMBO_BOX(type_combo));
-
-    image_type = x_image_get_type_from_description(image_type_descr);
-    sscanf(image_size, "%ix%i", &width, &height);
-    filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-
-    x_image_lowlevel(w_current, filename, width, height, image_type);
+    g_free(image_size);
+    g_free(image_type_descr);
   }
 
-  gtk_widget_destroy (dialog);
+  gtk_widget_destroy(dialog);
 }
 
 /*! \todo Finish function documentation!!!
@@ -485,13 +465,10 @@ static void x_image_convert_to_greyscale(GdkPixbuf *pixbuf)
     }
   }
 }
-
-/*! \todo Finish function documentation!!!
- *  \brief Renders the current page to a GdkPixbuf.
+/*! \brief Renders the current page to a GdkPixbuf.
  *  \par Function Description
- *  This function creates an offscreen pixmap and draws the current schematic
- *  page into it using o_redraw_rect(). It then extracts a GdkPixbuf for export
- *  or use elsewhere.
+ *  This function creates an offscreen Cairo surface and draws the current schematic
+ *  page into it using o_redraw_rect(). It then extracts a GdkPixbuf for export or use elsewhere.
  */
 GdkPixbuf *
 x_image_get_pixbuf(GschemToplevel *w_current, int width, int height)
@@ -513,48 +490,63 @@ x_image_get_pixbuf(GschemToplevel *w_current, int width, int height)
 
   old_geometry = gschem_page_view_get_page_geometry(page_view);
 
-  rect.x = origin_x;
-  rect.y = origin_y;
-  rect.width = width;
-  rect.height = height;
-
-  // Copy structures
+  // Clone working context
   memcpy(&new_w_current, w_current, sizeof(GschemToplevel));
   memcpy(&options, w_current->options, sizeof(GschemOptions));
   memcpy(&toplevel, w_current->toplevel, sizeof(TOPLEVEL));
-
   new_w_current.options = &options;
   new_w_current.toplevel = &toplevel;
 
   gschem_options_set_grid_mode(new_w_current.options, GRID_MODE_NONE);
 
-  // Create an image surface in ARGB32
-  cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+  rect.x = origin_x;
+  rect.y = origin_y;
+  rect.width = width;
+  rect.height = height;
+
+  // Create offscreen surface
+  surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
   if (cairo_surface_status(surface) != CAIRO_STATUS_SUCCESS) {
     fprintf(stderr, "Failed to create Cairo surface\n");
     return NULL;
   }
 
-  cairo_t *cr = cairo_create(surface);
+  cr = cairo_create(surface);
   if (cairo_status(cr) != CAIRO_STATUS_SUCCESS) {
     fprintf(stderr, "Failed to create Cairo context\n");
     cairo_surface_destroy(surface);
     return NULL;
   }
 
+  // Construct geometry for this rendering target
+  new_geometry = gschem_page_geometry_new_with_values(
+    width,
+    height,
+    old_geometry->viewport_left,
+    old_geometry->viewport_top,
+    old_geometry->viewport_right,
+    old_geometry->viewport_bottom,
+    toplevel.init_left,
+    toplevel.init_top,
+    toplevel.init_right,
+    toplevel.init_bottom
+  );
+
+  // Redraw the new geometry into Cairo context
+  o_redraw_rect(&new_w_current, cr, toplevel.page_current, new_geometry, &rect);
+
+  // Clean up geometry
   gschem_page_geometry_free(new_geometry);
-
-  /* Render into the Cairo context (instead of a pixmap) */
-  o_redraw_cairo_rect(&new_w_current, cr, toplevel.page_current, &rect);  // <== you must write or adapt this function
-
   cairo_destroy(cr);
 
-  /* Convert Cairo surface to pixbuf */
-  GdkPixbuf *pixbuf = gdk_pixbuf_get_from_surface(surface, 0, 0, width, height);
+  // Convert surface to GdkPixbuf
+  pixbuf = gdk_pixbuf_get_from_surface(surface, 0, 0, width, height);
   cairo_surface_destroy(surface);
 
+  // Optional grayscale conversion
   if (pixbuf != NULL && !toplevel.image_color) {
     x_image_convert_to_greyscale(pixbuf);
   }
 
   return pixbuf;
+}

@@ -29,11 +29,10 @@
 #endif
 
 #include "gschem.h"
+#include <gtk/gtk.h>
 
-#define GLADE_HOOKUP_OBJECT(component,widget,name) \
-  g_object_set_data_full (G_OBJECT (component), name, \
-    gtk_widget_ref (widget), (GDestroyNotify) g_object_unref)
-
+#define GLADE_HOOKUP_OBJECT(component, widget, name) \
+  g_object_set_data(G_OBJECT(component), name, widget)
 
 
 /***************** Start of Close Confirmation dialog box ************/
@@ -385,9 +384,9 @@ close_confirmation_dialog_build_page_list (CloseConfirmationDialog *dialog)
 }
 
 static GObject*
-close_confirmation_dialog_constructor (GType type,
-                                       guint n_construct_properties,
-                                       GObjectConstructParam *construct_params)
+close_confirmation_dialog_constructor(GType type,
+                                      guint n_construct_properties,
+                                      GObjectConstructParam *construct_params)
 {
   GObject *object;
   CloseConfirmationDialog *dialog;
@@ -398,165 +397,109 @@ close_confirmation_dialog_constructor (GType type,
   const gchar *cstr;
 
   /* chain up to constructor of parent class */
-  object =
-    G_OBJECT_CLASS (close_confirmation_dialog_parent_class)->constructor (
-      type,
-      n_construct_properties,
-      construct_params);
-  dialog = CLOSE_CONFIRMATION_DIALOG (object);
+  object = G_OBJECT_CLASS(close_confirmation_dialog_parent_class)->constructor(
+    type, n_construct_properties, construct_params);
+  dialog = CLOSE_CONFIRMATION_DIALOG(object);
 
-  g_object_set (dialog,
-                /* GtkDialog */
-                "has-separator",     FALSE,
-                /* GtkWindow */
-                "resizable",         FALSE,
-                "skip-taskbar-hint", TRUE,
-                /* GtkContainer */
-                "border-width",      5,
-                NULL);
-  g_object_set (GTK_DIALOG (dialog)->vbox,
-                /* GtkBox */
-                "spacing", 14,
-                NULL);
-  g_object_set (GTK_DIALOG (dialog)->action_area,
-                /* GtkBox */
-                "spacing",      6,
-                /* GtkContainer */
-                "border-width", 5,
-                NULL);
+  gtk_window_set_resizable(GTK_WINDOW(dialog), FALSE);
+  gtk_window_set_skip_taskbar_hint(GTK_WINDOW(dialog), TRUE);
+  gtk_container_set_border_width(GTK_CONTAINER(dialog), 5);
+
+  GtkWidget *content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+  gtk_box_set_spacing(GTK_BOX(content_area), 14);
+
+  GtkWidget *action_area = gtk_dialog_get_action_area(GTK_DIALOG(dialog));
+  gtk_box_set_spacing(GTK_BOX(action_area), 6);
+  gtk_container_set_border_width(GTK_CONTAINER(action_area), 5);
 
   /* check if there is one or more than one page with changes */
-  ret = gtk_tree_model_get_iter_first (GTK_TREE_MODEL (
-                                         dialog->store_unsaved_pages),
-                                       &iter);
-  g_assert (ret);
-  single_page = !gtk_tree_model_iter_next (GTK_TREE_MODEL (
-                                             dialog->store_unsaved_pages),
-                                           &iter);
+  ret = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(dialog->store_unsaved_pages), &iter);
+  g_assert(ret);
+  single_page = !gtk_tree_model_iter_next(GTK_TREE_MODEL(dialog->store_unsaved_pages), &iter);
 
-  /* here starts the layout of the dialog */
-  hbox = GTK_WIDGET (g_object_new (GTK_TYPE_HBOX,
-                                   /* GtkContainer */
-                                   "border-width", 5,
-                                   /* GtkBox */
-                                   "homogeneous",  FALSE,
-                                   "spacing",      12,
-                                   NULL));
+  /* layout the dialog */
+  hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 12);
+  gtk_container_set_border_width(GTK_CONTAINER(hbox), 5);
 
-  /* warning image */
-  image = g_object_new (GTK_TYPE_IMAGE,
-                        /* GtkMisc */
-                        "xalign",    0.5,
-                        "yalign",    0.0,
-                        /* GtkImage */
-                        "stock",     GTK_STOCK_DIALOG_WARNING,
-                        "icon-size", GTK_ICON_SIZE_DIALOG,
-                        NULL);
-  gtk_box_pack_start (GTK_BOX (hbox), image,
-                      FALSE, FALSE, 0);
+  image = gtk_image_new_from_icon_name("dialog-warning", GTK_ICON_SIZE_DIALOG);
+  gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
 
-  /* vertical box on the right hand side of the dialog */
-  vbox = GTK_WIDGET (g_object_new (GTK_TYPE_VBOX,
-                                   /* GtkBox */
-                                   "homogeneous", FALSE,
-                                   "spacing",     12,
-                                   NULL));
+  vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 12);
 
   /* primary label */
   if (single_page) {
-    /* single page */
-    GtkTreeModel *model = GTK_TREE_MODEL (dialog->store_unsaved_pages);
+    GtkTreeModel *model = GTK_TREE_MODEL(dialog->store_unsaved_pages);
     GtkTreeIter iter;
     PAGE *page;
 
-    gtk_tree_model_get_iter_first (model, &iter);
-    gtk_tree_model_get (model, &iter,
-                        COLUMN_PAGE, &page,
-                        -1);
-    g_assert (page != NULL);
+    gtk_tree_model_get_iter_first(model, &iter);
+    gtk_tree_model_get(model, &iter, COLUMN_PAGE, &page, -1);
+    g_assert(page != NULL);
 
-    x_window_set_current_page (dialog->w_current, page);
+    x_window_set_current_page(dialog->w_current, page);
 
-    if (page->is_untitled)
-      tmp = g_strdup (_("Save changes before closing?"));
-    else {
-      gchar *page_name = g_path_get_basename (page->page_filename);
-      tmp = g_strdup_printf (
-        _("Save the changes to \"%s\" before closing?"),
-        page_name);
-      g_free (page_name);
+    if (page->is_untitled) {
+      tmp = g_strdup(_("Save changes before closing?"));
+    } else {
+      gchar *page_name = g_path_get_basename(page->page_filename);
+      tmp = g_strdup_printf(_("Save the changes to \"%s\" before closing?"), page_name);
+      g_free(page_name);
     }
   } else {
-    /* multi page */
-    tmp = g_strdup_printf (
-      _("There are %d files with unsaved changes.\n"
-        "Save changes before closing?"),
-      count_pages (GTK_TREE_MODEL (dialog->store_unsaved_pages)));
+    tmp = g_strdup_printf(
+      _("There are %d files with unsaved changes.\nSave changes before closing?"),
+      count_pages(GTK_TREE_MODEL(dialog->store_unsaved_pages)));
   }
-  str = g_strconcat ("<big><b>", tmp, "</b></big>", NULL);
-  g_free (tmp);
-  label = GTK_WIDGET (g_object_new (GTK_TYPE_LABEL,
-                                    /* GtkMisc */
-                                    "xalign",     0.0,
-                                    "yalign",     0.0,
-                                    "selectable", TRUE,
-                                    /* GtkLabel */
-                                    "wrap",       TRUE,
-                                    "use-markup", TRUE,
-                                    "label",      str,
-                                    NULL));
-  g_free (str);
-  gtk_box_pack_start (GTK_BOX (vbox), label,
-                      FALSE, FALSE, 0);
+
+  str = g_strconcat("<big><b>", tmp, "</b></big>", NULL);
+  g_free(tmp);
+
+  label = gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(label), str);
+  // gtk_label_set_wrap(GTK_LABEL(label), TRUE);  ??? depracated in GTK 3?
+  gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
+  gtk_label_set_xalign(GTK_LABEL(label), 0.0);
+  gtk_widget_set_halign(label, GTK_ALIGN_START);
+  gtk_widget_set_valign(label, GTK_ALIGN_START);
+  gtk_label_set_selectable(GTK_LABEL(label), TRUE);
+  gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
+  g_free(str);
 
   if (!single_page) {
-    /* more than one page with changes, display each page and offer */
-    /* the opportunity to save them before exiting */
-    gtk_box_pack_start (GTK_BOX (vbox),
-                        close_confirmation_dialog_build_page_list (dialog),
-                        FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(vbox),
+                       close_confirmation_dialog_build_page_list(dialog),
+                       FALSE, FALSE, 0);
   }
 
   /* secondary label */
   cstr = _("If you don't save, all your changes will be permanently lost.");
-  label = GTK_WIDGET (g_object_new (GTK_TYPE_LABEL,
-                                    /* GtkMisc */
-                                    "xalign",     0.0,
-                                    "yalign",     0.0,
-                                    "selectable", TRUE,
-                                    /* GtkLabel */
-                                    "wrap",       TRUE,
-                                    "label",      cstr,
-                                    NULL));
-  gtk_box_pack_start (GTK_BOX (vbox), label,
-                      FALSE, FALSE, 0);
+  label = gtk_label_new(cstr);
+  gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
+  gtk_label_set_xalign(GTK_LABEL(label), 0.0);
+  gtk_widget_set_halign(label, GTK_ALIGN_START);
+  gtk_widget_set_valign(label, GTK_ALIGN_START);
+  gtk_label_set_selectable(GTK_LABEL(label), TRUE);
+  gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
 
+  gtk_box_pack_start(GTK_BOX(hbox), vbox, FALSE, FALSE, 0);
 
-  gtk_box_pack_start (GTK_BOX (hbox), vbox,
-                      FALSE, FALSE, 0);
+  /* add buttons */
+  gtk_dialog_add_buttons(GTK_DIALOG(dialog),
+                         _("Close _without saving"), GTK_RESPONSE_NO,
+                         _("_Cancel"),              GTK_RESPONSE_CANCEL,
+                         _("_Save"),                GTK_RESPONSE_YES,
+                         NULL);
 
-
-  /* add buttons to dialog action area */
-  gtk_dialog_add_buttons (GTK_DIALOG (dialog),
-                          _("Close _without saving"), GTK_RESPONSE_NO,
-                          GTK_STOCK_CANCEL,           GTK_RESPONSE_CANCEL,
-                          GTK_STOCK_SAVE,             GTK_RESPONSE_YES,
-                          NULL);
-
-  /* Set the alternative button order (ok, cancel, help) for other systems */
   gtk_dialog_set_alternative_button_order(GTK_DIALOG(dialog),
                                           GTK_RESPONSE_YES,
                                           GTK_RESPONSE_NO,
                                           GTK_RESPONSE_CANCEL,
                                           -1);
 
-  gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_YES);
+  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_YES);
 
-  /* all done, let's show the contents of the dialog */
-  gtk_widget_show_all (hbox);
-
-  gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), hbox,
-                      FALSE, FALSE, 0);
+  gtk_widget_show_all(hbox);
+  gtk_box_pack_start(GTK_BOX(content_area), hbox, FALSE, FALSE, 0);
 
   return object;
 }
