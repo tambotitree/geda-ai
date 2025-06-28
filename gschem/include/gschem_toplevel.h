@@ -58,6 +58,9 @@ struct st_gschem_toplevel {
   GtkWidget *bottom_notebook;
   GtkWidget *right_notebook;
 
+  #define GSCHEM_ROSTER_COUNT XWIN_LAST
+  GschemMainWindowRoster widget_roster[GSCHEM_ROSTER_COUNT];
+
 
   gchar *keyaccel_string;               /* visual feedback when pressing
                                            keyboard accelerators */
@@ -89,6 +92,11 @@ struct st_gschem_toplevel {
   GschemDockable *find_text_dockable;
   GschemDockable *patch_dockable;
   GschemDockable *pagesel_dockable;
+
+  /* TODO(gschem-roster): Add a parallel check for GschemDockables.
+  * Iterate over w_current->dockables and validate each widget.
+  * Integrate with verbosity_level and consider adding mapped/visible status.
+  */
 
   /* -------------------------------------- */
   /* Models for widgets inside dialog boxes */

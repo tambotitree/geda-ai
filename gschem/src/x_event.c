@@ -47,6 +47,9 @@ x_event_expose(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   GschemPageView *view = GSCHEM_PAGE_VIEW(widget);
 
   gschem_page_view_redraw(view, cr, w_current);
+#ifdef DEBUGGTK3MIGRATION
+  fprintf(stderr, "✅ x_event_expose completed\n");
+#endif
   return FALSE;  // Allow default processing to continue
 }
 

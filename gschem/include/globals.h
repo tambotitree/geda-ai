@@ -45,6 +45,8 @@ extern int logging_dest;
 extern int quiet_mode;
 extern int verbose_mode;
 extern int auto_place_mode;
+/* Verbosity level: incremented by repeated -v switches (max 11) */
+extern int verbosity_level;
 
 /* Global buffers */
 #define MAX_BUFFERS      (5)

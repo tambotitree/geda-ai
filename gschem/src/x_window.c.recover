@@ -753,11 +753,11 @@ x_window_setup_main_window(GschemToplevel *w_current)
  */
 void x_window_create_main(GschemToplevel *w_current)
 {
-  TOPLEVEL *toplevel = gschem_toplevel_get_toplevel(w_current);
+  TOPLEVEL *toplevel = gschem_toplevel_get_toplevel (w_current);
 
   GtkPolicyType policy;
-  GtkWidget *main_box = NULL;
-  GtkWidget *handlebox = NULL;
+  GtkWidget *main_box=NULL;
+  GtkWidget *handlebox=NULL;
   GtkWidget *scrolled;
   GtkAdjustment *hadjustment;
   GtkAdjustment *vadjustment;
@@ -766,39 +766,35 @@ void x_window_create_main(GschemToplevel *w_current)
   GtkWidget *vpaned;
   GtkWidget *work_box;
 
-  w_current->main_window = GTK_WIDGET(gschem_main_window_new());
+  w_current->main_window = GTK_WIDGET (gschem_main_window_new ());
 
-  gtk_widget_set_name(w_current->main_window, "gschem");
+  gtk_widget_set_name (w_current->main_window, "gschem");
   // gtk_window_set_policy is deprecated and removed; do not use.
 
+
   /* We want the widgets to flow around the drawing area, so we don't
-   * set a size of the main window. The drawing area's size is fixed,
-   * see below.
+   * set a size of the main window.  The drawing area's size is fixed,
+   * see below
    */
 
   /*
-   * By default, we let the window manager handle window placement.
-   * However, for batch-mode schematic rendering (e.g., exporting PDFs),
-   * we override this using `auto_place_mode`. In that case, the window
-   * will be moved to a fixed location (e.g., top-left of the screen).
-   *
-   * NOTE: gtk_widget_set_uposition() is deprecated; we now use
-   * gtk_window_move(), which must be called after the window is shown.
-   */
+  * By default, we let the window manager handle window placement.
+  * However, for batch-mode schematic rendering (e.g., exporting PDFs),
+  * we override this using `auto_place_mode`. In that case, the window
+  * will be moved to a fixed location (e.g., top-left of the screen).
+  *
+  * NOTE: gtk_widget_set_uposition() is deprecated; we now use
+  * gtk_window_move(), which must be called after the window is shown.
+  */
 
-  g_signal_connect(w_current->main_window, "delete_event",
-                   G_CALLBACK(x_window_close_wm), w_current);
+  g_signal_connect (w_current->main_window, "delete_event",
+    G_CALLBACK (x_window_close_wm), w_current);
 
-  /* TODO: gtk_widget_show_all is called here too early — move it to just before gtk_window_move() 
-   * and after all children have been packed to ensure complete layout.
-   * This will also allow inserting debug/roster instrumentation at logical construction steps.
-   */
-  gtk_widget_show_all(w_current->main_window);
-
+  /* Show everything before moving the window manually */
+  gtk_widget_show_all (w_current->main_window);
   if (auto_place_mode) {
       gtk_window_move(GTK_WINDOW(w_current->main_window), 10, 10);
   }
-
   /* Don't connect 'delete_event' twice */
 
   /* Containers first */
@@ -806,57 +802,45 @@ void x_window_create_main(GschemToplevel *w_current)
   gtk_container_set_border_width(GTK_CONTAINER(main_box), 0);
   gtk_container_add(GTK_CONTAINER(w_current->main_window), main_box);
 
-  // TODO: add_roster_item(XWIN_MAIN_BOX, "Main Vertical Box", main_box);
-
   x_menus_create_main_menu(w_current);
   if (w_current->menubar != NULL) {
     if (w_current->handleboxes) {
       handlebox = gtk_handle_box_new();  // Deprecated, but keep for now
       gtk_container_add(GTK_CONTAINER(handlebox), w_current->menubar);
       gtk_box_pack_start(GTK_BOX(main_box), handlebox, FALSE, FALSE, 0);
-
-      // TODO: add_roster_item(XWIN_MENU_BAR, "Menubar in Handlebox", handlebox);
     } else {
       gtk_box_pack_start(GTK_BOX(main_box), w_current->menubar, FALSE, FALSE, 0);
-
-      // TODO: add_roster_item(XWIN_MENU_BAR, "Menubar", w_current->menubar);
     }
   }
 
   gschem_action_set_sensitive(action_view_menubar, w_current->menubar != NULL, w_current);
   gschem_action_set_active(action_view_menubar, w_current->menubar != NULL, w_current);
-
-  // gtk_widget_realize is rarely needed in GTK 3+, remove unless depending on native window access
-  // gtk_widget_realize(w_current->main_window);
+                            
+  // gtk_widget_realize (w_current->main_window);
+  // gtk_widget_realize is rarely needed in GTK 3+, remove unless you depend on windowing internals
 
   x_menus_create_toolbar(w_current);
   if (w_current->toolbar != NULL) {
     if (w_current->handleboxes) {
-      handlebox = gtk_handle_box_new();  // Deprecated, but kept for legacy users
+      handlebox = gtk_handle_box_new();  // Deprecated, but keep for now
       gtk_container_add(GTK_CONTAINER(handlebox), w_current->toolbar);
       gtk_box_pack_start(GTK_BOX(main_box), handlebox, FALSE, FALSE, 0);
       gtk_widget_set_visible(handlebox, w_current->toolbars);
       gtk_widget_set_no_show_all(handlebox, TRUE);
-
-      // TODO: add_roster_item(XWIN_TOOLBAR, "Toolbar in Handlebox", handlebox);
     } else {
       gtk_box_pack_start(GTK_BOX(main_box), w_current->toolbar, FALSE, FALSE, 0);
       gtk_widget_set_visible(w_current->toolbar, w_current->toolbars);
       gtk_widget_set_no_show_all(w_current->toolbar, TRUE);
-
-      // TODO: add_roster_item(XWIN_TOOLBAR, "Toolbar", w_current->toolbar);
     }
   }
 
   gschem_action_set_sensitive(action_view_toolbar, w_current->toolbar != NULL, w_current);
-  gschem_action_set_active(action_view_toolbar,
-                           w_current->toolbars && w_current->toolbar != NULL,
-                           w_current);
+    gschem_action_set_active(action_view_toolbar,
+                             w_current->toolbars && w_current->toolbar != NULL,
+                             w_current);
 
-  left_hpaned = gtk_hpaned_new(); // GTK 3 okay
+  left_hpaned = gtk_hpaned_new(); // GTK 3: OK, deprecated in GTK 4
   gtk_container_add(GTK_CONTAINER(main_box), left_hpaned);
-
-  // TODO: add_roster_item(XWIN_PANED_LEFT, "Left HPaned Container", left_hpaned);
 
   w_current->left_notebook = gtk_notebook_new();
   gtk_paned_pack1(GTK_PANED(left_hpaned),
@@ -866,48 +850,39 @@ void x_window_create_main(GschemToplevel *w_current)
   gtk_notebook_set_group_name(GTK_NOTEBOOK(w_current->left_notebook),
                               "gschem-dock");
 
-  // TODO: add_roster_item(XWIN_LEFT_NOTEBOOK, "Left Notebook", w_current->left_notebook);
 
-  right_hpaned = gtk_hpaned_new(); // GTK 3 okay
-  gtk_paned_pack2(GTK_PANED(left_hpaned),
-                  right_hpaned,
-                  TRUE,
-                  TRUE);
-
-  // TODO: add_roster_item(XWIN_PANED_RIGHT, "Right HPaned Container", right_hpaned);
+  right_hpaned = gtk_hpaned_new (); // GT3 OK
+  gtk_paned_pack2 (GTK_PANED (left_hpaned),
+                   right_hpaned,
+                   TRUE,
+                   TRUE);
 
   w_current->right_notebook = gtk_notebook_new();
   gtk_paned_pack2(GTK_PANED(right_hpaned),
-                  w_current->right_notebook,
-                  FALSE,
-                  TRUE);
+                        w_current->right_notebook,
+                        FALSE,
+                        TRUE);
   gtk_notebook_set_group_name(GTK_NOTEBOOK(w_current->right_notebook),
-                              "gschem-dock");
+                        "gschem-dock");
 
-  // TODO: add_roster_item(XWIN_RIGHT_NOTEBOOK, "Right Notebook", w_current->right_notebook);
+  vpaned = gtk_vpaned_new (); // GT3 OK
+  gtk_paned_pack1 (GTK_PANED (right_hpaned),
+                   vpaned,
+                   TRUE,
+                   TRUE);
 
-  vpaned = gtk_vpaned_new(); // GTK 3 okay
-  gtk_paned_pack1(GTK_PANED(right_hpaned),
-                  vpaned,
-                  TRUE,
-                  TRUE);
+  w_current->bottom_notebook = gtk_notebook_new ();
+  gtk_paned_pack2 (GTK_PANED (vpaned),
+                   w_current->bottom_notebook,
+                   FALSE,
+                   TRUE);
+  gtk_notebook_set_group_name (GTK_NOTEBOOK (w_current->bottom_notebook),
+                               "gschem-dock");
 
-  // TODO: add_roster_item(XWIN_PANED_VERTICAL, "Vertical Paned Work Area", vpaned);
-  w_current->bottom_notebook = gtk_notebook_new();
-  gtk_paned_pack2(GTK_PANED(vpaned),
-                  w_current->bottom_notebook,
-                  FALSE,
-                  TRUE);
-  gtk_notebook_set_group_name(GTK_NOTEBOOK(w_current->bottom_notebook),
-                              "gschem-dock");
-
-  // TODO: add_roster_item(XWIN_BOTTOM_NOTEBOOK, "Bottom Notebook", w_current->bottom_notebook);
-
+/*-----------------------%<-----------------------------------*/
   // Create the vertical work container
   work_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
   gtk_paned_pack1(GTK_PANED(vpaned), work_box, TRUE, TRUE);
-
-  // TODO: add_roster_item(XWIN_WORK_BOX, "Work Area VBox", work_box);
 
   // File change notification bar
   w_current->file_change_notification = g_object_new(
@@ -921,8 +896,6 @@ void x_window_create_main(GschemToplevel *w_current)
                      w_current->file_change_notification->info_bar,
                      FALSE, FALSE, 0);
 
-  // TODO: add_roster_item(XWIN_FILE_NOTIFICATION, "File Change Notification", w_current->file_change_notification->info_bar);
-
   // Patch change notification bar
   w_current->patch_change_notification = g_object_new(
       GSCHEM_TYPE_CHANGE_NOTIFICATION,
@@ -934,8 +907,6 @@ void x_window_create_main(GschemToplevel *w_current)
   gtk_box_pack_start(GTK_BOX(work_box),
                      w_current->patch_change_notification->info_bar,
                      FALSE, FALSE, 0);
-
-  // TODO: add_roster_item(XWIN_PATCH_NOTIFICATION, "Patch Change Notification", w_current->patch_change_notification->info_bar);
 
   // Create popup menu
   x_menus_create_main_popup(w_current);
@@ -964,8 +935,6 @@ void x_window_create_main(GschemToplevel *w_current)
   gtk_widget_set_vexpand(scrolled, TRUE);
   gtk_box_pack_start(GTK_BOX(work_box), scrolled, TRUE, TRUE, 0);
 
-  // TODO: add_roster_item(XWIN_SCROLLED_WINDOW, "Scrolled Drawing Area", scrolled);
-
   // Create the drawing widget and connect it
   x_window_create_drawing(scrolled, w_current);
   x_window_setup_draw_events(w_current);
@@ -981,32 +950,11 @@ void x_window_create_main(GschemToplevel *w_current)
                      w_current->find_text_widget,
                      FALSE, FALSE, 0);
 
-  // TODO: add_roster_item(XWIN_TEXT_FIND_WIDGET, "Find Text Widget", w_current->find_text_widget);
-
   g_signal_connect(w_current->find_text_widget,
                    "response",
                    G_CALLBACK(x_window_find_text),
                    w_current);
-  gtk_box_pack_start(GTK_BOX(work_box),
-                     w_current->find_text_widget,
-                     FALSE, FALSE, 0);
-
-  // TODO: add_roster_item(XWIN_TEXT_FIND_WIDGET, "Find Text Widget", w_current->find_text_widget);
-
-  g_signal_connect(w_current->find_text_widget,
-                   "response",
-                   G_CALLBACK(x_window_find_text),
-                   w_current);
-  gtk_box_pack_start(GTK_BOX(work_box),
-                     w_current->find_text_widget,
-                     FALSE, FALSE, 0);
-
-  // TODO: add_roster_item(XWIN_TEXT_FIND_WIDGET, "Find Text Widget", w_current->find_text_widget);
-
-  g_signal_connect(w_current->find_text_widget,
-                   "response",
-                   G_CALLBACK(x_window_find_text),
-                   w_current);
+/*-----------------------%<-----------------------------------*/
   /* hide text box */
   w_current->hide_text_widget = GTK_WIDGET (g_object_new (GSCHEM_TYPE_SHOW_HIDE_TEXT_WIDGET,
                                                           "button-text", pgettext ("actuate", "Hide"),

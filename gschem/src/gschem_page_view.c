@@ -624,6 +624,10 @@ gschem_page_view_init (GschemPageView *view)
                    "unrealize",
                    G_CALLBACK (event_unrealize),
                    NULL);
+ g_signal_connect(view,
+                    "draw",
+                    G_CALLBACK(gschem_page_view_redraw),
+                    NULL);
 }
 
 
@@ -1380,16 +1384,32 @@ gschem_page_view_redraw(GschemPageView *view, cairo_t *cr, GschemToplevel *w_cur
   g_return_if_fail(view != NULL);
   g_return_if_fail(w_current != NULL);
 
-#if DEBUG
-  printf("DRAW EVENT\n");
-#endif
 
   PAGE *page = gschem_page_view_get_page(view);
+
+#ifdef DEBUGGTK3MIGRATION
+  printf("DRAW EVENT\n");
+  fprintf(stderr, "==> Redraw triggered on view: %p, page: %p\n", view, page);
+
+  if (page == NULL) {
+    fprintf(stderr, "!! No page loaded. Nothing to draw.\n");
+  } else {
+    cairo_set_source_rgb(cr, 1, 1, 1); // clear to white
+    cairo_paint(cr);
+
+    cairo_set_source_rgb(cr, 0.2, 0.2, 1.0);
+    cairo_set_line_width(cr, 3.0);
+    cairo_move_to(cr, 20, 20);
+    cairo_line_to(cr, 200, 200);
+    cairo_stroke(cr);
+
+    fprintf(stderr, "-- Cairo line should be visible\n");
+  }
+#endif
 
   if (page != NULL) {
     GschemPageGeometry *geometry = gschem_page_view_get_page_geometry(view);
 
-    // GTK 3: No event->area, so redraw the full widget
     GtkAllocation allocation;
     gtk_widget_get_allocation(GTK_WIDGET(view), &allocation);
 
@@ -1399,8 +1419,16 @@ gschem_page_view_redraw(GschemPageView *view, cairo_t *cr, GschemToplevel *w_cur
       .width = allocation.width,
       .height = allocation.height
     };
-
-    // Perform the redraw using the backend renderer
+#ifdef DEBUGGTK3MIGRATION
+fprintf(stderr, "📦 Calling o_redraw_rect: page=%p geometry=%p\n", page, geometry);
+if (geometry) {
+  fprintf(stderr, "📐 Geometry: width=%d height=%d\n", geometry->width, geometry->height);
+  fprintf(stderr, "📐 Geometry pointer is valid: %p\n", geometry);
+  fprintf(stderr, "DRAW: %p (width=%d height=%d)\n", view, allocation.width, allocation.height);
+} else {
+  fprintf(stderr, "❗ Geometry is NULL\n");
+}
+#endif
     o_redraw_rect(w_current, cr, page, geometry, &rect);
   }
 }

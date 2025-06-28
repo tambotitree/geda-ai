@@ -154,6 +154,18 @@ if test "x$have_gtk" = "xno"; then
   AC_MSG_ERROR([GTK+ 2.x (>= 2.10.0) not found. Please install the GTK+ 2 development package (e.g., libgtk2.0-dev).])
 fi
 
+AC_ARG_ENABLE([debuggtk3migration],
+  [AS_HELP_STRING([--enable-debuggtk3migration], [Enable debugging output for GTK3 migration])],
+  [enable_debuggtk3migration=yes],
+  [enable_debuggtk3migration=no])
+
+if test "x$enable_debuggtk3migration" = "xyes"; then
+  AC_DEFINE([DEBUGGTK3MIGRATION], [1], [Define if GTK3 migration debugging is enabled])
+  AC_MSG_NOTICE([Enabling GTK3 migration debug symbols])
+  CFLAGS="$CFLAGS -g -O0"
+  CXXFLAGS="$CXXFLAGS -g -O0"
+fi
+
 # Hacked in we should modify the libgedacairo/Makefile.am 
 GDK_CFLAGS="$GTK_CFLAGS"
 GDK_LIBS="$GTK_LIBS"

@@ -86,7 +86,7 @@ usage(char *cmd)
 "\n"
 "Options:\n"
 "  -q, --quiet              Quiet mode.\n"
-"  -v, --verbose            Verbose mode.\n"
+"  -v, --verbose            Increase verbosity (up to 11; like the amp) e.g. -vvvvvvvvvvv.\n"
 "  -r, --config-file=FILE   Additional configuration file to load.\n"
 "  -L DIR                   Add DIR to Scheme search path.\n"
 "  -c EXPR                  Scheme expression to run at startup.\n"
@@ -151,6 +151,9 @@ parse_commandline(int argc, char *argv[])
     switch (ch) {
       case 'v':
         verbose_mode = TRUE;
+        if (verbosity_level < 11) {
+          verbosity_level++;
+        }
         break;
 
       case 'q':
@@ -237,6 +240,15 @@ parse_commandline(int argc, char *argv[])
 
   if (quiet_mode) {
     verbose_mode = FALSE;
+  }
+
+  if (verbosity_level >= 9 && !quiet_mode) {
+    fprintf(stderr,
+      "🔊 Verbosity set to %d. Like Nigel Tufnel’s amp, it goes to 11.\n", verbosity_level);
+    if (verbosity_level == 11) {
+      fprintf(stderr,
+        "🤹 Welcome to the circus. You're not just debugging — you're performing.\n");
+    }
   }
 
   /* Make sure Scheme expressions can be passed straight to eval */
