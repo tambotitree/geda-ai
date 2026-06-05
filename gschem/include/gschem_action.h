@@ -21,6 +21,10 @@
 #ifndef GSCHEM_ACTION_H
 #define GSCHEM_ACTION_H
 
+#include <gtk/gtk.h>          // For GtkWidget, GtkToolItem
+#include <libguile.h>         // For SCM
+#include "gschem.h"           // For GschemToplevel
+
 #define GSCHEM_ACTION(obj) ((GschemAction *) (obj))
 
 typedef enum {
@@ -29,6 +33,12 @@ typedef enum {
   GSCHEM_ACTION_TYPE_TOGGLE_CHECK,
   GSCHEM_ACTION_TYPE_TOGGLE_RADIO
 } GschemActionType;
+
+/* Legacy macro aliases for action types */
+#define ACTUATE GSCHEM_ACTION_TYPE_ACTUATE
+#define TOGGLE_PLAIN GSCHEM_ACTION_TYPE_TOGGLE_PLAIN
+#define TOGGLE_CHECK GSCHEM_ACTION_TYPE_TOGGLE_CHECK
+#define TOGGLE_RADIO GSCHEM_ACTION_TYPE_TOGGLE_RADIO
 
 typedef struct _GschemAction GschemAction;
 
