@@ -162,3 +162,50 @@ if __name__ == "__main__":
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
+import httpx
+from typing import Optional
+import tkinter as tk
+from tkinter import ttk
+
+class GedaUI:
+    def __init__(self, root):
+        self.root = root
+        self.canvas = tk.Canvas(root, width=800, height=600, bg='white')
+        self.canvas.pack()
+        
+        self.load_button = ttk.Button(
+            root, text="Load RF Amp", 
+            command=self.load_rf_amp
+        )
+        self.load_button.pack()
+        
+        self.client = httpx.AsyncClient(base_url="http://localhost:8000")
+    
+    async def load_rf_amp(self):
+        try:
+            response = await self.client.get(
+                "/load_schematic/RF_Amp/schematics/rfamp-main.sch"
+            )
+            data = response.json()
+            self.render_schematic(data['components'])
+        except Exception as e:
+            print(f"Error loading schematic: {e}")
+    
+    def render_schematic(self, components: list):
+        self.canvas.delete("all")
+        
+        for comp in components:
+            if comp['type'] == 'component':
+                self._draw_component(comp)
+            elif comp['type'] == 'text':
+                self._draw_text(comp)
+    
+    def _draw_component(self, comp: dict):
+        # Basic rectangle placeholder for components
+        x, y = int(comp['x']), int(comp['y'])
+        self.canvas.create_rectangle(
+            x-20, y-20, x+20, y+20,
+            fill='lightblue',
+            tags=("component", comp['symbol'])
+        )
+        self.canvas.create_text(x, y, text=comp['symbol'])

@@ -22,8 +22,27 @@ async def hello_chat():
     """
     return {"message": "Hello from gEDA-AI!"}
 
-@app.post("/generate_symbol")
-async def generate_symbol(description: str):
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+
+# Mount examples directory
+app.mount("/examples", StaticFiles(directory="examples"), name="examples")
+
+@app.get("/load_schematic/{schematic_path:path}")
+async def load_schematic(schematic_path: str):
+    """Load a .sch file from the examples directory"""
+    full_path = Path("examples") / schematic_path
+    if not full_path.exists():
+        raise HTTPException(status_code=404, detail="Schematic not found")
+    
+    with open(full_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    
+    return {
+        "filename": schematic_path,
+        "content": content,
+        "components": parse_geda_schematic(content)  # We'll implement this
+    }
     """
     Endpoint to generate a gEDA symbol based on a description.
     (This is just a placeholder - the prompt and processing need refinement)
