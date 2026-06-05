@@ -1,7 +1,10 @@
 from fastapi import FastAPI, HTTPException
 import requests
 import os
-# from huggingface_hub import InferenceClient # Example for HF API
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+
+from gedai.schematic_parser import parse_geda_schematic
 
 app = FastAPI()
 
@@ -41,8 +44,12 @@ async def load_schematic(schematic_path: str):
     return {
         "filename": schematic_path,
         "content": content,
-        "components": parse_geda_schematic(content)  # We'll implement this
+        "components": parse_geda_schematic(content)
     }
+
+
+@app.post("/generate_symbol")
+async def generate_symbol(description: str):
     """
     Endpoint to generate a gEDA symbol based on a description.
     (This is just a placeholder - the prompt and processing need refinement)
@@ -54,9 +61,9 @@ async def load_schematic(schematic_path: str):
         response = requests.post(OLLAMA_API_URL, json={
             "model": OLLAMA_MODEL,
             "prompt": prompt,
-            "stream": False # Get the full response at once
+            "stream": False
         })
-        response.raise_for_status() # Raise exception for bad status codes
+        response.raise_for_status()
         result = response.json()
         generated_text = result.get("response", "").strip()
 
@@ -67,8 +74,7 @@ async def load_schematic(schematic_path: str):
         if not generated_text:
             raise HTTPException(status_code=500, detail="LLM returned empty response")
 
-        # TODO: Add validation here to ensure the output looks like a gEDA symbol
-        print(f"LLM Output:\n{generated_text}") # For debugging
+        print(f"LLM Output:\n{generated_text}")
 
         return {"symbol_text": generated_text}
 
@@ -78,8 +84,3 @@ async def load_schematic(schematic_path: str):
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
-
-# Add more endpoints as needed, e.g., /route_traces, /explain_schematic, etc.
-
-# To run (from the /Users/johnryan/Documents/GitHub/geda-ai/gedai/ directory):
-# uvicorn main:app --reload
