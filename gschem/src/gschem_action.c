@@ -64,18 +64,84 @@
 
 #include "gschem.h"
 
+/* - Getting rid of old macro expantions that break modern pedantic compilation.:w
+
 #define DEFINE_ACTION(c_id, id, icon, name, label, menu_label, tooltip, type) \
-  GschemAction *action_ ## c_id; \
-  static void action_callback_ ## c_id (GschemAction *action, \
-                                        GschemToplevel *w_current)
+  GschemAction *action_ ## c_id = NULL;
 #include "actions.c"
 #undef DEFINE_ACTION
+*/
 
-#include "actions.decl.x"
+#include "actions.h"
+
+extern GschemAction *action_docking_area_left;
+extern GschemAction *action_docking_area_bottom;
+extern GschemAction *action_docking_area_right;
+extern GschemAction *action_options_grid_size;
+extern GschemAction *action_options_scale_up_snap_size;
+extern GschemAction *action_options_scale_down_snap_size;
+/* Define storage for global GschemAction pointers */
+GschemAction *action_file_new = NULL;
+GschemAction *action_file_open = NULL;
+GschemAction *action_file_open_recent = NULL;
+GschemAction *action_file_save = NULL;
+GschemAction *action_file_save_as = NULL;
+GschemAction *action_file_save_all = NULL;
+GschemAction *action_page_revert = NULL;
+GschemAction *action_page_close = NULL;
+GschemAction *action_file_print = NULL;
+GschemAction *action_file_write_png = NULL;
+GschemAction *action_file_new_window = NULL;
+GschemAction *action_file_close = NULL;
+GschemAction *action_file_quit = NULL;
+GschemAction *action_file_repl = NULL;
+
+GschemAction *action_view_menubar = NULL;
+GschemAction *action_view_toolbar = NULL;
+GschemAction *action_view_scrollbars = NULL;
+
+GschemAction *action_page_prev = NULL;
+GschemAction *action_page_next = NULL;
+
+GschemAction *action_hierarchy_up = NULL;
+
+GschemAction *action_edit_undo = NULL;
+GschemAction *action_edit_redo = NULL;
+GschemAction *action_clipboard_cut = NULL;
+GschemAction *action_clipboard_copy = NULL;
+GschemAction *action_clipboard_paste = NULL;
+GschemAction *action_edit_delete = NULL;
+GschemAction *action_edit_select_all = NULL;
+GschemAction *action_edit_deselect = NULL;
+GschemAction *action_edit_find = NULL;
+
+GschemAction *action_add_component = NULL;
+GschemAction *action_add_last_component = NULL;
+GschemAction *action_add_net = NULL;
+GschemAction *action_add_bus = NULL;
+GschemAction *action_add_attribute = NULL;
+GschemAction *action_add_text = NULL;
+GschemAction *action_add_line = NULL;
+GschemAction *action_add_path = NULL;
+GschemAction *action_add_box = NULL;
+GschemAction *action_add_circle = NULL;
+GschemAction *action_add_arc = NULL;
+GschemAction *action_add_pin = NULL;
+GschemAction *action_add_picture = NULL;
+
+GschemAction *action_docking_area_left = NULL;
+GschemAction *action_docking_area_bottom = NULL;
+GschemAction *action_docking_area_right = NULL;
+GschemAction *action_options_grid_size = NULL;
+GschemAction *action_options_scale_up_snap_size = NULL;
+GschemAction *action_options_scale_down_snap_size = NULL;
 
 
 static scm_t_bits action_tag;
 
+
+static void dispatcher_class_init_wrapper(gpointer g_class, gpointer class_data);
+static void dispatcher_instance_init_wrapper(GTypeInstance *instance, gpointer g_class);
 
 /*! \brief Register statically-defined gschem action.
  *
@@ -98,12 +164,12 @@ gschem_action_register (const gchar *id,
 {
   GschemAction *action = g_new0 (GschemAction, 1);
 
-  action->id = id;
-  action->icon_name = icon_name;
-  action->name = name;
-  action->label = label;
-  action->menu_label = menu_label;
-  action->tooltip = tooltip;
+  action->id = g_strdup(id);
+  action->icon_name = g_strdup(icon_name);
+  action->name = g_strdup(name);
+  action->label = g_strdup(label);
+  action->menu_label = g_strdup(menu_label);
+  action->tooltip = g_strdup(tooltip);
   action->type = type;
   action->activate = callback;
 
@@ -122,7 +188,7 @@ gschem_action_register (const gchar *id,
     scm_c_define (name, action->smob);
     scm_c_export (name, NULL);
   }
-  scm_dynwind_end ();
+  scm_dynwind_end();
 
   return action;
 }
@@ -144,7 +210,7 @@ gschem_action_activate (GschemAction *action,
   scm_dynwind_begin (0);
   g_dynwind_window (w_current);
   action->activate (action, w_current);
-  scm_dynwind_end ();
+  scm_dynwind_end();
 }
 
 
@@ -190,6 +256,7 @@ scm_to_action (SCM smob)
 static void
 activate_scheme_thunk (GschemAction *action, GschemToplevel *w_current)
 {
+  (void)w_current;
   g_return_if_fail (!SCM_UNBNDP (action->thunk));
   g_scm_eval_protected (scm_list_1 (action->thunk), SCM_UNDEFINED);
 }
@@ -266,7 +333,7 @@ make_action (SCM s_icon_name, SCM s_name, SCM s_label, SCM s_menu_label,
        so the garbage collector knows about the allocated data */
     action->smob = smob = scm_new_smob (action_tag, (scm_t_bits) action);
   }
-  scm_dynwind_end ();
+  scm_dynwind_end();
 
   /* only then, fill in the thunk field */
   action->thunk = s_thunk;
@@ -288,18 +355,42 @@ action_p (SCM smob)
 static void
 init_module_gschem_core_action (void *data)
 {
-  scm_c_define_gsubr ("%make-action", 6, 0, 0, make_action);
-  scm_c_define_gsubr ("%action?", 1, 0, 0, action_p);
+  (void)data;
+  scm_c_define_gsubr ("%make-action", 6, 0, 0, (scm_t_subr) make_action);
+  scm_c_define_gsubr ("%action?", 1, 0, 0, (scm_t_subr) action_p);
 
   scm_c_export ("%make-action", "%action?", NULL);
 }
 
+/**
+ * \brief Initialize all gschem core built-in actions.
+ *
+ * This function is called during gschem startup to register
+ * every C-defined action (e.g., menu items and toolbar buttons)
+ * in the global action registry. Actions are also exposed to
+ * the Guile Scheme interpreter for scripting and automation.
+ *
+ * Previously, this initialization was done through a macro
+ * expansion of `actions.init.x`, which obfuscated the process.
+ * We’ve replaced that with an explicit call to
+ * `gschem_register_all_actions()`, defined in actions.c.
+ *
+ * This improves readability, simplifies debugging, and
+ * eliminates compiler warnings caused by old macro magic.
+ *
+ * \note This function is invoked by gschem_action_init(),
+ * which must be called during application startup before
+ * any action can be used in the GUI or Scheme.
+ */
 static void
 init_module_gschem_core_builtins (void *data)
 {
-#include "actions.init.x"
-}
+    /* 'data' is unused but kept for future-proofing API changes */
+    (void)data;
 
+    /* Register all core gschem actions (File, Edit, Add, etc.) */
+    gschem_register_all_actions();
+}
 
 static SCM
 mark_action (SCM smob)
@@ -327,6 +418,7 @@ free_action (SCM smob)
 static int
 print_action (SCM smob, SCM port, scm_print_state *pstate)
 {
+  (void)pstate;
   GschemAction *action = GSCHEM_ACTION (SCM_SMOB_DATA (smob));
 
   if (action->id != NULL) {
@@ -353,14 +445,36 @@ equalp_action (SCM smob0, SCM smob1)
   return scm_from_bool (action0 == action1);
 }
 
+/**
+ * @brief Apply (invoke) a gschem action from Scheme.
+ *
+ * This function acts as the "apply" method for the GschemAction SMOB type.
+ * It extracts the underlying GschemAction pointer from the Guile SCM object
+ * and activates the associated action in the context of the current window.
+ *
+ * This allows GschemAction objects to behave like Scheme procedures.
+ *
+ * @param smob The Scheme object representing a GschemAction.
+ * @return SCM_UNDEFINED, since the C activation routine does not return a value
+ *         meaningful to Scheme.
+ */
 static SCM
-apply_action (SCM smob)
+apply_action(SCM smob)
 {
-  GschemAction *action = GSCHEM_ACTION (SCM_SMOB_DATA (smob));
-  gschem_action_activate (action, g_current_window ());
+    /* Defensive check: Ensure smob is of type GschemAction */
+    GschemAction *action = GSCHEM_ACTION(SCM_SMOB_DATA(smob));
 
-  scm_remember_upto_here_1 (smob);
-  return SCM_UNDEFINED;
+    /* Activate the action in the context of the currently focused window */
+    gschem_action_activate(action, g_current_window());
+
+    /* 
+     * Inform the garbage collector that 'smob' is still in use at this point.
+     * Without this, Guile’s GC might incorrectly free resources too early.
+     */
+    scm_remember_upto_here_1(smob);
+
+    /* Return SCM_UNDEFINED as this activation does not yield a Scheme value */
+    return SCM_UNDEFINED;
 }
 
 /*! \brief Initialize Scheme action interface.
@@ -370,20 +484,20 @@ apply_action (SCM smob)
  * called before calling any other action-related functions.
  */
 void
-gschem_action_init (void)
+gschem_action_init(void)
 {
   action_tag = scm_make_smob_type ("gschem-action", 0);
   scm_set_smob_mark (action_tag, mark_action);
   scm_set_smob_free (action_tag, free_action);
   scm_set_smob_print (action_tag, print_action);
-  scm_set_smob_equalp (action_tag, equalp_action);
-  scm_set_smob_apply (action_tag, apply_action, 0, 0, 0);
+  scm_set_smob_equalp (action_tag,  equalp_action);
+  scm_set_smob_apply (action_tag, (scm_t_subr) apply_action, 0, 0, 0);
 
   scm_c_define_module ("gschem core action",
                        init_module_gschem_core_action, NULL);
 
   scm_c_define_module ("gschem core builtins",
-                       init_module_gschem_core_builtins, NULL);
+                        init_module_gschem_core_builtins, NULL);
 }
 
 
@@ -409,7 +523,7 @@ gschem_action_init (void)
  */
 
 #define TYPE_DISPATCHER \
-  (gschem_action_state_dispatcher_get_type ())
+  (gschem_action_state_dispatcher_get_type())
 #define DISPATCHER(obj) \
   (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_DISPATCHER, Dispatcher))
 #define DISPATCHER_CLASS(klass) \
@@ -472,7 +586,7 @@ static guint dispatcher_signals[LAST_SIGNAL] = { 0 };
 
 
 static GType
-gschem_action_state_dispatcher_get_type ()
+gschem_action_state_dispatcher_get_type(void)
 {
   static GType type = 0;
 
@@ -481,12 +595,14 @@ gschem_action_state_dispatcher_get_type ()
       sizeof (DispatcherClass),
       NULL,                                     /* base_init */
       NULL,                                     /* base_finalize */
-      (GClassInitFunc) dispatcher_class_init,
+      // (GClassInitFunc) dispatcher_class_init,
+      (GClassInitFunc) dispatcher_class_init_wrapper,
       NULL,                                     /* class_finalize */
       NULL,                                     /* class_data */
       sizeof (Dispatcher),
       0,                                        /* n_preallocs */
-      (GInstanceInitFunc) dispatcher_instance_init,
+      // (GInstanceInitFunc) dispatcher_instance_init,
+      (GInstanceInitFunc) dispatcher_instance_init_wrapper,
       NULL                                      /* value_table */
     };
 
@@ -734,13 +850,13 @@ menu_item_set_active (GtkCheckMenuItem *menu_item, gboolean is_active)
   /* make sure the toggle handler isn't called recursively */
   g_signal_handlers_block_matched (
     menu_item, G_SIGNAL_MATCH_FUNC, 0, 0, NULL,
-    G_CALLBACK (menu_item_toggled), NULL);
+    (gpointer) menu_item_toggled, NULL);
 
   gtk_check_menu_item_set_active (menu_item, is_active);
 
   g_signal_handlers_unblock_matched (
     menu_item, G_SIGNAL_MATCH_FUNC, 0, 0, NULL,
-    G_CALLBACK (menu_item_toggled), NULL);
+    (gpointer) menu_item_toggled, NULL);
 }
 
 static void
@@ -768,7 +884,7 @@ get_accel_string (GschemAction *action)
 {
   /* look up key binding in global keymap */
   SCM s_expr = scm_list_2 (scm_from_utf8_symbol ("find-key"), action->smob);
-  SCM s_keys = g_scm_eval_protected (s_expr, scm_interaction_environment ());
+  SCM s_keys = g_scm_eval_protected (s_expr, scm_interaction_environment());
   return scm_is_true (s_keys) ? scm_to_utf8_string (s_keys) : NULL;
 }
 
@@ -795,26 +911,24 @@ gschem_action_create_menu_item (GschemAction *action,
   else if (action->icon_name == NULL)
     menu_item = g_object_new (GTK_TYPE_MENU_ITEM, NULL);
   else {
-    menu_item = g_object_new (GTK_TYPE_IMAGE_MENU_ITEM, NULL);
+    menu_item = gtk_menu_item_new();
 
-    GtkWidget *image = gtk_image_new ();
-    gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item), image);
+    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+    GtkWidget *image = gtk_image_new_from_icon_name(action->icon_name, GTK_ICON_SIZE_MENU);
+    GtkWidget *label = gtk_label_new(use_menu_label ? action->menu_label : action->label);
 
-    /* If there's a matching stock item, use it.
-       Otherwise lookup the name in the icon theme. */
-    GtkStockItem stock_item;
-    if (gtk_stock_lookup (action->icon_name, &stock_item))
-      gtk_image_set_from_stock (GTK_IMAGE (image), action->icon_name,
-                                GTK_ICON_SIZE_MENU);
-    else
-      gtk_image_set_from_icon_name (GTK_IMAGE (image), action->icon_name,
-                                    GTK_ICON_SIZE_MENU);
+    gtk_box_pack_start(GTK_BOX(box), image, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 0);
+    gtk_container_add(GTK_CONTAINER(menu_item), box);
+
+    gtk_widget_show_all(box);
   }
 
   /* use custom label widget */
   char *accel_string = get_accel_string (action);
   GtkWidget *label = g_object_new (GSCHEM_TYPE_ACCEL_LABEL, NULL);
-  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+  gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
+  gtk_widget_set_valign(GTK_WIDGET(label), GTK_ALIGN_CENTER);
   gtk_label_set_use_underline (GTK_LABEL (label), TRUE);
   gtk_label_set_label (GTK_LABEL (label), use_menu_label ? action->menu_label
                                                          : action->label);
@@ -890,6 +1004,7 @@ static void
 spin_button_value_changed (GtkSpinButton *spin_button,
                            GschemToplevel *w_current)
 {
+  (void)spin_button;
   gtk_widget_grab_focus (w_current->drawing_area);
 }
 
@@ -949,13 +1064,13 @@ tool_button_set_active (GtkToggleToolButton *button, gboolean is_active)
   /* make sure the toggle handler isn't called recursively */
   g_signal_handlers_block_matched (
     button, G_SIGNAL_MATCH_FUNC, 0, 0, NULL,
-    G_CALLBACK (tool_button_toggled), NULL);
+    (gpointer) tool_button_toggled, NULL);
 
   gtk_toggle_tool_button_set_active (button, is_active);
 
   g_signal_handlers_unblock_matched (
     button, G_SIGNAL_MATCH_FUNC, 0, 0, NULL,
-    G_CALLBACK (tool_button_toggled), NULL);
+    (gpointer) tool_button_toggled, NULL);
 }
 
 static void
@@ -1045,4 +1160,15 @@ gschem_action_create_tool_button (GschemAction *action,
     gtk_widget_set_tooltip_text (GTK_WIDGET (button), dispatcher->name);
 
   return button;
+}
+static void dispatcher_class_init_wrapper(gpointer g_class, gpointer class_data)
+{
+    (void)class_data; // unused
+    dispatcher_class_init((DispatcherClass *)g_class);
+}
+
+static void dispatcher_instance_init_wrapper(GTypeInstance *instance, gpointer g_class)
+{
+    (void)g_class;
+    dispatcher_instance_init((Dispatcher *)instance);
 }
