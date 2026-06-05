@@ -3,20 +3,19 @@ import requests
 import os
 from pathlib import Path
 from fastapi.staticfiles import StaticFiles
+from dotenv import load_dotenv
 
 from gedai.schematic_parser import parse_geda_schematic
 
+# Load environment variables
+load_dotenv()
+
 app = FastAPI()
 
-# --- Configuration (Could use environment variables) ---
-# Example: Using Ollama running locally
-OLLAMA_API_URL = "http://localhost:11434/api/generate"
-OLLAMA_MODEL = "llama3" # Or whatever model you're using
-
-# Example: Using Hugging Face Inference API
-# HF_API_TOKEN = os.environ.get("HF_API_TOKEN")
-# HF_MODEL_ID = "mistralai/Mistral-7B-Instruct-v0.2"
-# hf_client = InferenceClient(model=HF_MODEL_ID, token=HF_API_TOKEN)
+# OpenRouter configuration
+OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
+OPENROUTER_MODEL = "deepseek-ai/deepseek-chat"  # Using DeepSeek model
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 @app.get("/")
 async def hello_chat():
