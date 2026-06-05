@@ -50,36 +50,54 @@ async def load_schematic(schematic_path: str):
 @app.post("/generate_symbol")
 async def generate_symbol(description: str):
     """
-    Endpoint to generate a gEDA symbol based on a description.
-    (This is just a placeholder - the prompt and processing need refinement)
+    Generate a gEDA symbol using DeepSeek via OpenRouter
     """
-    prompt = f"Generate a gEDA schematic symbol text block for: {description}. Only output the gEDA text block."
+    prompt = f"""You are an expert in gEDA schematic design. 
+    Generate a gEDA schematic symbol text block for: {description}. 
+    Only output the valid gEDA text format, nothing else.
+    Example format:
+    v 20200609 2
+    P 1000 1000 2000 1000 3 0 0
+    {{
+    T 1500 1500 5 10 1 0 0 0 1
+    value=10k
+    }}
+    """
 
     try:
-        # --- Option 1: Calling local Ollama ---
-        response = requests.post(OLLAMA_API_URL, json={
-            "model": OLLAMA_MODEL,
-            "prompt": prompt,
-            "stream": False
-        })
+        headers = {
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "model": OPENROUTER_MODEL,
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.3,
+            "max_tokens": 500
+        }
+
+        response = requests.post(OPENROUTER_API_URL, 
+                               headers=headers, 
+                               json=payload)
         response.raise_for_status()
+        
         result = response.json()
-        generated_text = result.get("response", "").strip()
+        generated_text = result['choices'][0]['message']['content'].strip()
 
-        # --- Option 2: Calling Hugging Face Inference API ---
-        # result = hf_client.text_generation(prompt=prompt, max_new_tokens=500)
-        # generated_text = result.strip()
+        # Validate the output contains gEDA format markers
+        if not any(marker in generated_text for marker in ["v ", "P ", "T ", "{"]):
+            raise HTTPException(status_code=500, detail="Invalid gEDA format generated")
 
-        if not generated_text:
-            raise HTTPException(status_code=500, detail="LLM returned empty response")
-
-        print(f"LLM Output:\n{generated_text}")
-
+        print(f"Generated symbol:\n{generated_text}")
         return {"symbol_text": generated_text}
 
     except requests.exceptions.RequestException as e:
-        print(f"Error calling LLM API: {e}")
-        raise HTTPException(status_code=503, detail=f"Error communicating with LLM: {e}")
+        print(f"OpenRouter API error: {e}")
+        raise HTTPException(status_code=503, detail=f"OpenRouter API error: {e}")
+    except KeyError as e:
+        print(f"Malformed API response: {e}")
+        raise HTTPException(status_code=502, detail="Malformed API response")
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+        print(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
