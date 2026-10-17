@@ -32,6 +32,13 @@
 static GtkWidget *
 build_menu (SCM s_menu, gboolean is_main_menu, GschemToplevel *w_current)
 {
+  /* The menu tree is read from Scheme rather than from action_specs on
+   * purpose.  The default Help menu contains actions that are defined in
+   * Scheme and are not in the C table, and users are documented to edit
+   * `menubar` / `context-menu` / `toolbar` from their gschemrc.  Building
+   * menus from the C table would drop both.  See "Why the menu builder
+   * still reads Scheme" in TRANSFORM_PROTOCOL.md before changing this.
+   */
   GtkWidget *menu = gtk_menu_new ();
 
   GtkWidget *placeholder = gtk_separator_menu_item_new();

@@ -66,3 +66,12 @@ The generator is deterministic and makes the tree green regardless of the
 API. The model stage re-derives each action from the original source and
 must agree with the oracle; disagreement is journalled as drift and
 rejected. Neither stage can silently change behaviour.
+
+## Menus are still built from Scheme, on purpose
+
+If you are here to finish the de-Guiling and rewrite `x_menus.c`, read
+"Why the menu builder still reads Scheme" in `TRANSFORM_PROTOCOL.md` first.
+The short version: the stock Help menu needs 4 actions that only exist in
+Scheme, and `menubar`/`context-menu`/`toolbar` are an interface users are
+invited to edit from `.gschemrc`. Building them from `action_specs` would
+drop both. Registration and activation are already Guile-free.

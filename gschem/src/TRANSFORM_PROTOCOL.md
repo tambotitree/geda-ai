@@ -124,3 +124,38 @@ not change the type every existing row is written against.
 * No JSON at runtime: the table is a plain C array.
 * No new third-party dependencies; the tooling is standard-library Python.
 * No semantic change to any callback. Not even whitespace inside a body.
+
+## Why the menu builder still reads Scheme
+
+`x_menus.c` builds the menu bar, context menu and toolbar by walking the
+Scheme variables `menubar`, `context-menu` and `toolbar`. That is the last
+place where Guile sits on a path that touches actions, and it looks like the
+next thing to remove. It should not be removed, for two independent reasons.
+
+**The default menu contains Tier B actions.** `help-menu` in
+`lib/system-gschemrc.scm` holds `&help-manual`, `&help-guide`, `&help-faq`
+and `&help-wiki`. These are defined with `define-action-public` in
+`scheme/gschem/builtins.scm`, their bodies are Scheme (`show-wiki`), and
+they are the same four Tier B actions described above. A menu built only from
+`action_specs` could not produce the stock Help menu. 108 of the 112 actions
+named in the default menus are in the C table; the other 4 are Tier B.
+
+**The menu structure is a published interface.** The comment block at
+`lib/system-gschemrc.scm:1131` documents that users may edit `menubar` and
+friends from `.gschemrc` using
+`set!`/`assoc-set!`/`set-cdr!`, and shows worked examples. Anything that
+replaces the Scheme walk with a fixed C layout breaks every user who has
+customised a menu — a behaviour regression, not a refactor. Detecting an
+override would mean keeping a C copy of the 114-entry default to compare
+against, which duplicates `system-gschemrc.scm` and can drift from it
+silently; that trades a real interface for a guessed one.
+
+The registry refactor already removed Guile from where it mattered most:
+action *registration* is a static table and activation is a function
+pointer. What remains is a tree walk that runs once per window, over data
+the user is documented to own. It stays.
+
+If this is ever revisited, the order is: promote nothing to the C table
+first (Tier B must stay in Scheme), then give the three menu variables a
+typed C representation that Scheme can still assign to, then build from
+that. That is a design change, not a cleanup, and it needs its own protocol.

@@ -125,15 +125,19 @@ synthetic case and against the real replies.
 
 No drift has been accepted into the tree.
 
-No drift has been accepted into the tree.
-
 ## Deliberately deferred
 
 - **Tier C** (external executable owner) — contract specified in
   `gschem/src/TRANSFORM_PROTOCOL.md`, not implemented.
-- **De-Guile of the menu hot path** — menus are still built from the Scheme
-  variable in `x_menus.c`; actions no longer depend on the macro pipeline
-  for registration, but the menu builder is unchanged.
+- **De-Guile of the menu hot path** — *investigated, deliberately not done.*
+  See "Why the menu builder still reads Scheme" in
+  `gschem/src/TRANSFORM_PROTOCOL.md`. Two independent blockers: the default
+  `help-menu` contains 4 Tier B actions that are not in the C table, so a
+  C-only builder cannot reproduce the stock UI; and `menubar`/
+  `context-menu`/`toolbar` are a documented user-editable interface in
+  `system-gschemrc.scm`, so replacing the Scheme walk with a fixed layout
+  would be a behaviour regression. Guile is already off the registration
+  and activation paths, which is where it mattered.
 - **GTK3 port fallout** — untouched; out of scope for this refactor.
 - **Per-body documentation (P3)** — `TRANSFORM_PROTOCOL.md` plus the
   `/*! \brief */` comments retained on 29 of 135 callbacks.
