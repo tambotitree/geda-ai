@@ -41,7 +41,7 @@
 G_BEGIN_DECLS
 
 
-/* File actions */
+/* File Menu Callback Functions */
 
 extern GschemAction *action_file_new;
 extern GschemAction *action_file_open;
@@ -56,13 +56,6 @@ extern GschemAction *action_file_write_png;
 extern GschemAction *action_file_new_window;
 extern GschemAction *action_file_close;
 extern GschemAction *action_file_quit;
-extern GschemAction *action_page_update_messages;
-extern GschemAction *action_page_prev;
-extern GschemAction *action_page_next;
-extern GschemAction *action_page_manager;
-extern GschemAction *action_file_script;
-extern GschemAction *action_file_repl;
-extern GschemAction *action_page_print;
 
 void action_callback_file_new (GschemAction *action,
                               GschemToplevel *w_current);
@@ -90,22 +83,8 @@ void action_callback_file_close (GschemAction *action,
                                 GschemToplevel *w_current);
 void action_callback_file_quit (GschemAction *action,
                                GschemToplevel *w_current);
-void action_callback_page_update_messages (GschemAction *action,
-                                          GschemToplevel *w_current);
-void action_callback_page_prev (GschemAction *action,
-                               GschemToplevel *w_current);
-void action_callback_page_next (GschemAction *action,
-                               GschemToplevel *w_current);
-void action_callback_page_manager (GschemAction *action,
-                                  GschemToplevel *w_current);
-void action_callback_file_script (GschemAction *action,
-                                 GschemToplevel *w_current);
-void action_callback_file_repl (GschemAction *action,
-                               GschemToplevel *w_current);
-void action_callback_page_print (GschemAction *action,
-                                GschemToplevel *w_current);
 
-/* Edit actions */
+/* Edit Menu Callback Functions */
 
 extern GschemAction *action_edit_undo;
 extern GschemAction *action_edit_redo;
@@ -116,29 +95,6 @@ extern GschemAction *action_edit_delete;
 extern GschemAction *action_edit_select_all;
 extern GschemAction *action_edit_deselect;
 extern GschemAction *action_edit_find;
-extern GschemAction *action_edit_edit;
-extern GschemAction *action_edit_properties;
-extern GschemAction *action_edit_copy;
-extern GschemAction *action_edit_mcopy;
-extern GschemAction *action_edit_move;
-extern GschemAction *action_edit_rotate_90;
-extern GschemAction *action_edit_mirror;
-extern GschemAction *action_edit_text;
-extern GschemAction *action_edit_embed;
-extern GschemAction *action_edit_unembed;
-extern GschemAction *action_edit_update;
-extern GschemAction *action_edit_lock;
-extern GschemAction *action_edit_unlock;
-extern GschemAction *action_edit_slot;
-extern GschemAction *action_edit_show_hidden;
-extern GschemAction *action_edit_autonumber_text;
-extern GschemAction *action_edit_translate;
-extern GschemAction *action_edit_find_patch;
-extern GschemAction *action_edit_hide_text;
-extern GschemAction *action_edit_show_text;
-extern GschemAction *action_edit_select_locked;
-extern GschemAction *action_edit_invoke_macro;
-extern GschemAction *action_edit_select;
 
 void action_callback_edit_undo (GschemAction *action,
                                GschemToplevel *w_current);
@@ -158,54 +114,8 @@ void action_callback_edit_deselect (GschemAction *action,
                                    GschemToplevel *w_current);
 void action_callback_edit_find (GschemAction *action,
                                GschemToplevel *w_current);
-void action_callback_edit_edit (GschemAction *action,
-                               GschemToplevel *w_current);
-void action_callback_edit_properties (GschemAction *action,
-                                     GschemToplevel *w_current);
-void action_callback_edit_copy (GschemAction *action,
-                               GschemToplevel *w_current);
-void action_callback_edit_mcopy (GschemAction *action,
-                                GschemToplevel *w_current);
-void action_callback_edit_move (GschemAction *action,
-                               GschemToplevel *w_current);
-void action_callback_edit_rotate_90 (GschemAction *action,
-                                    GschemToplevel *w_current);
-void action_callback_edit_mirror (GschemAction *action,
-                                 GschemToplevel *w_current);
-void action_callback_edit_text (GschemAction *action,
-                               GschemToplevel *w_current);
-void action_callback_edit_embed (GschemAction *action,
-                                GschemToplevel *w_current);
-void action_callback_edit_unembed (GschemAction *action,
-                                  GschemToplevel *w_current);
-void action_callback_edit_update (GschemAction *action,
-                                 GschemToplevel *w_current);
-void action_callback_edit_lock (GschemAction *action,
-                               GschemToplevel *w_current);
-void action_callback_edit_unlock (GschemAction *action,
-                                 GschemToplevel *w_current);
-void action_callback_edit_slot (GschemAction *action,
-                               GschemToplevel *w_current);
-void action_callback_edit_show_hidden (GschemAction *action,
-                                      GschemToplevel *w_current);
-void action_callback_edit_autonumber_text (GschemAction *action,
-                                          GschemToplevel *w_current);
-void action_callback_edit_translate (GschemAction *action,
-                                    GschemToplevel *w_current);
-void action_callback_edit_find_patch (GschemAction *action,
-                                     GschemToplevel *w_current);
-void action_callback_edit_hide_text (GschemAction *action,
-                                    GschemToplevel *w_current);
-void action_callback_edit_show_text (GschemAction *action,
-                                    GschemToplevel *w_current);
-void action_callback_edit_select_locked (GschemAction *action,
-                                        GschemToplevel *w_current);
-void action_callback_edit_invoke_macro (GschemAction *action,
-                                       GschemToplevel *w_current);
-void action_callback_edit_select (GschemAction *action,
-                                 GschemToplevel *w_current);
 
-/* Add actions */
+/* Add Menu Callback Functions */
 
 extern GschemAction *action_add_component;
 extern GschemAction *action_add_last_component;
@@ -220,21 +130,6 @@ extern GschemAction *action_add_circle;
 extern GschemAction *action_add_arc;
 extern GschemAction *action_add_pin;
 extern GschemAction *action_add_picture;
-extern GschemAction *action_buffer_copy1;
-extern GschemAction *action_buffer_copy2;
-extern GschemAction *action_buffer_copy3;
-extern GschemAction *action_buffer_copy4;
-extern GschemAction *action_buffer_copy5;
-extern GschemAction *action_buffer_cut1;
-extern GschemAction *action_buffer_cut2;
-extern GschemAction *action_buffer_cut3;
-extern GschemAction *action_buffer_cut4;
-extern GschemAction *action_buffer_cut5;
-extern GschemAction *action_buffer_paste1;
-extern GschemAction *action_buffer_paste2;
-extern GschemAction *action_buffer_paste3;
-extern GschemAction *action_buffer_paste4;
-extern GschemAction *action_buffer_paste5;
 
 void action_callback_add_component (GschemAction *action,
                                    GschemToplevel *w_current);
@@ -262,6 +157,262 @@ void action_callback_add_pin (GschemAction *action,
                              GschemToplevel *w_current);
 void action_callback_add_picture (GschemAction *action,
                                  GschemToplevel *w_current);
+
+/* Object Menu Callback Functions */
+
+extern GschemAction *action_edit_edit;
+extern GschemAction *action_edit_properties;
+extern GschemAction *action_edit_copy;
+extern GschemAction *action_edit_mcopy;
+extern GschemAction *action_edit_move;
+extern GschemAction *action_edit_rotate_90;
+extern GschemAction *action_edit_mirror;
+extern GschemAction *action_edit_text;
+extern GschemAction *action_attributes_attach;
+extern GschemAction *action_attributes_detach;
+extern GschemAction *action_attributes_show_value;
+extern GschemAction *action_attributes_show_name;
+extern GschemAction *action_attributes_show_both;
+extern GschemAction *action_attributes_visibility_toggle;
+extern GschemAction *action_attributes_overbar_toggle;
+extern GschemAction *action_edit_embed;
+extern GschemAction *action_edit_unembed;
+extern GschemAction *action_edit_update;
+extern GschemAction *action_edit_lock;
+extern GschemAction *action_edit_unlock;
+extern GschemAction *action_edit_slot;
+extern GschemAction *action_hierarchy_documentation;
+
+void action_callback_edit_edit (GschemAction *action,
+                               GschemToplevel *w_current);
+void action_callback_edit_properties (GschemAction *action,
+                                     GschemToplevel *w_current);
+void action_callback_edit_copy (GschemAction *action,
+                               GschemToplevel *w_current);
+void action_callback_edit_mcopy (GschemAction *action,
+                                GschemToplevel *w_current);
+void action_callback_edit_move (GschemAction *action,
+                               GschemToplevel *w_current);
+void action_callback_edit_rotate_90 (GschemAction *action,
+                                    GschemToplevel *w_current);
+void action_callback_edit_mirror (GschemAction *action,
+                                 GschemToplevel *w_current);
+void action_callback_edit_text (GschemAction *action,
+                               GschemToplevel *w_current);
+void action_callback_attributes_attach (GschemAction *action,
+                                       GschemToplevel *w_current);
+void action_callback_attributes_detach (GschemAction *action,
+                                       GschemToplevel *w_current);
+void action_callback_attributes_show_value (GschemAction *action,
+                                           GschemToplevel *w_current);
+void action_callback_attributes_show_name (GschemAction *action,
+                                          GschemToplevel *w_current);
+void action_callback_attributes_show_both (GschemAction *action,
+                                          GschemToplevel *w_current);
+void action_callback_attributes_visibility_toggle (GschemAction *action,
+                                                  GschemToplevel *w_current);
+void action_callback_attributes_overbar_toggle (GschemAction *action,
+                                               GschemToplevel *w_current);
+void action_callback_edit_embed (GschemAction *action,
+                                GschemToplevel *w_current);
+void action_callback_edit_unembed (GschemAction *action,
+                                  GschemToplevel *w_current);
+void action_callback_edit_update (GschemAction *action,
+                                 GschemToplevel *w_current);
+void action_callback_edit_lock (GschemAction *action,
+                               GschemToplevel *w_current);
+void action_callback_edit_unlock (GschemAction *action,
+                                 GschemToplevel *w_current);
+void action_callback_edit_slot (GschemAction *action,
+                               GschemToplevel *w_current);
+void action_callback_hierarchy_documentation (GschemAction *action,
+                                             GschemToplevel *w_current);
+
+/* View Menu Callback Functions */
+
+extern GschemAction *action_edit_show_hidden;
+extern GschemAction *action_view_show_origin;
+extern GschemAction *action_view_zoom_in;
+extern GschemAction *action_view_zoom_out;
+extern GschemAction *action_view_zoom_extents;
+extern GschemAction *action_view_zoom_full;
+extern GschemAction *action_view_zoom_box;
+extern GschemAction *action_view_pan;
+extern GschemAction *action_view_redraw;
+extern GschemAction *action_view_menubar;
+extern GschemAction *action_view_toolbar;
+extern GschemAction *action_view_scrollbars;
+extern GschemAction *action_docking_area_left;
+extern GschemAction *action_docking_area_bottom;
+extern GschemAction *action_docking_area_right;
+
+void action_callback_edit_show_hidden (GschemAction *action,
+                                      GschemToplevel *w_current);
+void action_callback_view_show_origin (GschemAction *action,
+                                      GschemToplevel *w_current);
+void action_callback_view_zoom_in (GschemAction *action,
+                                  GschemToplevel *w_current);
+void action_callback_view_zoom_out (GschemAction *action,
+                                   GschemToplevel *w_current);
+void action_callback_view_zoom_extents (GschemAction *action,
+                                       GschemToplevel *w_current);
+void action_callback_view_zoom_full (GschemAction *action,
+                                    GschemToplevel *w_current);
+void action_callback_view_zoom_box (GschemAction *action,
+                                   GschemToplevel *w_current);
+void action_callback_view_pan (GschemAction *action,
+                              GschemToplevel *w_current);
+void action_callback_view_redraw (GschemAction *action,
+                                 GschemToplevel *w_current);
+void action_callback_view_menubar (GschemAction *action,
+                                  GschemToplevel *w_current);
+void action_callback_view_toolbar (GschemAction *action,
+                                  GschemToplevel *w_current);
+void action_callback_view_scrollbars (GschemAction *action,
+                                     GschemToplevel *w_current);
+void action_callback_docking_area_left (GschemAction *action,
+                                       GschemToplevel *w_current);
+void action_callback_docking_area_bottom (GschemAction *action,
+                                         GschemToplevel *w_current);
+void action_callback_docking_area_right (GschemAction *action,
+                                        GschemToplevel *w_current);
+
+/* Pages Menu Callback Functions */
+
+extern GschemAction *action_page_update_messages;
+extern GschemAction *action_hierarchy_down_schematic;
+extern GschemAction *action_hierarchy_down_symbol;
+extern GschemAction *action_hierarchy_up;
+extern GschemAction *action_page_prev;
+extern GschemAction *action_page_next;
+extern GschemAction *action_page_manager;
+
+void action_callback_page_update_messages (GschemAction *action,
+                                          GschemToplevel *w_current);
+void action_callback_hierarchy_down_schematic (GschemAction *action,
+                                              GschemToplevel *w_current);
+void action_callback_hierarchy_down_symbol (GschemAction *action,
+                                           GschemToplevel *w_current);
+void action_callback_hierarchy_up (GschemAction *action,
+                                  GschemToplevel *w_current);
+void action_callback_page_prev (GschemAction *action,
+                               GschemToplevel *w_current);
+void action_callback_page_next (GschemAction *action,
+                               GschemToplevel *w_current);
+void action_callback_page_manager (GschemAction *action,
+                                  GschemToplevel *w_current);
+
+/* Tools Menu Callback Functions */
+
+extern GschemAction *action_edit_autonumber_text;
+extern GschemAction *action_edit_translate;
+extern GschemAction *action_edit_find_patch;
+extern GschemAction *action_edit_hide_text;
+extern GschemAction *action_edit_show_text;
+extern GschemAction *action_edit_select_locked;
+extern GschemAction *action_options_show_log_window;
+extern GschemAction *action_options_show_coordinates;
+extern GschemAction *action_edit_invoke_macro;
+extern GschemAction *action_file_script;
+extern GschemAction *action_file_repl;
+
+void action_callback_edit_autonumber_text (GschemAction *action,
+                                          GschemToplevel *w_current);
+void action_callback_edit_translate (GschemAction *action,
+                                    GschemToplevel *w_current);
+void action_callback_edit_find_patch (GschemAction *action,
+                                     GschemToplevel *w_current);
+void action_callback_edit_hide_text (GschemAction *action,
+                                    GschemToplevel *w_current);
+void action_callback_edit_show_text (GschemAction *action,
+                                    GschemToplevel *w_current);
+void action_callback_edit_select_locked (GschemAction *action,
+                                        GschemToplevel *w_current);
+void action_callback_options_show_log_window (GschemAction *action,
+                                             GschemToplevel *w_current);
+void action_callback_options_show_coordinates (GschemAction *action,
+                                              GschemToplevel *w_current);
+void action_callback_edit_invoke_macro (GschemAction *action,
+                                       GschemToplevel *w_current);
+void action_callback_file_script (GschemAction *action,
+                                 GschemToplevel *w_current);
+void action_callback_file_repl (GschemAction *action,
+                               GschemToplevel *w_current);
+
+/* Options Menu Callback Functions */
+
+extern GschemAction *action_options_options;
+extern GschemAction *action_options_rubberband;
+extern GschemAction *action_options_magneticnet;
+extern GschemAction *action_options_afeedback;
+extern GschemAction *action_options_snap_off;
+extern GschemAction *action_options_snap_grid;
+extern GschemAction *action_options_snap_resnap;
+extern GschemAction *action_options_scale_up_snap_size;
+extern GschemAction *action_options_scale_down_snap_size;
+extern GschemAction *action_view_dark_colors;
+extern GschemAction *action_view_light_colors;
+extern GschemAction *action_view_light_bw_colors;
+extern GschemAction *action_view_shaded_colors;
+extern GschemAction *action_view_shaded_bw_colors;
+
+void action_callback_options_options (GschemAction *action,
+                                     GschemToplevel *w_current);
+void action_callback_options_rubberband (GschemAction *action,
+                                        GschemToplevel *w_current);
+void action_callback_options_magneticnet (GschemAction *action,
+                                         GschemToplevel *w_current);
+void action_callback_options_afeedback (GschemAction *action,
+                                       GschemToplevel *w_current);
+void action_callback_options_snap_off (GschemAction *action,
+                                      GschemToplevel *w_current);
+void action_callback_options_snap_grid (GschemAction *action,
+                                       GschemToplevel *w_current);
+void action_callback_options_snap_resnap (GschemAction *action,
+                                         GschemToplevel *w_current);
+void action_callback_options_scale_up_snap_size (GschemAction *action,
+                                                GschemToplevel *w_current);
+void action_callback_options_scale_down_snap_size (GschemAction *action,
+                                                  GschemToplevel *w_current);
+void action_callback_view_dark_colors (GschemAction *action,
+                                      GschemToplevel *w_current);
+void action_callback_view_light_colors (GschemAction *action,
+                                       GschemToplevel *w_current);
+void action_callback_view_light_bw_colors (GschemAction *action,
+                                          GschemToplevel *w_current);
+void action_callback_view_shaded_colors (GschemAction *action,
+                                        GschemToplevel *w_current);
+void action_callback_view_shaded_bw_colors (GschemAction *action,
+                                           GschemToplevel *w_current);
+
+/* Help Menu Callback Functions */
+
+extern GschemAction *action_help_hotkeys;
+extern GschemAction *action_help_about;
+
+void action_callback_help_hotkeys (GschemAction *action,
+                                  GschemToplevel *w_current);
+void action_callback_help_about (GschemAction *action,
+                                GschemToplevel *w_current);
+
+/* Buffer Menu Callback Functions */
+
+extern GschemAction *action_buffer_copy1;
+extern GschemAction *action_buffer_copy2;
+extern GschemAction *action_buffer_copy3;
+extern GschemAction *action_buffer_copy4;
+extern GschemAction *action_buffer_copy5;
+extern GschemAction *action_buffer_cut1;
+extern GschemAction *action_buffer_cut2;
+extern GschemAction *action_buffer_cut3;
+extern GschemAction *action_buffer_cut4;
+extern GschemAction *action_buffer_cut5;
+extern GschemAction *action_buffer_paste1;
+extern GschemAction *action_buffer_paste2;
+extern GschemAction *action_buffer_paste3;
+extern GschemAction *action_buffer_paste4;
+extern GschemAction *action_buffer_paste5;
+
 void action_callback_buffer_copy1 (GschemAction *action,
                                   GschemToplevel *w_current);
 void action_callback_buffer_copy2 (GschemAction *action,
@@ -293,124 +444,23 @@ void action_callback_buffer_paste4 (GschemAction *action,
 void action_callback_buffer_paste5 (GschemAction *action,
                                    GschemToplevel *w_current);
 
-/* View actions */
+/* Special Actions */
 
-extern GschemAction *action_hierarchy_documentation;
-extern GschemAction *action_view_show_origin;
-extern GschemAction *action_view_zoom_in;
-extern GschemAction *action_view_zoom_out;
-extern GschemAction *action_view_zoom_extents;
-extern GschemAction *action_view_zoom_full;
-extern GschemAction *action_view_zoom_box;
-extern GschemAction *action_view_pan;
-extern GschemAction *action_view_redraw;
-extern GschemAction *action_view_menubar;
-extern GschemAction *action_view_toolbar;
-extern GschemAction *action_view_scrollbars;
-extern GschemAction *action_hierarchy_down_schematic;
-extern GschemAction *action_hierarchy_down_symbol;
-extern GschemAction *action_hierarchy_up;
-extern GschemAction *action_view_dark_colors;
-extern GschemAction *action_view_light_colors;
-extern GschemAction *action_view_light_bw_colors;
-extern GschemAction *action_view_shaded_colors;
-extern GschemAction *action_view_shaded_bw_colors;
-extern GschemAction *action_view_pan_left;
-extern GschemAction *action_view_pan_right;
-extern GschemAction *action_view_pan_up;
-extern GschemAction *action_view_pan_down;
-
-void action_callback_hierarchy_documentation (GschemAction *action,
-                                             GschemToplevel *w_current);
-void action_callback_view_show_origin (GschemAction *action,
-                                      GschemToplevel *w_current);
-void action_callback_view_zoom_in (GschemAction *action,
-                                  GschemToplevel *w_current);
-void action_callback_view_zoom_out (GschemAction *action,
-                                   GschemToplevel *w_current);
-void action_callback_view_zoom_extents (GschemAction *action,
-                                       GschemToplevel *w_current);
-void action_callback_view_zoom_full (GschemAction *action,
-                                    GschemToplevel *w_current);
-void action_callback_view_zoom_box (GschemAction *action,
-                                   GschemToplevel *w_current);
-void action_callback_view_pan (GschemAction *action,
-                              GschemToplevel *w_current);
-void action_callback_view_redraw (GschemAction *action,
-                                 GschemToplevel *w_current);
-void action_callback_view_menubar (GschemAction *action,
-                                  GschemToplevel *w_current);
-void action_callback_view_toolbar (GschemAction *action,
-                                  GschemToplevel *w_current);
-void action_callback_view_scrollbars (GschemAction *action,
-                                     GschemToplevel *w_current);
-void action_callback_hierarchy_down_schematic (GschemAction *action,
-                                              GschemToplevel *w_current);
-void action_callback_hierarchy_down_symbol (GschemAction *action,
-                                           GschemToplevel *w_current);
-void action_callback_hierarchy_up (GschemAction *action,
-                                  GschemToplevel *w_current);
-void action_callback_view_dark_colors (GschemAction *action,
-                                      GschemToplevel *w_current);
-void action_callback_view_light_colors (GschemAction *action,
-                                       GschemToplevel *w_current);
-void action_callback_view_light_bw_colors (GschemAction *action,
-                                          GschemToplevel *w_current);
-void action_callback_view_shaded_colors (GschemAction *action,
-                                        GschemToplevel *w_current);
-void action_callback_view_shaded_bw_colors (GschemAction *action,
-                                           GschemToplevel *w_current);
-void action_callback_view_pan_left (GschemAction *action,
-                                   GschemToplevel *w_current);
-void action_callback_view_pan_right (GschemAction *action,
-                                    GschemToplevel *w_current);
-void action_callback_view_pan_up (GschemAction *action,
-                                 GschemToplevel *w_current);
-void action_callback_view_pan_down (GschemAction *action,
-                                   GschemToplevel *w_current);
-
-/* Options actions */
-
-extern GschemAction *action_options_show_log_window;
-extern GschemAction *action_options_show_coordinates;
-extern GschemAction *action_options_options;
-extern GschemAction *action_options_rubberband;
-extern GschemAction *action_options_magneticnet;
-extern GschemAction *action_options_afeedback;
-extern GschemAction *action_options_snap_off;
-extern GschemAction *action_options_snap_grid;
-extern GschemAction *action_options_snap_resnap;
-extern GschemAction *action_options_scale_up_snap_size;
-extern GschemAction *action_options_scale_down_snap_size;
 extern GschemAction *action_options_grid_size;
 extern GschemAction *action_options_grid;
 extern GschemAction *action_options_grid_none;
 extern GschemAction *action_options_grid_dots;
 extern GschemAction *action_options_grid_mesh;
 extern GschemAction *action_options_snap;
+extern GschemAction *action_view_pan_left;
+extern GschemAction *action_view_pan_right;
+extern GschemAction *action_view_pan_up;
+extern GschemAction *action_view_pan_down;
+extern GschemAction *action_edit_select;
+extern GschemAction *action_cancel;
+extern GschemAction *action_page_print;
+extern GschemAction *action_repeat_last_action;
 
-void action_callback_options_show_log_window (GschemAction *action,
-                                             GschemToplevel *w_current);
-void action_callback_options_show_coordinates (GschemAction *action,
-                                              GschemToplevel *w_current);
-void action_callback_options_options (GschemAction *action,
-                                     GschemToplevel *w_current);
-void action_callback_options_rubberband (GschemAction *action,
-                                        GschemToplevel *w_current);
-void action_callback_options_magneticnet (GschemAction *action,
-                                         GschemToplevel *w_current);
-void action_callback_options_afeedback (GschemAction *action,
-                                       GschemToplevel *w_current);
-void action_callback_options_snap_off (GschemAction *action,
-                                      GschemToplevel *w_current);
-void action_callback_options_snap_grid (GschemAction *action,
-                                       GschemToplevel *w_current);
-void action_callback_options_snap_resnap (GschemAction *action,
-                                         GschemToplevel *w_current);
-void action_callback_options_scale_up_snap_size (GschemAction *action,
-                                                GschemToplevel *w_current);
-void action_callback_options_scale_down_snap_size (GschemAction *action,
-                                                  GschemToplevel *w_current);
 void action_callback_options_grid_size (GschemAction *action,
                                        GschemToplevel *w_current);
 void action_callback_options_grid (GschemAction *action,
@@ -423,54 +473,20 @@ void action_callback_options_grid_mesh (GschemAction *action,
                                        GschemToplevel *w_current);
 void action_callback_options_snap (GschemAction *action,
                                   GschemToplevel *w_current);
-
-/* Attributes actions */
-
-extern GschemAction *action_attributes_attach;
-extern GschemAction *action_attributes_detach;
-extern GschemAction *action_attributes_show_value;
-extern GschemAction *action_attributes_show_name;
-extern GschemAction *action_attributes_show_both;
-extern GschemAction *action_attributes_visibility_toggle;
-extern GschemAction *action_attributes_overbar_toggle;
-
-void action_callback_attributes_attach (GschemAction *action,
-                                       GschemToplevel *w_current);
-void action_callback_attributes_detach (GschemAction *action,
-                                       GschemToplevel *w_current);
-void action_callback_attributes_show_value (GschemAction *action,
-                                           GschemToplevel *w_current);
-void action_callback_attributes_show_name (GschemAction *action,
-                                          GschemToplevel *w_current);
-void action_callback_attributes_show_both (GschemAction *action,
-                                          GschemToplevel *w_current);
-void action_callback_attributes_visibility_toggle (GschemAction *action,
-                                                  GschemToplevel *w_current);
-void action_callback_attributes_overbar_toggle (GschemAction *action,
-                                               GschemToplevel *w_current);
-
-/* Misc actions */
-
-extern GschemAction *action_docking_area_left;
-extern GschemAction *action_docking_area_bottom;
-extern GschemAction *action_docking_area_right;
-extern GschemAction *action_help_hotkeys;
-extern GschemAction *action_help_about;
-extern GschemAction *action_cancel;
-extern GschemAction *action_repeat_last_action;
-
-void action_callback_docking_area_left (GschemAction *action,
-                                       GschemToplevel *w_current);
-void action_callback_docking_area_bottom (GschemAction *action,
-                                         GschemToplevel *w_current);
-void action_callback_docking_area_right (GschemAction *action,
-                                        GschemToplevel *w_current);
-void action_callback_help_hotkeys (GschemAction *action,
-                                  GschemToplevel *w_current);
-void action_callback_help_about (GschemAction *action,
-                                GschemToplevel *w_current);
+void action_callback_view_pan_left (GschemAction *action,
+                                   GschemToplevel *w_current);
+void action_callback_view_pan_right (GschemAction *action,
+                                    GschemToplevel *w_current);
+void action_callback_view_pan_up (GschemAction *action,
+                                 GschemToplevel *w_current);
+void action_callback_view_pan_down (GschemAction *action,
+                                   GschemToplevel *w_current);
+void action_callback_edit_select (GschemAction *action,
+                                 GschemToplevel *w_current);
 void action_callback_cancel (GschemAction *action,
                             GschemToplevel *w_current);
+void action_callback_page_print (GschemAction *action,
+                                GschemToplevel *w_current);
 void action_callback_repeat_last_action (GschemAction *action,
                                         GschemToplevel *w_current);
 

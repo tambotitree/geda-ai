@@ -24,7 +24,7 @@ The metadata strings use ``N_()`` because a static initialiser cannot call
 time.
 """
 
-from . import inventory as inventory_mod
+from . import inventory as inventory_mod  # noqa: F401  (kept for callers)
 import re
 
 LICENSE_HEADER = """/* gEDA - GPL Electronic Design Automation
@@ -150,20 +150,25 @@ def _spec_row(entry):
     )
 
 
+def _sections(entries):
+    """Group entries by oracle section, preserving first-seen order."""
+    order = []
+    groups = {}
+    for entry in entries:
+        key = entry["section"]
+        if key not in groups:
+            groups[key] = {"title": entry["section_title"], "entries": []}
+            order.append(key)
+        groups[key]["entries"].append(entry)
+    return [(groups[key]["title"], groups[key]["entries"]) for key in order]
+
+
 def render_header(entries):
     """Render the complete ``actions.h`` text."""
     lines = [LICENSE_HEADER, H_HEADER_NOTE]
 
-    groups = {}
-    for entry in entries:
-        groups.setdefault(inventory_mod.region(entry["cid"]), []).append(entry)
-
-    for region in ("File", "Edit", "Add", "View", "Options", "Attributes",
-                   "Select", "Misc"):
-        members = groups.get(region)
-        if not members:
-            continue
-        lines.append(f"\n/* {region} actions */\n")
+    for title, members in _sections(entries):
+        lines.append(f"\n/* {title} */\n")
         for entry in members:
             lines.append(f"extern GschemAction *action_{entry['cid']};")
         lines.append("")
@@ -205,13 +210,10 @@ def render_source(entries):
 
     lines.append(""
                  "\nstatic const GschemActionSpec action_specs[] = {")
-    last_region = None
-    for entry in entries:
-        region = inventory_mod.region(entry["cid"])
-        if region != last_region:
-            lines.append(f"\n  /* {region} actions */")
-            last_region = region
-        lines.append(_spec_row(entry))
+    for title, members in _sections(entries):
+        lines.append(f"\n  /* {title} */")
+        for entry in members:
+            lines.append(_spec_row(entry))
     lines.append("};\n")
 
     lines.append("""

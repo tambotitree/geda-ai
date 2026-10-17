@@ -27,6 +27,8 @@ def build(records=None):
             "menu_label": oracle.unquote(record["menu_label"]),
             "tooltip": oracle.unquote(record["tooltip"]),
             "type": record["type"],
+            "section": record["section"],
+            "section_title": record["section_title"],
             "comment": record["comment"],
             "body": record["body"],
             "body_sha256": record["body_sha256"],
@@ -59,19 +61,12 @@ def read(path=None):
 
 
 def region(cid):
-    """Return the file region a cid belongs to (its ``/*! \\section`` group).
+    """Return the file region a cid belongs to.
 
-    Used to keep the generated table grouped the way the original file
-    was, so reviews stay readable.
+    Obsolete: regions are now taken from the oracle's own ``/*! \\section``
+    markers, which is authoritative.  Retained only so old callers fail
+    loudly rather than silently mis-grouping.
     """
-    head = cid.split("_", 1)[0]
-    return {
-        "file": "File", "page": "File",
-        "edit": "Edit", "clipboard": "Edit",
-        "add": "Add", "buffer": "Add",
-        "view": "View", "hierarchy": "View",
-        "zoom": "View", "pan": "View",
-        "options": "Options",
-        "attributes": "Attributes",
-        "select": "Select",
-    }.get(head, "Misc")
+    raise NotImplementedError(
+        "regions come from the oracle section markers; "
+        "use entry['region']")

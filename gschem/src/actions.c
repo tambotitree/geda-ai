@@ -183,7 +183,7 @@ GschemAction *action_repeat_last_action = NULL;
 
 static const GschemActionSpec action_specs[] = {
 
-  /* File actions */
+  /* File Menu Callback Functions */
   { "file-new", "gtk-new", N_("New File"), N_("New"), N_("_New"), NULL, ACTUATE,
     action_callback_file_new, &action_file_new },
   { "file-open", "gtk-open", N_("Open File"), N_("Open..."), N_("_Open..."), NULL, ACTUATE,
@@ -211,7 +211,7 @@ static const GschemActionSpec action_specs[] = {
   { "file-quit", "gtk-quit", N_("Quit"), N_("Quit"), N_("_Quit"), NULL, ACTUATE,
     action_callback_file_quit, &action_file_quit },
 
-  /* Edit actions */
+  /* Edit Menu Callback Functions */
   { "edit-undo", "gtk-undo", N_("Undo"), N_("Undo"), N_("_Undo"), NULL, ACTUATE,
     action_callback_edit_undo, &action_edit_undo },
   { "edit-redo", "gtk-redo", N_("Redo"), N_("Redo"), N_("_Redo"), NULL, ACTUATE,
@@ -231,7 +231,7 @@ static const GschemActionSpec action_specs[] = {
   { "edit-find-text", "gtk-find", N_("Find Text"), N_("Find..."), N_("_Find..."), NULL, ACTUATE,
     action_callback_edit_find, &action_edit_find },
 
-  /* Add actions */
+  /* Add Menu Callback Functions */
   { "add-component", "insert-symbol", N_("Component Library"), N_("Component Library..."), N_("_Component..."), NULL, TOGGLE_PLAIN,
     action_callback_add_component, &action_add_component },
   { "add-last-component", "insert-symbol", N_("Add Last Component"), N_("Add Last Component"), N_("La_st Component"), NULL, TOGGLE_PLAIN,
@@ -259,7 +259,7 @@ static const GschemActionSpec action_specs[] = {
   { "add-picture", "insert-image", N_("Add Picture"), N_("Add Picture..."), N_("Pictu_re..."), NULL, TOGGLE_PLAIN,
     action_callback_add_picture, &action_add_picture },
 
-  /* Edit actions */
+  /* Object Menu Callback Functions */
   { "edit-edit", "gtk-edit", N_("Edit"), N_("Edit..."), N_("_Edit..."), NULL, ACTUATE,
     action_callback_edit_edit, &action_edit_edit },
   { "edit-properties", "gtk-properties", N_("Object Properties"), N_("Object Properties..."), N_("Object _Properties..."), NULL, ACTUATE,
@@ -276,8 +276,6 @@ static const GschemActionSpec action_specs[] = {
     action_callback_edit_mirror, &action_edit_mirror },
   { "edit-text", "gtk-edit", N_("Edit Text"), N_("Edit Text..."), N_("Edit Te_xt..."), NULL, ACTUATE,
     action_callback_edit_text, &action_edit_text },
-
-  /* Attributes actions */
   { "attributes-attach", "attribute-attach", N_("Attach Attributes"), N_("Attach Attributes"), N_("_Attach Attributes"), NULL, ACTUATE,
     action_callback_attributes_attach, &action_attributes_attach },
   { "attributes-detach", "attribute-detach", N_("Detach Attributes"), N_("Detach Attributes"), N_("_Detach Attributes"), NULL, ACTUATE,
@@ -292,8 +290,6 @@ static const GschemActionSpec action_specs[] = {
     action_callback_attributes_visibility_toggle, &action_attributes_visibility_toggle },
   { "attributes-overbar-toggle", NULL, N_("Toggle Text Overbar"), N_("Toggle Text Overbar"), N_("To_ggle Text Overbar"), NULL, ACTUATE,
     action_callback_attributes_overbar_toggle, &action_attributes_overbar_toggle },
-
-  /* Edit actions */
   { "edit-embed", NULL, N_("Embed Symbol/Picture"), N_("Embed Symbol/Picture"), N_("Em_bed Symbol/Picture"), NULL, ACTUATE,
     action_callback_edit_embed, &action_edit_embed },
   { "edit-unembed", NULL, N_("Unembed Symbol/Picture"), N_("Unembed Symbol/Picture"), N_("Unembed Symbol/Picture"), NULL, ACTUATE,
@@ -306,16 +302,12 @@ static const GschemActionSpec action_specs[] = {
     action_callback_edit_unlock, &action_edit_unlock },
   { "edit-slot", NULL, N_("Choose Slot"), N_("Slot..."), N_("_Slot..."), NULL, ACTUATE,
     action_callback_edit_slot, &action_edit_slot },
-
-  /* View actions */
   { "hierarchy-documentation", "symbol-datasheet", N_("Part Documentation"), N_("Part Documentation..."), N_("Part D_ocumentation..."), N_("View documentation for selected component"), ACTUATE,
     action_callback_hierarchy_documentation, &action_hierarchy_documentation },
 
-  /* Edit actions */
+  /* View Menu Callback Functions */
   { "edit-show-hidden", NULL, N_("Show/Hide Invisible Text"), N_("Show Invisible Text"), N_("_Show Invisible Text"), NULL, TOGGLE_CHECK,
     action_callback_edit_show_hidden, &action_edit_show_hidden },
-
-  /* View actions */
   { "view-show-origin", NULL, N_("Toggle Origin Visibility"), N_("Show Origin"), N_("Show Ori_gin"), NULL, TOGGLE_CHECK,
     action_callback_view_show_origin, &action_view_show_origin },
   { "view-zoom-in", "gtk-zoom-in", N_("Zoom In"), N_("Zoom In"), N_("Zoom _In"), NULL, ACTUATE,
@@ -338,8 +330,6 @@ static const GschemActionSpec action_specs[] = {
     action_callback_view_toolbar, &action_view_toolbar },
   { "view-scrollbars", NULL, N_("Show/Hide Scrollbars"), N_("Show Scrollbars"), N_("Show S_crollbars"), NULL, TOGGLE_CHECK,
     action_callback_view_scrollbars, &action_view_scrollbars },
-
-  /* Misc actions */
   { "docking-area-left", NULL, N_("Left Dock Windows"), N_("Left Dock"), N_("_Left Dock"), NULL, ACTUATE,
     action_callback_docking_area_left, &action_docking_area_left },
   { "docking-area-bottom", NULL, N_("Bottom Dock Windows"), N_("Bottom Dock"), N_("_Bottom Dock"), NULL, ACTUATE,
@@ -347,19 +337,15 @@ static const GschemActionSpec action_specs[] = {
   { "docking-area-right", NULL, N_("Right Dock Windows"), N_("Right Dock"), N_("_Right Dock"), NULL, ACTUATE,
     action_callback_docking_area_right, &action_docking_area_right },
 
-  /* File actions */
+  /* Pages Menu Callback Functions */
   { "page-update-messages", "gtk-refresh", N_("Update Messages"), N_("Update Messages"), N_("_Update Messages"), NULL, ACTUATE,
     action_callback_page_update_messages, &action_page_update_messages },
-
-  /* View actions */
   { "hierarchy-down-schematic", "gtk-go-down", N_("Down Schematic"), N_("Edit Subschematic"), N_("Edit _Subschematic"), NULL, ACTUATE,
     action_callback_hierarchy_down_schematic, &action_hierarchy_down_schematic },
   { "hierarchy-down-symbol", "gtk-goto-bottom", N_("Down Symbol"), N_("Edit Symbol"), N_("Edit S_ymbol"), NULL, ACTUATE,
     action_callback_hierarchy_down_symbol, &action_hierarchy_down_symbol },
   { "hierarchy-up", "gtk-go-up", N_("Up"), N_("Leave"), N_("_Leave Subschematic/Symbol"), NULL, ACTUATE,
     action_callback_hierarchy_up, &action_hierarchy_up },
-
-  /* File actions */
   { "page-prev", "gtk-go-back", N_("Previous Page"), N_("Previous Page"), N_("_Previous Page"), NULL, ACTUATE,
     action_callback_page_prev, &action_page_prev },
   { "page-next", "gtk-go-forward", N_("Next Page"), N_("Next Page"), N_("_Next Page"), NULL, ACTUATE,
@@ -367,7 +353,7 @@ static const GschemActionSpec action_specs[] = {
   { "page-manager", NULL, N_("Page Manager"), N_("Page Manager..."), N_("Page _Manager..."), NULL, ACTUATE,
     action_callback_page_manager, &action_page_manager },
 
-  /* Edit actions */
+  /* Tools Menu Callback Functions */
   { "edit-autonumber", NULL, N_("Autonumber Text"), N_("Autonumber..."), N_("A_utonumber..."), NULL, ACTUATE,
     action_callback_edit_autonumber_text, &action_edit_autonumber_text },
   { "edit-translate", NULL, N_("Reset Origin"), N_("Place Origin"), N_("_Place Origin"), NULL, TOGGLE_PLAIN,
@@ -380,24 +366,18 @@ static const GschemActionSpec action_specs[] = {
     action_callback_edit_show_text, &action_edit_show_text },
   { "edit-select-locked", NULL, N_("Select Locked Objects"), N_("Select Locked Objects"), N_("Select Loc_ked Objects"), NULL, ACTUATE,
     action_callback_edit_select_locked, &action_edit_select_locked },
-
-  /* Options actions */
   { "options-show-log-window", NULL, N_("Show Log Window"), N_("Log Window..."), N_("_Log Window..."), NULL, ACTUATE,
     action_callback_options_show_log_window, &action_options_show_log_window },
   { "options-show-coordinates", NULL, N_("Show/Hide Coordinates"), N_("Show Coordinates"), N_("Show _Coordinates"), NULL, TOGGLE_CHECK,
     action_callback_options_show_coordinates, &action_options_show_coordinates },
-
-  /* Edit actions */
   { "edit-invoke-macro", "gtk-execute", N_("Invoke Macro"), N_("Evaluate Guile Expression..."), N_("_Evaluate Guile Expression..."), NULL, ACTUATE,
     action_callback_edit_invoke_macro, &action_edit_invoke_macro },
-
-  /* File actions */
   { "file-script", "gtk-execute", N_("Run Script"), N_("Execute Guile Script..."), N_("E_xecute Guile Script..."), NULL, ACTUATE,
     action_callback_file_script, &action_file_script },
   { "file-repl", "gtk-execute", N_("Terminal REPL"), N_("Start Guile REPL in Terminal..."), N_("Start Guile _REPL in Terminal..."), NULL, ACTUATE,
     action_callback_file_repl, &action_file_repl },
 
-  /* Options actions */
+  /* Options Menu Callback Functions */
   { "options-options", "gtk-preferences", N_("Options"), N_("Options..."), N_("_Options..."), NULL, ACTUATE,
     action_callback_options_options, &action_options_options },
   { "options-rubberband", NULL, N_("Toggle Net Rubber Band"), N_("Net Rubberband Mode"), N_("Net _Rubberband Mode"), N_("When moving components or nets, drag the nets which are "
@@ -421,8 +401,6 @@ static const GschemActionSpec action_specs[] = {
     action_callback_options_scale_up_snap_size, &action_options_scale_up_snap_size },
   { "options-scale-down-snap-size", NULL, N_("Decrease Grid Spacing"), N_("Scale down Grid Spacing"), N_("Scale _down Grid Spacing"), NULL, ACTUATE,
     action_callback_options_scale_down_snap_size, &action_options_scale_down_snap_size },
-
-  /* View actions */
   { "view-dark-colors", NULL, N_("Dark Color Scheme"), N_("Dark Color Scheme"), N_("D_ark Color Scheme"), NULL, ACTUATE,
     action_callback_view_dark_colors, &action_view_dark_colors },
   { "view-light-colors", NULL, N_("Light Color Scheme"), N_("Light Color Scheme"), N_("_Light Color Scheme"), NULL, ACTUATE,
@@ -434,13 +412,13 @@ static const GschemActionSpec action_specs[] = {
   { "view-shaded-bw-colors", NULL, N_("Shaded Monochrome Color Scheme"), N_("Shaded Color Scheme (B&W)"), N_("Shaded Color Scheme (B&W)"), NULL, ACTUATE,
     action_callback_view_shaded_bw_colors, &action_view_shaded_bw_colors },
 
-  /* Misc actions */
+  /* Help Menu Callback Functions */
   { "help-hotkeys", "preferences-desktop-keyboard-shortcuts", N_("Show Hotkeys"), N_("Hotkeys..."), N_("_Hotkeys..."), NULL, ACTUATE,
     action_callback_help_hotkeys, &action_help_hotkeys },
   { "help-about", "gtk-about", N_("About gschem"), N_("About..."), N_("_About..."), NULL, ACTUATE,
     action_callback_help_about, &action_help_about },
 
-  /* Add actions */
+  /* Buffer Menu Callback Functions */
   { "buffer-copy1", "gtk-copy", N_("Copy into 1"), N_("Copy into 1"), N_("Copy into 1"), NULL, ACTUATE,
     action_callback_buffer_copy1, &action_buffer_copy1 },
   { "buffer-copy2", "gtk-copy", N_("Copy into 2"), N_("Copy into 2"), N_("Copy into 2"), NULL, ACTUATE,
@@ -472,7 +450,7 @@ static const GschemActionSpec action_specs[] = {
   { "buffer-paste5", "gtk-paste", N_("Paste from 5"), N_("Paste from 5"), N_("Paste from 5"), NULL, ACTUATE,
     action_callback_buffer_paste5, &action_buffer_paste5 },
 
-  /* Options actions */
+  /* Special Actions */
   { "options-grid-size", NULL, N_("Grid Size"), N_("Grid Size"), N_("Grid Size"), NULL, ACTUATE,
     action_callback_options_grid_size, &action_options_grid_size },
   { "options-grid", NULL, N_("Switch Grid Style"), N_("Cycle Grid Styles"), N_("Cycle _Grid Styles"), NULL, ACTUATE,
@@ -485,8 +463,6 @@ static const GschemActionSpec action_specs[] = {
     action_callback_options_grid_mesh, &action_options_grid_mesh },
   { "options-snap", NULL, N_("Switch Snap Mode"), N_("Cycle Snap Modes"), N_("Cycle _Snap Modes"), NULL, ACTUATE,
     action_callback_options_snap, &action_options_snap },
-
-  /* View actions */
   { "view-pan-left", NULL, N_("Pan Left"), N_("Pan Left"), N_("Pan Left"), NULL, ACTUATE,
     action_callback_view_pan_left, &action_view_pan_left },
   { "view-pan-right", NULL, N_("Pan Right"), N_("Pan Right"), N_("Pan Right"), NULL, ACTUATE,
@@ -495,20 +471,12 @@ static const GschemActionSpec action_specs[] = {
     action_callback_view_pan_up, &action_view_pan_up },
   { "view-pan-down", NULL, N_("Pan Down"), N_("Pan Down"), N_("Pan Down"), NULL, ACTUATE,
     action_callback_view_pan_down, &action_view_pan_down },
-
-  /* Edit actions */
   { "edit-select", "select", N_("Select"), N_("Select"), N_("Select Mode"), NULL, TOGGLE_PLAIN,
     action_callback_edit_select, &action_edit_select },
-
-  /* Misc actions */
   { "cancel", NULL, N_("Cancel"), N_("Cancel"), N_("Cancel"), NULL, ACTUATE,
     action_callback_cancel, &action_cancel },
-
-  /* File actions */
   { "page-print", "gtk-print", N_("Print Page"), N_("Print Page"), N_("Print Page"), NULL, ACTUATE,
     action_callback_page_print, &action_page_print },
-
-  /* Misc actions */
   { "repeat-last-action", "gtk-redo", N_("Repeat Last Action"), N_("Repeat Last Action"), N_("Repeat Last Action"), NULL, ACTUATE,
     action_callback_repeat_last_action, &action_repeat_last_action },
 };

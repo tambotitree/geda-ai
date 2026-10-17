@@ -29,6 +29,8 @@ FIELD_NAMES = ("cid", "id", "icon", "name", "label", "menu_label",
                "tooltip", "type")
 
 _OPEN_RE = re.compile(r"^DEFINE_ACTION\s*\(", re.MULTILINE)
+_SECTION_RE = re.compile(r"^/\*!\s*\\section\s+([\w-]+)\s+(.*?)\s*\*/\s*$",
+                         re.MULTILINE)
 
 
 class OracleError(RuntimeError):
@@ -204,6 +206,17 @@ def unquote(expr):
 
 def parse(text):
     """Parse oracle source text into an ordered list of action records."""
+    sections = [(m.start(), m.group(1), m.group(2))
+                for m in _SECTION_RE.finditer(text)]
+
+    def section_at(offset):
+        label = ("uncategorised", "Uncategorised")
+        for start, slug, title in sections:
+            if start > offset:
+                break
+            label = (slug, title)
+        return label
+
     records = []
     for match in _OPEN_RE.finditer(text):
         args, after_args = _split_args(text, match.end())
@@ -217,6 +230,7 @@ def parse(text):
             i += 1
         body, _ = _brace_body(text, i)
         record = dict(zip(FIELD_NAMES, args))
+        record["section"], record["section_title"] = section_at(match.start())
         record["comment"] = _leading_comment(text, match.start())
         record["body"] = normalize_body(body)
         record["body_sha256"] = body_sha256(body)
