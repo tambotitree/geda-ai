@@ -74,67 +74,8 @@
 
 #include "actions.h"
 
-extern GschemAction *action_docking_area_left;
-extern GschemAction *action_docking_area_bottom;
-extern GschemAction *action_docking_area_right;
-extern GschemAction *action_options_grid_size;
-extern GschemAction *action_options_scale_up_snap_size;
-extern GschemAction *action_options_scale_down_snap_size;
-/* Define storage for global GschemAction pointers */
-GschemAction *action_file_new = NULL;
-GschemAction *action_file_open = NULL;
-GschemAction *action_file_open_recent = NULL;
-GschemAction *action_file_save = NULL;
-GschemAction *action_file_save_as = NULL;
-GschemAction *action_file_save_all = NULL;
-GschemAction *action_page_revert = NULL;
-GschemAction *action_page_close = NULL;
-GschemAction *action_file_print = NULL;
-GschemAction *action_file_write_png = NULL;
-GschemAction *action_file_new_window = NULL;
-GschemAction *action_file_close = NULL;
-GschemAction *action_file_quit = NULL;
-GschemAction *action_file_repl = NULL;
-
-GschemAction *action_view_menubar = NULL;
-GschemAction *action_view_toolbar = NULL;
-GschemAction *action_view_scrollbars = NULL;
-
-GschemAction *action_page_prev = NULL;
-GschemAction *action_page_next = NULL;
-
-GschemAction *action_hierarchy_up = NULL;
-
-GschemAction *action_edit_undo = NULL;
-GschemAction *action_edit_redo = NULL;
-GschemAction *action_clipboard_cut = NULL;
-GschemAction *action_clipboard_copy = NULL;
-GschemAction *action_clipboard_paste = NULL;
-GschemAction *action_edit_delete = NULL;
-GschemAction *action_edit_select_all = NULL;
-GschemAction *action_edit_deselect = NULL;
-GschemAction *action_edit_find = NULL;
-
-GschemAction *action_add_component = NULL;
-GschemAction *action_add_last_component = NULL;
-GschemAction *action_add_net = NULL;
-GschemAction *action_add_bus = NULL;
-GschemAction *action_add_attribute = NULL;
-GschemAction *action_add_text = NULL;
-GschemAction *action_add_line = NULL;
-GschemAction *action_add_path = NULL;
-GschemAction *action_add_box = NULL;
-GschemAction *action_add_circle = NULL;
-GschemAction *action_add_arc = NULL;
-GschemAction *action_add_pin = NULL;
-GschemAction *action_add_picture = NULL;
-
-GschemAction *action_docking_area_left = NULL;
-GschemAction *action_docking_area_bottom = NULL;
-GschemAction *action_docking_area_right = NULL;
-GschemAction *action_options_grid_size = NULL;
-GschemAction *action_options_scale_up_snap_size = NULL;
-GschemAction *action_options_scale_down_snap_size = NULL;
+/* The global action pointers, and the storage for them, live in
+ * actions.c alongside the table that fills them in. */
 
 
 static scm_t_bits action_tag;

@@ -42,6 +42,36 @@ typedef enum {
 
 typedef struct _GschemAction GschemAction;
 
+/*! \brief Signature of an action activation callback.
+ *
+ * \param [in] action    The action being activated.
+ * \param [in] w_current The toplevel whose context the action runs in.
+ */
+typedef void (*GschemActionCallback) (GschemAction *action,
+                                      GschemToplevel *w_current);
+
+/*! \brief Declarative description of one action.
+ *
+ * One ::GschemActionSpec exists per action, held in the ::action_specs table
+ * in actions.c.  Keeping the description as data means the metadata can be
+ * reviewed, diffed and generated without preprocessor tricks, and the
+ * callback stays an ordinary function pointer.
+ *
+ * The string fields are \c N_()-marked literals: they are translated at
+ * registration time, since a static initialiser cannot call \c gettext().
+ */
+typedef struct {
+  const gchar         *id;        /*!< Stable id, e.g. "file-open"        */
+  const gchar         *icon_name; /*!< Icon name, or NULL                 */
+  const gchar         *name;      /*!< Long name, e.g. "Open File"        */
+  const gchar         *label;     /*!< Label, e.g. "Open..."              */
+  const gchar         *menu_label;/*!< Mnemonic label, e.g. "_Open..."    */
+  const gchar         *tooltip;   /*!< Tooltip, or NULL                   */
+  GschemActionType     type;      /*!< Actuate or one of the toggle types */
+  GschemActionCallback activate;  /*!< Function invoked on activation    */
+  GschemAction       **action;    /*!< Set to the registered object      */
+} GschemActionSpec;
+
 struct _GschemAction {
   gchar *id;
   gchar *icon_name;
