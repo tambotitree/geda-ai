@@ -106,8 +106,9 @@ def check_bodies(source, entries):
             continue
         expected, _ = generate.rewrite_body(entry["body"])
         if oracle.normalize_body(actual[cid]) != oracle.normalize_body(expected):
+            got = oracle.body_sha256(actual[cid])[:12]
             problems.append(f"{cid}: body differs from oracle "
-                            f"(expected sha {entry['body_sha256'][:12]})")
+                            f"(expected {entry['body_sha256'][:12]}, got {got})")
     return problems
 
 

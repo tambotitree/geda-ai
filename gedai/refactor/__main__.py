@@ -156,15 +156,24 @@ def cmd_run(args):
                 print("    " + line)
             journal.append("unit-rejected", cid=cid, reason="compile",
                            errors=errors)
+            # Undo the splice so the file returns to the last verified state.
+            checkpoint._git("checkout", "--", "gschem/src/actions.c")
             continue
 
-        commit = checkpoint._git("rev-parse", "--short", "HEAD")
+        # The unit is verified; record it in the tree.  The commit is what
+        # makes the unit both durable and resumable: `--resume` skips a cid
+        # only because a commit exists for it.
+        committed = units.commit_unit(entry, result)
+        if committed is None:
+            failed += 1
+            print(f"  {cid}: nothing to commit (no change on disk)")
+            journal.append("unit-rejected", cid=cid, reason="no change")
+            continue
+
         accepted += 1
         spent += (result["usage"] or {}).get("total_tokens", 0)
-        print(f"  {cid}: accepted ({result['elapsed_s']}s, "
-              f"{spent} tokens so far)")
-        journal.append("unit-accepted", cid=cid, commit=commit,
-                       usage=result["usage"], elapsed_s=result["elapsed_s"])
+        print(f"  {cid}: accepted + committed {committed} "
+              f"({result['elapsed_s']}s, {spent} tokens so far)")
 
     checkpoint.write_state(accepted=accepted, failed=failed,
                            tokens=spent, pending=len(pending) - accepted)

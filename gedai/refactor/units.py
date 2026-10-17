@@ -82,6 +82,74 @@ def check_spec(reply, entry):
     return normalize(actual) == normalize(expected), expected, actual
 
 
+def apply_body(cid, body):
+    """Replace one callback body in ``actions.c`` with ``body``.
+
+    The file is regenerated from the inventory first, so the result is a pure
+    function of (oracle, inventory, this body): no other unit's edit can be
+    lost, and re-applying the same body is a no-op.
+    """
+    from . import inventory as inventory_mod
+
+    entries = inventory_mod.build()
+    source, _ = generate.render_source(entries)
+    pattern = re.compile(
+        r"(^action_callback_" + re.escape(cid) +
+        r" \(GschemAction \*action,\s*\n\s*GschemToplevel \*w_current\)\n\{\n)"
+        r"(.*?)"
+        r"(\n\}\n)",
+        re.DOTALL | re.MULTILINE)
+    if not pattern.search(source):
+        raise UnitError(f"cannot locate callback for {cid} in regenerated source")
+    updated = pattern.sub(
+        lambda m: m.group(1) + oracle.normalize_body(
+            generate.rewrite_body(body)[0]) + m.group(3),
+        source, count=1)
+    if updated == source:
+        return False
+    config.ACTIONS_C.write_text(updated)
+    return True
+
+
+def commit_unit(entry, result):
+    """Write, verify and commit one accepted unit.
+
+    Returns the short commit hash, or None when the tree already matched the
+    accepted body (a re-run of an already-applied unit).
+    """
+    cid = entry["cid"]
+    reply_body = result.get("body")
+    if reply_body is not None:
+        apply_body(cid, reply_body)
+
+    source = config.ACTIONS_C.read_text()
+    entries = [entry]
+    problems = (validators.check_bodies(source, entries)
+                + validators.check_rows(source, [entry]))
+    if problems:
+        checkpoint._git("checkout", "--", "gschem/src/actions.c")
+        raise UnitError("post-apply verification failed: "
+                        + "; ".join(problems[:3]))
+
+    checkpoint._git("add", "gschem/src/actions.c")
+    staged = subprocess.run(
+        ["git", "diff", "--cached", "--quiet"],
+        cwd=config.REPO_ROOT).returncode != 0
+    if not staged:
+        return None
+
+    checkpoint._git("commit", "-q", "-m",
+                    f"unit: {cid}\n\n"
+                    f"Model: {config.API_MODEL}; "
+                    f"body verified equal to oracle "
+                    f"{entry['body_sha256'][:12]}; gschem-actions.o compiles.")
+    short = checkpoint._git("rev-parse", "--short", "HEAD")
+    journal.append("unit-committed", cid=cid, commit=short,
+                   usage=result.get("usage"),
+                   elapsed_s=result.get("elapsed_s"))
+    return short
+
+
 def run_unit(entry, api_key=None, include_spec=True):
     """Process one action.  Returns a result dict; raises on transport error."""
     cid = entry["cid"]
@@ -101,6 +169,7 @@ def run_unit(entry, api_key=None, include_spec=True):
         "cid": cid,
         "elapsed_s": elapsed,
         "usage": usage,
+        "body": body,
         "body_matches": body_matches,
         "spec_matches": spec_ok,
         "notes": reply.get("notes", ""),
