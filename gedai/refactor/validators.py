@@ -9,7 +9,7 @@ definition of "correct".
 
 import re
 
-from . import oracle
+from . import config, oracle
 
 _SPEC_ROW_RE = re.compile(r"^\s*\{ ")
 _CALLBACK_DEF_RE = re.compile(
@@ -127,6 +127,29 @@ def check_rows(source, entries):
         if row not in source:
             problems.append(f"{entry['cid']}: expected row not found "
                             f"(wrong callback, global slot or metadata)")
+    return problems
+
+
+def check_include_guard(header, guard="GSCHEM_ACTIONS_H"):
+    """Verify no other header claims the generated header's include guard.
+
+    Two headers sharing a guard silently suppress one of them depending on
+    include order, which is how a stale 48-action declaration file was able
+    to shadow the real 135-action one without any compile error.  Catching
+    it here turns a silent include-order dependency into a gate failure.
+    """
+    problems = []
+    scope = config.REPO_ROOT / "gschem"
+    for path in scope.rglob("*.h"):
+        if path == config.ACTIONS_H:
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        if f"#define {guard}" in text:
+            problems.append(f"{path.relative_to(config.REPO_ROOT)} also "
+                            f"defines {guard}")
     return problems
 
 

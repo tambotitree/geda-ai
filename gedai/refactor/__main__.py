@@ -81,11 +81,13 @@ def cmd_verify(args):
     problems += validators.check_bodies(source, entries)
     problems += validators.check_rows(source, entries)
     problems += validators.check_no_forbidden_source(source)
+    problems += validators.check_include_guard(header)
 
     print(f"oracle actions: {len(entries)}")
     print(f"arity: {'ok' if not validators.check_arity(source, header, len(entries), entries) else 'FAIL'}")
     print(f"bodies: {'ok' if not validators.check_bodies(source, entries) else 'FAIL'}")
     print(f"rows: {'ok' if not validators.check_rows(source, entries) else 'FAIL'}")
+    print(f"guards: {'ok' if not validators.check_include_guard(header) else 'FAIL'}")
 
     if problems:
         for problem in problems:

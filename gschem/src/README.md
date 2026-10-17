@@ -52,8 +52,9 @@ python3 -m gedai.refactor rollback ckpt/N
 `verify` is the gate everything else defers to. It checks that the table
 rows, callback definitions, externs and declarations all cover the same 135
 cids; that every row names its own callback and global slot; that every
-callback body still equals the oracle after the documented rewrites; and
-that `gschem-actions.o` compiles from scratch.
+callback body still equals the oracle after the documented rewrites; that no
+other header claims this file's include guard; and that `gschem-actions.o`
+compiles from scratch.
 
 The compile step deletes the object file first, because `make` reports
 "up to date" when timestamps say nothing changed, which would let a broken

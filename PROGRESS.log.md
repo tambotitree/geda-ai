@@ -66,6 +66,16 @@ point of building them first.
 10. **Model drift, real.** The first live unit was rejected because the
     model wrapped the `id` in `N_()`. The prompt's own example caused it
     (it showed `N_("id")`); corrected to a bare literal and the unit passed.
+11. **Colliding include guard (found last, and silent).**
+    `gschem/include/actions.h` was a stale WIP file declaring only 48 of 135
+    actions, and it used the same `GSCHEM_ACTIONS_H` guard as the generated
+    header. Whichever the compiler found first won, so a header claiming to
+    declare the registry could be silently replaced by an incomplete one —
+    with no compile error, because all 48 it declares are real. Verified
+    that nothing included it and that it was not installed, then deleted it,
+    and added `check_include_guard()` so any future duplicate fails `verify`
+    (tested by re-introducing the collision). A clean rebuild from scratch
+    passes with 0 errors.
 
 ## Drift audit
 
