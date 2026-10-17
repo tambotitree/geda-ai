@@ -40,3 +40,6 @@ requirements.txt
 DISTCLEANFILES = environment.yml
 .aider*
 .env
+
+# Refactor run state (journal, snapshots, gate reports)
+.refactor/

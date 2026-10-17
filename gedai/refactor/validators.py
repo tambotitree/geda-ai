@@ -29,11 +29,15 @@ def count_spec_rows(source):
     return len(re.findall(r"action_callback_\w+, &action_\w+ \},", source))
 
 
-def check_arity(source, header, expected):
+def check_arity(source, header, expected, entries=None):
     """Verify the generated pair declares and defines all actions.
 
     The three counts that must agree are: table rows, callback definitions
     in the .c, and both externs and callback declarations in the .h.
+
+    Counts alone would accept a file where one row names the wrong callback
+    and the totals still balance, so when ``entries`` is supplied the set of
+    names is compared against the inventory as well.
     """
     problems = []
     rows = count_spec_rows(source)
@@ -57,6 +61,19 @@ def check_arity(source, header, expected):
 
     if len(unique_defs) != len(definitions):
         problems.append("duplicate callback definitions")
+
+    if entries is not None:
+        wanted = {e["cid"] for e in entries}
+        for label, names in (("definitions", unique_defs),
+                             ("externs", set(externs)),
+                             ("declarations", set(declarations))):
+            unexpected = names - wanted
+            absent = wanted - names
+            if unexpected:
+                problems.append(f"{label} for unknown cids: "
+                                f"{sorted(unexpected)[:5]}")
+            if absent:
+                problems.append(f"{label} missing cids: {sorted(absent)[:5]}")
     return problems
 
 
@@ -91,6 +108,24 @@ def check_bodies(source, entries):
         if oracle.normalize_body(actual[cid]) != oracle.normalize_body(expected):
             problems.append(f"{cid}: body differs from oracle "
                             f"(expected sha {entry['body_sha256'][:12]})")
+    return problems
+
+
+def check_rows(source, entries):
+    """Verify every table row's callback and global slot belong to its cid.
+
+    A row whose metadata is right but whose callback is another action's
+    would still compile, and would make a menu item invoke the wrong
+    handler; only a structural check catches that.
+    """
+    from . import generate
+
+    problems = []
+    for entry in entries:
+        row = generate._spec_row(entry)
+        if row not in source:
+            problems.append(f"{entry['cid']}: expected row not found "
+                            f"(wrong callback, global slot or metadata)")
     return problems
 
 
