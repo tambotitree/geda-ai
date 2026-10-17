@@ -109,13 +109,17 @@ def cmd_run(args):
     until = config.parse_until(args.until)
     api_key = config.api_key()
     done = journal.completed_cids() if args.resume else set()
-    pending = [e for e in entries if e["cid"] not in done]
+    skipped_rejects = journal.rejected_cids() if (args.resume
+                                                  and not args.retry) else set()
+    pending = [e for e in entries
+               if e["cid"] not in done and e["cid"] not in skipped_rejects]
     if args.only:
         pending = [e for e in pending if e["cid"] in set(args.only)]
     limit = args.max_units or len(pending)
     pending = pending[:limit]
 
-    print(f"pending: {len(pending)} (skipping {len(done)} already committed)")
+    print(f"pending: {len(pending)} (skipping {len(done)} verified, "
+          f"{len(skipped_rejects)} rejected earlier)")
     print(f"hard stop: {until.isoformat()} "
           f"({config.minutes_left(until)} min)")
     if not pending:
@@ -238,7 +242,10 @@ def build_parser():
 
     p = sub.add_parser("run", help="drive the per-action model loop")
     p.add_argument("--resume", action="store_true",
-                   help="skip actions already committed in the journal")
+                   help="skip actions already verified in the journal")
+    p.add_argument("--retry", action="store_true",
+                   help="with --resume, also retry actions the model got "
+                        "wrong earlier")
     p.add_argument("--only", nargs="+", metavar="CID",
                    help="restrict to these cids")
     p.add_argument("--max-units", type=int,

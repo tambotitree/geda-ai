@@ -73,18 +73,47 @@ On the tree as checked in, the file is the generator's output and matches the
 oracle exactly for all 135 actions; the model stage never edits the file
 except to write a body it has just verified equal to the oracle.
 
-Drift observed during the run, all resolved:
+### Model stage outcome
 
-1. **Prompt-induced, `file_open_recent`.** The model wrapped the `id` in
-   `N_()`. The prompt's own example showed `N_("id")`, so this was our bug;
-   corrected to a bare literal, after which the unit passed.
-2. **Real model error, `add_bus`.** The oracle's menu label is `_("B_us")`;
-   the model produced `N_("B_us")` — it moved the mnemonic underscore to the
-   front (`_B_us`). Confirmed against `actions.c.bak` that `B_us` is the
-   original text and that the generated row is correct. The unit was
-   rejected and the action remains unverified pending a retry. This is the
-   behaviour the oracle comparison exists for: a one-character change to a
-   menu mnemonic is invisible in review and is a real user-facing change.
+133 of 135 actions independently reproduced by the model and verified equal
+to the oracle. Two were rejected on every attempt, both with the body
+correct and the metadata wrong:
+
+| action               | oracle            | model produced    | defect                                   |
+|----------------------|-------------------|-------------------|------------------------------------------|
+| `add_bus`            | `N_("B_us")`      | `N_("_B_us")`     | mnemonic underscore moved to the front   |
+| `options_rubberband` | `"… which are " "attached to them"` | `"… which are \"attached to them"` | stray `\"` inside the literal — would not compile |
+
+`add_bus` was confirmed against `actions.c.bak`, where the menu label is
+`_("B_us")`; the generated row is correct. The `options_rubberband` reply
+was inspected with its raw JSON to rule out a comparison artefact: the
+model really does emit the backslash-quote. Both are exactly the class of
+error the oracle comparison exists to catch — a one-character change to a
+menu mnemonic is invisible in review and is a real user-facing change, and
+a stray escape is invalid C that a naive string-diff review would miss.
+
+Both actions remain in place from the deterministic generator, so nothing is
+missing from the tree. They are unverified rather than broken.
+
+### Comparison bugs found in the tooling
+
+The first spec comparison was whitespace-sensitive and reported a legitimate
+reformatting as drift. It now normalises whitespace and treats the two
+equivalent ways of breaking a string across lines — juxtaposition (`"a"
+"b"`) and a backslash continuation — as equal, while still rejecting a
+changed mnemonic, a wrong callback or a changed word. Tested against a
+synthetic case and against the real replies.
+
+### Process defects found in the tooling
+
+- The first live unit was rejected because the model wrapped the `id` in
+  `N_()`. The prompt's own example showed `N_("id")`, so this was our bug;
+  corrected, after which the unit passed.
+- A rejected unit was retried on every resume, burning budget on a
+  deterministic miss. `--resume` now skips rejected cids unless `--retry`
+  is given.
+
+No drift has been accepted into the tree.
 
 No drift has been accepted into the tree.
 
@@ -103,8 +132,8 @@ No drift has been accepted into the tree.
 
 ## Not done, and why
 
-The API run is bounded by the 00:00Z stop and a token budget, so it may not
-cover all 135 actions. That is safe by construction: every action is already
-in the file from the deterministic generator, so an unvisited action is
-unverified, not missing. `status` reports verified vs remaining, and
-`run --resume` continues where it stopped.
+The API run is bounded by the 00:00Z stop and a token budget. It completed
+133 of 135 actions within ~124k tokens; the two misses are model errors, not
+missing work. Every action is in the file from the deterministic generator,
+so an unvisited action is unverified, not absent. `status` reports verified
+vs remaining, and `run --resume --retry` continues where it stopped.

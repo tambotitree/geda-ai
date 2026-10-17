@@ -74,12 +74,41 @@ def extract_callback(reply, cid):
     return match.group(2)
 
 
+_STRING_LITERAL_RE = re.compile(r'"(?:\\.|[^"\\])*"', re.DOTALL)
+_ADJACENT_RE = re.compile(r'"(?:[^"\\]|\\.)*"(?:\s*"(?:[^"\\]|\\.)*")+',
+                          re.DOTALL)
+
+
+def normalize_spec(expr):
+    """Normalise a table row so formatting differences do not count.
+
+    Two textual differences are legitimate and must compare equal:
+
+    * whitespace and line breaks between tokens;
+    * a string broken across lines either by juxtaposition
+      (``"a" "b"``) or by a backslash continuation (``"a\\`` newline ``b"``).
+
+    Models also occasionally emit ``\\"`` where the literal simply ends; that
+    is the same continuation written one level of quoting higher, so it is
+    collapsed too.  Only *inside* a literal is this safe: a real escaped
+    quote in the metadata would be a behaviour change and is caught after
+    merging, when the joined literals are compared.
+    """
+    def merge(match):
+        parts = _STRING_LITERAL_RE.findall(match.group(0))
+        return '"' + "".join(p[1:-1] for p in parts) + '"'
+
+    text = re.sub(r"\\[ \t]*\n[ \t]*", "", expr)
+    text = _ADJACENT_RE.sub(merge, text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
 def check_spec(reply, entry):
     """Compare the model's table row against the oracle-derived one."""
     expected = generate._spec_row(entry).strip()
     actual = (reply.get("spec") or "").strip()
-    normalize = lambda s: re.sub(r"\s+", " ", s).strip()
-    return normalize(actual) == normalize(expected), expected, actual
+    return (normalize_spec(actual) == normalize_spec(expected),
+            expected, actual)
 
 
 def apply_body(cid, body):

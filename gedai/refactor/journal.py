@@ -62,6 +62,19 @@ def completed_cids():
             if r.get("event") in finished and "cid" in r}
 
 
+def rejected_cids():
+    """Set of cids whose model output differed from the oracle.
+
+    These are skipped by ``--resume`` unless retried explicitly with
+    ``--retry``: the model's answer is deterministic at temperature 0, so
+    re-asking the same question spends tokens to get the same rejection.
+    """
+    return {r["cid"] for r in records()
+            if r.get("event") == "unit-rejected"
+            and "differs from oracle" in str(r.get("reason", ""))
+            and "cid" in r}
+
+
 def drift():
     """Records where the model deviated from the oracle."""
     return [r for r in records() if r.get("event") == "drift"]
