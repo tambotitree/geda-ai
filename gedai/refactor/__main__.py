@@ -160,20 +160,22 @@ def cmd_run(args):
             checkpoint._git("checkout", "--", "gschem/src/actions.c")
             continue
 
-        # The unit is verified; record it in the tree.  The commit is what
-        # makes the unit both durable and resumable: `--resume` skips a cid
-        # only because a commit exists for it.
-        committed = units.commit_unit(entry, result)
-        if committed is None:
+        # The unit is verified; record it in the tree.  A None result means
+        # the model reproduced the oracle exactly and the file already
+        # matches, which is success, not failure.
+        try:
+            committed = units.commit_unit(entry, result)
+        except units.UnitError as exc:
             failed += 1
-            print(f"  {cid}: nothing to commit (no change on disk)")
-            journal.append("unit-rejected", cid=cid, reason="no change")
+            print(f"  {cid}: POST-APPLY FAILED ({exc})")
+            journal.append("unit-rejected", cid=cid, reason=str(exc))
             continue
 
         accepted += 1
         spent += (result["usage"] or {}).get("total_tokens", 0)
-        print(f"  {cid}: accepted + committed {committed} "
-              f"({result['elapsed_s']}s, {spent} tokens so far)")
+        how = f"committed {committed}" if committed else "verified (no diff)"
+        print(f"  {cid}: {how} ({result['elapsed_s']}s, "
+              f"{spent} tokens so far)")
 
     checkpoint.write_state(accepted=accepted, failed=failed,
                            tokens=spent, pending=len(pending) - accepted)
@@ -189,7 +191,7 @@ def cmd_status(args):
     done = journal.completed_cids()
     usage = journal.usage_totals()
     print(f"actions:   {len(entries)}")
-    print(f"committed: {len(done)}")
+    print(f"verified:  {len(done)}")
     print(f"remaining: {len(entries) - len(done)}")
     print(f"tokens:    {usage['total_tokens']} "
           f"(prompt {usage['prompt_tokens']}, "

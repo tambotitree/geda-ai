@@ -112,10 +112,17 @@ def apply_body(cid, body):
 
 
 def commit_unit(entry, result):
-    """Write, verify and commit one accepted unit.
+    """Write, verify and journal one accepted unit.
 
-    Returns the short commit hash, or None when the tree already matched the
-    accepted body (a re-run of an already-applied unit).
+    Returns the short commit hash, or None when the verified body is already
+    what is on disk.
+
+    Note on why None is a normal outcome: the generator has already written
+    every oracle body into ``actions.c``, so a model that correctly
+    reproduces an action produces a byte-identical file.  The unit's value is
+    then the independent confirmation that the model agrees with the oracle,
+    which is recorded in the journal; inventing a commit for it would add
+    noise to the history without changing the tree.
     """
     cid = entry["cid"]
     reply_body = result.get("body")
@@ -123,8 +130,7 @@ def commit_unit(entry, result):
         apply_body(cid, reply_body)
 
     source = config.ACTIONS_C.read_text()
-    entries = [entry]
-    problems = (validators.check_bodies(source, entries)
+    problems = (validators.check_bodies(source, [entry])
                 + validators.check_rows(source, [entry]))
     if problems:
         checkpoint._git("checkout", "--", "gschem/src/actions.c")
@@ -136,6 +142,10 @@ def commit_unit(entry, result):
         ["git", "diff", "--cached", "--quiet"],
         cwd=config.REPO_ROOT).returncode != 0
     if not staged:
+        journal.append("unit-verified", cid=cid,
+                       usage=result.get("usage"),
+                       elapsed_s=result.get("elapsed_s"),
+                       note="model output identical to oracle")
         return None
 
     checkpoint._git("commit", "-q", "-m",

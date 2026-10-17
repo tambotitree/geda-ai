@@ -43,3 +43,4 @@ DISTCLEANFILES = environment.yml
 
 # Refactor run state (journal, snapshots, gate reports)
 .refactor/
+__pycache__/

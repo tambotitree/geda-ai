@@ -51,9 +51,15 @@ def last_commit_for(cid):
 
 
 def completed_cids():
-    """Set of cids whose unit was applied, verified and committed."""
+    """Set of cids whose unit was applied and verified.
+
+    A unit counts as done whether the model's output was identical to the
+    oracle (``unit-verified``) or changed something that then passed
+    verification and was committed (``unit-committed``).
+    """
+    finished = {"unit-committed", "unit-verified"}
     return {r["cid"] for r in records()
-            if r.get("event") == "unit-committed" and "cid" in r}
+            if r.get("event") in finished and "cid" in r}
 
 
 def drift():
