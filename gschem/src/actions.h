@@ -29,6 +29,11 @@
  * change its sensitivity) include this file.  Callbacks are declared here
  * too, so the registry table in actions.c is checked by the compiler: a
  * misspelt callback name is a build error, not a silently dead menu item.
+ *
+ * \note These are the actions implemented in C.  Actions defined by the
+ *       user, or by a Scheme module such as gschem/scheme/pcb.scm, are
+ *       registered at load time through gschem_action_register() and have no
+ *       entry here; they are not built-in and must not be added to the table.
  */
 
 #ifndef GSCHEM_ACTIONS_H

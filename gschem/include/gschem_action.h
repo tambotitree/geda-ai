@@ -59,6 +59,14 @@ typedef void (*GschemActionCallback) (GschemAction *action,
  *
  * The string fields are \c N_()-marked literals: they are translated at
  * registration time, since a static initialiser cannot call \c gettext().
+ *
+ * \todo Tier C actions, owned by an external executable, are not implemented.
+ *       When they are, they must reach activation through this structure so
+ *       that one registration path serves all three tiers; the planned
+ *       contract is \c TOOL \c --describe for the manifest and
+ *       \c TOOL \c [args] with an s-expression on stdin and stdout.  See
+ *       gschem/src/TRANSFORM_PROTOCOL.md.  Deliberately not stubbed here:
+ *       an unused \c x_run_transform() would rot before it is needed.
  */
 typedef struct {
   const gchar         *id;        /*!< Stable id, e.g. "file-open"        */
