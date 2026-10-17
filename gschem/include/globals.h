@@ -55,16 +55,7 @@ extern int verbosity_level;
 /* Hooks */
 extern SCM complex_place_list_changed_hook;
 
-#include "gettext.h"
-#ifdef ENABLE_NLS
-# ifdef gettext_noop
-#  define N_(String) gettext_noop (String)
-# else
-#  define N_(String) (String)
-# endif
-#else
-# define N_(String) (String)
-#endif
+#include <glib/gi18n.h>
 
 #ifndef pgettext
 # define GETTEXT_CONTEXT_GLUE "\004"

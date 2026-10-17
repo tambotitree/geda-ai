@@ -54,7 +54,7 @@ enum
  *  \return An empty list of routine values
  */
 GtkListStore*
-x_integerls_new ()
+x_integerls_new()
 {
   return gtk_list_store_new (COLUMN_COUNT, G_TYPE_STRING);
 }
@@ -111,7 +111,7 @@ x_integerls_add_value (GtkListStore *store, const char *value)
  *  \return The column index of the value
  */
 int
-x_integerls_get_value_column ()
+x_integerls_get_value_column()
 {
   return COLUMN_VALUE;
 }

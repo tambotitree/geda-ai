@@ -110,7 +110,7 @@ usage(char *cmd)
  * exit status 0.
  */
 static void
-version ()
+version()
 {
   printf(_(
 "gEDA %s (g%.7s)\n"
@@ -214,7 +214,7 @@ parse_commandline(int argc, char *argv[])
         break;
 
       case 'V':
-        version ();
+        version();
         break;
 
       case '?':
@@ -234,7 +234,7 @@ parse_commandline(int argc, char *argv[])
         exit (1);
         break;
       default:
-        g_assert_not_reached ();
+        g_assert_not_reached();
     }
   }
 

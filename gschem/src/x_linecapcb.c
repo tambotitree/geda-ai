@@ -60,7 +60,7 @@ static GtkListStore* create_line_cap_list_store();
 /*! \brief Create the GtkListStore for line cap styles.
  */
 static GtkListStore*
-create_line_cap_list_store ()
+create_line_cap_list_store()
 {
   GtkTreeIter iter;
   GtkListStore *store;
@@ -100,14 +100,14 @@ create_line_cap_list_store ()
  *  \return GtkWidget
  */
 GtkWidget*
-x_linecapcb_new ()
+x_linecapcb_new()
 {
   GtkComboBox *combo;
   GtkCellLayout *layout;
   GtkCellRenderer *text_cell;
 
   if (line_cap_list_store == NULL) {
-    line_cap_list_store = create_line_cap_list_store ();
+    line_cap_list_store = create_line_cap_list_store();
   }
 
   combo = GTK_COMBO_BOX (gtk_combo_box_new_with_model (GTK_TREE_MODEL (line_cap_list_store)));

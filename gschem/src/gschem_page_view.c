@@ -417,7 +417,7 @@ gschem_page_view_get_page_geometry (GschemPageView *view)
 /*! \brief Get/register GschemPageView type.
  */
 GType
-gschem_page_view_get_type ()
+gschem_page_view_get_type()
 {
   static GType type = 0;
 
@@ -1122,8 +1122,10 @@ gschem_page_view_update_vadjustment (GschemPageView *view)
     printf("Vp %f\n", view->vadjustment->page_size);
 #endif
 
-    gtk_adjustment_changed(view->vadjustment);
-    gtk_adjustment_value_changed (view->vadjustment);
+    // update to GTK 3 API
+    // gtk_adjustment_changed(view->vadjustment);
+    // gtk_adjustment_value_changed (view->vadjustment);
+    gtk_adjustment_set_value(view->vadjustment, gtk_adjustment_get_value(view->vadjustment));
   }
 }
 
@@ -1422,7 +1424,7 @@ gschem_page_view_redraw(GschemPageView *view, cairo_t *cr, GschemToplevel *w_cur
 #ifdef DEBUGGTK3MIGRATION
 fprintf(stderr, "📦 Calling o_redraw_rect: page=%p geometry=%p\n", page, geometry);
 if (geometry) {
-  fprintf(stderr, "📐 Geometry: width=%d height=%d\n", geometry->width, geometry->height);
+  fprintf(stderr, "📐 Geometry: width=%d height=%d\n", geometry->screen_width, geometry->screen_height);
   fprintf(stderr, "📐 Geometry pointer is valid: %p\n", geometry);
   fprintf(stderr, "DRAW: %p (width=%d height=%d)\n", view, allocation.width, allocation.height);
 } else {

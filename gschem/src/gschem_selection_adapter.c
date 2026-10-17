@@ -941,7 +941,7 @@ gschem_selection_adapter_get_toplevel (GschemSelectionAdapter *adapter)
 /*! \brief Get/register GschemSelection type.
  */
 GType
-gschem_selection_adapter_get_type ()
+gschem_selection_adapter_get_type()
 {
   static GType type = 0;
 
@@ -971,7 +971,7 @@ gschem_selection_adapter_get_type ()
  *  \return A new instance of the GschemSelectionAdapter
  */
 GschemSelectionAdapter*
-gschem_selection_adapter_new ()
+gschem_selection_adapter_new()
 {
   return GSCHEM_SELECTION_ADAPTER (g_object_new (GSCHEM_TYPE_SELECTION_ADAPTER, NULL));
 }

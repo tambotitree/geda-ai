@@ -31,7 +31,8 @@
 #include <unistd.h>
 
 #include "gschem.h"
-#include "actions.decl.x"
+// #include "actions.decl.x"
+#include "actions.h"
 
 /* break with the tradition here and input a list */
 /*! \todo probably should go back and do the same for o_copy o_move
@@ -278,7 +279,7 @@ void o_edit_show_hidden (GschemToplevel *w_current, const GList *o_list)
     s_log_message(_("Hidden text is now invisible\n"));
   }
 
-  gschem_action_set_active (action_edit_show_hidden,
+  gschem_action_set_active ("edit-show-hidden",
                             w_current->toplevel->show_hidden_text,
                             w_current);
 }
@@ -533,14 +534,14 @@ void o_autosave_backups(GschemToplevel *w_current)
             st.st_mode = 0666 & ~saved_umask;
             umask(saved_umask);
 #if defined(HAVE_GETUID) && defined(HAVE_GETGID)
-            st.st_uid = getuid ();
+            st.st_uid = getuid();
 
             result = stat (dirname, &dir_st);
 
             if (result == 0 && (dir_st.st_mode & S_ISGID))
               st.st_gid = dir_st.st_gid;
             else
-              st.st_gid = getgid ();
+              st.st_gid = getgid();
 #endif
           }
         g_free (dirname);

@@ -186,7 +186,6 @@ gschem_accel_label_get_preferred_width(GtkWidget *widget,
                                        gint *natural_width)
 {
     GschemAccelLabel *accel_label = GSCHEM_ACCEL_LABEL(widget);
-    GtkAccelLabel *gtk_accel_label = GTK_ACCEL_LABEL(widget);
     PangoLayout *layout;
     gint width;
 
@@ -342,7 +341,7 @@ gschem_accel_label_draw(GtkWidget *widget, cairo_t *cr)
   guint ac_width = gschem_accel_label_get_accel_width(accel_label);
 
   // Not enough room? Chain up
-  if (allocation.width < requisition.width + ac_width) {
+  if ((guint)allocation.width < requisition.width + ac_width) {
     GtkWidgetClass *parent = GTK_WIDGET_CLASS(gschem_accel_label_parent_class);
     if (parent->draw)
       return parent->draw(widget, cr);

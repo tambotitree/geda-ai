@@ -71,7 +71,7 @@ static void tree_selection_changed (GtkTreeSelection *selection,
 
 
 GType
-gschem_patch_dockable_get_type ()
+gschem_patch_dockable_get_type()
 {
   static GType type = 0;
 
@@ -156,13 +156,13 @@ create_widget (GschemDockable *dockable)
 
   /* filename column */
 
-  column = gtk_tree_view_column_new ();
+  column = gtk_tree_view_column_new();
   gtk_tree_view_column_set_resizable (column, TRUE);
   gtk_tree_view_column_set_title (column, _("Filename"));
 
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree_widget), column);
 
-  renderer = gtk_cell_renderer_text_new ();
+  renderer = gtk_cell_renderer_text_new();
   gtk_tree_view_column_pack_start (column, renderer, TRUE);
   gtk_tree_view_column_add_attribute (
     column, renderer, "text", COLUMN_FILENAME);
@@ -172,13 +172,13 @@ create_widget (GschemDockable *dockable)
 
   /* location column */
 
-  column = gtk_tree_view_column_new ();
+  column = gtk_tree_view_column_new();
   gtk_tree_view_column_set_resizable (column, TRUE);
   gtk_tree_view_column_set_title (column, _("Comp/Pin"));
 
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree_widget), column);
 
-  renderer = gtk_cell_renderer_text_new ();
+  renderer = gtk_cell_renderer_text_new();
   gtk_tree_view_column_pack_start (column, renderer, TRUE);
   gtk_tree_view_column_add_attribute (
     column, renderer, "text", COLUMN_LOCATION);
@@ -188,13 +188,13 @@ create_widget (GschemDockable *dockable)
 
   /* action column */
 
-  column = gtk_tree_view_column_new ();
+  column = gtk_tree_view_column_new();
   gtk_tree_view_column_set_resizable (column, TRUE);
   gtk_tree_view_column_set_title (column, _("Required action"));
 
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree_widget), column);
 
-  renderer = gtk_cell_renderer_text_new ();
+  renderer = gtk_cell_renderer_text_new();
   gtk_tree_view_column_pack_start (column, renderer, TRUE);
   gtk_tree_view_column_add_attribute (
     column, renderer, "text", COLUMN_ACTION);
@@ -276,12 +276,12 @@ x_patch_import (GschemToplevel *w_current)
                                 page->patch_descend);
   gtk_file_chooser_set_extra_widget (GTK_FILE_CHOOSER (dialog), extra_widget);
 
-  filter = gtk_file_filter_new ();
+  filter = gtk_file_filter_new();
   gtk_file_filter_set_name (filter, _("Back-annotation patches"));
   gtk_file_filter_add_pattern (filter, "*.bap");
   gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog), filter);
 
-  filter = gtk_file_filter_new ();
+  filter = gtk_file_filter_new();
   gtk_file_filter_set_name (filter, _("All files"));
   gtk_file_filter_add_pattern (filter, "*");
   gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog), filter);

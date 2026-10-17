@@ -29,7 +29,8 @@
 
 #include "gschem.h"
 #include "../include/gschem_pagesel_dockable.h"
-#include "actions.decl.x"
+// #include "actions.decl.x"
+#include "actions.h"
 
 
 static void pagesel_popup_menu (GschemPageselDockable *pagesel,
@@ -208,12 +209,12 @@ static void pagesel_popup_menu (GschemPageselDockable *pagesel,
                             G_CALLBACK (pagesel_update), pagesel);
   gtk_menu_shell_append (GTK_MENU_SHELL (menu), menuitem);
 
-  menuitem = gtk_separator_menu_item_new ();
+  menuitem = gtk_separator_menu_item_new();
   gtk_menu_shell_append (GTK_MENU_SHELL (menu), menuitem);
 
   for (tmp = menuitems; tmp->label != NULL; tmp++) {
     if (strcmp (tmp->label, "-") == 0) {
-      menuitem = gtk_separator_menu_item_new ();
+      menuitem = gtk_separator_menu_item_new();
     } else {
       menuitem = gtk_menu_item_new_with_label (_(tmp->label));
       g_object_set_data (G_OBJECT (menuitem), "action", tmp->action);

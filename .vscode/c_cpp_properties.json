@@ -1,0 +1,25 @@
+{
+    "configurations": [
+      {
+        "name": "Mac",
+        "includePath": [
+            "${workspaceFolder}/**",
+            "/opt/homebrew/include",
+            "/opt/homebrew/include/gtk-3.0",
+            "/opt/homebrew/Cellar/gtk+3/*/include/gtk-3.0",
+            "/opt/homebrew/Cellar/glib/*/include/glib-2.0",
+            "/opt/homebrew/Cellar/glib/*/lib/glib-2.0/include",
+            "/opt/homebrew/opt/gettext/include",
+            "/opt/homebrew/Cellar/pcre2/*/include",
+            "${workspaceFolder}/gschem/include" 
+        ],
+        "defines": [],
+        "macFrameworkPath": [],
+        "compilerPath": "/opt/homebrew/bin/gcc",
+        "cStandard": "gnu11",
+        "cppStandard": "c++17",
+        "intelliSenseMode": "macos-gcc-arm64"
+      }
+    ],
+    "version": 4
+  }

@@ -890,7 +890,7 @@ void autonumber_sortorder_create(GschemToplevel *w_current, GtkWidget *sort_orde
   }
 
   gtk_combo_box_set_model(GTK_COMBO_BOX(sort_order), GTK_TREE_MODEL(store));
-  renderer = gtk_cell_renderer_text_new ();
+  renderer = gtk_cell_renderer_text_new();
 
   gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (sort_order),
 			      renderer, TRUE);
@@ -1030,7 +1030,7 @@ void autonumber_set_state(AUTONUMBER_TEXT *autotext)
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(widget), el->data);
   }
 
-  widget = gtk_bin_get_child(GTK_BIN(widget));
+  widget = GTK_WIDGET(g_list_first(gtk_container_get_children(GTK_CONTAINER(widget)))->data);
   gtk_entry_set_text(GTK_ENTRY(widget), g_list_first(autotext->scope_text)->data);
 
   widget = lookup_widget(autotext->dialog, "scope_skip");
@@ -1078,7 +1078,7 @@ void autonumber_get_state(AUTONUMBER_TEXT *autotext)
 
   /* Search text history */
   widget = lookup_widget(autotext->dialog, "scope_text");
-  widget = gtk_bin_get_child(GTK_BIN(widget));
+  widget = GTK_WIDGET(g_list_first(gtk_container_get_children(GTK_CONTAINER(widget)))->data);
   text = g_strdup(gtk_entry_get_text( GTK_ENTRY(widget)));
 
   autotext->scope_text=autonumber_history_add(autotext->scope_text, text);
@@ -1165,218 +1165,196 @@ void autonumber_removenum_toggled(GtkWidget * opt_removenum,
 
 /* ***** DIALOG SET-UP ***************************************************** */
 
-/** @brief Creates the autonumber text dialog.
+/**
+ * @brief Creates the autonumber text dialog.
  *
- * Dialog is not shown. No callbacks are registered. This is basically
- * unmodified code returned by Glade.
- *
- * Only modification was the following substitution:
- *
- * %s/create_pixmap (autonumber_text, "\(.*\)")/autonumber_create_pixmap("gschem-\1", w_current)/
+ * Builds the dialog for configuring autonumbering options. The dialog is
+ * not shown immediately and no callbacks are yet registered. 
+ * Modernized for GTK3/GTK4 APIs:
+ *   - GtkTable replaced with GtkGrid
+ *   - GtkAlignment replaced with margin/padding
+ *   - gtk_misc_set_alignment replaced with gtk_widget_set_halign/valign
  * 
- * and addition of the "w_current" parameter.
- *
- * @param w_current Pointer to the top level struct.
- * @return Pointer to the dialog window.
+ * @param w_current Pointer to the GschemToplevel structure.
+ * @return Pointer to the newly created dialog widget.
  */
 GtkWidget* autonumber_create_dialog(GschemToplevel *w_current)
 {
-  GtkWidget *autonumber_text;
-  GtkWidget *vbox1;
-  GtkWidget *alignment1;
-  GtkWidget *vbox3;
-  GtkWidget *table1;
-  GtkWidget *label4;
-  GtkWidget *scope_text;
-  GtkWidget *label8;
-  GtkWidget *label6;
-  GtkWidget *scope_number;
-  GtkWidget *scope_skip;
-  GtkWidget *scope_overwrite;
-  GtkWidget *label1;
-  GtkWidget *alignment3;
-  GtkWidget *vbox4;
-  GtkWidget *table3;
-  GtkWidget *label12;
-  GtkWidget *label13;
-  // Old GTK 2 ...GtkObject *opt_startnum_adj;
-  GtkAdjustment *opt_startnum_adj;
-  GtkWidget *opt_startnum;
-  GtkWidget *sort_order;
-  GtkWidget *opt_removenum;
-  GtkWidget *opt_slotting;
-  GtkWidget *label3;
+    GtkWidget *autonumber_text;
+    GtkWidget *vbox1, *vbox3, *vbox4;
+    GtkWidget *table1, *table3;
+    GtkWidget *label, *scope_text, *scope_number, *scope_skip;
+    GtkWidget *scope_overwrite, *opt_startnum, *sort_order;
+    GtkWidget *opt_removenum, *opt_slotting;
+    GtkAdjustment *opt_startnum_adj;
 
+    // Create the main dialog window with standard buttons
+    autonumber_text = gschem_dialog_new_with_buttons(
+        _("Autonumber text"),
+        GTK_WINDOW(w_current->main_window),
+        0, // Non-modal dialog
+        "autonumber", w_current,
+        GTK_STOCK_CLOSE, GTK_RESPONSE_REJECT,
+        GTK_STOCK_APPLY, GTK_RESPONSE_ACCEPT,
+        NULL
+    );
 
-  autonumber_text = gschem_dialog_new_with_buttons(_("Autonumber text"),
-                                                   GTK_WINDOW(w_current->main_window),
-                                                   0, /* not modal */
-                                                   "autonumber", w_current,
-                                                   GTK_STOCK_CLOSE,
-                                                   GTK_RESPONSE_REJECT,
-                                                   GTK_STOCK_APPLY,
-                                                   GTK_RESPONSE_ACCEPT,
-                                                   NULL);
-  /* Set the alternative button order (ok, cancel, help) for other systems */
-  gtk_dialog_set_alternative_button_order(GTK_DIALOG(autonumber_text),
-					  GTK_RESPONSE_ACCEPT,
-					  GTK_RESPONSE_REJECT,
-					  -1);
+    // Set default button order for platform consistency
+    // Delete as it is not needed in GTK3/GTK4
+    /*
+    gtk_dialog_set_alternative_button_order(GTK_DIALOG(autonumber_text),
+                                            GTK_RESPONSE_ACCEPT,
+                                            GTK_RESPONSE_REJECT,
+                                            -1);
+    */
 
-  gtk_window_set_position (GTK_WINDOW (autonumber_text), GTK_WIN_POS_MOUSE);
-  
-  gtk_container_set_border_width (GTK_CONTAINER (autonumber_text),
-                                  DIALOG_BORDER_SPACING);
-  vbox1 = gtk_dialog_get_content_area(GTK_DIALOG(autonumber_text));
-  gtk_box_set_spacing(GTK_BOX(vbox1), DIALOG_V_SPACING);
+    // Position the dialog near the mouse pointer
+    gtk_window_set_position(GTK_WINDOW(autonumber_text), GTK_WIN_POS_MOUSE);
 
-  /* scope section */
-  label1 = gtk_label_new (_("<b>Scope</b>"));
-  gtk_label_set_use_markup (GTK_LABEL (label1), TRUE);
-  gtk_misc_set_alignment (GTK_MISC(label1), 0, 0);
-  gtk_box_pack_start (GTK_BOX(vbox1), label1, TRUE, TRUE, 0);
-  gtk_widget_show (label1);
+    // Set border around dialog content
+    gtk_container_set_border_width(GTK_CONTAINER(autonumber_text), DIALOG_BORDER_SPACING);
 
-  alignment1 = gtk_alignment_new (0, 0, 1, 1);
-  gtk_widget_show (alignment1);
-  gtk_box_pack_start (GTK_BOX (vbox1), alignment1, TRUE, TRUE, 0);
-  gtk_alignment_set_padding (GTK_ALIGNMENT (alignment1), 
-			     0, 0, DIALOG_INDENTATION, 0);
+    // Get the main vertical box container of the dialog
+    vbox1 = gtk_dialog_get_content_area(GTK_DIALOG(autonumber_text));
+    gtk_box_set_spacing(GTK_BOX(vbox1), DIALOG_V_SPACING);
 
-  vbox3 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox3);
-  gtk_container_add (GTK_CONTAINER (alignment1), vbox3);
+    /********************* SCOPE SECTION ************************/
+    // Add "Scope" section title label
+    label = gtk_label_new(_("<b>Scope</b>"));
+    gtk_label_set_use_markup(GTK_LABEL(label), TRUE);
+    gtk_widget_set_halign(label, GTK_ALIGN_START);
+    gtk_box_pack_start(GTK_BOX(vbox1), label, FALSE, FALSE, 0);
+    gtk_widget_show(label);
 
-  table1 = gtk_table_new (3, 2, FALSE);
-  gtk_widget_show (table1);
-  gtk_box_pack_start (GTK_BOX (vbox3), table1, TRUE, TRUE, 0);
-  gtk_table_set_row_spacings (GTK_TABLE (table1), DIALOG_V_SPACING);
-  gtk_table_set_col_spacings (GTK_TABLE (table1), DIALOG_H_SPACING);
+    // Vertical box for scope controls
+    vbox3 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_margin_start(vbox3, DIALOG_INDENTATION); // Replace alignment/padding
+    gtk_box_pack_start(GTK_BOX(vbox1), vbox3, FALSE, FALSE, 0);
+    gtk_widget_show(vbox3);
 
-  label4 = gtk_label_new (_("Search for:"));
-  gtk_widget_show (label4);
-  gtk_table_attach (GTK_TABLE (table1), label4, 0, 1, 0, 1,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-  gtk_misc_set_alignment (GTK_MISC (label4), 0, 0.5);
+    // Create a 3x2 grid for labels and combo boxes
+    table1 = gtk_grid_new();
+    gtk_grid_set_row_spacing(GTK_GRID(table1), DIALOG_V_SPACING);
+    gtk_grid_set_column_spacing(GTK_GRID(table1), DIALOG_H_SPACING);
+    gtk_box_pack_start(GTK_BOX(vbox3), table1, FALSE, FALSE, 0);
+    gtk_widget_show(table1);
 
-  // scope_text = gtk_combo_box_entry_new_text ();
-  scope_text = gtk_combo_box_text_new_with_entry(); // Change for GTK 3:w
-  // gtk_entry_set_activates_default(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(scope_text))), TRUE);
-  // gtk_entry_set_activates_default(GTK_ENTRY(gtk_combo_box_get_child(GTK_COMBO_BOX(scope_text))), TRUE);
-  gtk_entry_set_activates_default(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(scope_text))), TRUE);
-  gtk_widget_show (scope_text);
-  gtk_table_attach (GTK_TABLE (table1), scope_text, 1, 2, 0, 1,
-                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-                    (GtkAttachOptions) (GTK_FILL), 0, 0);
+    // "Search for" label
+    label = gtk_label_new(_("Search for:"));
+    gtk_widget_set_halign(label, GTK_ALIGN_START);
+    gtk_widget_show(label);
+    gtk_grid_attach(GTK_GRID(table1), label, 0, 0, 1, 1);
 
-  label8 = gtk_label_new (_("Autonumber text in:"));
-  gtk_widget_show (label8);
-  gtk_table_attach (GTK_TABLE (table1), label8, 0, 1, 1, 2,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-  gtk_misc_set_alignment (GTK_MISC (label8), 0, 0.5);
+// Search text combo box with entry (GTK3-safe)
+scope_text = gtk_combo_box_text_new_with_entry();
 
-  label6 = gtk_label_new (_("Skip numbers found in:"));
-  gtk_widget_show (label6);
-  gtk_table_attach (GTK_TABLE (table1), label6, 0, 1, 2, 3,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-  gtk_misc_set_alignment (GTK_MISC (label6), 0, 0.5);
+// GTK3 workaround: get the internal GtkEntry using gtk_bin_get_child()
+// Note: gtk_bin_get_child() is deprecated but still works in GTK3
+GtkEntry *entry = GTK_ENTRY(gtk_bin_get_child(GTK_BIN(scope_text)));
+gtk_entry_set_activates_default(entry, TRUE);
 
-  scope_number = gtk_combo_box_text_new();
-  gtk_widget_show(scope_number);
-  gtk_table_attach(GTK_TABLE(table1), scope_number, 1, 2, 1, 2,
-                 GTK_FILL, GTK_FILL, 0, 0);
+gtk_widget_show(scope_text);
+gtk_grid_attach(GTK_GRID(table1), scope_text, 1, 0, 1, 1);
 
-  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scope_number), _("Selected objects"));
-  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scope_number), _("Current page"));
-  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scope_number), _("Whole hierarchy"));
+    // "Autonumber text in" label
+    label = gtk_label_new(_("Autonumber text in:"));
+    gtk_widget_set_halign(label, GTK_ALIGN_START);
+    gtk_widget_show(label);
+    gtk_grid_attach(GTK_GRID(table1), label, 0, 1, 1, 1);
 
+    // Scope number combo box
+    scope_number = gtk_combo_box_text_new();
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scope_number), _("Selected objects"));
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scope_number), _("Current page"));
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scope_number), _("Whole hierarchy"));
+    gtk_widget_show(scope_number);
+    gtk_grid_attach(GTK_GRID(table1), scope_number, 1, 1, 1, 1);
 
-  scope_skip = gtk_combo_box_text_new();
-  gtk_widget_show(scope_skip);
-  gtk_table_attach(GTK_TABLE(table1), scope_skip, 1, 2, 2, 3,
-                 GTK_FILL, GTK_FILL, 0, 0);
+    // "Skip numbers found in" label
+    label = gtk_label_new(_("Skip numbers found in:"));
+    gtk_widget_set_halign(label, GTK_ALIGN_START);
+    gtk_widget_show(label);
+    gtk_grid_attach(GTK_GRID(table1), label, 0, 2, 1, 1);
 
-  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scope_skip), _("Selected objects"));
-  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scope_skip), _("Current page"));
-  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scope_skip), _("Whole hierarchy"));
+    // Scope skip combo box
+    scope_skip = gtk_combo_box_text_new();
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scope_skip), _("Selected objects"));
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scope_skip), _("Current page"));
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scope_skip), _("Whole hierarchy"));
+    gtk_widget_show(scope_skip);
+    gtk_grid_attach(GTK_GRID(table1), scope_skip, 1, 2, 1, 1);
 
-  scope_overwrite = gtk_check_button_new_with_mnemonic (_("Overwrite existing numbers"));
-  gtk_widget_show (scope_overwrite);
-  gtk_box_pack_start (GTK_BOX (vbox3), scope_overwrite, FALSE, FALSE, 6);
+    // Overwrite checkbox
+    scope_overwrite = gtk_check_button_new_with_mnemonic(_("Overwrite existing numbers"));
+    gtk_widget_show(scope_overwrite);
+    gtk_box_pack_start(GTK_BOX(vbox3), scope_overwrite, FALSE, FALSE, 6);
 
-  /* Options section */
-  label3 = gtk_label_new (_("<b>Options</b>"));
-  gtk_label_set_use_markup (GTK_LABEL (label3), TRUE);
-  gtk_misc_set_alignment(GTK_MISC(label3), 0, 0);
-  gtk_widget_show (label3);
-  gtk_box_pack_start(GTK_BOX(vbox1), label3, TRUE, TRUE, 0);
+    /********************* OPTIONS SECTION **********************/
+    // Add "Options" section title label
+    label = gtk_label_new(_("<b>Options</b>"));
+    gtk_label_set_use_markup(GTK_LABEL(label), TRUE);
+    gtk_widget_set_halign(label, GTK_ALIGN_START);
+    gtk_box_pack_start(GTK_BOX(vbox1), label, FALSE, FALSE, 0);
+    gtk_widget_show(label);
 
-  alignment3 = gtk_alignment_new (0, 0, 1, 1);
-  gtk_widget_show (alignment3);
-  gtk_box_pack_start(GTK_BOX(vbox1), alignment3, TRUE, TRUE, 0);
-  gtk_alignment_set_padding (GTK_ALIGNMENT (alignment3), 
-			     0, 0, DIALOG_INDENTATION, 0);
+    // Vertical box for options controls
+    vbox4 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 3);
+    gtk_widget_set_margin_start(vbox4, DIALOG_INDENTATION);
+    gtk_box_pack_start(GTK_BOX(vbox1), vbox4, FALSE, FALSE, 0);
+    gtk_widget_show(vbox4);
 
-  vbox4 = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (vbox4);
-  gtk_container_add (GTK_CONTAINER (alignment3), vbox4);
+    // Create a 2x2 grid for options controls
+    table3 = gtk_grid_new();
+    gtk_grid_set_row_spacing(GTK_GRID(table3), DIALOG_V_SPACING);
+    gtk_grid_set_column_spacing(GTK_GRID(table3), DIALOG_H_SPACING);
+    gtk_box_pack_start(GTK_BOX(vbox4), table3, FALSE, FALSE, 0);
+    gtk_widget_show(table3);
 
-  table3 = gtk_table_new (2, 2, FALSE);
-  gtk_widget_show (table3);
-  gtk_box_pack_start (GTK_BOX (vbox4), table3, TRUE, TRUE, 0);
-  gtk_table_set_row_spacings (GTK_TABLE (table3), DIALOG_V_SPACING);
-  gtk_table_set_col_spacings (GTK_TABLE (table3), DIALOG_H_SPACING);
+    // "Starting number" label
+    label = gtk_label_new(_("Starting number:"));
+    gtk_widget_set_halign(label, GTK_ALIGN_START);
+    gtk_widget_show(label);
+    gtk_grid_attach(GTK_GRID(table3), label, 0, 0, 1, 1);
 
-  label12 = gtk_label_new (_("Starting number:"));
-  gtk_widget_show (label12);
-  gtk_table_attach (GTK_TABLE (table3), label12, 0, 1, 0, 1,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-  gtk_misc_set_alignment (GTK_MISC (label12), 0, 0.5);
+    // Starting number spin button
+    opt_startnum_adj = gtk_adjustment_new(1, 0, 10000, 1, 10, 10);
+    opt_startnum = gtk_spin_button_new(opt_startnum_adj, 1, 0);
+    gtk_entry_set_activates_default(GTK_ENTRY(opt_startnum), TRUE);
+    gtk_widget_show(opt_startnum);
+    gtk_grid_attach(GTK_GRID(table3), opt_startnum, 1, 0, 1, 1);
 
-  label13 = gtk_label_new (_("Sort order:"));
-  gtk_widget_show (label13);
-  gtk_table_attach (GTK_TABLE (table3), label13, 0, 1, 1, 2,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-  gtk_misc_set_alignment (GTK_MISC (label13), 0, 0.5);
+    // "Sort order" label
+    label = gtk_label_new(_("Sort order:"));
+    gtk_widget_set_halign(label, GTK_ALIGN_START);
+    gtk_widget_show(label);
+    gtk_grid_attach(GTK_GRID(table3), label, 0, 1, 1, 1);
 
-  opt_startnum_adj = gtk_adjustment_new (1, 0, 10000, 1, 10, 10);
-  opt_startnum = gtk_spin_button_new (GTK_ADJUSTMENT (opt_startnum_adj), 1, 0);
-  gtk_entry_set_activates_default(GTK_ENTRY(opt_startnum), TRUE);
-  gtk_widget_show (opt_startnum);
-  gtk_table_attach (GTK_TABLE (table3), opt_startnum, 1, 2, 0, 1,
-                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
+    // Sort order combo box
+    sort_order = gtk_combo_box_new();
+    gtk_widget_show(sort_order);
+    gtk_grid_attach(GTK_GRID(table3), sort_order, 1, 1, 1, 1);
 
-  sort_order = gtk_combo_box_new();
-  gtk_widget_show (sort_order);
-  gtk_table_attach (GTK_TABLE (table3), sort_order, 1, 2, 1, 2,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (GTK_FILL), 0, 0);
+    // Remove numbers checkbox
+    opt_removenum = gtk_check_button_new_with_mnemonic(_("Remove numbers"));
+    gtk_widget_show(opt_removenum);
+    gtk_box_pack_start(GTK_BOX(vbox4), opt_removenum, FALSE, FALSE, 0);
 
-  opt_removenum = gtk_check_button_new_with_mnemonic (_("Remove numbers"));
-  gtk_widget_show (opt_removenum);
-  gtk_box_pack_start (GTK_BOX (vbox4), opt_removenum, FALSE, FALSE, 0);
+    // Automatic slotting checkbox
+    opt_slotting = gtk_check_button_new_with_mnemonic(_("Automatic slotting"));
+    gtk_widget_show(opt_slotting);
+    gtk_box_pack_start(GTK_BOX(vbox4), opt_slotting, FALSE, FALSE, 0);
 
-  opt_slotting = gtk_check_button_new_with_mnemonic (_("Automatic slotting"));
-  gtk_widget_show (opt_slotting);
-  gtk_box_pack_start (GTK_BOX (vbox4), opt_slotting, FALSE, FALSE, 0);
+    /*********** Hook widgets for later lookup *************/
+    GLADE_HOOKUP_OBJECT(autonumber_text, scope_text, "scope_text");
+    GLADE_HOOKUP_OBJECT(autonumber_text, scope_number, "scope_number");
+    GLADE_HOOKUP_OBJECT(autonumber_text, scope_skip, "scope_skip");
+    GLADE_HOOKUP_OBJECT(autonumber_text, scope_overwrite, "scope_overwrite");
+    GLADE_HOOKUP_OBJECT(autonumber_text, opt_startnum, "opt_startnum");
+    GLADE_HOOKUP_OBJECT(autonumber_text, sort_order, "sort_order");
+    GLADE_HOOKUP_OBJECT(autonumber_text, opt_removenum, "opt_removenum");
+    GLADE_HOOKUP_OBJECT(autonumber_text, opt_slotting, "opt_slotting");
 
-  /* Store pointers to all widgets, for use by lookup_widget(). */
-  GLADE_HOOKUP_OBJECT (autonumber_text, scope_text, "scope_text");
-  GLADE_HOOKUP_OBJECT (autonumber_text, scope_number, "scope_number");
-  GLADE_HOOKUP_OBJECT (autonumber_text, scope_skip, "scope_skip");
-  GLADE_HOOKUP_OBJECT (autonumber_text, scope_overwrite, "scope_overwrite");
-  GLADE_HOOKUP_OBJECT (autonumber_text, opt_startnum, "opt_startnum");
-  GLADE_HOOKUP_OBJECT (autonumber_text, sort_order, "sort_order");
-  GLADE_HOOKUP_OBJECT (autonumber_text, opt_removenum, "opt_removenum");
-  GLADE_HOOKUP_OBJECT (autonumber_text, opt_slotting, "opt_slotting");
-
-  return autonumber_text;
+    return autonumber_text;
 }
 
 /*! \brief Create or restore the autonumber text dialog

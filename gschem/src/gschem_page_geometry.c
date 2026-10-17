@@ -104,7 +104,7 @@ gschem_page_geometry_get_screen_width (GschemPageGeometry *geometry)
  *  \return The GschemPageGeometry type.
  */
 GType
-gschem_page_geometry_get_type ()
+gschem_page_geometry_get_type()
 {
   static GType type = 0;
 

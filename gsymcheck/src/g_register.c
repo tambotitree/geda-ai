@@ -39,7 +39,7 @@
 #include "../include/prototype.h"
 
 void
-g_register_funcs(void)
+g_register_funcs()
 {
   /* general functions */
   scm_c_define_gsubr ("quit", 0, 0, 0, g_quit);
@@ -51,7 +51,7 @@ g_register_funcs(void)
 }
 
 SCM
-g_quit(void)
+g_quit()
 {
   gsymcheck_quit();
   exit(0);

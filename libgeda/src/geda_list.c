@@ -115,7 +115,7 @@ static void geda_list_class_init( gpointer g_class, gpointer g_class_data )
  *
  *  \return the GType identifier associated with GedaList.
  */
-GType geda_list_get_type(void)
+GType geda_list_get_type()
 {
   static GType type = 0;
   if (type == 0) {
@@ -143,7 +143,7 @@ GType geda_list_get_type(void)
  *
  *  \return pointer to the new GedaList object.
  */
-GedaList *geda_list_new( void ) {
+GedaList *geda_list_new() {
   return g_object_new( GEDA_TYPE_LIST, NULL );
 }
 

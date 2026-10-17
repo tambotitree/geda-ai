@@ -60,7 +60,7 @@ static void
 x_window_create_menu(GtkWindow *window, GtkWidget **menubar);
 
 static void
-x_window_set_default_icon( void );
+x_window_set_default_icon();
 
 /*! \brief Initialises the toplevel gtksheet
  *
@@ -429,7 +429,7 @@ x_window_add_items()
  *  theme. The name used is #defined above as GATTRIB_THEME_ICON_NAME.
  */
 static void
-x_window_set_default_icon( void )
+x_window_set_default_icon()
 {
   gtk_window_set_default_icon_name( GATTRIB_THEME_ICON_NAME );
 }

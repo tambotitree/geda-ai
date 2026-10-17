@@ -76,7 +76,7 @@ static void clear_weak_refs (GschemMessagesDockable *messages_dockable);
 
 
 GType
-gschem_messages_dockable_get_type ()
+gschem_messages_dockable_get_type()
 {
   static GType type = 0;
 
@@ -465,7 +465,7 @@ create_menu (GschemMessagesDockable *messages_dockable)
   GtkWidget *menu, *item;
   g_return_if_fail (messages_dockable->menu == NULL);
 
-  menu = messages_dockable->menu = gtk_menu_new ();
+  menu = messages_dockable->menu = gtk_menu_new();
 
   item = messages_dockable->select_item =
     gtk_menu_item_new_with_mnemonic (_("_Select Object"));
@@ -542,7 +542,7 @@ popup (GschemMessagesDockable *messages_dockable,
     pos[1] += rect.y + rect.height;
 
     gtk_menu_popup (GTK_MENU (messages_dockable->menu), NULL, NULL,
-                    menu_position_func, pos, 0, gtk_get_current_event_time ());
+                    menu_position_func, pos, 0, gtk_get_current_event_time());
     gtk_menu_shell_select_first (GTK_MENU_SHELL (messages_dockable->menu),
                                  FALSE);
   }
@@ -639,16 +639,16 @@ create_widget (GschemDockable *dockable)
 
 
   /* filename column */
-  column = gtk_tree_view_column_new ();
+  column = gtk_tree_view_column_new();
   gtk_tree_view_column_set_title (column, _("Filename"));
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree_view), column);
 
-  renderer = gtk_cell_renderer_pixbuf_new ();
+  renderer = gtk_cell_renderer_pixbuf_new();
   gtk_tree_view_column_pack_start (column, renderer, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer,
                                            icon_cell_data_func, NULL, NULL);
 
-  renderer = gtk_cell_renderer_text_new ();
+  renderer = gtk_cell_renderer_text_new();
   gtk_tree_view_column_pack_start (column, renderer, TRUE);
   gtk_tree_view_column_add_attribute (column, renderer,
                                       "text", COLUMN_FILENAME);
@@ -657,11 +657,11 @@ create_widget (GschemDockable *dockable)
                                       "foreground-set", COLUMN_REMOVED);
 
   /* refdes column */
-  column = gtk_tree_view_column_new ();
+  column = gtk_tree_view_column_new();
   gtk_tree_view_column_set_title (column, _("Comp/Pin"));
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree_view), column);
 
-  renderer = gtk_cell_renderer_text_new ();
+  renderer = gtk_cell_renderer_text_new();
   gtk_tree_view_column_pack_start (column, renderer, TRUE);
   gtk_tree_view_column_add_attribute (column, renderer,
                                       "text", COLUMN_REFDES);
@@ -670,11 +670,11 @@ create_widget (GschemDockable *dockable)
                                       "foreground-set", COLUMN_REMOVED);
 
   /* message column */
-  column = gtk_tree_view_column_new ();
+  column = gtk_tree_view_column_new();
   gtk_tree_view_column_set_title (column, _("Message"));
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree_view), column);
 
-  renderer = gtk_cell_renderer_text_new ();
+  renderer = gtk_cell_renderer_text_new();
   gtk_tree_view_column_pack_start (column, renderer, TRUE);
   gtk_tree_view_column_add_attribute (column, renderer,
                                       "text", COLUMN_MESSAGE);

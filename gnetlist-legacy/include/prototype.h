@@ -1,9 +1,9 @@
 /* g_netlist.c */
 void g_set_project_current(TOPLEVEL *pr_current);
 SCM g_scm_c_get_uref (OBJECT *object);
-SCM g_get_verbosity ();
-SCM g_get_backend_arguments ();
-SCM g_get_input_files();
+SCM g_get_verbosity (void);
+SCM g_get_backend_arguments (void);
+SCM g_get_input_files(void);
 SCM g_get_packages(SCM level);
 SCM g_get_non_unique_packages(SCM level);
 SCM g_get_pins(SCM uref);

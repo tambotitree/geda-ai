@@ -1,3 +1,5 @@
+#ifndef GSCHEM_OPTIONS_DOCKABLE_H
+#define GSCHEM_OPTIONS_DOCKABLE_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 2013 Ales Hvezda
@@ -51,4 +53,5 @@ struct _GschemOptionsDockable {
 };
 
 GType
-gschem_options_dockable_get_type ();
+gschem_options_dockable_get_type (void);
+#endif /* GSCHEM_OPTIONS_DOCKABLE_H */

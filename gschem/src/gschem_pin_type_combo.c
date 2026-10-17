@@ -59,7 +59,7 @@ static GtkListStore* create_pin_type_list_store();
 /*! \brief Create the GtkListStore for fill styles.
  */
 static GtkListStore*
-create_pin_type_list_store ()
+create_pin_type_list_store()
 {
   GtkTreeIter iter;
   GtkListStore *store;
@@ -92,14 +92,14 @@ create_pin_type_list_store ()
  *  \return GtkWidget
  */
 GtkWidget*
-gschem_pin_type_combo_new ()
+gschem_pin_type_combo_new()
 {
   GtkComboBox *combo;
   GtkCellLayout *layout;
   GtkCellRenderer *text_cell;
 
   if (pin_type_list_store == NULL) {
-    pin_type_list_store = create_pin_type_list_store ();
+    pin_type_list_store = create_pin_type_list_store();
   }
 
   combo = GTK_COMBO_BOX (gtk_combo_box_new_with_model (GTK_TREE_MODEL (pin_type_list_store)));

@@ -69,7 +69,7 @@ static int cur_set = 0;
  * Initialise the renaming data space by setting all the pair pointers
  * to NULL.
  */
-void s_rename_init(void)
+void s_rename_init()
 {
     int i, j;
 
@@ -88,7 +88,7 @@ void s_rename_init(void)
  * Runs through the rename pairs and calls g_free() on the non-NULL
  * entries, then sets the entry to NULL.
  */
-void s_rename_destroy_all(void)
+void s_rename_destroy_all()
 {
     int i, j;
 
@@ -110,7 +110,7 @@ void s_rename_destroy_all(void)
     cur_set = 0;
 }
 
-void s_rename_next_set(void)
+void s_rename_next_set()
 {
     if (cur_set == MAX_SETS) {
 	fprintf(stderr,
@@ -125,7 +125,7 @@ void s_rename_next_set(void)
  *
  * Iterate through the array and print all the rename sets to stdout.
  */
-void s_rename_print(void)
+void s_rename_print()
 {
     int i,j;
 

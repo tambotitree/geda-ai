@@ -222,7 +222,7 @@ x_fileselect_load_files (GSList *filenames)
  *           the dialog
  */
 GSList *
-x_fileselect_open (void)
+x_fileselect_open ()
 {
   GtkWidget *dialog;
   GSList *filenames = NULL;
@@ -268,7 +268,7 @@ x_fileselect_open (void)
  *  The function updates the user interface.
  */
 void
-x_fileselect_save (void)
+x_fileselect_save ()
 {
   GtkWidget *dialog;
 

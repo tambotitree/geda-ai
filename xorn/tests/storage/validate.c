@@ -170,7 +170,7 @@ static void check_fill_attr(xorn_obtype_t type, ptrdiff_t offset, size_t size)
 	fill->pitch1 = INFINITY;	test(type, data, 1);
 }
 
-static void check_arc(void)
+static void check_arc()
 {
 	struct xornsch_arc data;
 
@@ -215,7 +215,7 @@ static void check_arc(void)
 			sizeof(struct xornsch_arc));
 }
 
-static void check_box(void)
+static void check_box()
 {
 	struct xornsch_box data;
 
@@ -258,7 +258,7 @@ static void check_box(void)
 			sizeof(struct xornsch_box));
 }
 
-static void check_circle(void)
+static void check_circle()
 {
 	struct xornsch_circle data;
 
@@ -295,7 +295,7 @@ static void check_circle(void)
 			sizeof(struct xornsch_circle));
 }
 
-static void check_component(void)
+static void check_component()
 {
 	struct xornsch_component data;
 
@@ -319,7 +319,7 @@ static void check_component(void)
 	data.angle = 360;	test(xornsch_obtype_component, &data, 1);
 }
 
-static void check_line(void)
+static void check_line()
 {
 	struct xornsch_line data;
 
@@ -358,7 +358,7 @@ static void check_line(void)
 			sizeof(struct xornsch_line));
 }
 
-static void check_net(void)
+static void check_net()
 {
 	struct xornsch_net data;
 
@@ -400,7 +400,7 @@ static void check_net(void)
 	data.is_inverted = true;	test(xornsch_obtype_net, &data, 0);
 }
 
-static void check_path(void)
+static void check_path()
 {
 	struct xornsch_path data;
 
@@ -419,7 +419,7 @@ static void check_path(void)
 			sizeof(struct xornsch_path));
 }
 
-static void check_picture(void)
+static void check_picture()
 {
 	struct xornsch_picture data;
 
@@ -455,7 +455,7 @@ static void check_picture(void)
 	data.angle = 360;		test(xornsch_obtype_picture, &data, 1);
 }
 
-static void check_text(void)
+static void check_text()
 {
 	struct xornsch_text data;
 
@@ -504,7 +504,7 @@ static void check_text(void)
 	data.alignment = 9;		test(xornsch_obtype_text, &data, 1);
 }
 
-int main(void)
+int main()
 {
 	check_arc();
 	check_box();

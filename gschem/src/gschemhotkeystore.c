@@ -39,9 +39,9 @@ static void gschem_hotkey_store_bind_keys_handler (GschemHotkeyStore *store,
                                                     SCM s_args,
                                                     EdascmHookProxy *proxy);
 
-G_DEFINE_TYPE (GschemHotkeyStore, gschem_hotkey_store, GTK_TYPE_LIST_STORE);
+G_DEFINE_TYPE (GschemHotkeyStore, gschem_hotkey_store, GTK_TYPE_LIST_STORE)
 
-/*! Initialise GschemHotkeyStore class */
+ /*! Initialise GschemHotkeyStore class */
 static void
 gschem_hotkey_store_class_init (GschemHotkeyStoreClass *klass)
 {
@@ -162,7 +162,7 @@ gschem_hotkey_store_rebuild (GschemHotkeyStore *store)
       GSCHEM_HOTKEY_STORE_COLUMN_ICON, action->icon_name,
       -1);
 
-    scm_dynwind_end ();
+    scm_dynwind_end();
     scm_remember_upto_here_1 (s_binding);
   }
 
@@ -184,6 +184,8 @@ gschem_hotkey_store_action_property_handler (GschemHotkeyStore *store,
   static SCM icon_sym = SCM_UNDEFINED;
   SCM s_key;
   gboolean rebuild = FALSE;
+
+  (void)proxy;
 
   g_assert (GSCHEM_IS_HOTKEY_STORE (store));
 
@@ -215,6 +217,8 @@ gschem_hotkey_store_bind_keys_handler (GschemHotkeyStore *store,
   static SCM global_keymap_sym = SCM_UNDEFINED;
   gboolean rebuild = FALSE;
 
+  (void)proxy;
+
   g_assert (GSCHEM_IS_HOTKEY_STORE (store));
 
   if (SCM_UNBNDP (global_keymap_sym)) {
@@ -231,7 +235,7 @@ gschem_hotkey_store_bind_keys_handler (GschemHotkeyStore *store,
 }
 
 GschemHotkeyStore *
-gschem_hotkey_store_new (void)
+gschem_hotkey_store_new(void)
 {
   return g_object_new (GSCHEM_TYPE_HOTKEY_STORE, NULL);
 }

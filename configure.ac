@@ -57,6 +57,14 @@ AC_ARG_ENABLE([doxygen],
     [ENABLE_DOXYGEN=no])
 AM_CONDITIONAL([ENABLE_DOXYGEN], [test "$ENABLE_DOXYGEN" = "yes"])
 
+AC_ARG_ENABLE([pedantic],
+  AS_HELP_STRING([--enable-pedantic],
+                 [Enable pedantic build warnings (default: no)]),
+  [PEDANTIC=$enableval],
+  [PEDANTIC=no])
+
+AM_CONDITIONAL([PEDANTIC], [test "x$PEDANTIC" = "xyes"])
+
 # --- Checks for programs ---
 AC_PROG_CXX
 AM_PROG_AR

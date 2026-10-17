@@ -78,7 +78,7 @@ static void
 click_find (GtkWidget *entry, GschemFindTextWidget *widget);
 
 static GtkListStore*
-create_find_type_store ();
+create_find_type_store();
 
 static void
 dispose (GObject *object);
@@ -113,7 +113,7 @@ static gboolean
 key_press_event (GtkWidget *widget, GdkEventKey *event, gpointer user_data)
 {
   if (event->keyval == GDK_KEY_Escape &&
-      (event->state & gtk_accelerator_get_default_mod_mask ()) == 0) {
+      (event->state & gtk_accelerator_get_default_mod_mask()) == 0) {
     gtk_info_bar_response (GTK_INFO_BAR (user_data), GTK_RESPONSE_CANCEL);
     return TRUE;
   }
@@ -364,7 +364,7 @@ gschem_find_text_widget_get_find_text_string (GschemFindTextWidget *widget)
 /*! \brief Get/register GschemFindTextWidget type.
  */
 GType
-gschem_find_text_widget_get_type ()
+gschem_find_text_widget_get_type()
 {
   static GType type = 0;
 
@@ -406,7 +406,7 @@ gschem_find_text_widget_init (GschemFindTextWidget *widget)
 
   gtk_widget_set_no_show_all (GTK_WIDGET (widget), TRUE);
 
-  widget->find_type_model = GTK_TREE_MODEL (create_find_type_store ());
+  widget->find_type_model = GTK_TREE_MODEL (create_find_type_store());
   widget->combo = gtk_combo_box_new_with_model (widget->find_type_model);
   gtk_widget_set_visible (widget->combo, TRUE);
   gtk_box_pack_start (GTK_BOX (content), widget->combo, FALSE, FALSE, 0);
@@ -416,7 +416,7 @@ gschem_find_text_widget_init (GschemFindTextWidget *widget)
   gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (widget->combo), text_cell, TRUE);
   gtk_cell_layout_add_attribute (GTK_CELL_LAYOUT (widget->combo), text_cell, "text", COLUMN_NAME);
 
-  widget->entry = gtk_entry_new ();
+  widget->entry = gtk_entry_new();
   gtk_widget_set_visible (widget->entry, TRUE);
   gtk_box_pack_start (GTK_BOX (content), widget->entry, TRUE, TRUE, 0);
 
@@ -424,7 +424,7 @@ gschem_find_text_widget_init (GschemFindTextWidget *widget)
   gtk_widget_set_visible (widget->descend_button, TRUE);
   gtk_box_pack_start (GTK_BOX (content), widget->descend_button, FALSE, FALSE, 0);
 
-  button_box = gtk_hbutton_box_new ();
+  button_box = gtk_hbutton_box_new();
   gtk_widget_set_visible (button_box, TRUE);
   gtk_box_pack_start (GTK_BOX (content), button_box, FALSE, FALSE, 0);
 
@@ -539,7 +539,7 @@ gschem_find_text_widget_set_find_text_string (GschemFindTextWidget *widget, cons
 
 
 static GtkListStore*
-create_find_type_store ()
+create_find_type_store()
 {
   GtkTreeIter iter;
   GtkListStore *store;

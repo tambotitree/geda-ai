@@ -348,7 +348,7 @@ static void gschem_dialog_class_init (GschemDialogClass *klass)
  *
  *  \return the GType identifier associated with GschemDialog.
  */
-GType gschem_dialog_get_type ()
+GType gschem_dialog_get_type()
 {
   static GType gschem_dialog_type = 0;
 

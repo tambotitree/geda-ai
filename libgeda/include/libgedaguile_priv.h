@@ -25,14 +25,14 @@
  * that use libgeda and which need to make use of or extend the gEDA
  * Scheme API.
  *
- * To initialise the API, edascm_init() needs to be called before any
+ * To initialise the API, edascm_init(void) needs to be called before any
  * Scheme code is executed or any of the other functions listed in
  * this module are called.  Normally, this will be called
- * automatically by libgeda_init().
+ * automatically by libgeda_init(void).
  *
  * The Scheme API requires a libgeda #TOPLEVEL context to be available
  * at any given time.  The #TOPLEVEL can be set on a per-thread basis
- * using the edascm_dynwind_toplevel() or edascm_c_with_toplevel()
+ * using the edascm_dynwind_toplevel(void) or edascm_c_with_toplevel()
  * functions.  For example:
  *
  * \code
@@ -47,7 +47,7 @@
  *
  *   // ...set up mydata... //
  *
- *   // Set current toplevel using edascm_c_with_toplevel()
+ *   // Set current toplevel using edascm_c_with_toplevel(void)
  *   edascm_c_with_toplevel (toplevel, worker, mydata);
  *
  *   // Set current toplevel using dynamic wind
@@ -55,7 +55,7 @@
  *   edascm_dynwind_toplevel (toplevel);
  *   worker (mydata);
  *   // ...run Scheme code and/or call Scheme API C functions...
- *   scm_dynwind_end ();
+ *   scm_dynwind_end (void);
  * }
  * \endcode
  *
@@ -72,9 +72,9 @@
  * counted, each Scheme object that contains an #OBJECT has a flag
  * that indicates whether it is wholly owned by Scheme or whether
  * there are any remaining references to it from C code.  If you use
- * edascm_from_object() to create a Scheme value for an #OBJECT that
+ * edascm_from_object(void) to create a Scheme value for an #OBJECT that
  * has no remaining references from other C structures, you should use
- * edascm_c_set_gc() to mark it as garbage-collectable.
+ * edascm_c_set_gc(void) to mark it as garbage-collectable.
  */
 
 /*!
@@ -86,17 +86,17 @@
 
 #include <libgeda/libgedaguile.h>
 
-void edascm_init_smob ();
-void edascm_init_toplevel ();
-void edascm_init_object ();
-void edascm_init_complex ();
-void edascm_init_page ();
-void edascm_init_attrib ();
-void edascm_init_os ();
-void edascm_init_config ();
+void edascm_init_smob (void);
+void edascm_init_toplevel (void);
+void edascm_init_object (void);
+void edascm_init_complex (void);
+void edascm_init_page (void);
+void edascm_init_attrib (void);
+void edascm_init_os (void);
+void edascm_init_config (void);
 void edascm_init_closure (void);
 void edascm_init_log (void);
-void edascm_init_deprecated ();
+void edascm_init_deprecated (void);
 
 /* ---------------------------------------- */
 
@@ -172,7 +172,7 @@ SCM edascm_from_toplevel (TOPLEVEL *toplevel);
  * \brief Test whether a structure may be garbage-collected
  * \par Macro Description
  * Tests whether the C structure contained by the smob \a x is only
- * referenced by Scheme code, and thus can be free()'d when \a x is
+ * referenced by Scheme code, and thus can be free(void)'d when \a x is
  * garbage-collected.
  */
 #define EDASCM_SMOB_GCP(x) \
@@ -182,7 +182,7 @@ SCM edascm_from_toplevel (TOPLEVEL *toplevel);
  * \brief Set whether a structure may be garbage-collected
  * \par Macro Description
  * Set whether the structure contained by the smob \a x is only
- * referenced by Scheme code, and thus should be free()'d when \a x is
+ * referenced by Scheme code, and thus should be free(void)'d when \a x is
  * garbage-collected.
  *
  * \param x  Smob to modify.

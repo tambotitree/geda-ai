@@ -118,7 +118,7 @@ adjust_focus (GschemDockable *parent)
 /*! \brief Get/register text properties widget type.
  */
 GType
-gschem_text_properties_dockable_get_type ()
+gschem_text_properties_dockable_get_type()
 {
   static GType type = 0;
 
@@ -187,7 +187,7 @@ create_text_content_section (GschemTextPropertiesDockable *widget)
                                   GTK_POLICY_AUTOMATIC,
                                   GTK_POLICY_AUTOMATIC);
 
-  widget->text_view = gtk_text_view_new ();
+  widget->text_view = gtk_text_view_new();
 
   gtk_text_view_set_editable (GTK_TEXT_VIEW (widget->text_view), TRUE);
 
@@ -250,8 +250,8 @@ create_text_property_section (GschemTextPropertiesDockable *widget)
   label[2] = gschem_dialog_misc_create_property_label(_("Alignment:"));
   label[3] = gschem_dialog_misc_create_property_label(_("Rotation:"));
 
-  editor[0] = widget->colorcb = x_colorcb_new ();
-  editor[1] = widget->textsizecb = gschem_integer_combo_box_new ();
+  editor[0] = widget->colorcb = x_colorcb_new();
+  editor[1] = widget->textsizecb = gschem_integer_combo_box_new();
   editor[2] = widget->aligncb = gschem_alignment_combo_new();
   editor[3] = widget->rotatecb = gschem_rotation_combo_new();
 

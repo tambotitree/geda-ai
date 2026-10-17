@@ -1,3 +1,5 @@
+#ifndef GSCHEM_BOTTOM_WIDGET_H
+#define GSCHEM_BOTTOM_WIDGET_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 1998-2010 Ales Hvezda
@@ -82,7 +84,7 @@ const char*
 gschem_bottom_widget_get_status_text (GschemBottomWidget *widget);
 
 GType
-gschem_bottom_widget_get_type ();
+gschem_bottom_widget_get_type (void);
 
 void
 gschem_bottom_widget_set_grid_mode (GschemBottomWidget *widget, int mode);
@@ -114,3 +116,4 @@ gschem_bottom_widget_set_status_text_color (GschemBottomWidget *widget, gboolean
 void
 gschem_bottom_widget_set_coordinates (GschemBottomWidget *bottom_widget,
                                       int world_x, int world_y);
+#endif /* GSCHEM_BOTTOM_WIDGET_H */

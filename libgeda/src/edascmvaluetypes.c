@@ -169,7 +169,7 @@ value_lcopy_scm (const GValue *value,
 /* Public functions related to low-level GType / GValue support. */
 
 GType
-edascm_scm_get_type (void)
+edascm_scm_get_type ()
 {
   static GType edascm_scm_type = 0;
   if (g_once_init_enter (&edascm_scm_type)) {
@@ -275,7 +275,7 @@ param_scm_values_cmp (GParamSpec *pspec,
 /* Public functions related to GParamSpec support. */
 
 GType
-edascm_param_spec_scm_get_type (void)
+edascm_param_spec_scm_get_type ()
 {
   static GType edascm_param_spec_scm_type = 0;
   if (g_once_init_enter (&edascm_param_spec_scm_type)) {

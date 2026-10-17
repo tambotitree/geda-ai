@@ -82,7 +82,7 @@ log_message (GschemLogDockableClass *klass, const gchar *message, const gchar *s
  * \returns the type identifier for the Log class
  */
 GType
-gschem_log_dockable_get_type ()
+gschem_log_dockable_get_type()
 {
   static GType type = 0;
 
@@ -210,11 +210,11 @@ class_init (GschemLogDockableClass *klass)
   gchar *contents;
 /*   GObjectClass *gobject_class = G_OBJECT_CLASS (klass); */
 
-  klass->buffer = create_text_buffer ();
+  klass->buffer = create_text_buffer();
 
   /* make it read the content of the current log file */
   /* and add its contents to the dialog */
-  contents = s_log_read ();
+  contents = s_log_read();
 
   /* s_log_read can return NULL if the log file cannot be written to */
   if (contents != NULL) {

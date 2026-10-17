@@ -83,7 +83,7 @@ set_property (GObject      *object,
 /*! \brief Get/register GschemFillSwatchCellRenderer type.
  */
 GType
-gschem_fill_swatch_cell_renderer_get_type ()
+gschem_fill_swatch_cell_renderer_get_type()
 {
   static GType type = 0;
 
@@ -116,7 +116,7 @@ gschem_fill_swatch_cell_renderer_get_type ()
  *  \return The new cell renderer
  */
 GtkCellRenderer*
-gschem_fill_swatch_cell_renderer_new ()
+gschem_fill_swatch_cell_renderer_new()
 {
   return g_object_new (GSCHEM_TYPE_FILL_SWATCH_CELL_RENDERER, NULL);
 }

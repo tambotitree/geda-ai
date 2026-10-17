@@ -19,7 +19,7 @@
 #define NO_ERROR ((xorn_error_t) -1)
 
 
-int main(void)
+int main()
 {
 	xorn_revision_t rev0, rev1, rev2, rev3;
 	xorn_object_t ob0, ob1a, ob1b;

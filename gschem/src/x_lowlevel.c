@@ -32,7 +32,8 @@
 #include <config.h>
 
 #include "gschem.h"
-#include "actions.decl.x"
+// #include "actions.decl.x"
+#include "actions.h"
 
 
 /*! \brief Create a new untitled page with a titleblock.
@@ -62,7 +63,7 @@ x_lowlevel_new_page (GschemToplevel *w_current, const gchar *filename)
     /* Generate untitled filename if none was specified */
     gchar *cwd, *tmp, *untitled_name;
     EdaConfig *cfg;
-    cwd = g_get_current_dir ();
+    cwd = g_get_current_dir();
     cfg = eda_config_get_context_for_path (cwd);
     untitled_name = eda_config_get_string (cfg, "gschem", "default-filename",
                                            NULL);
@@ -347,7 +348,7 @@ x_lowlevel_revert_page (GschemToplevel *w_current, PAGE *page)
   gschem_toplevel_page_changed (w_current);
 
   /* Force symbols to be re-loaded from disk */
-  s_clib_refresh ();
+  s_clib_refresh();
 
   page = x_lowlevel_open_page (w_current, filename);
   g_free (filename);

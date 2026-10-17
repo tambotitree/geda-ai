@@ -1,3 +1,5 @@
+#ifndef GSCHEM_SWATCH_COLUMN_RENDERER_H
+#define GSCHEM_SWATCH_COLUMN_RENDERER_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 2013 Ales Hvezda
@@ -45,7 +47,8 @@ struct _GschemSwatchColumnRenderer
 };
 
 GType
-gschem_swatch_column_renderer_get_type ();
+gschem_swatch_column_renderer_get_type (void);
 
 GschemSwatchColumnRenderer*
-gschem_swatch_column_renderer_new ();
+gschem_swatch_column_renderer_new (void);
+#endif /* GSCHEM_SWATCH_COLUMN_RENDERER_H */

@@ -358,31 +358,37 @@ void attrib_edit_dialog (GschemToplevel *w_current, OBJECT *attr_obj, int flag)
   else
     label = gtk_label_new(_("<b>Add Attribute</b>"));
   gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
-  gtk_misc_set_alignment(GTK_MISC(label),0,0);
-  gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);  
-  
-  alignment = gtk_alignment_new(0,0,1,1);
-  gtk_alignment_set_padding(GTK_ALIGNMENT(alignment), 0, 0, 
-			    DIALOG_INDENTATION, 0);
-  gtk_box_pack_start(GTK_BOX(vbox), alignment, TRUE, TRUE, 0);
+  gtk_widget_set_halign(label, GTK_ALIGN_START);
+  gtk_widget_set_valign(label, GTK_ALIGN_START);
+  gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
 
-  table = gtk_table_new (3, 2, FALSE);
-  gtk_table_set_row_spacings(GTK_TABLE(table), DIALOG_V_SPACING);
-  gtk_table_set_col_spacings(GTK_TABLE(table), DIALOG_H_SPACING);
-  gtk_container_add (GTK_CONTAINER (alignment), table);
+  // Replace gtk_alignment_new and gtk_alignment_set_padding with a GtkBox
+  alignment = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+  gtk_box_pack_start(GTK_BOX(vbox), alignment, TRUE, TRUE, 0);
+  gtk_widget_set_margin_start(alignment, DIALOG_INDENTATION);
+  gtk_widget_set_margin_end(alignment, 0);
+  gtk_widget_set_margin_top(alignment, 0);
+  gtk_widget_set_margin_bottom(alignment, 0);
+
+  table = gtk_grid_new();
+  gtk_grid_set_row_spacing(GTK_GRID(table), DIALOG_V_SPACING);
+  gtk_grid_set_column_spacing(GTK_GRID(table), DIALOG_H_SPACING);
+  gtk_box_pack_start(GTK_BOX(alignment), table, FALSE, FALSE, 0);
 
   /* Name selection */
   label = gtk_label_new (_("Name:"));
-  gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
-  gtk_table_attach (GTK_TABLE (table), label, 0, 1, 0, 1,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (GTK_FILL), 0, 0);
+  gtk_widget_set_halign(label, GTK_ALIGN_START);
+  gtk_widget_set_valign(label, GTK_ALIGN_CENTER);
+  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 
-  attrib_combo_box_entry = gtk_combo_box_text_new_with_entry ();
-  attrib_combo_entry = gtk_bin_get_child(GTK_BIN(attrib_combo_box_entry));
-  gtk_table_attach (GTK_TABLE (table), attrib_combo_box_entry, 1, 2, 0, 1,
-                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
+  attrib_combo_box_entry = gtk_combo_box_text_new_with_entry();
+  /* GTK 3: get the entry from the combo box's container children */
+  {
+      GList *children = gtk_container_get_children(GTK_CONTAINER(attrib_combo_box_entry));
+      attrib_combo_entry = GTK_WIDGET(children->data);
+      g_list_free(children);
+  }
+  gtk_grid_attach(GTK_GRID(table), attrib_combo_box_entry, 1, 0, 1, 1);
   g_object_ref (attrib_combo_entry);
   g_object_set_data_full (G_OBJECT (aewindow),
                          "attrib_combo_entry", attrib_combo_entry,
@@ -390,18 +396,15 @@ void attrib_edit_dialog (GschemToplevel *w_current, OBJECT *attr_obj, int flag)
 
   /* Value entry */
   label = gtk_label_new (_("Value:"));
-  gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
-  gtk_table_attach (GTK_TABLE (table), label, 0, 1, 1, 2,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
+  gtk_widget_set_halign(label, GTK_ALIGN_START);
+  gtk_widget_set_valign(label, GTK_ALIGN_CENTER);
+  gtk_grid_attach(GTK_GRID(table), label, 0, 1, 1, 1);
 
-  value_entry = gtk_entry_new ();
+  value_entry = gtk_entry_new();
   g_object_ref (value_entry);
   g_object_set_data_full (G_OBJECT (aewindow), "value_entry", value_entry,
                           (GDestroyNotify) g_object_unref);
-  gtk_table_attach (GTK_TABLE (table), value_entry, 1, 2, 1, 2,
-                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
+  gtk_grid_attach(GTK_GRID(table), value_entry, 1, 1, 1, 1);
   gtk_entry_set_activates_default(GTK_ENTRY(value_entry), TRUE);
 
   /* Visibility */
@@ -411,71 +414,68 @@ void attrib_edit_dialog (GschemToplevel *w_current, OBJECT *attr_obj, int flag)
                           (GDestroyNotify) g_object_unref);
 
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (visbutton), TRUE);
-  gtk_table_attach (GTK_TABLE (table), visbutton, 0, 1, 2, 3,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
+  gtk_grid_attach(GTK_GRID(table), visbutton, 0, 2, 1, 1);
 
-  show_options = gtk_combo_box_text_new ();
+  show_options = gtk_combo_box_text_new();
   g_object_ref (show_options);
   g_object_set_data_full (G_OBJECT (aewindow), "show_options", show_options,
                           (GDestroyNotify) g_object_unref);
   gtk_widget_show (show_options);
-  gtk_table_attach (GTK_TABLE (table), show_options, 1, 2, 2, 3,
-                    (GtkAttachOptions) (GTK_FILL | GTK_EXPAND),
-                    (GtkAttachOptions) (0), 0, 0);
+  gtk_grid_attach(GTK_GRID(table), show_options, 1, 2, 1, 1);
   gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(show_options), _("Show Value Only"));
   gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(show_options), _("Show Name Only"));
   gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(show_options), _("Show Name & Value"));
   gtk_combo_box_set_active(GTK_COMBO_BOX(show_options), 0);
   
   if (nsel > 1) { /* gschem specific */
-    
+
     label = gtk_label_new(_("<b>Attach Options</b>"));
     gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
-    gtk_misc_set_alignment(GTK_MISC(label),0,0);
-    gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);  
-    
-    alignment = gtk_alignment_new(0,0,1,1);
-    gtk_alignment_set_padding(GTK_ALIGNMENT(alignment), 0, 0, 
-			    DIALOG_INDENTATION, 0);
-    gtk_box_pack_start(GTK_BOX(vbox), alignment, TRUE, TRUE, 0);
+    gtk_widget_set_halign(label, GTK_ALIGN_START);
+    gtk_widget_set_valign(label, GTK_ALIGN_START);
+    gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
 
-    table = gtk_table_new (2, 3, FALSE);
-    gtk_table_set_row_spacings(GTK_TABLE(table), DIALOG_V_SPACING);
-    gtk_table_set_col_spacings(GTK_TABLE(table), DIALOG_H_SPACING);
-    gtk_container_add (GTK_CONTAINER (alignment), table);
+    // Replace gtk_alignment_new and gtk_alignment_set_padding with GtkBox
+    alignment = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_box_pack_start(GTK_BOX(vbox), alignment, TRUE, TRUE, 0);
+    gtk_widget_set_margin_start(alignment, DIALOG_INDENTATION);
+    gtk_widget_set_margin_end(alignment, 0);
+    gtk_widget_set_margin_top(alignment, 0);
+    gtk_widget_set_margin_bottom(alignment, 0);
+
+    table = gtk_grid_new();
+    gtk_grid_set_row_spacing(GTK_GRID(table), DIALOG_V_SPACING);
+    gtk_grid_set_column_spacing(GTK_GRID(table), DIALOG_H_SPACING);
+    gtk_box_pack_start(GTK_BOX(alignment), table, FALSE, FALSE, 0);
 
     addtoallbutton = gtk_radio_button_new_with_label (hbox2_group, _("All"));
     hbox2_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (addtoallbutton));
     g_object_ref (addtoallbutton);
     g_object_set_data_full (G_OBJECT (aewindow), "addtoallbutton", addtoallbutton,
                             (GDestroyNotify) g_object_unref);
-    gtk_table_attach(GTK_TABLE(table), addtoallbutton, 0, 1, 0, 1,
-		     (GtkAttachOptions) (GTK_FILL), 0, 0, 0);
-		     
+    gtk_grid_attach(GTK_GRID(table), addtoallbutton, 0, 0, 1, 1);
+
     addtocompsbutton = gtk_radio_button_new_with_label (hbox2_group, _("Components"));
     hbox2_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (addtocompsbutton));
     g_object_ref (addtocompsbutton);
     g_object_set_data_full (G_OBJECT (aewindow), "addtocompsbutton", addtocompsbutton,
                             (GDestroyNotify) g_object_unref);
-    gtk_table_attach(GTK_TABLE(table), addtocompsbutton, 1, 2, 0, 1,
-		     (GtkAttachOptions) (GTK_FILL), 0, 0, 0);
+    gtk_grid_attach(GTK_GRID(table), addtocompsbutton, 1, 0, 1, 1);
 
     addtonetsbutton = gtk_radio_button_new_with_label (hbox2_group, _("Nets"));
     hbox2_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (addtonetsbutton));
     g_object_ref (addtonetsbutton);
     g_object_set_data_full (G_OBJECT (aewindow), "addtonetsbutton", addtonetsbutton,
                             (GDestroyNotify) g_object_unref);
-    gtk_table_attach(GTK_TABLE(table), addtonetsbutton, 2, 3, 0, 1,
-		     (GtkAttachOptions) (GTK_FILL), 0, 0, 0);
+    gtk_grid_attach(GTK_GRID(table), addtonetsbutton, 2, 0, 1, 1);
 
     overwritebutton = gtk_check_button_new_with_label (_("Replace existing attributes"));
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(overwritebutton), TRUE);
     g_object_ref (overwritebutton);
     g_object_set_data_full (G_OBJECT (aewindow), "overwritebutton", overwritebutton,
                             (GDestroyNotify) g_object_unref);
-    gtk_table_attach(GTK_TABLE(table), overwritebutton, 0, 3, 1, 2,
-		     (GtkAttachOptions) (GTK_FILL), 0, 0, 0);
+    gtk_grid_attach(GTK_GRID(table), overwritebutton, 0, 1, 3, 1);
+    gtk_grid_set_column_homogeneous(GTK_GRID(table), FALSE);
   }
 
   /* gschem specific */

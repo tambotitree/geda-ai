@@ -56,10 +56,7 @@ struct _EdaRenderer
 
 #define EDA_TYPE_RENDERER_FLAGS (eda_renderer_flags_get_type ())
 
-typedef enum _EdaRendererFlags EdaRendererFlags;
-
-enum _EdaRendererFlags
-{
+typedef enum {
   /* Should hinting be enabled? */
   EDA_RENDERER_FLAG_HINTING = 1 << 0,
   /* Should picture outlines be drawn instead of raster? */
@@ -69,8 +66,8 @@ enum _EdaRendererFlags
   /* Should text outlines be drawn instead of glyphs? */
   EDA_RENDERER_FLAG_TEXT_OUTLINE = 1 << 3,
   /* Should text origin markers be drawn? */
-  EDA_RENDERER_FLAG_TEXT_ORIGIN = 1 << 4,
-};
+  EDA_RENDERER_FLAG_TEXT_ORIGIN = 1 << 4
+} EdaRendererFlags;
 
 GType eda_renderer_get_type (void) G_GNUC_CONST;
 GType eda_renderer_flags_get_type (void) G_GNUC_CONST;

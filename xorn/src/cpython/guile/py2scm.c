@@ -31,7 +31,7 @@
 		   (void (*)(void *))Py_DecRef, x, SCM_F_WIND_EXPLICITLY);
    }
    
-   static void py2scm_exception(void)
+   static void py2scm_exception()
    {
 	   PyObject *ptype = NULL, *pvalue = NULL, *ptraceback = NULL;
 	   PyErr_Fetch(&ptype, &pvalue, &ptraceback);

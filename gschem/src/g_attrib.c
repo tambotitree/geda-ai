@@ -128,7 +128,7 @@ SCM_DEFINE (add_attrib_x, "%add-attrib!", 5, 0, 0,
 
   OBJECT *result = o_attrib_add_attrib (w_current, str, visibility, show, obj);
 
-  scm_dynwind_end ();
+  scm_dynwind_end();
 
   return edascm_from_object (result);
 }
@@ -140,8 +140,10 @@ SCM_DEFINE (add_attrib_x, "%add-attrib!", 5, 0, 0,
  * be accessed using (use-modules (gschem core attrib)).
  */
 static void
-init_module_gschem_core_attrib ()
+init_module_gschem_core_attrib(void *data)
 {
+  (void)data; /* Suppress unused parameter warning */
+
   /* Register the functions and symbols */
   #include "g_attrib.x"
 
@@ -157,7 +159,7 @@ init_module_gschem_core_attrib ()
  * attributes. Should only be called by main_prog().
  */
 void
-g_init_attrib ()
+g_init_attrib(void)
 {
   /* Define the (gschem core attrib) module */
   scm_c_define_module ("gschem core attrib",

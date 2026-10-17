@@ -1,3 +1,5 @@
+#ifndef GSCHEM_BINDING_H
+#define GSCHEM_BINDING_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 2013 Ales Hvezda
@@ -49,7 +51,7 @@ struct _GschemBinding
 //gschem_binding_get_model_object (GschemBinding *binding);
 
 GType
-gschem_binding_get_type ();
+gschem_binding_get_type (void);
 
 void
 gschem_binding_set_model_object (GschemBinding *binding, GObject *object);
@@ -59,3 +61,4 @@ gschem_binding_update_model (GschemBinding *binding);
 
 gboolean
 gschem_binding_update_widget (GschemBinding *binding);
+#endif /* GSCHEM_BINDING_H */

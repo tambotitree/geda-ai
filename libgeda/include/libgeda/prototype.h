@@ -1,7 +1,7 @@
 G_BEGIN_DECLS
 
 /* a_basic.c */
-const gchar *o_file_format_header();
+const gchar *o_file_format_header(void);
 gchar *o_save_buffer (const GList *object_list);
 int o_save (TOPLEVEL *toplevel, const GList *object_list, const char *filename, GError **err);
 GList *o_read_buffer(TOPLEVEL *toplevel, GList *object_list, char *buffer, const int size, const char *name, GError **err);
@@ -32,12 +32,12 @@ gboolean g_rc_parse_user (TOPLEVEL *toplevel, const gchar *rcname, GError **err)
 gboolean g_rc_parse_local (TOPLEVEL *toplevel, const gchar *rcname, const gchar *path, GError **err);
 void g_rc_parse(TOPLEVEL *toplevel, const gchar* pname, const gchar* rcname, const gchar* rcfile);
 void g_rc_parse_handler (TOPLEVEL *toplevel, const gchar *rcname, const gchar *rcfile, ConfigParseErrorFunc handler, void *user_data);
-SCM g_rc_rc_filename();
-SCM g_rc_rc_config ();
+SCM g_rc_rc_filename(void);
+SCM g_rc_rc_config (void);
 
 /* i_vars.c */
 void i_vars_libgeda_set(TOPLEVEL *toplevel);
-void i_vars_libgeda_freenames();
+void i_vars_libgeda_freenames(void);
 
 /* libgeda.c */
 void libgeda_init(void);
@@ -222,7 +222,7 @@ void o_pin_modify(TOPLEVEL *toplevel, OBJECT *object, int x, int y, int whichone
 void o_pin_update_whichend(TOPLEVEL *toplevel, GList *object_list, int num_pins);
 void o_pin_set_type(TOPLEVEL *toplevel, OBJECT *o_current, int pin_type);
 /* o_selection.c */
-SELECTION *o_selection_new( void );
+SELECTION *o_selection_new(void);
 void o_selection_add(TOPLEVEL *toplevel, SELECTION *selection, OBJECT *o_selected);
 void o_selection_print_all(const SELECTION *selection);
 void o_selection_remove(TOPLEVEL *toplevel, SELECTION *selection, OBJECT *o_selected);
@@ -261,15 +261,15 @@ void s_object_remove_weak_ptr (OBJECT *object, void *weak_pointer_loc);
 char *remove_nl(char *string);
 char *remove_last_nl(char *string);
 gchar *s_expand_env_variables (const gchar *string);
-const char *s_path_sys_data ();
-const char *s_path_sys_config ();
-const char *s_path_user_config ();
+const char *s_path_sys_data (void);
+const char *s_path_sys_config (void);
+const char *s_path_user_config (void);
 
 /* s_clib.c */
 void s_clib_free (void);
 GList *s_clib_get_sources (const gboolean sorted);
 const CLibSource *s_clib_get_source_by_name (const gchar *name);
-void s_clib_refresh ();
+void s_clib_refresh (void);
 const CLibSource *s_clib_add_directory (const gchar *directory,
 					const gchar *name);
 const CLibSource *s_clib_add_command (const gchar *list_cmd,
@@ -285,8 +285,8 @@ gchar *s_clib_symbol_get_filename (const CLibSymbol *symbol);
 const CLibSource *s_clib_symbol_get_source (const CLibSymbol *symbol);
 gchar *s_clib_symbol_get_data (const CLibSymbol *symbol);
 GList *s_clib_search (const gchar *pattern, const CLibSearchMode mode);
-void s_clib_flush_search_cache ();
-void s_clib_flush_symbol_cache ();
+void s_clib_flush_search_cache (void);
+void s_clib_flush_symbol_cache (void);
 void s_clib_symbol_invalidate_data (const CLibSymbol *symbol);
 const CLibSymbol *s_clib_get_symbol_by_name (const gchar *name);
 gchar *s_clib_symbol_get_data_by_name (const gchar *name);
@@ -294,8 +294,8 @@ GList *s_toplevel_get_symbols (const TOPLEVEL *toplevel);
 void s_clib_add_update_callback (void (*update) (gpointer user_data),
                                  gpointer user_data);
 void s_clib_remove_update_callback (gpointer user_data);
-void s_clib_begin_update ();
-void s_clib_end_update ();
+void s_clib_begin_update (void);
+void s_clib_end_update (void);
 
 /* s_color.c */
 void s_color_map_defaults (COLOR *map);

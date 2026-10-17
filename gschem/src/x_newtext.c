@@ -213,97 +213,90 @@ static void newtext_init(NewText *dialog)
   int real_tab_width;
   GtkWidget *table;
 
-  gtk_dialog_add_button (GTK_DIALOG (dialog),
-                         GTK_STOCK_CLOSE,
-                         GTK_RESPONSE_CLOSE);
+  gtk_dialog_add_button(GTK_DIALOG(dialog),
+                        GTK_STOCK_CLOSE,
+                        GTK_RESPONSE_CLOSE);
+  gtk_dialog_add_button(GTK_DIALOG(dialog),
+                        GTK_STOCK_APPLY,
+                        GTK_RESPONSE_APPLY);
 
-  gtk_dialog_add_button (GTK_DIALOG (dialog),
-                         GTK_STOCK_APPLY,
-                         GTK_RESPONSE_APPLY);
-
-  /* Set the alternative button order (ok, cancel, help) for other systems */
-  gtk_dialog_set_alternative_button_order(GTK_DIALOG(dialog),
-                                          GTK_RESPONSE_ACCEPT,
-                                          GTK_RESPONSE_REJECT,
-                                          -1);
-
-  gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_NONE);
-
-  g_signal_connect (G_OBJECT (dialog), "response",
-                    G_CALLBACK (text_input_dialog_response),
-                    NULL);
+  g_signal_connect(G_OBJECT(dialog), "response",
+                   G_CALLBACK(text_input_dialog_response),
+                   NULL);
 
   gtk_dialog_set_default_response(GTK_DIALOG(dialog),
-                                  GTK_RESPONSE_ACCEPT);
+                                  GTK_RESPONSE_APPLY);
 
-  // vbox = GTK_DIALOG(dialog)->vbox;
   vbox = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
-  gtk_box_set_spacing(GTK_BOX(vbox),DIALOG_V_SPACING);
+  gtk_box_set_spacing(GTK_BOX(vbox), DIALOG_V_SPACING);
 
-  table = gtk_table_new(4, 2, FALSE);
-  gtk_table_set_row_spacings(GTK_TABLE(table), DIALOG_V_SPACING);
-  gtk_table_set_col_spacings(GTK_TABLE(table), DIALOG_H_SPACING);
+  // Replace deprecated GtkTable with GtkGrid
+  table = gtk_grid_new();
+  gtk_grid_set_row_spacing(GTK_GRID(table), DIALOG_V_SPACING);
+  gtk_grid_set_column_spacing(GTK_GRID(table), DIALOG_H_SPACING);
 
   label = gtk_label_new(_("<b>Text Properties</b>"));
   gtk_label_set_use_markup(GTK_LABEL(label), TRUE);
-  gtk_misc_set_alignment(GTK_MISC(label),0,0);
+  gtk_widget_set_halign(label, GTK_ALIGN_START);
+  gtk_widget_set_valign(label, GTK_ALIGN_START);
   gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
 
-  alignment = gtk_alignment_new(0,0,1,1);
-  gtk_alignment_set_padding(GTK_ALIGNMENT(alignment), 0, 0,
-                            DIALOG_INDENTATION, 0);
+  // Replace GtkAlignment with GtkBox for padding
+  alignment = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
   gtk_box_pack_start(GTK_BOX(vbox), alignment, FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(alignment), table, FALSE, FALSE, DIALOG_INDENTATION);
 
-  gtk_container_add(GTK_CONTAINER(alignment), table);
-
-  label = gtk_label_new (_("<b>Text Content</b>"));
-  gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
-  gtk_misc_set_alignment(GTK_MISC(label),0,0);
+  label = gtk_label_new(_("<b>Text Content</b>"));
+  gtk_label_set_use_markup(GTK_LABEL(label), TRUE);
+  gtk_widget_set_halign(label, GTK_ALIGN_START);
+  gtk_widget_set_valign(label, GTK_ALIGN_START);
   gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
 
+  label = gtk_label_new(_("Color:"));
+  gtk_widget_set_halign(label, GTK_ALIGN_START);
+  gtk_widget_set_valign(label, GTK_ALIGN_CENTER);
+  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 
-  label = gtk_label_new (_("Color:"));
-  gtk_misc_set_alignment(GTK_MISC(label),0,0);
-  gtk_table_attach(GTK_TABLE(table), label, 0,1,0,1, GTK_FILL,0,0,0);
-
-  dialog->colorcb = x_colorcb_new ();
+  dialog->colorcb = x_colorcb_new();
   x_colorcb_set_index(dialog->colorcb, TEXT_COLOR);
-  gtk_table_attach_defaults(GTK_TABLE(table), dialog->colorcb, 1,2,0,1);
+  gtk_grid_attach(GTK_GRID(table), dialog->colorcb, 1, 0, 1, 1);
 
-  label = gtk_label_new (_("Size:"));
-  gtk_misc_set_alignment(GTK_MISC(label),0,0);
-  gtk_table_attach(GTK_TABLE(table), label, 0,1,1,2, GTK_FILL,0,0,0);
+  label = gtk_label_new(_("Size:"));
+  gtk_widget_set_halign(label, GTK_ALIGN_START);
+  gtk_widget_set_valign(label, GTK_ALIGN_CENTER);
+  gtk_grid_attach(GTK_GRID(table), label, 0, 1, 1, 1);
 
   dialog->textsizecb = gschem_integer_combo_box_new();
   gschem_integer_combo_box_set_value(dialog->textsizecb, 12);
-  gtk_table_attach_defaults(GTK_TABLE(table), dialog->textsizecb, 1,2,1,2);
+  gtk_grid_attach(GTK_GRID(table), dialog->textsizecb, 1, 1, 1, 1);
 
-  label = gtk_label_new (_("Alignment:"));
-  gtk_misc_set_alignment(GTK_MISC(label),0,0);
-  gtk_table_attach(GTK_TABLE(table), label, 0,1,2,3, GTK_FILL,0,0,0);
+  label = gtk_label_new(_("Alignment:"));
+  gtk_widget_set_halign(label, GTK_ALIGN_START);
+  gtk_widget_set_valign(label, GTK_ALIGN_CENTER);
+  gtk_grid_attach(GTK_GRID(table), label, 0, 2, 1, 1);
 
-  dialog->aligncb = gschem_alignment_combo_new ();
+  dialog->aligncb = gschem_alignment_combo_new();
   gschem_alignment_combo_set_align(dialog->aligncb, LOWER_LEFT);
-  gtk_table_attach_defaults(GTK_TABLE(table), dialog->aligncb, 1,2,2,3);
+  gtk_grid_attach(GTK_GRID(table), dialog->aligncb, 1, 2, 1, 1);
 
-  label = gtk_label_new (_("Rotation:"));
-  gtk_misc_set_alignment(GTK_MISC(label),0,0);
-  gtk_table_attach(GTK_TABLE(table), label, 0,1,3,4, GTK_FILL,0,0,0);
+  label = gtk_label_new(_("Rotation:"));
+  gtk_widget_set_halign(label, GTK_ALIGN_START);
+  gtk_widget_set_valign(label, GTK_ALIGN_CENTER);
+  gtk_grid_attach(GTK_GRID(table), label, 0, 3, 1, 1);
 
-  dialog->rotatecb = gschem_rotation_combo_new ();
+  dialog->rotatecb = gschem_rotation_combo_new();
   gschem_rotation_combo_set_angle(dialog->rotatecb, 0);
-  gtk_table_attach_defaults(GTK_TABLE(table), dialog->rotatecb, 1,2,3,4);
+  gtk_grid_attach(GTK_GRID(table), dialog->rotatecb, 1, 3, 1, 1);
 
-
-  viewport1 = gtk_viewport_new (NULL, NULL);
-  gtk_widget_show (viewport1);
+  viewport1 = gtk_viewport_new(NULL, NULL);
+  gtk_widget_show(viewport1);
 
   scrolled_window = gtk_scrolled_window_new(NULL, NULL);
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),
-                                   GTK_POLICY_AUTOMATIC,
-                                   GTK_POLICY_AUTOMATIC);
-  gtk_container_add (GTK_CONTAINER (viewport1), scrolled_window);
-  gtk_box_pack_start( GTK_BOX(vbox), viewport1, TRUE, TRUE, 0);
+                                 GTK_POLICY_AUTOMATIC,
+                                 GTK_POLICY_AUTOMATIC);
+  gtk_container_add(GTK_CONTAINER(viewport1), scrolled_window);
+  gtk_box_pack_start(GTK_BOX(vbox), viewport1, TRUE, TRUE, 0);
 
   dialog->text_view = gtk_text_view_new();
   gtk_text_view_set_editable(GTK_TEXT_VIEW(dialog->text_view), TRUE);
@@ -311,20 +304,19 @@ static void newtext_init(NewText *dialog)
 
   /* Set the tab width, using pango tab array */
   /*! \bug FIXME: This doesn't work. Why? */
-  tab_array = pango_tab_array_new (1, TRUE);
+  tab_array = pango_tab_array_new(1, TRUE);
   real_tab_width = text_view_calculate_real_tab_width(GTK_TEXT_VIEW(dialog->text_view),
-                                                        tab_in_chars);
+                                                     tab_in_chars);
   if (real_tab_width >= 0) {
-    pango_tab_array_set_tab (tab_array, 0, PANGO_TAB_LEFT, real_tab_width);
-    /* printf("Real tab width: %i\n", real_tab_width);*/
-    gtk_text_view_set_tabs (GTK_TEXT_VIEW (dialog->text_view),
-                            tab_array);
+    pango_tab_array_set_tab(tab_array, 0, PANGO_TAB_LEFT, real_tab_width);
+    gtk_text_view_set_tabs(GTK_TEXT_VIEW(dialog->text_view),
+                           tab_array);
   }
   else {
-    g_warning ("text_input_dialog: Impossible to set tab width.\n");
+    g_warning("text_input_dialog: Impossible to set tab width.\n");
   }
 
-  pango_tab_array_free (tab_array);
+  pango_tab_array_free(tab_array);
   gtk_container_add(GTK_CONTAINER(scrolled_window), dialog->text_view);
 }
 

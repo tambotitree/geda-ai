@@ -1,3 +1,5 @@
+#ifndef GSCHEM_PAGESEL_DOCKABLE_H
+#define GSCHEM_PAGESEL_DOCKABLE_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 1998-2010 Ales Hvezda
@@ -42,3 +44,4 @@ struct _GschemPageselDockable {
 
 
 GType gschem_pagesel_dockable_get_type (void);
+#endif /* GSCHEM_PAGESEL_DOCKABLE_H */

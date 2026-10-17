@@ -33,6 +33,6 @@ typedef enum {
   EDA_ERROR_NUM_ERRORS,
 } EdaError;
 
-GQuark eda_error_quark (void);
+GQuark eda_error_quark(void);
 
 G_END_DECLS

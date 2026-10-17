@@ -76,19 +76,19 @@ x_controlfd_parsearg (char *optarg)
   if ((errno != 0 && val == 0) ||
       (errno == ERANGE && (val == LONG_MAX || val == LONG_MIN))) {
     fprintf (stderr, "%s: strtol: \"%s\": %s\n",
-             g_get_prgname (), optarg, strerror (errno));
+             g_get_prgname(), optarg, strerror (errno));
     exit (EXIT_FAILURE);
   }
 
   if (endptr == optarg || *endptr != '\0') {
     fprintf (stderr, "%s: \"%s\": Not a valid integer\n",
-             g_get_prgname (), optarg);
+             g_get_prgname(), optarg);
     exit (EXIT_FAILURE);
   }
 
   if (val < 0 || val > INT_MAX) {
     fprintf (stderr, "%s: \"%s\": File descriptor out of range\n",
-             g_get_prgname (), optarg);
+             g_get_prgname(), optarg);
     exit (EXIT_FAILURE);
   }
 
@@ -97,7 +97,7 @@ x_controlfd_parsearg (char *optarg)
 
 
 void
-x_controlfd_init (void)
+x_controlfd_init()
 {
   if (control_fd != -1) {
     stream = fdopen (control_fd, "r");
@@ -112,7 +112,7 @@ x_controlfd_init (void)
 
 
 void
-x_controlfd_free (void)
+x_controlfd_free()
 {
   if (tag != 0) {
     (void) g_source_remove (tag);

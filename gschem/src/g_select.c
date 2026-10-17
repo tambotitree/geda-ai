@@ -161,8 +161,9 @@ SCM_DEFINE (object_selected_p, "%object-selected?", 1, 0, 0,
  * can be accessed using (use-modules (gschem core selection)).
  */
 static void
-init_module_gschem_core_select ()
+init_module_gschem_core_select(void *data)
 {
+  (void)data;
   /* Register the functions */
   #include "g_select.x"
 
@@ -177,7 +178,7 @@ init_module_gschem_core_select ()
  * Should only be called by main_prog().
  */
 void
-g_init_select ()
+g_init_select(void)
 {
   /* Define the (gschem core selection) module */
   scm_c_define_module ("gschem core selection",

@@ -49,11 +49,11 @@ static GArray *stroke_points = NULL;
  * \warning Not thread-safe.
  */
 void
-x_stroke_init (void)
+x_stroke_init()
 {
   g_return_if_fail (stroke_points == NULL);
 
-  stroke_init ();
+  stroke_init();
 
   stroke_points = g_array_new (FALSE,
                                FALSE,
@@ -69,7 +69,7 @@ x_stroke_init (void)
  * \warning Not idempotent. Will fail if stroke system was not initialized.
  */
 void
-x_stroke_free (void)
+x_stroke_free()
 {
   g_return_if_fail (stroke_points != NULL);
 
@@ -205,7 +205,7 @@ x_stroke_translate_and_execute (GschemToplevel *w_current)
     // Execute Scheme expression and capture result
     ret = g_scm_c_eval_string_protected (guile_string);
 
-    scm_dynwind_end ();
+    scm_dynwind_end();
 
     // Return true if expression was not false
     return (SCM_NFALSEP (ret));

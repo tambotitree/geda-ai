@@ -22,7 +22,7 @@
 /* Used by EDA_ERROR. Returns a GQuark used to identify GErrors
  * originating in libgeda. Should not be called directly. */
 GQuark
-eda_error_quark (void)
+eda_error_quark ()
 {
   return g_quark_from_static_string ("eda-error-quark");
 }

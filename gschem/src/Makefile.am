@@ -1,8 +1,6 @@
 bin_PROGRAMS = gschem
 
 BUILT_SOURCES = \
-	actions.decl.x \
-	actions.init.x \
 	g_attrib.x \
 	g_hook.x \
 	g_keys.x \
@@ -13,6 +11,7 @@ BUILT_SOURCES = \
 gschem_SOURCES = \
 	a_zoom.c \
 	g_action.c \
+	actions.c \:W
 	g_attrib.c \
 	g_funcs.c \
 	g_hook.c \
@@ -125,7 +124,8 @@ gschem_SOURCES = \
 	x_rc.c \
 	x_script.c \
 	x_stroke.c \
-	x_window.c
+	x_window.c \
+	unit_tests.c
 
 gschem_CPPFLAGS = -I$(top_srcdir)/libgeda/include  -I$(srcdir)/../include \
 	-I$(top_srcdir) -I$(includedir)
@@ -139,6 +139,11 @@ gschem_LDADD = \
 	$(top_builddir)/libgedacairo/libgedacairo.la \
 	$(top_builddir)/libgeda/src/libgeda.la
 
+# Set warnings to errors
+# Add developer flags if PEDANTIC=1
+if PEDANTIC
+gschem_CFLAGS += -Wall -Wextra -Wpedantic -Werror
+endif
 
 # This is used to generate boilerplate for defining Scheme functions
 # in C.
@@ -152,20 +157,41 @@ am__v_SNARF_1 =
 .c.x:
 	$(AM_V_SNARF)CPP="$(CPP)" $(GUILE_SNARF) -o $@ $< $(snarf_cpp_opts)
 
-actions.decl.x: actions.decl.h actions.c Makefile
-	$(AM_V_GEN)$(CPP) -I$(srcdir) -c $(srcdir)/actions.decl.h | \
-	  sed -e '/^.*KEEP_LINE /!d' -e 's/^.*KEEP_LINE //' > $@.tmp && \
-	mv $@.tmp $@
 
-actions.init.x: actions.init.c actions.c Makefile
-	$(AM_V_GEN)$(CPP) -I$(srcdir) -c $(srcdir)/actions.init.c | \
-	  sed -e '/^.*KEEP_LINE /!d' -e 's/^.*KEEP_LINE //' > $@.tmp && \
-	mv $@.tmp $@
 
-EXTRA_DIST = actions.c actions.decl.h actions.init.c
+EXTRA_DIST = actions.c
 
 localedir = @datadir@/locale
 DEFS = -DLOCALEDIR=\"$(localedir)\" @DEFS@
+
+# Add a custom pedantic target ... make pedantic is for the obssesive complusively code cleaners
+#	1.	make PEDANTIC=1
+#	•	Runs clang-tidy and valgrind.
+#	•	If both succeed, creates pedantic.tidy.
+#	2.	make clean-pedantic
+#	•	Removes the sentinel, forcing a re-run next time.
+#	3.	If you change any .c file, make sees $(srcdir)/*.c newer than pedantic.tidy and re-runs.
+.PHONY: pedantic clean-pedantic
+
+PEDSENTINEL = pedantic.tidy
+
+pedantic: $(PEDSENTINEL)
+
+$(PEDSENTINEL): $(gschem_SOURCES)
+	@echo "🔍 Running clang-tidy on all source files..."
+	@for file in $(gschem_SOURCES); do \
+	  clang-tidy $(srcdir)/$$file -- $(gschem_CPPFLAGS) $(gschem_CFLAGS) || exit 1; \
+	  @command -v clang-tidy >/dev/null 2>&1 || { echo "clang-tidy not found!"; exit 1; }
+	  @echo "🔍 Running clang-tidy on all source files..."
+	done
+	@echo "🧪 Running valgrind on gschem binary..."
+	@valgrind --leak-check=full --track-origins=yes $(builddir)/gschem || exit 1
+	@touch $(PEDSENTINEL)
+
+clean-pedantic:
+	@rm -f $(PEDSENTINEL)
+
+clean-local: clean-pedantic
 
 MOSTLYCLEANFILES = *.log core FILE *~
 CLEANFILES = *.log core FILE *~ $(BUILT_SOURCES)

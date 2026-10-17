@@ -29,7 +29,8 @@
 #endif
 
 #include "gschem.h"
-#include "actions.decl.x"
+// #include "actions.decl.x"
+#include "actions.h"
 
 static int undo_file_index=0;
 static int prog_pid=0;
@@ -46,7 +47,7 @@ static char* tmp_path = NULL;
  *  \par Function Description
  *
  */
-void o_undo_init(void)
+void o_undo_init()
 {
   prog_pid = getpid();
 
@@ -588,7 +589,7 @@ o_undo_update_actions (GschemToplevel *w_current, PAGE *page)
  *  \par Function Description
  *
  */
-void o_undo_cleanup(void)
+void o_undo_cleanup()
 {
   int i;
   char *filename;

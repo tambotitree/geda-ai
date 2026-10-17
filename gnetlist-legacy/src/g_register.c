@@ -95,7 +95,7 @@ static struct gsubr_t gnetlist_funcs[] = {
   { NULL,                           0, 0, 0, NULL } };
 
 
-void g_register_funcs(void)
+void g_register_funcs()
 {
   struct gsubr_t *tmp = gnetlist_funcs;
 
@@ -106,7 +106,7 @@ void g_register_funcs(void)
 
 }
 
-SCM g_quit(void)
+SCM g_quit()
 {
     gnetlist_quit();
     exit(0);

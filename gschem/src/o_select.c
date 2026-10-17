@@ -142,7 +142,7 @@ void o_select_run_hooks(GschemToplevel *w_current, OBJECT *o_current, int flag)
     g_run_hook_object (w_current, "%select-objects-hook", o_current);
     break;
   default:
-    g_assert_not_reached ();
+    g_assert_not_reached();
   }
 }
 

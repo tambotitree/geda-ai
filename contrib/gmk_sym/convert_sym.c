@@ -325,9 +325,9 @@ void bus_segment(int x1, int y1, int x2, int y2, unsigned int color,
                  int ripperdir);
 void complex_object(int x, int y, unsigned int selectable, 
 	       int angle, unsigned int mirror, char *name);
-void begin_attach(void);
-void end_attach(void);
-void reset_attributes(void);
+void begin_attach();
+void end_attach();
+void reset_attributes();
 
 /* externals */
 int GetStringDisplayLength(char *str,int font_size);
@@ -1987,7 +1987,7 @@ complex_object(int x, int y, unsigned int selectable,
 
 
 void
-begin_attach(void)
+begin_attach()
 {
   if(attach_pending == 1)  /* begin an attachment if one is pending*/
     {
@@ -1997,13 +1997,13 @@ begin_attach(void)
 }
 
 void
-end_attach(void) 
+end_attach() 
 {
   printf("}\n");
 }
 
 void
-reset_attributes(void)
+reset_attributes()
 {
 
   /* if we are inside of some kind of attribute attachment

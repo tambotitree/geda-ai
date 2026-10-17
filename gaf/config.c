@@ -41,7 +41,7 @@ static struct option config_long_options[] =
   };
 
 static void
-config_usage (void)
+config_usage ()
 {
   printf (_("Usage: gaf config [OPTION] [GROUP KEY [VALUE]]\n"
 "\n"

@@ -34,24 +34,24 @@ x_fileselect_setup_filechooser_filters (GtkFileChooser *filechooser)
   GtkFileFilter *filter;
 
   /* file filter for schematic files (*.sch) */
-  filter = gtk_file_filter_new ();
+  filter = gtk_file_filter_new();
   gtk_file_filter_set_name (filter, _("Schematics"));
   gtk_file_filter_add_pattern (filter, "*.sch");
   gtk_file_chooser_add_filter (filechooser, filter);
   /* file filter for symbol files (*.sym) */
-  filter = gtk_file_filter_new ();
+  filter = gtk_file_filter_new();
   gtk_file_filter_set_name (filter, _("Symbols"));
   gtk_file_filter_add_pattern (filter, "*.sym");
   gtk_file_chooser_add_filter (filechooser, filter);
   /* file filter for both symbol and schematic files (*.sym+*.sch) */
-  filter = gtk_file_filter_new ();
+  filter = gtk_file_filter_new();
   gtk_file_filter_set_name (filter, _("Schematics and symbols"));
   gtk_file_filter_add_pattern (filter, "*.sym");
   gtk_file_filter_add_pattern (filter, "*.sch");
   gtk_file_chooser_add_filter (filechooser, filter);
   gtk_file_chooser_set_filter (filechooser, filter);
   /* file filter that match any file */
-  filter = gtk_file_filter_new ();
+  filter = gtk_file_filter_new();
   gtk_file_filter_set_name (filter, _("All files"));
   gtk_file_filter_add_pattern (filter, "*");
   gtk_file_chooser_add_filter (filechooser, filter);
@@ -129,7 +129,7 @@ x_fileselect_add_preview (GtkFileChooser *filechooser)
                                         "yalign", 0.5,
                                         NULL));
 
-  preview = gschem_preview_new ();
+  preview = gschem_preview_new();
 
   gtk_container_add (GTK_CONTAINER (alignment), preview);
   gtk_container_add (GTK_CONTAINER (frame), alignment);
@@ -210,7 +210,7 @@ x_fileselect_create (GschemToplevel *w_current, const gchar *dirname,
     TOPLEVEL *toplevel = gschem_toplevel_get_toplevel (w_current);
     gchar *cwd;
     if (toplevel->page_current == NULL || toplevel->page_current->is_untitled)
-      cwd = g_get_current_dir ();
+      cwd = g_get_current_dir();
     else
       cwd = g_path_get_dirname (toplevel->page_current->page_filename);
     gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (dialog), cwd);
@@ -312,7 +312,7 @@ x_fileselect_open(GschemToplevel *w_current)
   /* force start in current working directory, not in 'Recently Used' */
   page_current = gschem_toplevel_get_toplevel (w_current)->page_current;
   if (page_current == NULL || page_current->is_untitled)
-    cwd = g_get_current_dir ();
+    cwd = g_get_current_dir();
   else
     cwd = g_path_get_dirname (page_current->page_filename);
   gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (dialog), cwd);

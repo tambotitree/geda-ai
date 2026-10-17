@@ -128,7 +128,7 @@ int initangle(float dx, float dy)
     most of the work must be done for
     correct symbol rendering
 */
-int write_sym(void)
+int write_sym()
 {
   int i,xs,ys,xe,ye;
   int xt,yt,xb,yb;

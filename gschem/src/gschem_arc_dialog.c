@@ -44,6 +44,7 @@
  */
 void arc_angle_dialog_response(GtkDialog *dialog, gint response_id, GschemToplevel *w_current)
 {
+  (void)dialog;
   GtkWidget *spinentry;
   gint radius, start_angle, sweep_angle;
   OBJECT *arc_object = NULL;

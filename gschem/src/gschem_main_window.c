@@ -86,7 +86,7 @@ gschem_main_window_class_init (GschemMainWindowClass *klass)
 /*! \brief Get/register GschemSelection type.
  */
 GType
-gschem_main_window_get_type ()
+gschem_main_window_get_type()
 {
   static GType type = 0;
 
@@ -127,7 +127,7 @@ gschem_main_window_init (GschemMainWindow *window)
  *  \return A new instanceof the GschemMainWindow
  */
 GschemMainWindow*
-gschem_main_window_new ()
+gschem_main_window_new()
 {
   return GSCHEM_MAIN_WINDOW (g_object_new (GSCHEM_TYPE_MAIN_WINDOW,
                                            "type", GTK_WINDOW_TOPLEVEL,

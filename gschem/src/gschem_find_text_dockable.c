@@ -157,7 +157,7 @@ gschem_find_text_dockable_find (GschemFindTextDockable *state, GList *pages, int
 /*! \brief Get/register GschemFindTextDockable type.
  */
 GType
-gschem_find_text_dockable_get_type ()
+gschem_find_text_dockable_get_type()
 {
   static GType type = 0;
 

@@ -77,7 +77,7 @@ s_traverse_clear_all_visited (const GList *obj_list)
                                NULL);
 }
 
-void s_traverse_init(void)
+void s_traverse_init()
 {
     netlist_head = s_netlist_add(NULL);
     netlist_head->nlid = -1;	/* head node */

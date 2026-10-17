@@ -69,7 +69,7 @@ static gboolean preview_callback_draw(GtkWidget *widget, cairo_t *cr, gpointer u
 /*! \brief create a new preview widget
  */
 GtkWidget*
-gschem_preview_new ()
+gschem_preview_new()
 {
   return GTK_WIDGET (g_object_new (GSCHEM_TYPE_PREVIEW, NULL));
 }
@@ -280,7 +280,7 @@ preview_zoom (GschemPreview *preview)
 }
 
 GType
-gschem_preview_get_type ()
+gschem_preview_get_type()
 {
   static GType preview_type = 0;
 
@@ -369,8 +369,8 @@ preview_init (GschemPreview *preview)
   }, *tmp;
 
   GschemToplevel *preview_w_current;
-  preview_w_current = gschem_toplevel_new ();
-  gschem_toplevel_set_toplevel (preview_w_current, s_toplevel_new ());
+  preview_w_current = gschem_toplevel_new();
+  gschem_toplevel_set_toplevel (preview_w_current, s_toplevel_new());
 
   preview_w_current->toplevel->load_newer_backup_func =
     x_fileselect_load_backup;

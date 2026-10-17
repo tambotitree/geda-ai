@@ -34,7 +34,8 @@
 #endif
 
 #include "gschem.h"
-#include "actions.decl.x"
+// #include "actions.decl.x"
+#include "actions.h"
 
 
 
@@ -251,7 +252,7 @@ gschem_options_get_snap_size (GschemOptions *options)
 /*! \brief Get/register GschemSelection type.
  */
 GType
-gschem_options_get_type ()
+gschem_options_get_type()
 {
   static GType type = 0;
 
@@ -342,13 +343,13 @@ gschem_options_set_grid_mode (GschemOptions *options, GRID_MODE grid_mode)
       break;
   }
 
-  gschem_action_set_active (action_options_grid_none,
+  gschem_action_set_active ("options-grid-none",
                             options->grid_mode == GRID_MODE_NONE,
                             options->w_current);
-  gschem_action_set_active (action_options_grid_dots,
+  gschem_action_set_active ("options-grid-dots",
                             options->grid_mode == GRID_MODE_DOTS,
                             options->w_current);
-  gschem_action_set_active (action_options_grid_mesh,
+  gschem_action_set_active ("options-grid-mesh",
                             options->grid_mode == GRID_MODE_MESH,
                             options->w_current);
 
@@ -369,7 +370,7 @@ gschem_options_set_show_origin (GschemOptions *options, gboolean show_origin)
 
   options->show_origin = show_origin;
 
-  gschem_action_set_active (action_view_show_origin,
+  gschem_action_set_active ("view-show-origin",
                             options->show_origin,
                             options->w_current);
 
@@ -390,7 +391,7 @@ gschem_options_set_magnetic_net_mode (GschemOptions *options, gboolean enabled)
 
   options->magnetic_net_mode = enabled;
 
-  gschem_action_set_active (action_options_magneticnet,
+  gschem_action_set_active ("options-magneticnet",
                             options->magnetic_net_mode,
                             options->w_current);
 
@@ -413,7 +414,7 @@ gschem_options_set_net_rubber_band_mode (GschemOptions *options, gboolean enable
 
   options->net_rubber_band_mode = enabled;
 
-  gschem_action_set_active (action_options_rubberband,
+  gschem_action_set_active ("options-rubberband",
                             options->net_rubber_band_mode,
                             options->w_current);
 
@@ -434,13 +435,13 @@ gschem_options_set_snap_mode (GschemOptions *options, SNAP_STATE snap_mode)
 
   options->snap_mode = snap_mode;
 
-  gschem_action_set_active (action_options_snap_off,
+  gschem_action_set_active ("options-snap-off",
                             options->snap_mode == SNAP_OFF,
                             options->w_current);
-  gschem_action_set_active (action_options_snap_grid,
+  gschem_action_set_active ("options-snap-grid",
                             options->snap_mode == SNAP_GRID,
                             options->w_current);
-  gschem_action_set_active (action_options_snap_resnap,
+  gschem_action_set_active ("options-snap-resnap",
                             options->snap_mode == SNAP_RESNAP,
                             options->w_current);
 

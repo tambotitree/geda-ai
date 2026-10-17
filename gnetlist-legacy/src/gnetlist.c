@@ -44,7 +44,7 @@
 #include "../include/prototype.h"
 #include "../include/gettext.h"
 
-void gnetlist_quit(void)
+void gnetlist_quit()
 {
     s_clib_free();
     s_slib_free();

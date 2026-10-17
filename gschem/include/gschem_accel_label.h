@@ -66,7 +66,7 @@ struct _GschemAccelLabelClass
 };
 
 
-GType      gschem_accel_label_get_type          (void) G_GNUC_CONST;
+GType      gschem_accel_label_get_type (void) G_GNUC_CONST;
 GtkWidget* gschem_accel_label_new               (const gchar      *string);
 guint      gschem_accel_label_get_accel_width   (GschemAccelLabel *accel_label);
 void       gschem_accel_label_set_accel_string  (GschemAccelLabel *accel_label,

@@ -1,3 +1,5 @@
+#ifndef GSCHEM_FILL_SWATCH_CELL_RENDERER_H
+#define GSCHEM_FILL_SWATCH_CELL_RENDERER_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 2013 Ales Hvezda
@@ -45,7 +47,8 @@ struct _GschemFillSwatchCellRenderer
 };
 
 GType
-gschem_fill_swatch_cell_renderer_get_type ();
+gschem_fill_swatch_cell_renderer_get_type (void);
 
 GtkCellRenderer*
-gschem_fill_swatch_cell_renderer_new ();
+gschem_fill_swatch_cell_renderer_new (void);
+#endif /* GSCHEM_FILL_SWATCH_CELL_RENDERER_H */

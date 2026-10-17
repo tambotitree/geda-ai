@@ -56,7 +56,7 @@ static GtkListStore* align_list_store = NULL;
  *  \return A GtkListStore with gschem text alignment entries.
  */
 static GtkListStore *
-create_align_list_store ()
+create_align_list_store(void)
 {
   GtkTreeIter iter;
   GtkListStore *store;
@@ -99,20 +99,20 @@ create_align_list_store ()
  *  \return A GtkWidget for selecting text alignments.
  */
 GtkWidget*
-gschem_alignment_combo_new ()
+gschem_alignment_combo_new(void)
 {
   GtkCellRenderer *cell;
   GtkComboBox *combo;
 
   if (align_list_store == NULL) {
-    align_list_store = create_align_list_store ();
+    align_list_store = create_align_list_store();
   }
 
   combo = GTK_COMBO_BOX (gtk_combo_box_new_with_model (GTK_TREE_MODEL (align_list_store)));
 
   gtk_combo_box_set_wrap_width (GTK_COMBO_BOX (combo), 3);
 
-  cell = gtk_cell_renderer_text_new ();
+  cell = gtk_cell_renderer_text_new();
   gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo), cell, TRUE);
   gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo), cell, "text", COLUMN_NAME, NULL);
 

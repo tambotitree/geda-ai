@@ -63,6 +63,7 @@ typedef struct {
 static gboolean
 g_key_is_valid (guint keyval, GdkModifierType modifiers)
 {
+  (void) modifiers;
   static const guint invalid_keyvals[] = {
     GDK_KEY_Shift_L, GDK_KEY_Shift_R, GDK_KEY_Shift_Lock, GDK_KEY_Caps_Lock, GDK_KEY_ISO_Lock,
     GDK_KEY_Control_L, GDK_KEY_Control_R, GDK_KEY_Meta_L, GDK_KEY_Meta_R,
@@ -219,6 +220,7 @@ SCM_DEFINE (g_key_to_display_string, "%key->display-string", 1, 0, 0,
 static int
 g_key_print (SCM smob, SCM port, scm_print_state *pstate)
 {
+  (void) pstate;
   scm_puts ("#<gschem-key ", port);
   scm_write (g_key_to_display_string (smob), port);
   scm_puts (">", port);
@@ -309,8 +311,8 @@ g_keys_reset (GschemToplevel *w_current)
   /* Reset the Scheme keybinding state */
   scm_dynwind_begin (0);
   g_dynwind_window (w_current);
-  g_scm_eval_protected (s_expr, scm_interaction_environment ());
-  scm_dynwind_end ();
+  g_scm_eval_protected (s_expr, scm_interaction_environment());
+  scm_dynwind_end();
 }
 
 /*! \brief Evaluate a user keystroke.
@@ -347,7 +349,7 @@ g_keys_execute(GschemToplevel *w_current, GdkEventKey *event)
 
   key = event->keyval;
   gdk_keyval_convert_case (event->keyval, &lower, &upper);
-  mods = (event->state & gtk_accelerator_get_default_mod_mask ()
+  mods = (event->state & gtk_accelerator_get_default_mod_mask()
                 & ~consumed_modifiers);
 
   /* Handle Caps Lock. The idea is to obtain the same keybindings
@@ -394,8 +396,8 @@ g_keys_execute(GschemToplevel *w_current, GdkEventKey *event)
   scm_dynwind_begin (0);
   g_dynwind_window (w_current);
   s_expr = scm_list_2 (press_key_sym, s_key);
-  s_retval = g_scm_eval_protected (s_expr, scm_interaction_environment ());
-  scm_dynwind_end ();
+  s_retval = g_scm_eval_protected (s_expr, scm_interaction_environment());
+  scm_dynwind_end();
 
   /* only start timer if window wasn't destroyed during the action */
   if (g_list_find (global_window_list, w_current) != NULL) {
@@ -424,8 +426,9 @@ g_keys_execute(GschemToplevel *w_current, GdkEventKey *event)
  * can be accessed using (use-modules (gschem core keymap)).
  */
 static void
-init_module_gschem_core_keymap ()
+init_module_gschem_core_keymap(void *data)
 {
+  (void)data;
   /* Register the functions */
   #include "g_keys.x"
 
@@ -440,7 +443,7 @@ init_module_gschem_core_keymap ()
  * Should only be called by main_prog().
  */
 void
-g_init_keys ()
+g_init_keys(void)
 {
   /* Register key smob type */
   g_key_smob_tag = scm_make_smob_type ("gschem-key", 0);

@@ -30,10 +30,10 @@
  */
 
 /* Initialise the Scheme API. */
-void edascm_init ();
+void edascm_init(void);
 
 /* Get the value of the #TOPLEVEL fluid. */
-TOPLEVEL *edascm_c_current_toplevel ();
+TOPLEVEL *edascm_c_current_toplevel(void);
 
 /* Set the #TOPLEVEL fluid in the current dynamic context. */
 void edascm_dynwind_toplevel (TOPLEVEL *toplevel);

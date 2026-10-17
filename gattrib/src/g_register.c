@@ -54,7 +54,7 @@
  * gattrib.  They are mostly unnecessary, except for reading in the gattribrc
  * file at the beginning of the prog which gives the library search paths.
  */
-void g_register_funcs(void)
+void g_register_funcs()
 {
   /* general functions */
   scm_c_define_gsubr ("quit", 0, 0, 0, g_quit);
@@ -69,7 +69,7 @@ void g_register_funcs(void)
  *
  * Quit the application from within Scheme.
  */
-SCM g_quit(void)
+SCM g_quit()
 {
 #ifdef DEBUG
   printf("In g_quit, calling exit(0)\n");

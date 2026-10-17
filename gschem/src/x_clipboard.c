@@ -27,7 +27,8 @@
 #endif
 
 #include "gschem.h"
-#include "actions.decl.x"
+// #include "actions.decl.x"
+#include "actions.h"
 
 #define MIME_TYPE_SCHEMATIC "application/x-geda-schematic"
 #define CLIP_TYPE_SCHEMATIC 1

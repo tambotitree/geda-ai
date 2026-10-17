@@ -34,7 +34,7 @@ int s_attrib_name_in_list(STRING_LIST *name_value_list, char *name);
 char *s_attrib_get_refdes(OBJECT *object);
 
 /* ------------- s_sheet_data.c ------------- */
-SHEET_DATA *s_sheet_data_new();
+SHEET_DATA *s_sheet_data_new(void);
 
 void s_sheet_data_add_master_comp_list_items(const GList *obj_list);
 void s_sheet_data_add_master_comp_attrib_list_items(const GList *obj_list);
@@ -43,11 +43,11 @@ void s_sheet_data_add_master_net_attrib_list_items(const GList *obj_list);
 void s_sheet_data_add_master_pin_list_items(const GList *obj_list);
 void s_sheet_data_add_master_pin_attrib_list_items(const GList *obj_list);
 
-void s_sheet_data_gtksheet_to_sheetdata();
+void s_sheet_data_gtksheet_to_sheetdata(void);
 
 
 /* ------------- s_string_list.c ------------- */
-STRING_LIST *s_string_list_new();
+STRING_LIST *s_string_list_new(void);
 STRING_LIST *s_string_list_duplicate_string_list(STRING_LIST *old_string_list);
 void s_string_list_add_item(STRING_LIST *list, int *count, char *item);
 void s_string_list_delete_item(STRING_LIST **list, int *count, char *item);
@@ -55,12 +55,12 @@ int s_string_list_in_list(STRING_LIST *list, char *item);
 gint s_string_list_find_in_list (STRING_LIST *list, char *item);
 gchar *s_string_list_get_data_at_index(STRING_LIST *list, gint index);
 
-void s_string_list_sort_master_comp_list();
-void s_string_list_sort_master_comp_attrib_list();
-void s_string_list_sort_master_net_list();
-void s_string_list_sort_master_net_attrib_list();
-void s_string_list_sort_master_pin_list();
-void s_string_list_sort_master_pin_attrib_list();
+void s_string_list_sort_master_comp_list(void);
+void s_string_list_sort_master_comp_attrib_list(void);
+void s_string_list_sort_master_net_list(void);
+void s_string_list_sort_master_net_attrib_list(void);
+void s_string_list_sort_master_pin_list(void);
+void s_string_list_sort_master_pin_attrib_list(void);
 
 
 /* ------------- s_table.c ------------- */
@@ -78,7 +78,7 @@ void s_table_add_toplevel_comp_items_to_comp_table(const GList *obj_list);
 void s_table_add_toplevel_net_items_to_net_table(const GList *obj_list);
 void s_table_add_toplevel_pin_items_to_pin_table(const GList *obj_list);
 
-void s_table_gtksheet_to_all_tables();
+void s_table_gtksheet_to_all_tables(void);
 void s_table_gtksheet_to_table(GtkSheet *local_gtk_sheet, 
 			      STRING_LIST *master_row_list, STRING_LIST *master_col_list, 
 			      TABLE **local_table, int num_rows, int num_cols);
@@ -88,7 +88,7 @@ int s_toplevel_read_page(TOPLEVEL *toplevel, char *filename);
 void s_toplevel_verify_design(TOPLEVEL *toplevel);
 void s_toplevel_gtksheet_to_toplevel(TOPLEVEL *toplevel);
 void s_toplevel_add_new_attrib(gchar *new_attrib_name);
-void s_toplevel_delete_attrib_col();
+void s_toplevel_delete_attrib_col(void);
 void s_toplevel_sheetdata_to_toplevel(TOPLEVEL *toplevel, PAGE *page);
 
 STRING_LIST *s_toplevel_get_component_attribs_in_sheet(char *refdes);
@@ -156,10 +156,10 @@ void verbose_reset_index(void);
 char *s_misc_remaining_string(char *string, char delimiter, int count);
 
 /* ------------- s_visibility.c ------------- */
-void s_visibility_set_invisible();
-void s_visibility_set_name_only();
-void s_visibility_set_value_only();
-void s_visibility_set_name_and_value();
+void s_visibility_set_invisible(void);
+void s_visibility_set_name_only(void);
+void s_visibility_set_value_only(void);
+void s_visibility_set_name_and_value(void);
 void s_visibility_set_cell(gint cur_page, gint row, gint col, 
 			   gint visibility, gint show_name_value);
 
@@ -168,17 +168,17 @@ void i_vars_set(TOPLEVEL *toplevel);
 void i_window_vars_set(TOPLEVEL *toplevel);
 
 /* ------------- x_dialog.c ------------- */
-void x_dialog_newattrib();
-void x_dialog_delattrib();
-void x_dialog_missing_sym();
-void x_dialog_unsaved_data();
-void x_dialog_unimplemented_feature();
+void x_dialog_newattrib(void);
+void x_dialog_delattrib(void);
+void x_dialog_missing_sym(void);
+void x_dialog_unsaved_data(void);
+void x_dialog_unimplemented_feature(void);
 void x_dialog_fatal_error(gchar *string, gint return_code);
-void x_dialog_about_dialog();
-void x_dialog_export_file();
+void x_dialog_about_dialog(void);
+void x_dialog_export_file(void);
 
 /* ------------- x_gtksheet.c ------------- */
-void x_gtksheet_init();
+void x_gtksheet_init(void);
 void x_gtksheet_add_row_labels(GtkSheet *sheet, int count, STRING_LIST *list_head);
 void x_gtksheet_add_col_labels(GtkSheet *sheet, int count, STRING_LIST *list_head);
 void x_gtksheet_add_cell_item(GtkSheet *sheet, gint i, gint j, 
@@ -194,8 +194,8 @@ void x_fileselect_save (void);
 gboolean x_fileselect_load_files (GSList *filenames);
 
 /* ------------- x_window.c ------------- */
-void x_window_init();
-void x_window_add_items();
+void x_window_init(void);
+void x_window_add_items(void);
 
 
 

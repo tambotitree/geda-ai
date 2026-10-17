@@ -91,7 +91,7 @@
 #undef min
 #define min(a,b) ((a) < (b) ? (a) : (b)) 
 
-/* for s_clib_getfilename() */
+/* for s_clib_getfilename(void) */
 #define OPEN_DIR	0
 #define READ_DIR	1
 #define CLOSE_DIR	2

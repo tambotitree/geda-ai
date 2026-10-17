@@ -74,7 +74,7 @@ static struct gsubr_t libgeda_funcs[] = {
  *  Creates g_subr_t objects to make g_rc_* functions that are defined
  *  in g_rc.c visible to Scheme.
  */
-void g_register_libgeda_funcs (void)
+void g_register_libgeda_funcs ()
 {
   struct gsubr_t *tmp = libgeda_funcs;
   
@@ -91,7 +91,7 @@ void g_register_libgeda_funcs (void)
  * Guile load path.
  */
 void
-g_register_libgeda_dirs (void)
+g_register_libgeda_dirs ()
 {
   char *scheme_dir;
 

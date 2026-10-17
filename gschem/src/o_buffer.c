@@ -215,7 +215,7 @@ o_buffer_paste_start(GschemToplevel *w_current, int w_x, int w_y, int buf_num)
  *  \par Function Description
  *
  */
-void o_buffer_init(void)
+void o_buffer_init()
 {
   int i;
 

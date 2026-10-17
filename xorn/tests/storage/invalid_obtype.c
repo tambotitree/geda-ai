@@ -21,7 +21,7 @@
 #define NO_ERROR ((xorn_error_t) -1)
 
 
-int main(void)
+int main()
 {
 	xorn_revision_t rev0, rev1, rev2;
 	struct xornsch_line line_data;

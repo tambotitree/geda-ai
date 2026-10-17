@@ -66,7 +66,7 @@
  *
  *  \return value 0 to the shell to denote a successful quit.
  */
-gboolean gattrib_really_quit(void)
+gboolean gattrib_really_quit()
 {
   if (sheet_head->CHANGED == TRUE) {
     x_dialog_unsaved_data();

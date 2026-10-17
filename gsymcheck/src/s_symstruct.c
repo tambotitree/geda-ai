@@ -35,7 +35,7 @@
 
 /* call this for every symbol that needs to be checked */
 SYMCHECK *
-s_symstruct_init(void)
+s_symstruct_init()
 {
   SYMCHECK *s_symcheck;
 	

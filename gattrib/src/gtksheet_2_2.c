@@ -553,7 +553,7 @@ static void gtk_sheet_real_cell_clear 		(GtkSheet *sheet,
 						 gint row,
 						 gint column,
 						 gboolean delete);
-static GtkSheetCell * gtk_sheet_cell_new 	(void);
+static GtkSheetCell * gtk_sheet_cell_new 	();
 static gint AddRow				(GtkSheet *sheet, gint nrows);
 static gint AddColumn				(GtkSheet *sheet, gint ncols);
 static gint InsertRow				(GtkSheet *sheet, gint row, gint nrows);
@@ -718,7 +718,7 @@ gtk_sheet_range_free (GtkSheetRange *range)
 }
 
 GType
-gtk_sheet_range_get_type (void)
+gtk_sheet_range_get_type ()
 {
   static GType sheet_range_type;
 

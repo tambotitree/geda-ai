@@ -178,7 +178,7 @@ void s_log_init (const gchar *prefix)
  *  This function deregisters the handler for redirection to the log file
  *  and closes it.
  */
-void s_log_close (void)
+void s_log_close ()
 {
   do_logging = FALSE; /* subsequent messages are lost after the close */
 
@@ -205,7 +205,7 @@ void s_log_close (void)
  *  \return Character string with current log's contents.
  *
  */
-gchar *s_log_read (void)
+gchar *s_log_read ()
 {
   gboolean tmp;
 #define BUFSIZE 200  

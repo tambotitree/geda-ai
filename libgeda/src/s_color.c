@@ -70,7 +70,7 @@ static COLOR default_colors[] = {
  *  At the moment, just initialises the print color map.
  */
 void
-s_color_init(void)
+s_color_init()
 {
   s_color_map_defaults (print_colors);
 }

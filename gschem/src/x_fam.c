@@ -45,7 +45,7 @@ static gboolean fam_read (gint fd, GIOCondition condition, gpointer user_data);
 
 
 void
-x_fam_init ()
+x_fam_init()
 {
 #ifdef HAVE_LIBFAM
   FAMConnection *new_fc = g_new0 (FAMConnection, 1);
@@ -69,7 +69,7 @@ x_fam_init ()
 }
 
 void
-x_fam_free ()
+x_fam_free()
 {
 #ifdef HAVE_LIBFAM
   if (fc == NULL)

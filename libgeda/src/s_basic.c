@@ -530,7 +530,7 @@ libgeda_module_handle ()
 {
   typedef BOOL (WINAPI *t_GetModuleHandleExA) (DWORD, LPCTSTR, HMODULE *);
   static t_GetModuleHandleExA p_GetModuleHandleExA = NULL;
-  static gconstpointer address = (void (*)(void)) &libgeda_module_handle;
+  static gconstpointer address = (void (*)()) &libgeda_module_handle;
   static HMODULE hmodule = NULL;
 
   if (hmodule != NULL) return (gpointer) hmodule;

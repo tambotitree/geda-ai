@@ -97,7 +97,7 @@ static gboolean
 key_press_event (GtkWidget *widget, GdkEventKey *event, gpointer user_data)
 {
   if (event->keyval == GDK_KEY_Escape &&
-      (event->state & gtk_accelerator_get_default_mod_mask ()) == 0) {
+      (event->state & gtk_accelerator_get_default_mod_mask()) == 0) {
     gtk_info_bar_response (GTK_INFO_BAR (user_data), GTK_RESPONSE_CANCEL);
     return TRUE;
   }
@@ -284,7 +284,7 @@ gschem_macro_widget_get_macro_string (GschemMacroWidget *widget)
 /*! \brief Get/register GschemMacroWidget type.
  */
 GType
-gschem_macro_widget_get_type ()
+gschem_macro_widget_get_type()
 {
   static GType type = 0;
 
@@ -329,11 +329,11 @@ gschem_macro_widget_init (GschemMacroWidget *widget)
   gtk_widget_set_visible (widget->label, TRUE);
   gtk_box_pack_start (GTK_BOX (content), widget->label, FALSE, FALSE, 0);
 
-  widget->entry = gtk_entry_new ();
+  widget->entry = gtk_entry_new();
   gtk_widget_set_visible (widget->entry, TRUE);
   gtk_box_pack_start (GTK_BOX (content), widget->entry, TRUE, TRUE, 0);
 
-  button_box = gtk_hbutton_box_new ();
+  button_box = gtk_hbutton_box_new();
   gtk_widget_set_visible (button_box, TRUE);
   gtk_box_pack_start (GTK_BOX (content), button_box, FALSE, FALSE, 0);
 

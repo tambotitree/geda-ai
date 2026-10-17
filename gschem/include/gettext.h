@@ -58,7 +58,7 @@
 #endif
 
 /* A pseudo function call that serves as a marker for the automated
-   extraction of messages, but does not call gettext().  The run-time
+   extraction of messages, but does not call gettext(void).  The run-time
    translation is done at a different place in the code.
    The argument, String, should be a literal string.  Concatenated strings
    and other string expressions won't work.

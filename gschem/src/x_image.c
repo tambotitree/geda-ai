@@ -132,7 +132,7 @@ x_image_get_type_from_description (const char *description)
     return "pdf";
   }
 
-  ptr = gdk_pixbuf_get_formats ();
+  ptr = gdk_pixbuf_get_formats();
 
   while (ptr != NULL) {
     gchar *ptr_descr = gdk_pixbuf_format_get_description (ptr->data);

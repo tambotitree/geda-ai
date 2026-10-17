@@ -1,3 +1,5 @@
+#ifndef GSCHEM_FIND_TEXT_WIDGET_H
+#define GSCHEM_FIND_TEXT_WIDGET_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 1998-2010 Ales Hvezda
@@ -64,7 +66,7 @@ int
 gschem_find_text_widget_get_find_type (GschemFindTextWidget *widget);
 
 GType
-gschem_find_text_widget_get_type ();
+gschem_find_text_widget_get_type (void);
 
 void
 gschem_find_text_widget_set_descend (GschemFindTextWidget *widget, int descend);
@@ -78,3 +80,4 @@ gschem_find_text_widget_set_find_type (GschemFindTextWidget *widget, int type);
 
 void
 find_text_dialog(GschemToplevel *w_current);
+#endif /* GSCHEM_FIND_TEXT_WIDGET_H */

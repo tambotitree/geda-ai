@@ -22,7 +22,8 @@
 #include <stdio.h>
 
 #include "gschem.h"
-#include "actions.decl.x"
+// #include "actions.decl.x"
+#include "actions.h"
 
 /* This works, but using one macro inside of other doesn't */
 #define GET_PICTURE_WIDTH(w)			\

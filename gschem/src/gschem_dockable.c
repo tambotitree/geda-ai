@@ -152,7 +152,7 @@ callback_notebook_button_press_event (GtkWidget *notebook,
 
 
 GType
-gschem_dockable_state_get_type ()
+gschem_dockable_state_get_type()
 {
   static GType type = 0;
 
@@ -181,7 +181,7 @@ gschem_dockable_state_get_type ()
 
 
 GType
-gschem_dockable_get_type ()
+gschem_dockable_get_type()
 {
   static GType type = 0;
 
@@ -511,7 +511,7 @@ get_property (GObject *object, guint property_id,
 static GtkWidget *
 real_create_widget (GschemDockable *dockable)
 {
-  g_assert_not_reached ();
+  g_assert_not_reached();
 }
 
 
@@ -557,7 +557,7 @@ get_notebook_group_name (GschemToplevel *w_current, GtkNotebook *notebook)
     return "gschem.dock-geometry.bottom";
   if (GTK_WIDGET (notebook) == w_current->right_notebook)
     return "gschem.dock-geometry.right";
-  g_assert_not_reached ();
+  g_assert_not_reached();
 }
 
 
@@ -1006,7 +1006,7 @@ create_menu (GschemDockable *dockable)
 {
   g_return_if_fail (dockable->menu == NULL);
 
-  dockable->menu = gtk_menu_new ();
+  dockable->menu = gtk_menu_new();
   g_object_ref_sink (dockable->menu);
 
   dockable->detach_item = gtk_menu_item_new_with_mnemonic (_("_Detach"));
@@ -1016,7 +1016,7 @@ create_menu (GschemDockable *dockable)
                          dockable->detach_item);
 
   gtk_menu_shell_append (GTK_MENU_SHELL (dockable->menu),
-                         gtk_separator_menu_item_new ());
+                         gtk_separator_menu_item_new());
 
   dockable->move_left_item =
     gtk_menu_item_new_with_mnemonic (_("Move to _left dock"));
@@ -1040,7 +1040,7 @@ create_menu (GschemDockable *dockable)
                          dockable->move_right_item);
 
   gtk_menu_shell_append (GTK_MENU_SHELL (dockable->menu),
-                         gtk_separator_menu_item_new ());
+                         gtk_separator_menu_item_new());
 
   dockable->close_item = gtk_image_menu_item_new_from_stock (GTK_STOCK_CLOSE,
                                                              NULL);
@@ -1307,7 +1307,7 @@ gschem_dockable_set_state (GschemDockable *dockable, GschemDockableState state)
         dockable, dockable->w_current->right_notebook);
       break;
     default:
-      g_assert_not_reached ();
+      g_assert_not_reached();
   }
 }
 
@@ -1340,7 +1340,7 @@ gschem_dockable_get_state (GschemDockable *dockable)
   if (parent == dockable->w_current->right_notebook)
     return GSCHEM_DOCKABLE_STATE_DOCKED_RIGHT;
 
-  g_assert_not_reached ();
+  g_assert_not_reached();
 }
 
 
@@ -1363,7 +1363,7 @@ gschem_dockable_present (GschemDockable *dockable)
       present_in_notebook (dockable);
       break;
     default:
-      g_assert_not_reached ();
+      g_assert_not_reached();
   }
 
   GSCHEM_DOCKABLE_GET_CLASS (dockable)->post_present (dockable);
@@ -1490,7 +1490,7 @@ callback_after_window_key_press_event (GtkWidget *widget,
   if ((event->keyval == GDK_KEY_Return ||
        event->keyval == GDK_KEY_ISO_Enter ||
        event->keyval == GDK_KEY_KP_Enter) &&
-      (event->state & gtk_accelerator_get_default_mod_mask ()) == 0) {
+      (event->state & gtk_accelerator_get_default_mod_mask()) == 0) {
     if (gschem_dockable_get_state (dockable) == GSCHEM_DOCKABLE_STATE_DIALOG)
       gschem_dockable_hide (dockable);
     else {
@@ -1501,7 +1501,7 @@ callback_after_window_key_press_event (GtkWidget *widget,
   }
 
   if (event->keyval == GDK_KEY_Escape &&
-      (event->state & gtk_accelerator_get_default_mod_mask ()) == 0) {
+      (event->state & gtk_accelerator_get_default_mod_mask()) == 0) {
     if (gschem_dockable_get_state (dockable) == GSCHEM_DOCKABLE_STATE_DIALOG)
       gschem_dockable_hide (dockable);
     else {
@@ -1569,7 +1569,7 @@ callback_help_button_clicked (GtkWidget *button,
                                                    "show-wiki")),
                           scm_from_utf8_string (dockable->help_page)),
                         SCM_UNDEFINED);
-  scm_dynwind_end ();
+  scm_dynwind_end();
 }
 
 
@@ -1590,7 +1590,7 @@ callback_dock_item_toggled (GtkWidget *check_menu_item,
   else if (check_menu_item == dockable->dock_right_item)
     target_state = GSCHEM_DOCKABLE_STATE_DOCKED_RIGHT;
   else
-    g_assert_not_reached ();
+    g_assert_not_reached();
 
   if (active && current_state != target_state)
     gschem_dockable_set_state (dockable, target_state);
@@ -1614,7 +1614,7 @@ callback_menu_item_activate (GtkWidget *menu_item,
   else if (menu_item == dockable->close_item)
     gschem_dockable_set_state (dockable, GSCHEM_DOCKABLE_STATE_HIDDEN);
   else
-    g_assert_not_reached ();
+    g_assert_not_reached();
 }
 
 
@@ -1755,13 +1755,13 @@ callback_notebook_key_press_event (GtkWidget *notebook,
   if ((event->keyval == GDK_KEY_Return ||
        event->keyval == GDK_KEY_ISO_Enter ||
        event->keyval == GDK_KEY_KP_Enter) &&
-      (event->state & gtk_accelerator_get_default_mod_mask ()) == 0) {
+      (event->state & gtk_accelerator_get_default_mod_mask()) == 0) {
     gtk_widget_grab_focus (w_current->drawing_area);
     return TRUE;
   }
 
   if (event->keyval == GDK_KEY_Escape &&
-      (event->state & gtk_accelerator_get_default_mod_mask ()) == 0) {
+      (event->state & gtk_accelerator_get_default_mod_mask()) == 0) {
     gtk_widget_grab_focus (w_current->drawing_area);
     if (GSCHEM_DOCKABLE_GET_CLASS (dockable)->cancel != NULL)
       GSCHEM_DOCKABLE_GET_CLASS (dockable)->cancel (dockable);

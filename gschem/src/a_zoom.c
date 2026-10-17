@@ -192,7 +192,7 @@ void a_zoom_box_start(GschemToplevel *w_current, int w_x, int w_y)
  *  \par Function Description
  *
  */
-void a_zoom_box_end(GschemToplevel *w_current, int x, int y)
+void a_zoom_box_end(GschemToplevel *w_current, int x __attribute__((unused)), int y __attribute__((unused)))
 {
   g_assert( w_current->inside_action != 0 );
 

@@ -1,6 +1,9 @@
 
 SUBDIRS = data docs include lib src scheme
 
+AM_CPPFLAGS = $(GLIB_CFLAGS) $(OTHER_CFLAGS)
+AM_LDFLAGS  = $(GLIB_LIBS) $(OTHER_LIBS)
+
 EXTRA_DIST = HACKING BUGS ChangeLog ChangeLog-1.0 po/domain.mak.in
 
 pkgconfigdir            = $(libdir)/pkgconfig

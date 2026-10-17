@@ -114,7 +114,7 @@ void o_net_guess_direction(GschemToplevel *w_current,
 	current_rules = (int*) bus_rules;
 	break;
       default:
-	g_assert_not_reached ();
+	g_assert_not_reached();
       }
 
       x1 = o_current->line->x[0];

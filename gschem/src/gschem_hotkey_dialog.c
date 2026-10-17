@@ -160,7 +160,7 @@ void x_dialog_hotkeys (GschemToplevel *w_current)
                                     GTK_POLICY_AUTOMATIC);
 
     /* the model */
-    store = GTK_TREE_MODEL (gschem_hotkey_store_new ());
+    store = GTK_TREE_MODEL (gschem_hotkey_store_new());
 
     /* the tree view */
     treeview = gtk_tree_view_new_with_model (store);
@@ -169,7 +169,7 @@ void x_dialog_hotkeys (GschemToplevel *w_current)
     /* the columns */
     /* The first column contains the action's icon (if one was set)
      * and its label. */
-    renderer = gtk_cell_renderer_pixbuf_new ();
+    renderer = gtk_cell_renderer_pixbuf_new();
     column = gtk_tree_view_column_new_with_attributes (_("Action"),
                                                        renderer,
                                                        "stock-id",
@@ -180,7 +180,7 @@ void x_dialog_hotkeys (GschemToplevel *w_current)
                       G_CALLBACK (x_dialog_hotkeys_cell_stock_id_notify),
                       NULL);
 
-    renderer = gtk_cell_renderer_text_new ();
+    renderer = gtk_cell_renderer_text_new();
     gtk_tree_view_column_pack_start (column, renderer, FALSE);
     gtk_tree_view_column_set_attributes (column, renderer,
                                          "text", GSCHEM_HOTKEY_STORE_COLUMN_LABEL,

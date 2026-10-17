@@ -170,12 +170,12 @@ create_fill_property_widget (GschemObjectPropertiesDockable *dialog)
   label[4] = gschem_dialog_misc_create_property_label (_("Angle 2:"));
   label[5] = gschem_dialog_misc_create_property_label (_("Pitch 2:"));
 
-  widget[0] = dialog->fstylecb = x_fstylecb_new ();
-  widget[1] = dialog->widthe = gschem_integer_combo_box_new ();
-  widget[2] = dialog->angle1e = gschem_integer_combo_box_new ();
-  widget[3] = dialog->pitch1e = gschem_integer_combo_box_new ();
-  widget[4] = dialog->angle2e = gschem_integer_combo_box_new ();
-  widget[5] = dialog->pitch2e = gschem_integer_combo_box_new ();
+  widget[0] = dialog->fstylecb = x_fstylecb_new();
+  widget[1] = dialog->widthe = gschem_integer_combo_box_new();
+  widget[2] = dialog->angle1e = gschem_integer_combo_box_new();
+  widget[3] = dialog->pitch1e = gschem_integer_combo_box_new();
+  widget[4] = dialog->angle2e = gschem_integer_combo_box_new();
+  widget[5] = dialog->pitch2e = gschem_integer_combo_box_new();
 
   table = gschem_dialog_misc_create_property_table (label, widget, 6);
 
@@ -248,7 +248,7 @@ create_general_property_widget (GschemObjectPropertiesDockable *dialog)
 
   label[0] = gschem_dialog_misc_create_property_label (_("Color:"));
 
-  widget[0] = dialog->colorcb = x_colorcb_new ();
+  widget[0] = dialog->colorcb = x_colorcb_new();
 
   table = gschem_dialog_misc_create_property_table (label, widget, 1);
 
@@ -281,11 +281,11 @@ create_line_property_widget (GschemObjectPropertiesDockable *dialog)
   label[3] = gschem_dialog_misc_create_property_label (_("Dash Space:"));
   label[4] = gschem_dialog_misc_create_property_label (_("Cap style:"));
 
-  widget[0] = dialog->line_type = x_linetypecb_new ();
-  widget[1] = dialog->width_entry = gschem_integer_combo_box_new ();
-  widget[2] = dialog->length_entry = gschem_integer_combo_box_new ();
-  widget[3] = dialog->space_entry = gschem_integer_combo_box_new ();
-  widget[4] = dialog->line_end = x_linecapcb_new ();
+  widget[0] = dialog->line_type = x_linetypecb_new();
+  widget[1] = dialog->width_entry = gschem_integer_combo_box_new();
+  widget[2] = dialog->length_entry = gschem_integer_combo_box_new();
+  widget[3] = dialog->space_entry = gschem_integer_combo_box_new();
+  widget[4] = dialog->line_end = x_linecapcb_new();
 
   table = gschem_dialog_misc_create_property_table (label, widget, 5);
 
@@ -344,7 +344,7 @@ create_pin_property_widget (GschemObjectPropertiesDockable *dialog)
 
   label[0] = gschem_dialog_misc_create_property_label (_("Pin Type:"));
 
-  widget[0] = dialog->pin_type = gschem_pin_type_combo_new ();
+  widget[0] = dialog->pin_type = gschem_pin_type_combo_new();
 
   table = gschem_dialog_misc_create_property_table (label, widget, 1);
 

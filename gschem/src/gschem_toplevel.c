@@ -429,7 +429,7 @@ gschem_toplevel_get_selection_adapter (GschemToplevel *w_current)
   g_return_val_if_fail (w_current->toplevel != NULL, NULL);
 
   if (w_current->selection_adapter == NULL) {
-    w_current->selection_adapter = gschem_selection_adapter_new ();
+    w_current->selection_adapter = gschem_selection_adapter_new();
 
     g_signal_connect_swapped (w_current->selection_adapter,
                               "handle-undo",

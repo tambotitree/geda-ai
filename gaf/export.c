@@ -49,12 +49,12 @@ static void export_layout_page (PAGE *page, cairo_rectangle_t *extents,
                                 cairo_matrix_t *mtx);
 static void export_draw_page (PAGE *page);
 
-static void export_png (void);
+static void export_png ();
 static void export_postscript (gboolean is_eps);
-static void export_ps  (void);
-static void export_eps (void);
-static void export_pdf (void);
-static void export_svg (void);
+static void export_ps  ();
+static void export_eps ();
+static void export_pdf ();
+static void export_svg ();
 
 static gdouble export_parse_dist (const gchar *dist);
 static gboolean export_parse_scale (const gchar *scale);
@@ -62,8 +62,8 @@ static gboolean export_parse_layout (const gchar *layout);
 static gboolean export_parse_margins (const gchar *margins);
 static gboolean export_parse_paper (const gchar *paper);
 static gboolean export_parse_size (const gchar *size);
-static void export_config (void);
-static void export_usage (void);
+static void export_config ();
+static void export_usage ();
 static void export_command_line (int argc, char * const *argv);
 
 /* Default pixels-per-inch for raster outputs */
@@ -81,7 +81,7 @@ struct ExportFormat {
   gchar *name; /* UTF-8 */
   gchar *alias; /* UTF-8 */
   gint flags;
-  void (*func)(void);
+  void (*func)();
 };
 
 enum ExportOrientation {
@@ -467,7 +467,7 @@ export_draw_page (PAGE *page)
 }
 
 static void
-export_png (void)
+export_png ()
 {
   cairo_surface_t *surface;
   cairo_t *cr;
@@ -549,19 +549,19 @@ export_postscript (gboolean is_eps)
 }
 
 static void
-export_ps (void)
+export_ps ()
 {
   export_postscript (FALSE);
 }
 
 static void
-export_eps (void)
+export_eps ()
 {
   export_postscript (TRUE);
 }
 
 static void
-export_pdf (void)
+export_pdf ()
 {
   cairo_surface_t *surface;
   cairo_rectangle_t extents;
@@ -803,7 +803,7 @@ export_parse_scale (const gchar *scale)
 
 /* Initialise settings from config store. */
 static void
-export_config (void)
+export_config ()
 {
   EdaConfig *cfg = eda_config_get_context_for_file (NULL);
   gchar *str;
@@ -900,7 +900,7 @@ static struct option export_long_options[] = {
 };
 
 static void
-export_usage (void)
+export_usage ()
 {
   printf (_("Usage: gaf export [OPTION ...] -o OUTPUT [--] FILE ...\n"
 "\n"

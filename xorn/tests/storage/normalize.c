@@ -159,7 +159,7 @@ static void check_string(xorn_revision_t rev, xorn_object_t ob,
 	assert(out->len == 0);
 }
 
-int main(void)
+int main()
 {
 	xorn_revision_t rev;
 	xorn_object_t ob;

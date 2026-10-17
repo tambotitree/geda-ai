@@ -1,3 +1,35 @@
+GTK3 Modernization and gEDA-AI Direction
+----------------------
+
+- Complete GTK 3 migration and audit all warnings from deprecated or updated API usage (e.g., GtkImageMenuItem, GtkStock, GtkMisc, GtkAlignment, etc).
+- Instrument x_window_create_main() using add_test_object_x_window_main() for all major widget creation points.
+- Move gtk_widget_show_all(w_current->main_window) to the end of x_window_create_main(), after all widgets are packed.
+- Remove all usage of GtkHandleBox and set w_current->handleboxes = FALSE permanently.
+- Compile all icons into the binary; do not allow user theme override. Consider using GResource for embedding.
+- Add widget visibility, allocation, and mapping checks to widget_roster instrumentation.
+- Optional: add print_test_objects_x_window_main() for terminal or log output of widget state.
+- Optional: validate drawing_area creation by stepping into gschem_page_view_new_with_page() and checking for NULL.
+Data Structure Cleanup and Naming Consistency
+----------------------
+
+- Audit and fix all uses of object_tail and return_tail to ensure consistent and correct list traversal.
+- Review head-based list structures, especially attributes where the head has a NULL "object" pointer; see notes in o_attrib.c.
+- Clarify and separate the use of selected/object_head/replicated object lists — current code is inconsistent and chaotic.
+- Eliminate global_window_current and window_current usage; move toward explicit state passing throughout.
+- Fix switch/case/break tabbing and structure across the entire codebase — too many logic errors hiding in layout slop.
+- Investigate and correct kludge in object_parent usage; currently required for o_attrib_attach() but likely replaceable with cleaner context passing.
+- Move zoom/pan logic (`a_zoom`, `a_pan`) to the `i_*` interface layer.
+- Consider renaming `a_basic.c` to a more descriptive name based on its function.
+- Standardize coordinate system semantics: enforce that (0,0) is lower-left, and correct variable use of `left`, `top`, `right`, `bottom`.
+- Unify naming patterns for *_world, world_*, and *_world_* variables and functions, especially in complex object handling.
+- Rename w_current->toolbar to w_current->tool_bar_main_window for clarity and future extensibility.
+- Remove w_current->toolbars visibility flag; always show the toolbar.
+- Drop gschem_action_set_sensitive/active for toolbar toggling; toolbar is no longer user-toggleable.
+- Clarify the role of left_notebook — it appears docked to the side, not the main schematic view.
+- Investigate what tabs are placed in left_notebook — symbol/library browser?
+* Refactor popup menu creation out of x_window_create_main() into x_window_create_popup_menu() to simplify the main window setup function.
+Replace ad-hoc printf/fprintf debugging with GTK/GLib logging (g_log, g_debug, etc). Integrate verbosity flags (-v, -vvvv) to control debug output levels for maintainability.
+
 TODOs
 ----------------------
 

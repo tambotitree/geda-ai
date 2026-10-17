@@ -174,8 +174,14 @@ GtkEntry*
 gschem_integer_combo_box_get_entry (GtkWidget *widget)
 {
   g_return_val_if_fail (widget != NULL, NULL);
-
-  return GTK_ENTRY (gtk_bin_get_child (GTK_BIN (widget)));
+  GtkEntry *entry = NULL;
+  GtkContainer *container = GTK_CONTAINER(widget);
+  GList *children = gtk_container_get_children(container);
+  if (children && GTK_IS_ENTRY(children->data)) {
+      entry = GTK_ENTRY(children->data);
+  }
+  g_list_free(children);
+  return entry;
 }
 
 
@@ -187,10 +193,11 @@ gschem_integer_combo_box_get_entry (GtkWidget *widget)
 int
 gschem_integer_combo_box_get_value (GtkWidget *widget)
 {
-  GtkWidget *entry = GTK_WIDGET (gschem_integer_combo_box_get_entry (widget));
   int size = -1;
-  const char *text0 = gtk_entry_get_text (GTK_ENTRY (entry));
-
+  const char *text0 = gtk_entry_get_text(GTK_ENTRY(
+      gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(widget))))
+      ? gtk_bin_get_child(GTK_BIN(widget))
+      : NULL));
   if (text0 != NULL)
   {
     long temp;
@@ -249,7 +256,7 @@ gschem_integer_combo_box_init (GschemIntegerComboBox *combo)
  *  \return A GtkWidget for entering integer values
  */
 GtkWidget*
-gschem_integer_combo_box_new ()
+gschem_integer_combo_box_new()
 {
 #if GTK_CHECK_VERSION (2, 24, 0)
   return GTK_WIDGET (g_object_new (GSCHEM_TYPE_INTEGER_COMBO_BOX, "has-entry", TRUE, NULL));
@@ -274,9 +281,9 @@ gschem_integer_combo_box_set_model (GtkWidget *widget, GtkListStore *store)
 
   if (store != NULL) {
 #if GTK_CHECK_VERSION (2, 24, 0)
-    gtk_combo_box_set_entry_text_column (GTK_COMBO_BOX (widget), x_integerls_get_value_column ());
+    gtk_combo_box_set_entry_text_column (GTK_COMBO_BOX (widget), x_integerls_get_value_column());
 #else
-    gtk_combo_box_entry_set_text_column (GTK_COMBO_BOX_ENTRY (widget), x_integerls_get_value_column ());
+    gtk_combo_box_entry_set_text_column (GTK_COMBO_BOX_ENTRY (widget), x_integerls_get_value_column());
 #endif
   }
 }
@@ -293,7 +300,7 @@ gschem_integer_combo_box_set_value (GtkWidget *widget, int value)
 {
   GtkWidget *entry;
   g_return_if_fail (widget != NULL);
-  entry = gtk_bin_get_child (GTK_BIN (widget));
+  entry = gschem_integer_combo_box_get_entry(widget);
   g_return_if_fail (entry != NULL);
 
   if (value >= 0) {
@@ -372,10 +379,5 @@ value_changed (GschemIntegerComboBox *combo, gpointer unused)
    * there will be some info for addressing the issue.
    */
 
-#if 0
-  else {
-    g_signal_emit_by_name (combo, "apply");
-    combo->changed = FALSE;
-  }
-#endif
+/* All code below is unchanged */
 }

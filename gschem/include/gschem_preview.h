@@ -1,3 +1,5 @@
+#ifndef GSCHEM_PREVIEW_H
+#define GSCHEM_PREVIEW_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 1998-2010 Ales Hvezda
@@ -53,4 +55,5 @@ GType
 gschem_preview_get_type (void);
 
 GtkWidget*
-gschem_preview_new ();
+gschem_preview_new (void);
+#endif /* GSCHEM_PREVIEW_H */

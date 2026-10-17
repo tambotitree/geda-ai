@@ -1,3 +1,5 @@
+#ifndef GSCHEM_INTEGER_COMBO_BOX_H
+#define GSCHEM_INTEGER_COMBO_BOX_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 1998-2010 Ales Hvezda
@@ -56,16 +58,17 @@ GtkEntry*
 gschem_integer_combo_box_get_entry (GtkWidget *widget);
 
 GType
-gschem_integer_combo_box_get_type();
+gschem_integer_combo_box_get_type (void);
 
 int
 gschem_integer_combo_box_get_value (GtkWidget *widget);
 
 GtkWidget*
-gschem_integer_combo_box_new ();
+gschem_integer_combo_box_new (void);
 
 void
 gschem_integer_combo_box_set_model (GtkWidget *widget, GtkListStore *store);
 
 void
 gschem_integer_combo_box_set_value (GtkWidget *widget, int value);
+#endif /* GSCHEM_INTEGER_COMBO_BOX_H */

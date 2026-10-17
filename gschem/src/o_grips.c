@@ -1443,6 +1443,6 @@ void o_grips_draw_rubber (GschemToplevel *w_current, EdaRenderer *renderer)
     break;
 
     default:
-      g_return_if_reached ();
+      g_return_if_reached();
   }
 }

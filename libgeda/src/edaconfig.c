@@ -1707,7 +1707,7 @@ parent_config_changed_handler (EdaConfig *cfg, const gchar *group,
  * \return a #GQuark representing the error domain.
  */
 GQuark
-eda_config_error_quark (void)
+eda_config_error_quark ()
 {
   return g_quark_from_static_string ("eda-config-error-quark");
 }

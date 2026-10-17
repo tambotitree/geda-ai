@@ -38,7 +38,7 @@
 #include "../include/gettext.h"
 
 void
-gsymcheck_quit(void)
+gsymcheck_quit()
 {
   
   s_clib_free();

@@ -78,7 +78,7 @@ build_menu (SCM s_menu, gboolean is_main_menu, GschemToplevel *w_current)
 void
 x_menus_create_main_menu (GschemToplevel *w_current)
 {
-  SCM s_var = scm_module_variable (scm_current_module (),
+  SCM s_var = scm_module_variable (scm_current_module(),
                                    scm_from_utf8_symbol ("menubar"));
   if (!scm_is_true (s_var)) {
     g_critical (_("No menubar definition found\n"));
@@ -91,7 +91,7 @@ x_menus_create_main_menu (GschemToplevel *w_current)
     return;
   }
 
-  w_current->menubar = gtk_menu_bar_new ();
+  w_current->menubar = gtk_menu_bar_new();
 
   for (SCM l = s_menubar; scm_is_pair (l); l = scm_cdr (l)) {
     SCM s_menu = scm_car (l);
@@ -126,14 +126,14 @@ x_menus_create_main_menu (GschemToplevel *w_current)
          of style */
       gtk_menu_shell_append (GTK_MENU_SHELL (w_current->menubar), root_menu);
     }
-    scm_dynwind_end ();
+    scm_dynwind_end();
   }
 }
 
 void
 x_menus_create_main_popup (GschemToplevel *w_current)
 {
-  SCM s_var = scm_module_variable (scm_current_module (),
+  SCM s_var = scm_module_variable (scm_current_module(),
                                    scm_from_utf8_symbol ("context-menu"));
   if (!scm_is_true (s_var)) {
     g_warning (_("No context menu definition found\n"));
@@ -213,19 +213,19 @@ x_menus_create_submenus (GschemToplevel *w_current)
                      "settings-name", "recent-files");
 
   /* create left docking area menu */
-  w_current->left_docking_area_menu = gtk_menu_new ();
+  w_current->left_docking_area_menu = gtk_menu_new();
   g_object_set_data (G_OBJECT (w_current->left_docking_area_menu),
                      "settings-name", "left-docking-area");
   gtk_widget_show_all (w_current->left_docking_area_menu);
 
   /* create bottom docking area menu */
-  w_current->bottom_docking_area_menu = gtk_menu_new ();
+  w_current->bottom_docking_area_menu = gtk_menu_new();
   g_object_set_data (G_OBJECT (w_current->bottom_docking_area_menu),
                      "settings-name", "bottom-docking-area");
   gtk_widget_show_all (w_current->bottom_docking_area_menu);
 
   /* create right docking area menu */
-  w_current->right_docking_area_menu = gtk_menu_new ();
+  w_current->right_docking_area_menu = gtk_menu_new();
   g_object_set_data (G_OBJECT (w_current->right_docking_area_menu),
                      "settings-name", "right-docking-area");
   gtk_widget_show_all (w_current->right_docking_area_menu);
@@ -234,7 +234,7 @@ x_menus_create_submenus (GschemToplevel *w_current)
 void
 x_menus_create_toolbar (GschemToplevel *w_current)
 {
-  SCM s_var = scm_module_variable (scm_current_module (),
+  SCM s_var = scm_module_variable (scm_current_module(),
                                    scm_from_utf8_symbol ("toolbar"));
   if (!scm_is_true (s_var)) {
     g_warning (_("No toolbar definition found\n"));
@@ -247,7 +247,7 @@ x_menus_create_toolbar (GschemToplevel *w_current)
     return;
   }
 
-  w_current->toolbar = gtk_toolbar_new ();
+  w_current->toolbar = gtk_toolbar_new();
   gtk_orientable_set_orientation (GTK_ORIENTABLE (w_current->toolbar),
                                   GTK_ORIENTATION_HORIZONTAL);
   gtk_toolbar_set_style (GTK_TOOLBAR (w_current->toolbar), GTK_TOOLBAR_ICONS);
@@ -274,7 +274,7 @@ x_menus_create_toolbar (GschemToplevel *w_current)
 
     if (scm_is_pair (scm_cdr (l0)))
       gtk_toolbar_insert (GTK_TOOLBAR (w_current->toolbar),
-                          gtk_separator_tool_item_new (), -1);
+                          gtk_separator_tool_item_new(), -1);
   }
 
   gtk_widget_show_all (w_current->toolbar);

@@ -45,11 +45,11 @@ struct _GedaListClass {
   GObjectClass parent;
 };
 
-GType geda_list_get_type (void);
+GType geda_list_get_type(void);
 
 /* It would be nice to add const qualifiers to some of these, but GLib
  * is buggy in this respect, and doesn't have const where necessary. */
-GedaList *geda_list_new( void );
+GedaList *geda_list_new(void);
 void geda_list_add( GedaList *list, gpointer item );
 void geda_list_add_glist( GedaList *list, GList *items );
 void geda_list_remove( GedaList *list, gpointer item );

@@ -91,7 +91,7 @@ update_snap_mode_widget (GschemOptionsDockable *dockable);
 /*! \brief Get/register options dockable type.
  */
 GType
-gschem_options_dockable_get_type ()
+gschem_options_dockable_get_type()
 {
   static GType type = 0;
 
@@ -159,7 +159,7 @@ create_grid_mode_widget (GschemOptionsDockable *dockable)
   box = gtk_hbox_new (FALSE, FALSE);
 
   for (index=0; index<GRID_MODE_COUNT; index++) {
-    dockable->grid_radio[index] = gtk_toggle_button_new ();
+    dockable->grid_radio[index] = gtk_toggle_button_new();
 
     gtk_box_pack_start (GTK_BOX (box),                           /* box     */
                         dockable->grid_radio[index],             /* child   */
@@ -273,7 +273,7 @@ create_snap_mode_widget (GschemOptionsDockable *dockable)
   box = gtk_hbox_new (FALSE, FALSE);
 
   for (index=0; index<SNAP_STATE_COUNT; index++) {
-    dockable->snap_radio[index] = gtk_toggle_button_new ();
+    dockable->snap_radio[index] = gtk_toggle_button_new();
 
     gtk_box_pack_start (GTK_BOX (box),                           /* box     */
                         dockable->snap_radio[index],             /* child   */

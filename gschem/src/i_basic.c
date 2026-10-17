@@ -24,7 +24,8 @@
 #endif
 
 #include "gschem.h"
-#include "actions.decl.x"
+// #include "actions.decl.x"
+#include "actions.h"
 
 /*! \brief Update status bar string
  *
@@ -301,7 +302,7 @@ void i_update_middle_button (GschemToplevel *w_current,
  */
 void i_update_toolbar(GschemToplevel *w_current)
 {
-  gschem_action_set_active (action_edit_select,
+  gschem_action_set_active ("edit-select",
                             w_current->event_state == SELECT ||
                             w_current->event_state == GRIPS ||
                             w_current->event_state == MOVEMODE ||
@@ -334,21 +335,21 @@ void i_update_toolbar(GschemToplevel *w_current)
   gschem_action_set_active (action_add_text,
                             w_current->event_state == TEXTMODE, w_current);
 
-  gschem_action_set_active (action_edit_copy,
+  gschem_action_set_active ("edit-copy",
                             w_current->event_state == COPYMODE, w_current);
-  gschem_action_set_active (action_edit_mcopy,
+  gschem_action_set_active ("edit-mcopy",
                             w_current->event_state == MCOPYMODE, w_current);
-  gschem_action_set_active (action_edit_rotate_90,
+  gschem_action_set_active ("edit-rotate-90",
                             w_current->event_state == ROTATEMODE, w_current);
-  gschem_action_set_active (action_edit_mirror,
+  gschem_action_set_active ("edit-mirror",
                             w_current->event_state == MIRRORMODE, w_current);
 
-  gschem_action_set_active (action_view_pan,
+  gschem_action_set_active ("view-pan",
                             w_current->event_state == PAN, w_current);
-  gschem_action_set_active (action_view_zoom_box,
+  gschem_action_set_active ("view-zoom-box",
                             w_current->event_state == ZOOMBOX, w_current);
 
-  gschem_action_set_active (action_edit_translate,
+  gschem_action_set_active ("edit-translate",
                             w_current->event_state == OGNRSTMODE, w_current);
 }
 
@@ -487,48 +488,48 @@ void i_update_menus(GschemToplevel *w_current)
   gschem_action_set_sensitive (action_clipboard_copy, sel_object, w_current);
   gschem_action_set_sensitive (action_edit_deselect, sel_object, w_current);
   gschem_action_set_sensitive (action_edit_delete, sel_object, w_current);
-  gschem_action_set_sensitive (action_edit_copy, sel_object, w_current);
-  gschem_action_set_sensitive (action_edit_mcopy, sel_object, w_current);
-  gschem_action_set_sensitive (action_edit_move, sel_object, w_current);
-  gschem_action_set_sensitive (action_edit_rotate_90, sel_object, w_current);
-  gschem_action_set_sensitive (action_edit_mirror, sel_object, w_current);
+  gschem_action_set_sensitive ("edit-copy", sel_object, w_current);
+  gschem_action_set_sensitive ("edit-mcopy", sel_object, w_current);
+  gschem_action_set_sensitive ("edit-move", sel_object, w_current);
+  gschem_action_set_sensitive ("edit-rotate-90", sel_object, w_current);
+  gschem_action_set_sensitive ("edit-mirror", sel_object, w_current);
 
-  gschem_action_set_sensitive (action_edit_edit, sel_editable, w_current);
-  gschem_action_set_sensitive (action_edit_text, sel_text, w_current);
-  gschem_action_set_sensitive (action_edit_slot, sel_slotted, w_current);
-  gschem_action_set_sensitive (action_edit_properties,
+  gschem_action_set_sensitive ("edit-edit", sel_editable, w_current);
+  gschem_action_set_sensitive ("edit-text", sel_text, w_current);
+  gschem_action_set_sensitive ("edit-slot", sel_slotted, w_current);
+  gschem_action_set_sensitive ("edit-properties",
                                sel_has_properties, w_current);
 
-  gschem_action_set_sensitive (action_edit_lock, sel_unlocked, w_current);
-  gschem_action_set_sensitive (action_edit_unlock, sel_locked, w_current);
-  gschem_action_set_sensitive (action_edit_update, sel_component, w_current);
+  gschem_action_set_sensitive ("edit-lock", sel_unlocked, w_current);
+  gschem_action_set_sensitive ("edit-unlock", sel_locked, w_current);
+  gschem_action_set_sensitive ("edit-update", sel_component, w_current);
 
-  gschem_action_set_sensitive (action_edit_embed,
+  gschem_action_set_sensitive ("edit-embed",
                                sel_embeddable, w_current);
-  gschem_action_set_sensitive (action_edit_unembed,
+  gschem_action_set_sensitive ("edit-unembed",
                                sel_embeddable, w_current);
 
-  gschem_action_set_sensitive (action_hierarchy_down_schematic,
+  gschem_action_set_sensitive ("hierarchy-down-schematic",
                                sel_subsheet, w_current);
-  gschem_action_set_sensitive (action_hierarchy_down_symbol,
+  gschem_action_set_sensitive ("hierarchy-down-symbol",
                                sel_referenced, w_current);
-  gschem_action_set_sensitive (action_hierarchy_documentation,
+  gschem_action_set_sensitive ("hierarchy-documentation",
                                sel_documented, w_current);
 
-  gschem_action_set_sensitive (action_attributes_attach,
+  gschem_action_set_sensitive ("attributes-attach",
                                sel_floating && sel_attachable == 1, w_current);
-  gschem_action_set_sensitive (action_attributes_detach,
+  gschem_action_set_sensitive ("attributes-detach",
                                sel_attached, w_current);
 
-  gschem_action_set_sensitive (action_attributes_show_value,
+  gschem_action_set_sensitive ("attributes-show-value",
                                sel_text, w_current);
-  gschem_action_set_sensitive (action_attributes_show_name,
+  gschem_action_set_sensitive ("attributes-show-name",
                                sel_text, w_current);
-  gschem_action_set_sensitive (action_attributes_show_both,
+  gschem_action_set_sensitive ("attributes-show-both",
                                sel_text, w_current);
-  gschem_action_set_sensitive (action_attributes_visibility_toggle,
+  gschem_action_set_sensitive ("attributes-visibility-toggle",
                                sel_text, w_current);
-  gschem_action_set_sensitive (action_attributes_overbar_toggle,
+  gschem_action_set_sensitive ("attributes-overbar-toggle",
                                sel_text, w_current);
 }
 

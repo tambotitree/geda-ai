@@ -34,7 +34,8 @@
 #endif
 
 #include "gschem.h"
-#include "actions.decl.x"
+// #include "actions.decl.x"
+#include "actions.h"
 #include <gdk/gdkkeysyms.h>
 
 #include "../include/gschem_compselect_dockable.h"
@@ -122,7 +123,7 @@ compselect_place (GschemCompselectDockable *compselect)
               w_current->include_complex = 1;
               break;
             default:
-              g_assert_not_reached ();
+              g_assert_not_reached();
         }
 
         if (w_current->event_state == COMPMODE) {
@@ -468,7 +469,7 @@ update_attributes_model (GschemCompselectDockable *compselect, gchar *filename)
   o_attrlist = o_attrib_find_floating_attribs (s_page_objects (preview_page));
 
   cfg = filename != NULL ? eda_config_get_context_for_path (filename)
-                         : eda_config_get_user_context ();
+                         : eda_config_get_user_context();
   filter_list = eda_config_get_string_list (cfg, "gschem.library",
                                             "component-attributes", &n, NULL);
 
@@ -897,7 +898,7 @@ select_symbol_by_filename (GschemCompselectDockable *compselect,
     tree_view = compselect->libtreeview;
     break;
   default:
-    g_assert_not_reached ();
+    g_assert_not_reached();
   }
 
   GtkTreeModel *model = gtk_tree_view_get_model (tree_view);
@@ -953,7 +954,7 @@ static void
 compselect_callback_refresh_library (GtkButton *button, gpointer user_data)
 {
   /* Rescan the libraries for symbols */
-  s_clib_refresh ();
+  s_clib_refresh();
 }
 
 /*! \brief Creates the treeview for the "In Use" view. */
@@ -1291,11 +1292,11 @@ create_attributes_treeview (GschemCompselectDockable *compselect)
  *  selecting the behavior when a component is added to the sheet.
  */
 static GtkWidget*
-create_behaviors_combo_box (void)
+create_behaviors_combo_box()
 {
   GtkWidget *combobox;
 
-  combobox = gtk_combo_box_text_new ();
+  combobox = gtk_combo_box_text_new();
 
   /* Note: order of items in menu is important */
   /* BEHAVIOR_REFERENCE */
@@ -1314,7 +1315,7 @@ create_behaviors_combo_box (void)
 }
 
 GType
-gschem_compselect_dockable_get_type ()
+gschem_compselect_dockable_get_type()
 {
   static GType compselect_type = 0;
 
@@ -1502,7 +1503,7 @@ reparent2 (GtkWidget *container, GtkWidget *top, GtkWidget *bottom)
     gtk_box_pack_start (GTK_BOX (container), top, TRUE, TRUE, 0);
     gtk_box_pack_start (GTK_BOX (container), bottom, FALSE, FALSE, 0);
   } else
-    g_assert_not_reached ();
+    g_assert_not_reached();
 }
 
 /*! \brief Put the appropriate widget hierarchy for vertical layout in place.
@@ -1682,7 +1683,7 @@ compselect_create_widget (GschemDockable *dockable)
   // Create notebook tabs
   inuseview = create_inuse_treeview (compselect);
   libview = create_lib_treeview (compselect);
-  notebook = gtk_notebook_new ();
+  notebook = gtk_notebook_new();
   compselect->viewtabs = GTK_NOTEBOOK (notebook);
 
   gtk_notebook_append_page (compselect->viewtabs, inuseview, gtk_label_new (_("In Use")));
@@ -1704,7 +1705,7 @@ compselect_create_widget (GschemDockable *dockable)
   gtk_paned_pack2 (GTK_PANED (compselect->hpaned), compselect->vpaned, TRUE, FALSE);
 
   // Behavior combo box
-  combobox = create_behaviors_combo_box ();
+  combobox = create_behaviors_combo_box();
   compselect->combobox_behaviors = GTK_COMBO_BOX (combobox);
   g_signal_connect (combobox, "changed",
                     G_CALLBACK (compselect_callback_behavior_changed),
@@ -1718,7 +1719,7 @@ compselect_create_widget (GschemDockable *dockable)
   g_object_ref (compselect->vbox);
 
   // Preview
-  preview = gschem_preview_new ();
+  preview = gschem_preview_new();
   compselect->preview = GSCHEM_PREVIEW (preview);
   gtk_widget_set_size_request (GTK_WIDGET (preview), 160, 120);
 

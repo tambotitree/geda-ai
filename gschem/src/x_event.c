@@ -126,7 +126,7 @@ x_event_button_pressed(GschemPageView *page_view, GdkEventButton *event, GschemT
      * manually here before processing the double-click event. */
     i_action_stop (w_current);
     o_edit (w_current, geda_list_get_glist (page->selection_list), TRUE);
-    scm_dynwind_end ();
+    scm_dynwind_end();
     return(0);
   }
 
@@ -260,7 +260,7 @@ x_event_button_pressed(GschemPageView *page_view, GdkEventButton *event, GschemT
                                     "eval-action-at-point!")),
                                 w_current->last_action->smob),
                               SCM_UNDEFINED);
-        scm_dynwind_end ();
+        scm_dynwind_end();
       }
       break;
       case(STROKE):
@@ -314,7 +314,7 @@ x_event_button_pressed(GschemPageView *page_view, GdkEventButton *event, GschemT
   }
 
  end_button_pressed:
-  scm_dynwind_end ();
+  scm_dynwind_end();
 
   return(0);
 }
@@ -440,7 +440,7 @@ x_event_button_released (GschemPageView *page_view, GdkEventButton *event, Gsche
       }
   }
  end_button_released:
-  scm_dynwind_end ();
+  scm_dynwind_end();
 
   return(0);
 }
@@ -546,7 +546,7 @@ x_event_motion (GschemPageView *page_view, GdkEventMotion *event, GschemToplevel
     }
   }
 
-  scm_dynwind_end ();
+  scm_dynwind_end();
 
   return(0);
 }

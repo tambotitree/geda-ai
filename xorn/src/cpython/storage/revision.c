@@ -754,7 +754,7 @@ static int Revision_settransient(
 
 
 PyMODINIT_FUNC
-INITFUNC(void)
+INITFUNC()
 {
     PyObject *m;
 

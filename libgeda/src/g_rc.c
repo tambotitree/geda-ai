@@ -903,7 +903,7 @@ SCM g_rc_bus_ripper_symname(SCM scmsymname)
  *
  *  \return SCM_BOOL_T always.
  */
-SCM g_rc_reset_component_library(void)
+SCM g_rc_reset_component_library()
 {
   s_clib_init();
   
@@ -916,7 +916,7 @@ SCM g_rc_reset_component_library(void)
  *
  *  \return SCM_BOOL_T always.
  */
-SCM g_rc_reset_source_library(void)
+SCM g_rc_reset_source_library()
 {
   s_slib_free();
   s_slib_init();

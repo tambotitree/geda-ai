@@ -371,8 +371,8 @@ struct _GtkSheetClass
 
 };
   
-GType gtk_sheet_get_type (void);
-GtkType gtk_sheet_range_get_type (void);
+GType gtk_sheet_get_type ();
+GtkType gtk_sheet_range_get_type ();
 
 /* create a new sheet */
 GtkWidget *

@@ -31,7 +31,7 @@
  *  \par Returns a pointer to a new SELECTION object.
  *  \return pointer to the new SELECTION object.
  */
-SELECTION *o_selection_new( void )
+SELECTION *o_selection_new()
 {
   return (SELECTION*)geda_list_new();
 }

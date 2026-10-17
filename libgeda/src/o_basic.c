@@ -573,7 +573,7 @@ void o_set_color (TOPLEVEL *toplevel, OBJECT *object, int color)
  * \param [in] object    The OBJECT for which to retrieve the parent PAGE.
  * \return The PAGE which owns \a object or NULL.
  *
- * \sa s_page_append_object() s_page_append() s_page_remove()
+ * \sa s_page_append_object(void) s_page_append() s_page_remove()
  */
 PAGE *
 o_get_page (TOPLEVEL *toplevel, OBJECT *object)

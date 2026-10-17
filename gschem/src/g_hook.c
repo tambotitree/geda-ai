@@ -79,8 +79,8 @@ g_run_hook_object_list (GschemToplevel *w_current, const char *name,
                          scm_cons (list_sym,
                                    scm_reverse_x (lst, SCM_EOL)));
 
-  g_scm_eval_protected (expr, scm_interaction_environment ());
-  scm_dynwind_end ();
+  g_scm_eval_protected (expr, scm_interaction_environment());
+  scm_dynwind_end();
   scm_remember_upto_here_1 (expr);
 }
 
@@ -104,8 +104,8 @@ g_run_hook_object (GschemToplevel *w_current, const char *name, OBJECT *obj)
                          g_get_hook_by_name (name),
                          scm_list_2 (list_sym, edascm_from_object (obj)));
 
-  g_scm_eval_protected (expr, scm_interaction_environment ());
-  scm_dynwind_end ();
+  g_scm_eval_protected (expr, scm_interaction_environment());
+  scm_dynwind_end();
   scm_remember_upto_here_1 (expr);
 }
 
@@ -127,8 +127,8 @@ g_run_hook_page (GschemToplevel *w_current, const char *name, PAGE *page)
                          g_get_hook_by_name (name),
                          edascm_from_page (page));
 
-  g_scm_eval_protected (expr, scm_interaction_environment ());
-  scm_dynwind_end ();
+  g_scm_eval_protected (expr, scm_interaction_environment());
+  scm_dynwind_end();
   scm_remember_upto_here_1 (expr);
 }
 
@@ -154,8 +154,9 @@ g_hook_new_proxy_by_name (const char *name)
  * please see ../scheme/gschem/hook.scm.
  */
 static void
-init_module_gschem_core_hook ()
+init_module_gschem_core_hook(void *data)
 {
+  (void)data;
 
 #include "g_hook.x"
 
@@ -189,7 +190,7 @@ init_module_gschem_core_hook ()
  * called by main_prog().
  */
 void
-g_init_hook ()
+g_init_hook(void)
 {
   /* Define the (gschem core hook) module */
   scm_c_define_module ("gschem core hook",

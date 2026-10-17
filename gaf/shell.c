@@ -41,7 +41,7 @@ static struct option shell_long_options[] =
   };
 
 static void
-shell_usage (void)
+shell_usage ()
 {
   printf (_("Usage: gaf shell [OPTION ...]\n"
 "\n"
