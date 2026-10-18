@@ -42,6 +42,8 @@
 #include <glib.h>
 #include <glib-object.h>
 
+#include <pango/pangocairo.h>
+
 #ifdef HAVE_STRING_H
 #include <string.h>
 #endif
@@ -56,358 +58,296 @@
 #include "../include/globals.h"
 #include "../include/gettext.h"
 
-static void show_entry(GtkWidget *widget, gpointer data);
 
-/*! \brief Create the GtkSheet
+/*! \brief Measure a text object without a page view
  *
- * Creates and initializes the GtkSheet widget, which is the
- *         spreadsheet widget used for displaying the data.
+ * libgeda calls back into the application to measure rendered text bounds.
+ * gschem's implementation renders through an EdaRenderer on a live page view;
+ * gattrib has neither, so the string is measured directly with a Pango layout.
+ *
+ * Only the extents are needed here, for the work that walks schematic text
+ * (attribute extraction and net listing), never for drawing, so an
+ * approximation based on Pango metrics is sufficient and avoids pulling in the
+ * whole cairo rendering stack.
+ *
+ * \param [in]  user_data unused
+ * \param [in]  object    text object to measure
+ * \param [out] min_x      left world coord
+ * \param [out] min_y      top world coord
+ * \param [out] max_x      right world coord
+ * \param [out] max_y      bottom world coord
+ * \returns TRUE on success
+ */
+static int
+x_gtksheet_text_bounds(void *user_data, OBJECT *object,
+                       int *min_x, int *min_y, int *max_x, int *max_y)
+{
+  const gchar *text;
+  PangoLayout *layout;
+  PangoContext *context;
+  gint width, height;
+  gint origin_x, origin_y;
+
+  if ((object == NULL) || (object->text == NULL))
+    return FALSE;
+  if (object->type != OBJ_TEXT)
+    return FALSE;
+
+  text = object->text->disp_string != NULL ? object->text->disp_string
+                                           : object->text->string;
+  if (text == NULL)
+    text = "";
+
+  /* A context created from the default font map has one attached; a bare
+   * pango_context_new() does not, and measuring with one raises
+   * "context->font_map != NULL" criticals. */
+  context = pango_font_map_create_context (pango_cairo_font_map_get_default ());
+  layout = pango_layout_new (context);
+  pango_layout_set_text (layout, text, -1);
+  pango_layout_get_pixel_size (layout, &width, &height);
+
+  /* Scale from the object's nominal font size, if one is set, to the size the
+   * layout was measured at. */
+  if (object->text->size > 0) {
+    gdouble scale = (gdouble) object->text->size / 12.0;
+    width = (gint) (width * scale);
+    height = (gint) (height * scale);
+  }
+
+  origin_x = object->text->x;
+  origin_y = object->text->y;
+
+  if (min_x != NULL) *min_x = origin_x;
+  if (min_y != NULL) *min_y = origin_y - height;
+  if (max_x != NULL) *max_x = origin_x + width;
+  if (max_y != NULL) *max_y = origin_y;
+
+  g_object_unref (layout);
+  g_object_unref (context);
+
+  return TRUE;
+}
+
+/*! \brief Register the text-bounds callback with libgeda
+ *
+ * Must be called once the TOPLEVEL exists; world_get_text_bounds() asserts
+ * that a callback is installed.
+ * \param toplevel the TOPLEVEL to configure
+ */
+void
+x_gtksheet_set_text_bounds_func(TOPLEVEL *toplevel)
+{
+  if (toplevel != NULL)
+    o_text_set_rendered_bounds_func(toplevel, x_gtksheet_text_bounds, NULL);
+}
+
+
+/*! \brief Create the attribute sheet widget
+ *
+ * Creates and initializes the sheet widget used to display the attribute data.
+ * Only the Components sheet is implemented; the Nets and Pins pages were never
+ * finished, so nothing is created for them.
  */
 void
 x_gtksheet_init()
 {
   gint i;
-  gchar *folder[]= {_("Components"),
-                   _("Nets"),
-                   _("Pins")};
+  gchar *folder[]= {_("Components")};
 
-
-  /* ---  Create three new sheets.   were malloc'ed in x_window_init  --- */
-
-  /* -----  Components  ----- */
-  if ((sheet_head->comp_count > 0) && (sheet_head->comp_attrib_count >0)) {
-    sheets[0] = (GtkSheet *) gtk_sheet_new((guint) sheet_head->comp_count, (guint) sheet_head->comp_attrib_count, _("Components"));
+  /* ---  Create the Components sheet.  Its slot was malloc'ed in x_window_init  --- */
+  if ((sheet_head->comp_count > 0) && (sheet_head->comp_attrib_count > 0)) {
+    sheets[0] = GATTRIB_SHEET (gattrib_sheet_new ((guint) sheet_head->comp_count,
+                                                  (guint) sheet_head->comp_attrib_count,
+                                                  _("Components")));
   } else {
     x_dialog_fatal_error(_("No components found in design.  Please check your schematic and try again!\n"), 1);
   }
-  
 
-#ifdef UNIMPLEMENTED_FEATURES
-  /* -----  Nets  ----- */
-  if ((sheet_head->net_count > 0) && (sheet_head->net_attrib_count >0)) {
-    sheets[1] = (GtkSheet *) gtk_sheet_new(sheet_head->net_count, sheet_head->net_attrib_count, _("Nets"));
-    gtk_sheet_set_locked(GTK_SHEET(sheets[1]), TRUE);   /* disallow editing of attribs for now */
-  } else {
-    sheets[1] = (GtkSheet *) gtk_sheet_new(1, 1, _("Nets"));
-    gtk_sheet_row_button_add_label(sheets[1], 0, _("TBD"));
-    gtk_sheet_row_button_justify(sheets[1], 0, GTK_JUSTIFY_LEFT);
-    gtk_sheet_column_button_add_label(sheets[1], 0, _("TBD"));
-    gtk_sheet_column_button_justify(sheets[1], 0, GTK_JUSTIFY_LEFT);
-    gtk_sheet_set_locked(GTK_SHEET(sheets[1]), TRUE);   /* disallow editing of attribs for now */
-  }
-#endif
-  
+  /* --- Finally stick the page label on the notebook holding the sheet. --- */
+  for (i = 0; i < NUM_SHEETS; i++) {
+    GtkWidget *label;
 
-#ifdef UNIMPLEMENTED_FEATURES
-  /* -----  Pins  ----- */
-  if ((sheet_head->pin_count > 0) && (sheet_head->pin_attrib_count >0)) {
-    sheets[2] = (GtkSheet *) gtk_sheet_new(sheet_head->pin_count, sheet_head->pin_attrib_count, _("Pins"));
-    gtk_sheet_set_locked(GTK_SHEET(sheets[2]), TRUE);   /* disallow editing of attribs for now */
-  } else {
-    sheets[2] = (GtkSheet *) gtk_sheet_new(1, 1, _("Pins"));
-    gtk_sheet_set_locked(GTK_SHEET(sheets[2]), TRUE);    /* disallow editing of attribs for now */
-  }
-#endif
-
-
-
-  /* --- Finally stick labels on the notebooks holding the two sheets. --- */
-  for(i=0; i<NUM_SHEETS; i++){
-    if (sheets[i] != NULL) {  /* is this check needed? 
-			       * Yes, it prevents us from segfaulting on empty nets sheet. */
-
-
-      scrolled_windows=(GtkWidget **)realloc(scrolled_windows, (i+1)*sizeof(GtkWidget *));
-      scrolled_windows[i]=gtk_scrolled_window_new(NULL, NULL);
-      
-      gtk_container_add( GTK_CONTAINER(scrolled_windows[i]), GTK_WIDGET(sheets[i]) );
-
-      /* First remove old notebook page.  I should probably do some checking here. */
-      if (notebook != NULL) 
-	gtk_notebook_remove_page(GTK_NOTEBOOK(notebook), i);
-
-
-      /* Then add new, updated notebook page */
-      label= gtk_label_new(folder[i]);
-
-      gtk_notebook_append_page(GTK_NOTEBOOK(notebook), GTK_WIDGET(scrolled_windows[i]),
-			       GTK_WIDGET(label) );
-
-      gtk_widget_show( GTK_WIDGET(sheets[i]) );
-      gtk_widget_show( GTK_WIDGET(scrolled_windows[i]) );
-      gtk_widget_show( GTK_WIDGET(notebook) );  /* show updated notebook  */
-
-
-      /*  "changed" signal raised when user changes anything in entry cell  */
-      /*  Note that the entry cell is the text entry field at the top of the
-       *  sheet's working area (like in MS E*cel).   I have removed this from
-       *  gattrib, but leave the code in just in case I want to put it back.  */
-      g_signal_connect (gtk_sheet_get_entry (GTK_SHEET (sheets[i])),
-                        "changed", (GCallback) show_entry, NULL);
+    if (sheets[i] == NULL) {
+      continue;
     }
+
+    scrolled_windows = (GtkWidget **) g_realloc (scrolled_windows,
+                                                (i + 1) * sizeof (GtkWidget *));
+    scrolled_windows[i] = gtk_scrolled_window_new (NULL, NULL);
+    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled_windows[i]),
+                                    GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+    gtk_container_add (GTK_CONTAINER (scrolled_windows[i]),
+                       GTK_WIDGET (sheets[i]));
+
+    /* First remove old notebook page.  I should probably do some checking here. */
+    if (notebook != NULL)
+      gtk_notebook_remove_page(GTK_NOTEBOOK(notebook), i);
+
+    /* Then add new, updated notebook page */
+    label = gtk_label_new (folder[i]);
+
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
+                             GTK_WIDGET (scrolled_windows[i]),
+                             GTK_WIDGET (label));
+
+    gtk_widget_show (GTK_WIDGET (sheets[i]));
+    gtk_widget_show (GTK_WIDGET (scrolled_windows[i]));
+    gtk_widget_show (GTK_WIDGET (notebook));  /* show updated notebook  */
+
+    /* A GtkTreeView has no persistent in-cell GtkEntry, so the old "changed"
+     * hook on gtk_sheet_get_entry() is gone.  Cell edits are delivered through
+     * GattribSheet's "cell-edited" signal instead, which gattrib does not
+     * currently subscribe to. */
   }
 }
 
 
-
 /*------------------------------------------------------------------*/
-/*! \brief Add row labels to GtkSheet
+/*! \brief Add row labels to the attribute sheet
  *
- * Add row labels to GtkSheet
- * \param sheet Pointer to the GtkSheet object
- * \param count Number of row labels to add
- * \param list_head Top of the string list
- */
-void
-x_gtksheet_add_row_labels(GtkSheet *sheet, int count, STRING_LIST *list_head)
-{
-  STRING_LIST *string_list_item;
-  gchar *text;
-  int j;
-  int width = 0;
-  int new_width = 0;
-  int char_width;
-  
-  /* Leave if no items to add are available */
-  if ((count == 0) || (list_head == NULL)) return;
-
-  /* Get character width based upon "X", which is a large char.
-   * font_combo is a global.  Where is it set?  */
-  if ( GTK_WIDGET(sheet)->style->private_font )
-    char_width = gdk_char_width (GTK_WIDGET(sheet)->style->private_font, (gchar)'X'); 
-  else
-    char_width = 12;
-
-  string_list_item = list_head;
-  for (j = 0; j < count; j++) {
-    text = (gchar *) g_strdup(string_list_item->data);
-    new_width = char_width * strlen(text);  
-    if (new_width > width) 
-      width = new_width;
-    
-    gtk_sheet_row_button_add_label(sheet, j, text);
-    gtk_sheet_row_button_justify(sheet, j, GTK_JUSTIFY_LEFT);
-    g_free(text);
-    string_list_item = string_list_item->next;
-  }
-
-
-  gtk_sheet_set_row_titles_width(sheet, width+8);
-}
-
-
-/*------------------------------------------------------------------*/
-/*! \brief Add column labels to GtkSheet
- *
- * Add column labels to GtkSheet.
- * \param sheet GtkSheet to add columns to
- * \param count
+ * Add component-name row labels to the sheet.
+ * \param sheet sheet to add rows to
+ * \param count number of labels
  * \param list_head pointer to top of STRING_LIST
  */
 void
-x_gtksheet_add_col_labels(GtkSheet *sheet, int count, STRING_LIST *list_head)
+x_gtksheet_add_row_labels(GattribSheet *sheet, int count, STRING_LIST *list_head)
 {
   STRING_LIST *string_list_item;
-  gchar *text;
+  gchar **labels;
   int j;
 
   /* Leave if no items to add are available */
   if ((count == 0) || (list_head == NULL)) return;
 
+  labels = g_new0 (gchar *, count);
+
   string_list_item = list_head;
-  for (j = 0; j < count; j++) {
-    text = (gchar *) g_strdup(string_list_item->data);
-    gtk_sheet_column_button_add_label(sheet, j, text);
-    gtk_sheet_column_button_justify(sheet, j, GTK_JUSTIFY_LEFT);
-    /* need to resize the column width here . . . */
-    g_free(text);
+  for (j = 0; j < count && string_list_item != NULL; j++) {
+    labels[j] = (gchar *) string_list_item->data;
     string_list_item = string_list_item->next;
   }
+
+  gattrib_sheet_set_row_labels (sheet, count, labels);
+  g_free (labels);
 }
-  
+
 
 /*------------------------------------------------------------------*/
-/*! \brief Add a cell item to the GtkSheet
+/*! \brief Add column labels to the attribute sheet
  *
- * Add a cell item to the GtkSheet
- * \param sheet GtkSheet to add the cell item to
- * \param i
- * \param j
- * \param text
- * \param visibility
- * \param show_name_value
+ * Add attribute-name column labels to the sheet.
+ * \param sheet sheet to add columns to
+ * \param count number of labels
+ * \param list_head pointer to top of STRING_LIST
  */
 void
-x_gtksheet_add_cell_item(GtkSheet *sheet,gint i, gint j, 
-			 gchar *text, 
-			 gint visibility, 
-			 gint show_name_value)
+x_gtksheet_add_col_labels(GattribSheet *sheet, int count, STRING_LIST *list_head)
 {
+  STRING_LIST *string_list_item;
+  gchar **labels;
+  int j;
+
+  /* Leave if no items to add are available */
+  if ((count == 0) || (list_head == NULL)) return;
+
+  labels = g_new0 (gchar *, count);
+
+  string_list_item = list_head;
+  for (j = 0; j < count && string_list_item != NULL; j++) {
+    labels[j] = (gchar *) string_list_item->data;
+    string_list_item = string_list_item->next;
+  }
+
+  gattrib_sheet_set_column_labels (sheet, count, labels);
+  g_free (labels);
+}
+
+
+/*------------------------------------------------------------------*/
+/*! \brief Add a cell item to the attribute sheet
+ *
+ * Add a cell item to the sheet, colouring it according to the attribute's
+ * visibility state.
+ * \param sheet sheet to add the cell item to
+ * \param i row
+ * \param j column
+ * \param text cell text
+ * \param visibility INVISIBLE or VISIBLE
+ * \param show_name_value SHOW_NAME_VALUE, SHOW_NAME or SHOW_VALUE
+ */
+void
+x_gtksheet_add_cell_item(GattribSheet *sheet, gint i, gint j,
+                         gchar *text,
+                         gint visibility,
+                         gint show_name_value)
+{
+  gint color;
 
   /*  Should I do some sanity checking here?  */
 
-  gtk_sheet_set_cell(sheet, i, j, GTK_JUSTIFY_LEFT, text);
   if (visibility == INVISIBLE) {
-    x_gtksheet_set_cell_text_color(sheet, i, j, GREY);
+    color = GREY;
   } else {
     switch(show_name_value) {
 
     case(SHOW_NAME_VALUE):
-      	x_gtksheet_set_cell_text_color(sheet, i, j, BLUE);       
-	break;
+      color = BLUE;
+      break;
 
     case(SHOW_NAME):
-      	x_gtksheet_set_cell_text_color(sheet, i, j, RED);
-	break;
+      color = RED;
+      break;
 
     case(SHOW_VALUE):
-      	x_gtksheet_set_cell_text_color(sheet, i, j, BLACK);
-	break;
+    default:
+      color = BLACK;
+      break;
     }
   } /* if (visibility == INVISIBLE) */
 
+  gattrib_sheet_set_cell (sheet, i, j, text, color);
 
-
-  /* Need to find a way to ensure that the text in a cell is clipped.
-   * Otherwise, long attribs overwrite adjacent cells.  */
+  /* Long attribute values are ellipsized by the column renderer rather than
+   * overwriting adjacent cells. */
 }
 
 
-/*! \brief Get the first column selected in the GtkSheet
+/*! \brief Get the first column selected in the sheet
  *
- * Get the first column selected in the GtkSheet
- * Returns the index of the first column selected, or -1 if
- *         no column is selected.
- * \param sheet GtkSheet to query
- * \returns index of the first column selected, or -1 if
- *          no column is selected.
+ * Returns the index of the selected column, or -1 if no single column is
+ * selected.
+ * \param sheet sheet to query
+ * \returns index of the selected column, or -1
  */
-int x_gtksheet_get_min_col(GtkSheet *sheet) {
-  if (sheet->state == GTK_SHEET_COLUMN_SELECTED) {
-    return sheet->range.col0;
-  } else {
-    return -1;
-  }
+int x_gtksheet_get_min_col(GattribSheet *sheet) {
+  return gattrib_sheet_get_selected_column (sheet);
 }
 
 
-/*! \brief Get the last column selected in the GtkSheet
+/*! \brief Get the last column selected in the sheet
  *
- * Get the last column selected in the GtkSheet
- * \param GtkSheet to query
- * \returns the index of the last column selected, or -1 if
- *         no column is selected.
+ * Returns the index of the selected column, or -1 if no single column is
+ * selected.  A GtkTreeView selection is a set of rows rather than a rectangle,
+ * so the first and last selected column are always the same.
+ * \param sheet sheet to query
+ * \returns index of the selected column, or -1
  */
-int x_gtksheet_get_max_col(GtkSheet *sheet) {
-  if (sheet->state == GTK_SHEET_COLUMN_SELECTED) {
-    return sheet->range.coli;
-  } else {
-    return -1;
-  }
+int x_gtksheet_get_max_col(GattribSheet *sheet) {
+  return gattrib_sheet_get_selected_column (sheet);
 }
 
 
 /*! \brief Set the text color of a cell
  *
  * Sets the color of a cell identified by row, col.
- * \param sheet GtkSheet to operate on
+ * \param sheet sheet to operate on
  * \param row Row of cell to set
  * \param col Column of cell to set
  * \param color_name Color to set text to
  */
-void x_gtksheet_set_cell_text_color(GtkSheet *sheet, gint row, gint col, 
-			       gint color_name)
+void x_gtksheet_set_cell_text_color(GattribSheet *sheet, gint row, gint col,
+                                    gint color_name)
 {
-  GtkSheetRange *range;	
-  GdkColormap *cmap;
-  GdkColor *color;
-
-  /* First get the system color map and allocate the color */
-  cmap = gdk_colormap_get_system ();
-  color = g_malloc(sizeof(GdkColor));
-  switch(color_name) {
-  case RED:
-    color->red = 0xffff;
-    color->green = 0x0;
-    color->blue = 0x0;
-  break; 
-
-  case BLUE:
-    color->red = 0x0;
-    color->green = 0x0;
-    color->blue = 0xffff;
-  break; 
-
-  case BLACK:
-    color->red = 0x0;
-    color->green = 0x0;
-    color->blue = 0x0;
-  break; 
-
-  case GREY:
-    color->red = 0x9999;
-    color->green = 0x9999;
-    color->blue = 0x9999;
-  break; 
-  }
-
-  if (!gdk_colormap_alloc_color (cmap, color, FALSE, FALSE)) {
-    g_error (_("couldn't allocate color"));
-    return;
-  }
-  /*   g_free(cmap); */
-  
-  /* XXXXX  Attempt to set cell color */
-  range = g_malloc(sizeof(GtkSheetRange));
-  range->row0 = row;
-  range->rowi = row;
-  range->col0 = col;
-  range->coli = col;
-
-  /* Now set color */
-  gtk_sheet_range_set_foreground(sheet, range, color);
-  g_free(color);
-  g_free(range);
+  gattrib_sheet_set_cell_colour (sheet, row, col, color_name);
 }
-
-
-/*! \brief Show text entry box
- *
- * Displays a text entry box at the top of the working area.
- *         It is removed since it is not needed now, but may come in
- *         handy later. Therefore I keep the code around.
- * \param widget
- * \param data
- */
-static void
-show_entry(GtkWidget *widget, gpointer data)
-{
- gchar *text; 
- GtkSheet *sheet;
- GtkWidget *sheet_entry = NULL;
- gint cur_page;
-
- if(!GTK_WIDGET_HAS_FOCUS(widget)) {
-   return;
- }
-
- cur_page = gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook));
-
- sheet = GTK_SHEET(sheets[cur_page]);
- if (sheet != NULL) {
-   sheet_entry = gtk_sheet_get_entry( GTK_SHEET(sheet) );
- }
-
- /*  Here's another place where we mix entry and sheet_entry  */
- if (entry != NULL) {
-   text = (gchar *) gtk_entry_get_text (GTK_ENTRY(sheet_entry));
-   if( text != NULL ) {
-     gtk_entry_set_text(GTK_ENTRY(entry),  text);
-   }
-   else {
-     gtk_entry_set_text(GTK_ENTRY(entry), (const gchar *) ""); 
-     /* gtk_entry_set_text(GTK_ENTRY(entry), NULL); */
-   }
- }
-}
-

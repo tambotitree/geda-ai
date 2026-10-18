@@ -323,3 +323,64 @@ The API run is bounded by the 00:00Z stop and a token budget. It completed
 missing work. Every action is in the file from the deterministic generator,
 so an unvisited action is unverified, not absent. `status` reports verified
 vs remaining, and `run --resume --retry` continues where it stopped.
+
+
+## GTK2 removal: gattrib's bundled GtkSheet replaced (2026-10-18)
+
+GTK2 is no longer supported anywhere in the tree. When this work started the
+only remaining GTK2 code was `gattrib`: the vendored GTK-extra `GtkSheet`
+widget (`gtksheet_2_2.c`, 8,667 lines + 871-line header) with its marshaller.
+Against GTK3 it produced 757 compile errors, including 81 direct-draw
+(`gdk_draw_*`/`gdk_gc_*`) sites that a port would have had to rewrite in
+cairo, so it was replaced rather than converted.
+
+### What replaced it
+
+`gattrib_sheet.{c,h}` is a small GTK3 widget: a `GtkBox` containing a
+`GtkTreeView` over a `GtkListStore`. Column 0 is the read-only component name;
+each attribute is one editable text column. That mirrors what gattrib actually
+needed, which the investigation showed was only 12 API entry points -- the
+original count of "182 call sites" was inflated by gtksheet's internal
+self-calls.
+
+Cell colour still encodes visibility, preserving the documented meanings:
+`GREY` hidden, `BLUE` name=value, `RED` name only, `BLACK` value only. The
+colours live in their own model columns so setting text never clobbers them.
+
+### Dead code removed
+
+Nets and Pins sheets were behind `#ifdef UNIMPLEMENTED_FEATURES`, a macro never
+defined anywhere, so `sheets[1]` and `sheets[2]` were always NULL while
+`s_visibility.c` and `x_dialog.c` dereferenced them and relied on
+`g_return_if_fail` to survive. `NUM_SHEETS` is now 1 and the switch arms for
+pages 1 and 2 remain as no-ops.
+
+`s_visibility.c`'s four `switch (sheet->state)` bodies read GtkSheet's private
+`range`/`active_cell`/`state` fields. They now share one helper built on
+`gattrib_sheet_get_selection()`, with the active cell treated as a one-cell
+selection.
+
+### Pre-existing bug fixed along the way
+
+`gattrib` never installed libgeda's rendered-text-bounds callback, so every
+text object raised `world_get_text_bounds: assertion
+'toplevel->rendered_text_bounds_func != NULL' failed` -- 62 criticals on a
+single small schematic. gattrib has no page view, so `x_gtksheet.c` now
+supplies a Pango-based measurement (created from the default font map, since a
+bare `pango_context_new()` has no font map and raises its own criticals).
+
+### Verification
+
+- `gattrib`, `libgeda`, `libgedacairo`, `gaf`, `gschem`, `gsymcheck`: 0 errors.
+- `make check` in `gattrib`: `PASS: test-gattrib-sheet`, 41 assertions covering
+  the cell model, colour/text independence, column append and delete, row
+  resize, and selection.
+- `gattrib <schematic>` starts, stays up, and logs 0 criticals (down from 62).
+- No `gtk_sheet_*`/`GtkSheet` references remain in compiled code; only comments.
+
+### Not verified
+
+Visual parity -- column widths, exact colours and in-cell editing behaviour -- needs a human looking at a real design. The tests cover the data model, not
+appearance. `gtkextra-marshal` was also removed; nothing outside gtksheet used
+it.
+

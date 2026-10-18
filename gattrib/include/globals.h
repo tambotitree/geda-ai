@@ -104,12 +104,14 @@ extern SHEET_DATA *sheet_head;
  *------------------------------------------------------------------*/
 #define DEFAULT_PRECISION 2
 #define DEFAULT_SPACE 8
-#define NUM_SHEETS 3            /* Components, Nets, and Pins */
+/* Only the Components sheet is implemented; the Nets and Pins sheets were never
+ * finished and always stayed NULL. */
+#define NUM_SHEETS 1            /* Components only */
 
 extern GtkWidget *window;              /* Main window */
 extern GtkWidget *notebook;
 
-extern GtkSheet **sheets;             /* These are the spreadsheet widgets themselves */
+extern GattribSheet **sheets;         /* These are the spreadsheet widgets themselves */
 
 extern GtkWidget **scrolled_windows;
 extern GtkWidget *entry;

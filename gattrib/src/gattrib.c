@@ -161,6 +161,11 @@ void gattrib_main(void *closure, int argc, char *argv[])
   /* ---------- Start creation of new project: (TOPLEVEL *pr_current) ---------- */
   pr_current = s_toplevel_new();
 
+  /* libgeda needs a text measuring callback before anything walks schematic
+   * text; without it world_get_text_bounds() raises a critical for every text
+   * object it meets.  gattrib has no page view, so it supplies its own. */
+  x_gtksheet_set_text_bounds_func(pr_current);
+
   /* ----- Read in RC files.   ----- */
   g_rc_parse (pr_current, argv[0], "gattribrc", NULL);
 

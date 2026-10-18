@@ -23,7 +23,7 @@
  *
  * This file holds functions used to handle the toplevel window and
  * various widgets held by that window.  Widges used to handle
- * (GtkSheet *sheet) itself are held in a different file.
+ * (GattribSheet *sheet) itself are held in a different file.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -111,10 +111,9 @@ x_window_init()
   gtk_box_pack_start(GTK_BOX(main_vbox), notebook, TRUE, TRUE, 0);
   
   /* -----  Now malloc -- but don't fill out -- space for sheets  ----- */  
-  /* This basically sets up the overhead for the sheets, as I understand
-   * it.  The memory for the actual sheet cells is allocated later,
-   * when gtk_sheet_new is invoked, I think.  */
-  sheets = g_malloc0(NUM_SHEETS * sizeof(GtkWidget *));
+  /* This sets up the slot for the attribute sheet.  The sheet widget itself
+   * is created later, by x_gtksheet_init().  */
+  sheets = g_malloc0(NUM_SHEETS * sizeof(GattribSheet *));
 }
 
 
@@ -338,30 +337,30 @@ x_window_add_items()
 		       * in sheet_head->comp_count, etc. . .  */
 
   if (sheet_head->comp_count > 0 ) {
-    x_gtksheet_add_row_labels(GTK_SHEET(sheets[0]), 
+    x_gtksheet_add_row_labels(GATTRIB_SHEET(sheets[0]), 
 			      sheet_head->comp_count, sheet_head->master_comp_list_head);
-    x_gtksheet_add_col_labels(GTK_SHEET(sheets[0]), 
+    x_gtksheet_add_col_labels(GATTRIB_SHEET(sheets[0]), 
 			      sheet_head->comp_attrib_count, sheet_head->master_comp_attrib_list_head);
   }
 
 #ifdef UNIMPLEMENTED_FEATURES
   /* This is not ready.  I need to implement net attributes */
   if (sheet_head->net_count > 0 ) {
-    x_gtksheet_add_row_labels(GTK_SHEET(sheets[1]), 
+    x_gtksheet_add_row_labels(GATTRIB_SHEET(sheets[1]), 
 			      sheet_head->net_count, sheet_head->master_net_list_head);
-    x_gtksheet_add_col_labels(GTK_SHEET(sheets[1]), 
+    x_gtksheet_add_col_labels(GATTRIB_SHEET(sheets[1]), 
 			      sheet_head->net_attrib_count, sheet_head->master_net_attrib_list_head);
   } else {
-    x_gtksheet_add_row_labels(GTK_SHEET(sheets[1]), 1, NULL);
-    x_gtksheet_add_col_labels(GTK_SHEET(sheets[1]), 1, NULL);
+    x_gtksheet_add_row_labels(GATTRIB_SHEET(sheets[1]), 1, NULL);
+    x_gtksheet_add_col_labels(GATTRIB_SHEET(sheets[1]), 1, NULL);
   }  
 #endif
 
 #ifdef UNIMPLEMENTED_FEATURES
   if (sheet_head->pin_count > 0 ) {
-    x_gtksheet_add_row_labels(GTK_SHEET(sheets[2]), 
+    x_gtksheet_add_row_labels(GATTRIB_SHEET(sheets[2]), 
 			      sheet_head->pin_count, sheet_head->master_pin_list_head);
-    x_gtksheet_add_col_labels(GTK_SHEET(sheets[2]), 
+    x_gtksheet_add_col_labels(GATTRIB_SHEET(sheets[2]), 
 			      sheet_head->pin_attrib_count, sheet_head->master_pin_attrib_list_head);
   }
 #endif
@@ -375,7 +374,7 @@ x_window_add_items()
 	text = (gchar *) g_strdup( (sheet_head->component_table)[i][j].attrib_value );
 	visibility = (sheet_head->component_table)[i][j].visibility;
 	show_name_value = (sheet_head->component_table)[i][j].show_name_value;
-	x_gtksheet_add_cell_item( GTK_SHEET(sheets[0]), i, j, (gchar *) text, 
+	x_gtksheet_add_cell_item( GATTRIB_SHEET(sheets[0]), i, j, (gchar *) text, 
 				  visibility, show_name_value );
 	g_free(text);
       }
@@ -392,7 +391,7 @@ x_window_add_items()
 	text = (gchar *) g_strdup( (sheet_head->net_table)[i][j].attrib_value );
 	visibility = (sheet_head->net_table)[i][j].visibility;
 	show_name_value = (sheet_head->component_table)[i][j].show_name_value;
-	x_gtksheet_add_cell_item( GTK_SHEET(sheets[1]), i, j, (gchar *) text,
+	x_gtksheet_add_cell_item( GATTRIB_SHEET(sheets[1]), i, j, (gchar *) text,
 				  visibility, show_name_value );
 	g_free(text);
       }
@@ -409,7 +408,7 @@ x_window_add_items()
       if ( (sheet_head->pin_table)[i][j].attrib_value ) { /* NULL = no entry */
 	text = (gchar *) g_strdup( (sheet_head->pin_table)[i][j].attrib_value );
 	/* pins have no visibility attributes, must therefore provide default. */
-	x_gtksheet_add_cell_item( GTK_SHEET(sheets[2]), i, j, (gchar *) text, 
+	x_gtksheet_add_cell_item( GATTRIB_SHEET(sheets[2]), i, j, (gchar *) text, 
 				  VISIBLE, SHOW_VALUE );
 	g_free(text);
       }

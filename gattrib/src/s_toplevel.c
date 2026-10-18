@@ -241,9 +241,9 @@ void s_toplevel_add_new_attrib(gchar *new_attrib_name) {
     printf("In s_toplevel_add_new_attrib, just resized component table.\n");
 #endif
 
-    /* Fill out new sheet with new stuff from gtksheet */
-    gtk_sheet_insert_columns(GTK_SHEET(sheets[0]), new_index, 1);
-    x_gtksheet_add_col_labels(GTK_SHEET(sheets[0]), 
+    /* Fill out new sheet with new stuff from the attribute matrix */
+    gattrib_sheet_append_columns(GATTRIB_SHEET(sheets[0]), 1, NULL);
+    x_gtksheet_add_col_labels(GATTRIB_SHEET(sheets[0]), 
 			      sheet_head->comp_attrib_count, 
 			      sheet_head->master_comp_attrib_list_head);
 
@@ -276,12 +276,12 @@ void s_toplevel_add_new_attrib(gchar *new_attrib_name) {
 void s_toplevel_delete_attrib_col() {
   gint cur_page;  /* current page in notbook  */
   gint mincol, maxcol;
-  GtkSheet *sheet;
+  GattribSheet *sheet;
   gchar *attrib_name;
 
   /* Repeat previous checks  */
   cur_page = gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook));
-  sheet = GTK_SHEET(sheets[cur_page]);
+  sheet = GATTRIB_SHEET(sheets[cur_page]);
   if (sheet == NULL) {
     return;
   }
@@ -307,8 +307,8 @@ void s_toplevel_delete_attrib_col() {
     s_table_destroy(sheet_head->component_table, 
 		    sheet_head->comp_count, sheet_head->comp_attrib_count);
 
-    /*  Get name (label) of the col to delete from the gtk sheet */
-    attrib_name = g_strdup( gtk_sheet_column_button_get_label(sheet, mincol) );
+    /*  Get name (label) of the col to delete from the sheet */
+    attrib_name = g_strdup( gattrib_sheet_get_column_label(sheet, mincol) );
     
     if (attrib_name != NULL) {
 #ifdef DEBUG
@@ -354,13 +354,13 @@ void s_toplevel_delete_attrib_col() {
   }  /* switch  */
 
 
-  /* Delete col on gtksheet  */
+  /* Delete col in the attribute matrix */
 #ifdef DEBUG
-  printf("In s_toplevel_delete_attrib_col, about to delete col in gtksheet.\n");
+  printf("In s_toplevel_delete_attrib_col, about to delete col in sheet.\n");
 #endif
-  gtk_sheet_delete_columns (sheet, mincol, 1); 
+  gattrib_sheet_delete_column (sheet, mincol); 
 #ifdef DEBUG
-  printf("In s_toplevel_delete_attrib_col, done deleting col in gtksheet.\n");
+  printf("In s_toplevel_delete_attrib_col, done deleting col in sheet.\n");
 #endif
   
   sheet_head->CHANGED = TRUE;  /* Set changed flag so user is prompted when exiting */

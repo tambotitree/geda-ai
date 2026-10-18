@@ -41,7 +41,7 @@ SHEET_DATA *sheet_head;
 GtkWidget *window;
 GtkWidget *notebook;
 
-GtkSheet **sheets;
+GattribSheet **sheets;
 
 GtkWidget **scrolled_windows;
 GtkWidget *entry;

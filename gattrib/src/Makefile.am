@@ -5,8 +5,7 @@ bin_PROGRAMS = gattrib
 
 ## don't forget all *.h files */
 gattrib_SOURCES = \
-		gtksheet_2_2.c \
-		gtkextra-marshal.c \
+		gattrib_sheet.c \
 		globals.c \
 		listsort.c \
 		parsecmd.c \
@@ -44,7 +43,18 @@ gattrib_LDADD = $(top_builddir)/libgeda/src/libgeda.la
 localedir = @datadir@/locale
 DEFS = -DLOCALEDIR=\"$(localedir)\" @DEFS@
 
-MOSTLYCLEANFILES = *.log *.ps core FILE *~ #*# 
-CLEANFILES = *.log *.ps core FILE *~ #*#
+## Unit test for the attribute-matrix widget.  Built and run by "make check";
+## it needs no display because it only exercises the model API.
+check_PROGRAMS = test-gattrib-sheet
+
+test_gattrib_sheet_SOURCES = test_gattrib_sheet.c gattrib_sheet.c
+test_gattrib_sheet_CPPFLAGS = -I$(srcdir)/../include -I$(srcdir)
+test_gattrib_sheet_CFLAGS = $(GCC_CFLAGS) $(GLIB_CFLAGS) $(GTK_CFLAGS)
+test_gattrib_sheet_LDADD = $(GLIB_LIBS) $(GTK_LIBS)
+
+TESTS = test-gattrib-sheet
+
+MOSTLYCLEANFILES = *.log *.ps core FILE *~ #*#  test-gattrib-sheet *.trs
+CLEANFILES = *.log *.ps core FILE *~ #*# test-gattrib-sheet *.trs
 DISTCLEANFILES = *.log core FILE *~ #*#
 MAINTAINERCLEANFILES = *.log *.ps core FILE *~ Makefile.in #*#

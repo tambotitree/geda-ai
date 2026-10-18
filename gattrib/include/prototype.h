@@ -79,7 +79,7 @@ void s_table_add_toplevel_net_items_to_net_table(const GList *obj_list);
 void s_table_add_toplevel_pin_items_to_pin_table(const GList *obj_list);
 
 void s_table_gtksheet_to_all_tables(void);
-void s_table_gtksheet_to_table(GtkSheet *local_gtk_sheet, 
+void s_table_gtksheet_to_table(GattribSheet *local_gtk_sheet, 
 			      STRING_LIST *master_row_list, STRING_LIST *master_col_list, 
 			      TABLE **local_table, int num_rows, int num_cols);
 
@@ -178,15 +178,16 @@ void x_dialog_about_dialog(void);
 void x_dialog_export_file(void);
 
 /* ------------- x_gtksheet.c ------------- */
+void x_gtksheet_set_text_bounds_func(TOPLEVEL *toplevel);
 void x_gtksheet_init(void);
-void x_gtksheet_add_row_labels(GtkSheet *sheet, int count, STRING_LIST *list_head);
-void x_gtksheet_add_col_labels(GtkSheet *sheet, int count, STRING_LIST *list_head);
-void x_gtksheet_add_cell_item(GtkSheet *sheet, gint i, gint j, 
+void x_gtksheet_add_row_labels(GattribSheet *sheet, int count, STRING_LIST *list_head);
+void x_gtksheet_add_col_labels(GattribSheet *sheet, int count, STRING_LIST *list_head);
+void x_gtksheet_add_cell_item(GattribSheet *sheet, gint i, gint j, 
 			      char *text, gint visibility, gint show_name_value);
-void x_gtksheet_set_cell_text_color(GtkSheet *sheet, gint row, gint col, 
+void x_gtksheet_set_cell_text_color(GattribSheet *sheet, gint row, gint col, 
 				    gint color_name);
-int x_gtksheet_get_min_col(GtkSheet *sheet);
-int x_gtksheet_get_max_col(GtkSheet *sheet);
+int x_gtksheet_get_min_col(GattribSheet *sheet);
+int x_gtksheet_get_max_col(GattribSheet *sheet);
 
 /* ------------- x_fileselect.c ------------- */
 GSList *x_fileselect_open (void);
