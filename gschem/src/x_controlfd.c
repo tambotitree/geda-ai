@@ -32,6 +32,7 @@
 #include <config.h>
 
 #include "gschem.h"
+#include "gschem_ai_assist.h"
 
 #include <glib-unix.h>
 
@@ -45,12 +46,19 @@ static const char *help_string =
   "    close FILE\n"
   "    patch-filename FILE PATCHFILE\n"
   "    import-patch FILE [PATCHFILE]\n"
+  "    ai-prompt PROMPTFILE\n"
   "    quit\n"
   "    help\n"
   "\n"
   "File paths must be absolute, except for patch filenames which are resolved\n"
   "relative to the main file.  Arguments are separated by spaces; spaces and\n"
-  "backslashes inside arguments must be escaped with a backslash.\n";
+  "backslashes inside arguments must be escaped with a backslash.\n"
+  "\n"
+  "ai-prompt reads PROMPTFILE and writes PROMPTFILE.out next to it, holding\n"
+  "the prompt, the current schematic as gEDA text, and a SPICE readiness\n"
+  "report.  It writes nothing to the schematic and calls no model; the\n"
+  "result is reported as `ai-prompt: wrote FILE' and is meant to be picked\n"
+  "up by an assistant.\n";
 
 static int control_fd = -1;
 static guint tag = 0;
@@ -117,6 +125,14 @@ x_controlfd_free()
   if (tag != 0) {
     (void) g_source_remove (tag);
     tag = 0;
+  }
+
+  /* Closing here keeps gschem_quit's call sufficient on its own; can_read's
+   * error path calls this too, so both must tolerate a stream that is
+   * already gone. */
+  if (stream != NULL) {
+    fclose (stream);
+    stream = NULL;
   }
 }
 
@@ -342,6 +358,31 @@ process_command (gchar *buf)
     }
   }
 
+  else if (strcmp (args[0], "ai-prompt") == 0) {
+    if (count != 2)
+      fprintf (stderr, "Command usage: ai-prompt PROMPTFILE\n");
+    else if (global_window_list != NULL) {
+      GschemToplevel *w_current = GSCHEM_TOPLEVEL (global_window_list->data);
+      gchar *out_path = NULL;
+      GError *err = NULL;
+
+      if (ai_assist_write_prompt (w_current, args[1], &out_path, &err)) {
+        /* The answer goes to stderr, which is where every other line of
+         * this protocol's output goes (see help_string).  Keeping the
+         * result on stdout would interleave it with the caller's own
+         * output when the control fd is stdin. */
+        fprintf (stderr, "ai-prompt: wrote %s\n", out_path);
+        g_free (out_path);
+      } else {
+        fprintf (stderr, "ai-prompt: %s\n",
+                 err != NULL ? err->message : "failed");
+        g_error_free (err);
+      }
+    } else {
+      fprintf (stderr, "ai-prompt: no window is open\n");
+    }
+  }
+
   else if (strcmp (args[0], "quit") == 0) {
     if (count != 1)
       fprintf (stderr, "Command usage: quit\n");
@@ -378,25 +419,32 @@ can_read (gint fd, GIOCondition condition, gpointer user_data)
   size_t bufsize = 0;
   ssize_t len;
 
+  /* A closed or broken control fd reports HUP/ERR together with IN.  Handle
+   * it before reading: getline() on a hung-up stream is where the old code
+   * aborted, and quitting the source first means no further callback can
+   * arrive after the stream has been closed below. */
+  if (condition & (G_IO_HUP | G_IO_ERR | G_IO_NVAL)) {
+    g_message (_("Control fd %d closed; leaving gschem running.\n"),
+               control_fd);
+    goto error;
+  }
+
   errno = 0;
   len = getline (&buf, &bufsize, stream);
 
-  if (errno != 0) {
-    g_warning (_("Can't read from control fd %d: %s\n"),
-               control_fd, strerror (errno));
-    goto error;
-  }
-
   if (len == -1) {
-    g_warning (_("Received EOF on control fd %d\n"), control_fd);
+    if (errno != 0) {
+      g_warning (_("Can't read from control fd %d: %s\n"),
+                 control_fd, strerror (errno));
+    } else {
+      g_message (_("Received EOF on control fd %d; leaving gschem "
+                   "running.\n"), control_fd);
+    }
     goto error;
   }
 
-  if (len == 0) {
-    g_warning (_("Read zero bytes from control fd %d\n"), control_fd);
-    goto error;
-  }
-
+  /* An empty line is still a line; only a bare "\n" reaches here with
+   * len == 1 and is ignored by process_command(). */
   buf[len - 1] = '\0';
 
   process_command (buf);
@@ -406,7 +454,15 @@ can_read (gint fd, GIOCondition condition, gpointer user_data)
 
 error:
   free (buf);
-  fclose (stream);
-  tag = 0;
+
+  /* Remove the source before closing the stream.  Returning FALSE also
+   * drops it, but it stays attached until the main loop gets there, and an
+   * IN event could be dispatched against a closed stream in between. */
+  x_controlfd_free ();
+
+  if (stream != NULL) {
+    fclose (stream);
+    stream = NULL;
+  }
   return FALSE;
 }

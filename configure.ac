@@ -184,6 +184,17 @@ AC_SUBST(GDK_LIBS)
 AC_FUNC_ALLOCA
 AC_CHECK_HEADERS([argz.h ctype.h fcntl.h inttypes.h langinfo.h libintl.h malloc.h stdint.h stdio_ext.h strings.h sys/param.h sys/time.h unistd.h])
 
+# getopt_long is what makes gschem's long options (--control-fd, --help,
+# --quiet, --verbose) work at all: without HAVE_GETOPT_LONG, parsecmd.c falls
+# back to the short option string and every "--name" argument is rejected as
+# an unknown option.  Headless control depends on --control-fd, so restore
+# these two checks alongside the other function checks.
+AC_CHECK_HEADERS([getopt.h])
+# On FreeBSD the 'gnugetopt' library is needed.
+AC_SEARCH_LIBS([getopt_long], [gnugetopt],
+               AC_DEFINE([HAVE_GETOPT_LONG], 1,
+                         [Define to 1 if you have the `getopt_long' function.]))
+
 # --- Checks for typedefs, structures, and compiler characteristics ---
 AC_CHECK_HEADER_STDBOOL
 AC_C_INLINE

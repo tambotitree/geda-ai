@@ -18,6 +18,43 @@ _EXTERN_RE = re.compile(r"^extern GschemAction \*action_(\w+);", re.MULTILINE)
 _CALLBACK_DECL_RE = re.compile(r"^void action_callback_(\w+) \(GschemAction",
                                re.MULTILINE)
 
+#: Marker introducing the platform between generated and hand-registered
+#: actions in actions.c.
+_EXTRA_ACTIONS_MARKER = "/* --- hand-registered actions (not generated) --- */"
+
+
+def strip_extra_actions(source, entries=None):
+    """Restrict ``source`` to the callbacks the refactor is responsible for.
+
+    ``actions.c`` holds two kinds of action: the ones generated from the
+    oracle and recorded in the inventory, and any registered outside it
+    (currently the AI Assist dialog).  The checks below are about the
+    generated set, so callbacks whose cid is not in the inventory are
+    dropped from the text before matching.  Filtering by name rather than by
+    position keeps the file layout free to change.
+
+    When ``entries`` is None the source is returned unchanged, because
+    there is no inventory to filter against.
+    """
+    if entries is None:
+        return source
+
+    cids = {entry["cid"] for entry in entries}
+    kept = []
+    current = None
+
+    # Split on callback definitions so each block can be judged as a unit.
+    parts = re.split(r"(?m)^(?=action_callback_\w+ \(GschemAction \*action,)",
+                     source)
+    for part in parts:
+        match = re.match(r"action_callback_(\w+) \(GschemAction \*action,",
+                         part)
+        if match is not None:
+            current = match.group(1)
+        if current is None or current in cids:
+            kept.append(part)
+    return "".join(kept)
+
 
 def count_spec_rows(source):
     """Number of rows in the action_specs table.
@@ -26,7 +63,8 @@ def count_spec_rows(source):
     ``action_callback_<cid>, &action_<cid> },`` because each spec points at
     both its callback and its own global slot.
     """
-    return len(re.findall(r"action_callback_\w+, &action_\w+ \},", source))
+    return len(re.findall(r"action_callback_\w+, &action_\w+ \},",
+                          strip_extra_actions(source)))
 
 
 def check_arity(source, header, expected, entries=None):
@@ -40,8 +78,9 @@ def check_arity(source, header, expected, entries=None):
     names is compared against the inventory as well.
     """
     problems = []
+    generated = strip_extra_actions(source, entries)
     rows = count_spec_rows(source)
-    definitions = _CALLBACK_DEF_RE.findall(source)
+    definitions = _CALLBACK_DEF_RE.findall(generated)
     externs = _EXTERN_RE.findall(header)
     declarations = _CALLBACK_DECL_RE.findall(header)
 
@@ -98,7 +137,7 @@ def check_bodies(source, entries):
     from . import generate
 
     problems = []
-    actual = extract_bodies(source)
+    actual = extract_bodies(strip_extra_actions(source, entries))
     for entry in entries:
         cid = entry["cid"]
         if cid not in actual:

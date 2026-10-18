@@ -81,6 +81,7 @@ struct st_gschem_toplevel {
   GtkWidget *aawindow;                  /* arc attribs */
   GtkWidget *aewindow;                  /* attribute edit */
   GtkWidget *hkwindow;                  /* Help/Hotkeys... dialog*/
+  GtkWidget *ai_assist_window;          /* AI Assist dialog */
 
   /* --------- */
   /* Dockables */

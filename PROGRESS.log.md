@@ -144,6 +144,111 @@ No drift has been accepted into the tree.
 - **`x_run_transform()`** — the Tier C seam is documented, not stubbed, to
   avoid an unused function in the tree.
 
+## AI Assist entry point
+
+Added outside the refactor, after it was closed, so that the gEDA base can be
+used with an assistant before any model call exists.
+
+- New modeless dialog (`gschem/src/gschem_ai_assist_dialog.c`) with two
+  tabs: the current page rendered as gEDA text, and a count of objects,
+  components and `model-name`/`device` attributes with the command needed to
+  netlist it. It does not call any API.
+- The schematic text comes from `o_save_buffer (s_page_objects (page))`, so
+  it is the *edit buffer*: unsaved changes are included and nothing is
+  written to disk. A Refresh button re-reads the page.
+- Registered through `gschem_action_register()`, not the `action_specs`
+  table. `actions.h` is generated in full by `gedai.refactor.gen`, so a
+  hand-added row would be destroyed on the next generation and would also
+  break the 135-action count. The action and its callback are declared in
+  `gschem/include/gschem_ai_assist.h` for the same reason.
+- `&ai-assist` is exported automatically by `gschem_action_register()`, so
+  `system-gschemrc.scm` puts it in `tools-menu` (last section) and a user can
+  move or remove it like any other action. `gschem_action_init()` runs before
+  rc parsing, so the binding exists when the menu is read.
+- `validators.strip_extra_actions()` filters callbacks whose cid is not in
+  the inventory, by name, before the count/name/body checks. Filtering by
+  name rather than by position keeps the file layout free to change.
+  Confirmed the checks still fail on an injected body change and on a
+  deleted table row.
+
+Known limitation: SPICE *netlisting* is not done by the dialog. `gaf netlist`
+is not registered as a command, the installed xorn `gnetlist` wrapper is
+missing `xorn.command`, and `gnetlist-legacy -g spice-sdb` produced a 7-line
+file on the test schematic because it could not resolve `transistor.sym`.
+Rather than show a silently wrong netlist, the report describes readiness and
+prints the command to run after saving.
+
+## Headless prompting
+
+`--control-fd` already existed as a live, line-oriented channel (`visit`,
+`save`, `close`, `quit`, ...) but had no way to ask a question. Added one
+command rather than a one-shot `--prompt_file`, so a single running gschem
+serves many prompts — which is what an agent loop needs.
+
+    gschem design.sch --control-fd=3 3<>pipe
+
+    ai-prompt /abs/prompt.txt
+    ai-prompt: wrote /abs/prompt.txt.out
+
+- `ai-prompt FILE` reads the prompt, bundles it with the schematic as gEDA
+  text and the SPICE report, and writes `FILE.out` next to it. Verified on
+  `gnetlist-legacy/tests/common/TwoStageAmp.sch`: 162 objects, 36
+  components, 1 `model-name`, 21 `device`, and 38 `C` records, matching the
+  source file's 38.
+- The bundle's section markers (`=== PROMPT ===`, `=== REPORT ===`,
+  `=== SCHEMATIC ===`) are deliberately not translated, so a caller can
+  parse them regardless of locale.
+- The result goes to stderr, matching every other line of this protocol, so
+  it cannot interleave with a caller's own stdout when the control fd is
+  stdin. Two prompts in one session write two distinct files.
+- Errors are reported and do not kill the session: a missing prompt file and
+  a wrong argument count both leave gschem running.
+
+### Bugs found and fixed on the way
+
+Three of these blocked headless operation, so they were fixed rather than
+worked around.
+
+- **`HAVE_GETOPT_LONG` was never defined.** The `getopt.h` / `getopt_long`
+  checks existed in `configure.ac.orig` but had been dropped from
+  `configure.ac`, so `parsecmd.c` compiled the short-option path and *every*
+  long option was rejected — `--control-fd`, `--help`, `--quiet`,
+  `--verbose` alike. Restored both checks, then had to run `autoheader` as
+  well: without it the define never reached `config.h.in` and the fix
+  silently did nothing. Confirmed the only `config.h` delta is the two new
+  defines.
+- **Dockable lookup always returned NULL.** `gschem_dockable.c` stored the
+  `GschemDockable` in the GtkWidget `"user-data"` *property*, which is
+  construct-only in GTK3, so both the set and the get raised a critical and
+  every `get_dockable_by_widget()` returned NULL. Switched to
+  `g_object_set_data()`/`g_object_get_data()`. The `dockable != NULL` and
+  `user-data` criticals went from 7 in a run to 0. One of these criticals
+  fired *inside* a critical handler, which GLib escalates to `abort()` —
+  this was the actual cause of gschem dying at startup with
+  `--control-fd`.
+- **`can_read` abused `errno` and ignored its `condition`.** A hung-up fd
+  reports `G_IO_HUP` together with `G_IO_IN`, which was never checked, and
+  `getline()` on a closed stream was allowed to run. It also `fclose()`d the
+  stream while the source was still attached. Now handles HUP/ERR/NVAL
+  first, distinguishes EOF (`len == -1` with `errno == 0`) from a real
+  error, and detaches the source before closing the stream;
+  `x_controlfd_free()` is idempotent and owns the close.
+
+Still not done: the dialog and this command do not call a model. They produce
+the bundle and stop, so the feature works offline and is testable.
+
+### Known crash on `quit`
+
+`quit` segfaults during teardown. The backtrace is
+`process_command` -> `x_window_close_all` -> `x_window_close` ->
+`gschem_toplevel_free` -> `g_object_unref` -> `eda_renderer_finalize` ->
+`cairo_surface_destroy`, so it is renderer/cairo teardown, not the control
+channel. It reproduces on unmodified HEAD (verified by stashing these fixes
+and rebuilding), so it is pre-existing. It does not affect the AI Assist
+path: `ai-prompt` has already written its output and flushed before `quit`
+is reached. Leave the session running rather than quitting it, and no crash
+occurs.
+
 ## Not done, and why
 
 The API run is bounded by the 00:00Z stop and a token budget. It completed

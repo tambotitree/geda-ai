@@ -38,6 +38,7 @@
 
 #include "gschem.h"
 #include "gschem_action.h"
+#include "gschem_ai_assist.h"
 #include "actions.h"
 
 
@@ -482,6 +483,45 @@ static const GschemActionSpec action_specs[] = {
 };
 
 
+/* --- hand-registered actions (not generated) --- */
+
+/*! \brief Register actions that are deliberately outside the generated table.
+ *
+ *  ::action_specs above is generated from the 135-action oracle and is
+ *  checked by `python3 -m gedai.refactor verify`; a row added by hand would
+ *  be rejected.  Actions that are not part of the refactor are therefore
+ *  registered here, through the same public API that Scheme modules such as
+ *  pcb.scm use.  gschem_action_register() exports the action to Scheme as
+ *  `&ai-assist`, so system-gschemrc.scm can refer to it directly.
+ *
+ *  Everything below this marker is outside the generated set; validators.py
+ *  ignores it when counting, but it still has to compile.
+ */
+GschemAction *action_ai_assist = NULL;
+
+void
+action_callback_ai_assist (GschemAction *action,
+                           GschemToplevel *w_current)
+{
+  ai_assist_dialog (w_current);
+}
+
+static void
+gschem_register_extra_actions (void)
+{
+  action_ai_assist =
+    gschem_action_register ("ai-assist",
+                            "applications-science",
+                            _("AI Assist..."),
+                            _("AI Assist..."),
+                            _("AI _Assist..."),
+                            _("Show the current schematic as text, with a "
+                              "SPICE readiness report"),
+                            ACTUATE,
+                            action_callback_ai_assist);
+}
+
+
 /*! \brief Register every C-defined gschem action.
  *
  * Walks ::action_specs, registering each action and storing the resulting
@@ -503,6 +543,8 @@ gschem_register_all_actions (void)
                                                    spec->activate);
     *spec->action = action;
   }
+
+  gschem_register_extra_actions ();
 }
 
 

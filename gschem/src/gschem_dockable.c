@@ -38,6 +38,13 @@ enum {
 
 static gpointer parent_class = NULL;
 
+/*! \brief Object-data key holding the GschemDockable for a dockable widget.
+ *
+ *  Used instead of the GtkWidget "user-data" property, which in GTK3 is
+ *  construct-only and so cannot be set or read on an existing widget.
+ */
+static const gchar *const DOCKABLE_DATA_KEY = "gschem-dockable";
+
 static void class_init (GschemDockableClass *class);
 static void instance_init (GschemDockable *dockable);
 static void constructed (GObject *object);
@@ -566,10 +573,11 @@ get_dockable_by_widget (GschemToplevel *w_current, GtkWidget *widget)
 {
   g_return_val_if_fail (widget != NULL, NULL);
 
-  GValue value = G_VALUE_INIT;
-  g_value_init (&value, G_TYPE_POINTER);
-  g_object_get_property (G_OBJECT (widget), "user-data", &value);
-  return GSCHEM_DOCKABLE (g_value_get_pointer (&value));
+  /* See the note in get_widget(): "user-data" is a GtkWidget *construct-only*
+   * property, so it cannot be read back after construction and attempting to
+   * do so raises a critical.  Object data is the supported replacement. */
+  return GSCHEM_DOCKABLE (g_object_get_data (G_OBJECT (widget),
+                                             DOCKABLE_DATA_KEY));
 }
 
 
@@ -893,13 +901,12 @@ create_widget (GschemDockable *dockable)
     GSCHEM_DOCKABLE_GET_CLASS (dockable)->create_widget (dockable);
   g_object_ref_sink (dockable->widget);
 
-  /* GtkNotebook doesn't allow storing a pointer along with a widget,
-   * so store the dockable in the user-data property of the widget */
-
-  GValue value = G_VALUE_INIT;
-  g_value_init (&value, G_TYPE_POINTER);
-  g_value_set_pointer (&value, dockable);
-  g_object_set_property (G_OBJECT (dockable->widget), "user-data", &value);
+  /* GtkNotebook doesn't allow storing a pointer along with a widget, so
+   * attach the dockable to the widget.  This used to be stored in the
+   * "user-data" property, but in GTK3 that property only exists at
+   * construction, so setting it here raised a critical and the lookup in
+   * get_dockable_by_widget() always returned NULL. */
+  g_object_set_data (G_OBJECT (dockable->widget), DOCKABLE_DATA_KEY, dockable);
 }
 
 

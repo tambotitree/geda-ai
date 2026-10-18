@@ -1301,7 +1301,8 @@
            ,&options-show-coordinates)
           (,&edit-invoke-macro
            ,&file-script
-           ,&file-repl)))
+           ,&file-repl)
+          (,&ai-assist)))
 
 (define options-menu
         `((,&options-options)

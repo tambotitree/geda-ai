@@ -248,4 +248,5 @@
 (define options-show-coord-window &options-show-coordinates)
 (define help-about &help-about)
 (define help-hotkeys &help-hotkeys)
+(define ai-assist &ai-assist)
 (define cancel &cancel)
