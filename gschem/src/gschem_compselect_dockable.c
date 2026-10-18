@@ -1399,10 +1399,14 @@ compselect_restore_internal_geometry (GschemDockable *dockable,
   position = eda_config_get_int (cfg, group_name, "hpaned", NULL);
   if (position == 0)
     position = 300;
-  gtk_paned_set_position (GTK_PANED (compselect->hpaned), position);
+  /* Guard every widget: restore_internal_geometry() runs whenever the dockable
+   * is shown, including before create_widget() has had a chance to build the
+   * parts, and a GTK-CRITICAL here aborts when GLib treats it as fatal. */
+  if (compselect->hpaned != NULL)
+    gtk_paned_set_position (GTK_PANED (compselect->hpaned), position);
 
   position = eda_config_get_int (cfg, group_name, "vpaned", NULL);
-  if (position != 0)
+  if (position != 0 && compselect->vpaned != NULL)
     gtk_paned_set_position (GTK_PANED (compselect->vpaned), position);
 
   position = eda_config_get_int (cfg, group_name, "source-tab", &error);
@@ -1410,23 +1414,26 @@ compselect_restore_internal_geometry (GschemDockable *dockable,
     position = 1;
     g_clear_error (&error);
   }
-  gtk_notebook_set_current_page (compselect->viewtabs, position);
+  if (compselect->viewtabs != NULL)
+    gtk_notebook_set_current_page (compselect->viewtabs, position);
 
   expanded = eda_config_get_boolean (cfg, group_name, "preview-expanded", &error);
   if (error != NULL) {
     expanded = TRUE;
     g_clear_error (&error);
   }
-  gtk_expander_set_expanded (GTK_EXPANDER (compselect->preview_expander),
-                             expanded);
+  if (compselect->preview_expander != NULL)
+    gtk_expander_set_expanded (GTK_EXPANDER (compselect->preview_expander),
+                               expanded);
 
   expanded = eda_config_get_boolean (cfg, group_name, "attribs-expanded", &error);
   if (error != NULL) {
     expanded = TRUE;
     g_clear_error (&error);
   }
-  gtk_expander_set_expanded (GTK_EXPANDER (compselect->attribs_expander),
-                             expanded);
+  if (compselect->attribs_expander != NULL)
+    gtk_expander_set_expanded (GTK_EXPANDER (compselect->attribs_expander),
+                               expanded);
 }
 
 
@@ -1452,13 +1459,42 @@ compselect_class_init (GschemCompselectDockableClass *klass)
   compselect_parent_class = g_type_class_peek_parent (klass);
 }
 
+/*! \brief Return the only child of <container>, or NULL if it has none (or
+ *  more than one).
+ *
+ *  The widgets this file packs are sometimes GtkBoxes rather than GtkBins, so
+ *  gtk_bin_get_child() cannot be used on them: passing a non-GtkBin raises
+ *  "gtk_bin_get_child: assertion 'GTK_IS_BIN (bin)' failed" and returns NULL,
+ *  which was happening on every start for compselect->top.
+ */
+static GtkWidget *
+compselect_get_only_child (GtkWidget *container)
+{
+  GtkWidget *child = NULL;
+
+  if (container == NULL)
+    return NULL;
+
+  if (GTK_IS_BIN (container))
+    return gtk_bin_get_child (GTK_BIN (container));
+
+  if (GTK_IS_CONTAINER (container)) {
+    GList *children = gtk_container_get_children (GTK_CONTAINER (container));
+    if (children != NULL && children->next == NULL)
+      child = children->data;
+    g_list_free (children);
+  }
+
+  return child;
+}
+
 /*! \brief Make <widget> the child of <container>, removing other
  *         parent-child relations if necessary.
  */
 static void
 reparent (GtkWidget *container, GtkWidget *widget)
 {
-  GtkWidget *old_child = gtk_bin_get_child (GTK_BIN (container));
+  GtkWidget *old_child = compselect_get_only_child (container);
   GtkWidget *old_parent = widget ? gtk_widget_get_parent (widget) : NULL;
   if (old_child == widget && old_parent == container)
     return;
@@ -1542,7 +1578,7 @@ compselect_update_vertical_hierarchy (GschemCompselectDockable *compselect)
 static void
 compselect_set_tiled (GschemCompselectDockable *compselect, gboolean tiled)
 {
-  GtkWidget *top_widget = gtk_bin_get_child (GTK_BIN (compselect->top));
+  GtkWidget *top_widget = compselect_get_only_child (compselect->top);
 
   if (tiled) {
     if (top_widget == compselect->vbox)
@@ -1578,7 +1614,7 @@ compselect_set_tiled (GschemCompselectDockable *compselect, gboolean tiled)
 static gboolean
 compselect_is_tiled (GschemCompselectDockable *compselect)
 {
-  GtkWidget *top_widget = gtk_bin_get_child (GTK_BIN (compselect->top));
+  GtkWidget *top_widget = compselect_get_only_child (compselect->top);
 
   return top_widget != compselect->attribs_paned &&
          top_widget != compselect->attribs_box;
@@ -1655,6 +1691,9 @@ compselect_content_size_allocate (GtkWidget *widget,
     if (height <= 0)
       height = default_height;
 
+    if (vpaned == NULL)
+      return;
+
     gtk_paned_set_position(vpaned,
                            gtk_paned_get_position(vpaned)
                              - height
@@ -1692,6 +1731,21 @@ compselect_create_widget (GschemDockable *dockable)
   // Create frames
   compselect->preview_frame = gtk_frame_new (_("Preview"));
   compselect->attribs_frame = gtk_frame_new (_("Attributes"));
+
+  /* The expanders, the plain boxes used when collapsed, and the panes that
+   * hold preview/attributes in the vertical layout.  These were declared in
+   * the header and freed in dispose(), but never created, so they were
+   * permanently NULL: gtk_expander_set_expanded() and gtk_paned_set_position()
+   * in compselect_restore_internal_geometry() then raised a Gtk-CRITICAL on
+   * every start, and the vertical layout could not work at all. */
+  compselect->preview_expander = gtk_expander_new (NULL);
+  compselect->attribs_expander = gtk_expander_new (NULL);
+
+  compselect->preview_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+  compselect->attribs_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+
+  compselect->preview_paned = gtk_paned_new (GTK_ORIENTATION_VERTICAL);
+  compselect->attribs_paned = gtk_paned_new (GTK_ORIENTATION_VERTICAL);
 
   // Vertical paned layout
   compselect->vpaned = gtk_paned_new (GTK_ORIENTATION_VERTICAL);

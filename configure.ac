@@ -34,7 +34,22 @@ AX_GIT_VERSION([$PACKAGE_VERSION])
 temp_package_date_version="$PACKAGE_VERSION"
 AC_DEFINE_UNQUOTED([PACKAGE_DATE_VERSION], ["$temp_package_date_version"], [The package version string, simplified to dotted version for geda-ai.])
 AC_SUBST([PACKAGE_DATE_VERSION], [$temp_package_date_version])
- 
+
+# version.h is generated from version.h.in via AC_CONFIG_HEADERS, but
+# AX_GIT_VERSION only AC_SUBSTs DOTTED_VERSION and DATE_VERSION, while the
+# header wants the PACKAGE_-prefixed names.  Without the two substitutions
+# below, config.status wrote the literal "@PACKAGE_DOTTED_VERSION@" into
+# version.h and gschem -V printed
+#   gEDA @PACKAGE_DOTTED_VERSION@ (g@PACKAG)
+PACKAGE_DOTTED_VERSION=`echo "$PACKAGE_VERSION" | cut -d- -f1`
+if test -z "$PACKAGE_DOTTED_VERSION"; then
+  PACKAGE_DOTTED_VERSION="$PACKAGE_VERSION"
+fi
+PACKAGE_GIT_COMMIT=`cd "$srcdir" && git rev-parse HEAD 2>/dev/null | cut -c1-7`
+AC_SUBST([PACKAGE_DOTTED_VERSION], [$PACKAGE_DOTTED_VERSION])
+AC_SUBST([PACKAGE_GIT_COMMIT], [$PACKAGE_GIT_COMMIT])
+AC_DEFINE_UNQUOTED([PACKAGE_DOTTED_VERSION], ["$PACKAGE_DOTTED_VERSION"], [Dotted part of package version string.])
+AC_DEFINE_UNQUOTED([PACKAGE_GIT_COMMIT], ["$PACKAGE_GIT_COMMIT"], [Current git commit.])
 
 # --- Enable/Disable Arguments ---
 AC_ARG_ENABLE([gattrib],

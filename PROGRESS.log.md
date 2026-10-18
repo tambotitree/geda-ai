@@ -249,6 +249,73 @@ path: `ai-prompt` has already written its output and flushed before `quit`
 is reached. Leave the session running rather than quitting it, and no crash
 occurs.
 
+## Startup hygiene: a blank sheet should start quietly
+
+A user with a blank idea opens gschem with no arguments. That path created an
+in-memory untitled page and ran, but it printed 125 Gtk/Atk/GLib diagnostics
+and `-V` printed autoconf placeholders instead of a version. All of the below
+are pre-existing at `ckpt/9` and unrelated to AI Assist.
+
+### `-V` printed `gEDA @PACKAGE_DOTTED_VERSION@ (g@PACKAG)`
+
+`version.h` is generated through `AC_CONFIG_HEADERS([config.h version.h])`,
+but `AX_GIT_VERSION` only `AC_SUBST`s `DOTTED_VERSION`/`DATE_VERSION` while
+the header wants the `PACKAGE_`-prefixed names, so two of the three macros
+never resolved. `version.h.in` also declared them as
+`#define X "@X@"` rather than `#undef X`, which is the form `config.status`
+actually substitutes. `configure.ac` now derives and substitutes both
+`PACKAGE_DOTTED_VERSION` and `PACKAGE_GIT_COMMIT`, and the template uses
+`#undef` plus a stray `#undef` that sat outside the include guard is gone.
+Verified from a clean `git archive` tree: `gEDA 1.0.0 (g5d185da)`.
+
+### 97 `Gtk-WARNING`s: two children in one `GtkMenuItem`
+
+`gschem_action_create_menu_item()` built a `GtkBox` holding an icon and a
+label and added it to the menu item, then fell through to a second block that
+created a `GschemAccelLabel` and added that too. A `GtkMenuItem` is a
+`GtkBin`, so the second add failed for every icon-bearing action. The label is
+now created only when there is no icon, and the dispatcher label updates are
+guarded on `label != NULL`.
+
+### 28 `Gtk-CRITICAL`s: compselect widgets that were never created
+
+`preview_expander`, `attribs_expander`, `preview_box`, `attribs_box`,
+`preview_paned` and `attribs_paned` were declared in the header and freed in
+`dispose()` but never assigned anywhere, so they were permanently `NULL` and
+`compselect_restore_internal_geometry()` passed them to
+`gtk_paned_set_position()`/`gtk_expander_set_expanded()`. They are now
+created in `compselect_create_widget()`, every read is guarded, and the three
+`gtk_bin_get_child (GTK_BIN (compselect->top))` calls -- `top` is a `GtkBox`,
+not a `GtkBin` -- go through a new `compselect_get_only_child()` helper.
+
+### `Atk-CRITICAL`: `atk_object_set_name (aobj, NULL)`
+
+`gschem_accel_label_set_accel_string()` cleared the accessible name by passing
+`NULL`, which ATK asserts against. It now passes `""`, and both branches check
+the `AtkObject` for `NULL`.
+
+### `GLib-GObject-CRITICAL`: `GtkFrame` has no `shadow`
+
+GTK3 renamed the property to `shadow-type`; that is what
+`gschem_multiattrib_dockable.c` uses now.
+
+### `GLib-GObject-CRITICAL`: pagesel instance size smaller than parent
+
+`GschemPageselDockable` is registered with `g_type_register_static
+(GSCHEM_TYPE_DOCKABLE, ...)` but its structs declared `GschemDialog` as the
+parent, so the instance struct was smaller than `GschemDockable` and GType
+refused the registration. The header now matches the registration.
+
+### Result
+
+`gschem` with no arguments and `--control-fd` both start and stay up with 0
+criticals. The only diagnostics left are two environment warnings from this
+Homebrew install, both missing icon assets and not code defects:
+`check-symbolic.svg` is absent from Adwaita and `gtk-new-ltr` is missing from
+hicolor. `g_rc_parse_gtkrc()` no longer emits its two "deprecated" warnings;
+it was building paths it never read.
+
+
 ## Not done, and why
 
 The API run is bounded by the 00:00Z stop and a token budget. It completed

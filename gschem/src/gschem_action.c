@@ -843,6 +843,9 @@ gschem_action_create_menu_item (GschemAction *action,
                                 GschemToplevel *w_current)
 {
   GtkWidget *menu_item;
+  /* The label to keep in sync with the dispatcher, or NULL for items that
+   * own a box with an icon instead. */
+  GtkWidget *label = NULL;
 
   if (action->type == GSCHEM_ACTION_TYPE_TOGGLE_CHECK)
     menu_item = g_object_new (GTK_TYPE_CHECK_MENU_ITEM, NULL);
@@ -865,19 +868,29 @@ gschem_action_create_menu_item (GschemAction *action,
     gtk_widget_show_all(box);
   }
 
-  /* use custom label widget */
-  char *accel_string = get_accel_string (action);
-  GtkWidget *label = g_object_new (GSCHEM_TYPE_ACCEL_LABEL, NULL);
-  gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
-  gtk_widget_set_valign(GTK_WIDGET(label), GTK_ALIGN_CENTER);
-  gtk_label_set_use_underline (GTK_LABEL (label), TRUE);
-  gtk_label_set_label (GTK_LABEL (label), use_menu_label ? action->menu_label
-                                                         : action->label);
-  gschem_accel_label_set_accel_string (GSCHEM_ACCEL_LABEL (label),
-                                       accel_string);
-  gtk_container_add (GTK_CONTAINER (menu_item), label);
-  gtk_widget_show (label);
-  free (accel_string);
+  /* The menu item may already own a child: unless we bail out here, the code
+   * below packs a second, redundant label into the item.  A GtkMenuItem is a
+   * GtkBin and accepts only one child, so doing that emitted
+   *   Gtk-WARNING: Attempting to add a widget with type GschemAccelLabel to a
+   *   GtkMenuItem ... it already contains a widget of type GtkBox
+   * once per icon-bearing action on every start (~100 warnings).  The tooltip
+   * and submenu handling still has to run for those items, so only the label
+   * creation is skipped. */
+  if (action->icon_name == NULL) {
+    /* use custom label widget */
+    char *accel_string = get_accel_string (action);
+    label = g_object_new (GSCHEM_TYPE_ACCEL_LABEL, NULL);
+    gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(label), GTK_ALIGN_CENTER);
+    gtk_label_set_use_underline (GTK_LABEL (label), TRUE);
+    gtk_label_set_label (GTK_LABEL (label), use_menu_label ? action->menu_label
+                                                           : action->label);
+    gschem_accel_label_set_accel_string (GSCHEM_ACCEL_LABEL (label),
+                                         accel_string);
+    gtk_container_add (GTK_CONTAINER (menu_item), label);
+    gtk_widget_show (label);
+    free (accel_string);
+  }
 
   gtk_widget_set_tooltip_text (menu_item, action->tooltip);
 
@@ -927,12 +940,14 @@ gschem_action_create_menu_item (GschemAction *action,
                               G_CALLBACK (menu_item_set_active), menu_item);
     menu_item_set_active (GTK_CHECK_MENU_ITEM (menu_item), dispatcher->active);
   }
-  g_signal_connect_swapped (dispatcher, use_menu_label ? "set-menu-label"
-                                                       : "set-label",
-                            G_CALLBACK (gtk_label_set_label), label);
-  gchar *l_str = use_menu_label ? dispatcher->menu_label : dispatcher->label;
-  if (l_str != NULL)
-    gtk_label_set_label (GTK_LABEL (label), l_str);
+  if (label != NULL) {
+    g_signal_connect_swapped (dispatcher, use_menu_label ? "set-menu-label"
+                                                         : "set-label",
+                              G_CALLBACK (gtk_label_set_label), label);
+    gchar *l_str = use_menu_label ? dispatcher->menu_label : dispatcher->label;
+    if (l_str != NULL)
+      gtk_label_set_label (GTK_LABEL (label), l_str);
+  }
 
   return menu_item;
 }

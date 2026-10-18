@@ -38,22 +38,16 @@
 
 #include "gschem.h"
 
-/*! \todo Finish function documentation!!!
- *  \brief
- *  \par Function Description
+/*! \brief Parse GTK resource files for gschem.
  *
+ *  GTK3 has removed gtk_rc_parse(), and this function used to build the
+ *  gschem-gtkrc paths and then emit a g_warning() for each one without ever
+ *  reading them.  Emitting a warning is not useful to users -- there is
+ *  nothing they can do about it -- so the function is now a no-op kept for
+ *  source and API compatibility.
  */
 void g_rc_parse_gtkrc(void)
 {
-  gchar *filename;
-
-  filename = g_build_filename (s_path_sys_config(), "gschem-gtkrc", NULL);
-  g_warning("gtk_rc_parse() is deprecated. Skipping GTKRC parsing.");
-  g_free (filename);
-
-  filename = g_build_filename (s_path_user_config(), "gschem-gtkrc", NULL);
-  g_warning("gtk_rc_parse() is deprecated. Skipping GTKRC parsing.");
-  g_free (filename);
 }
 
 /*! \brief Verify the version of the RC file under evaluation.

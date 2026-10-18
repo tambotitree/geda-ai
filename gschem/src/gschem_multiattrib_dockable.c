@@ -2387,8 +2387,10 @@ multiattrib_create_widget(GschemDockable *dockable)
 
   /* create the attribute list frame */
   multiattrib->list_frame = GTK_WIDGET(g_object_new(GTK_TYPE_FRAME,
-                                                    /* GtkFrame */
-                                                    "shadow", GTK_SHADOW_NONE,
+                                                    /* GtkFrame; GTK3 renamed
+                                                     * the "shadow" property to
+                                                     * "shadow-type" */
+                                                    "shadow-type", GTK_SHADOW_NONE,
                                                     NULL));
   /*   - create the model for the treeview */
   multiattrib->store = GTK_TREE_MODEL(
