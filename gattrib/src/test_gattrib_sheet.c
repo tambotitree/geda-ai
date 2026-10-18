@@ -71,8 +71,9 @@ main (int argc, char **argv)
   check_str (gattrib_sheet_get_column_label (sheet, 1), "footprint",
              "column label 1");
 
-  /* Empty cell reads as the empty string, not NULL: s_table.c relies on that. */
-  check_str (gattrib_sheet_get_cell_text (sheet, 0, 0), "", "empty cell");
+  /* An empty cell reads as NULL, as gattrib_sheet.h documents and as the
+   * BOM hook needs in order to tell "no value" from "value is empty". */
+  check (gattrib_sheet_get_cell_text (sheet, 0, 0) == NULL, "empty cell");
 
   gattrib_sheet_set_cell (sheet, 0, 0, "10k", BLUE);
   gattrib_sheet_set_cell (sheet, 0, 1, "0603", BLACK);
@@ -85,8 +86,8 @@ main (int argc, char **argv)
   check_str (gattrib_sheet_get_cell_text (sheet, 2, 1), "0805", "cell 2,1");
 
   /* Out-of-range access must not crash and must read as empty. */
-  check_str (gattrib_sheet_get_cell_text (sheet, 99, 0), "", "row out of range");
-  check_str (gattrib_sheet_get_cell_text (sheet, 0, 99), "", "col out of range");
+  check (gattrib_sheet_get_cell_text (sheet, 99, 0) == NULL, "row out of range");
+  check (gattrib_sheet_get_cell_text (sheet, 0, 99) == NULL, "col out of range");
   gattrib_sheet_set_cell (sheet, 99, 99, "x", RED);
   gattrib_sheet_set_cell_colour (sheet, 99, 99, RED);
   g_print ("ok: out-of-range writes ignored\n");
@@ -174,10 +175,10 @@ main (int argc, char **argv)
                "e2e cell R1/vendor");
     check_str (gattrib_sheet_get_cell_text (s2, 1, 0), "100n",
                "e2e cell C1/value");
-    /* A cell that was never set reads as empty, which is what makes
+    /* A cell that was never set reads as NULL, which is what makes
      * s_table_gtksheet_to_table() treat the attribute as absent. */
-    check_str (gattrib_sheet_get_cell_text (s2, 1, 1), "",
-               "e2e unset cell is empty");
+    check (gattrib_sheet_get_cell_text (s2, 1, 1) == NULL,
+           "e2e unset cell is empty");
 
     /* Column deletion, as used by s_toplevel_delete_attrib_col(). */
     gattrib_sheet_delete_column (s2, 1);

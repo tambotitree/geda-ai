@@ -49,6 +49,7 @@
 #include "../include/struct.h"     /* typdef and struct declarations */
 #include "../include/prototype.h"  /* function prototypes */
 #include "../include/globals.h"
+#include "../include/gattrib_bom_hook.h"
 #include "../include/gettext.h"
 
 /*------------------------------------------------------------------
@@ -61,6 +62,9 @@ x_window_create_menu(GtkWindow *window, GtkWidget **menubar);
 
 static void
 x_window_set_default_icon();
+
+static void
+x_window_debug_dump_sheet (GattribSheet *sheet);
 
 /*! \brief Initialises the toplevel gtksheet
  *
@@ -211,6 +215,84 @@ menu_edit_delattrib()
 }
 
 /*!
+ * \brief Edit->Fetch BOM data menu item
+ *
+ * Asks the configured supplier about every part in the component table and
+ * writes the manufacturer part number, stock/price summary and datasheet link
+ * into attribute columns, creating them if needed.
+ *
+ * Existing values are kept, so a price the designer corrected by hand is not
+ * clobbered by a refresh.  The heavy lifting is in gattrib_bom_hook.c; this
+ * function only reports the outcome.
+ */
+static void
+menu_edit_fetch_bom_data()
+{
+  gint cur_page;
+  GattribSheet *sheet;
+  GattribBomHookStats stats = { 0 };
+  GError *error = NULL;
+  GtkWidget *dialog;
+
+  /* Component table only: the net and pin tables have no part numbers. */
+  cur_page = gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook));
+  if (cur_page != 0) {
+    x_dialog_unimplemented_feature();
+    return;
+  }
+
+  sheet = GATTRIB_SHEET(sheets[0]);
+  if (sheet == NULL) {
+    return;
+  }
+
+  if (!gattrib_bom_hook_enrich_with_default_supplier (sheet, FALSE,
+                                                      &stats, &error)) {
+    if (error != NULL) {
+      dialog = gtk_message_dialog_new (GTK_WINDOW (window),
+                                       GTK_DIALOG_MODAL,
+                                       GTK_MESSAGE_ERROR,
+                                       GTK_BUTTONS_OK,
+                                       _("Fetching BOM data failed: %s"),
+                                       error->message);
+      gtk_dialog_run (GTK_DIALOG (dialog));
+      gtk_widget_destroy (dialog);
+      g_clear_error (&error);
+    } else {
+      /* No error but nothing written: nothing was matched or the cells were
+       * already filled in. */
+      dialog = gtk_message_dialog_new (GTK_WINDOW (window),
+                                       GTK_DIALOG_MODAL,
+                                       GTK_MESSAGE_INFO,
+                                       GTK_BUTTONS_OK,
+                                       _("%d parts looked up, %d found; "
+                                         "no cells needed updating."),
+                                       stats.looked_up, stats.found);
+      gtk_dialog_run (GTK_DIALOG (dialog));
+      gtk_widget_destroy (dialog);
+    }
+    gattrib_bom_hook_stats_clear (&stats);
+    return;
+  }
+
+  /* No widget refresh is needed: gattrib_sheet_set_cell updates the tree
+   * model directly, and the table itself is rebuilt from the widget on save
+   * by s_toplevel_gtksheet_to_toplevel(). */
+
+  dialog = gtk_message_dialog_new (GTK_WINDOW (window),
+                                   GTK_DIALOG_MODAL,
+                                   GTK_MESSAGE_INFO,
+                                   GTK_BUTTONS_OK,
+                                   _("Filled in %d of %d parts (%d not "
+                                     "found by the supplier)."),
+                                   stats.updated, stats.looked_up,
+                                   stats.looked_up - stats.found);
+  gtk_dialog_run (GTK_DIALOG (dialog));
+  gtk_widget_destroy (dialog);
+  gattrib_bom_hook_stats_clear (&stats);
+}
+
+/*!
  * The Gtk action table
  */
 static const GtkActionEntry actions[] = {
@@ -227,6 +309,8 @@ static const GtkActionEntry actions[] = {
   { "edit", NULL, "_Edit"},
   { "edit-add-attrib", NULL, "Add new attrib column", "", "", menu_edit_newattrib},
   { "edit-delete-attrib", NULL, "Delete attrib column", "", "", menu_edit_delattrib},
+  { "edit-fetch-bom-data", NULL, "Fetch BOM data", "", "Fill in part number, "
+    "price and datasheet columns from a supplier", menu_edit_fetch_bom_data},
   /* { "edit-find-attrib", GTK_STOCK_FIND, "Find attrib value", "<Control>F", "", x_dialog_unimplemented_feature}, */
   /* { "edit-search-replace-attrib-value", NULL, "Search and replace attrib value", "", "", x_dialog_unimplemented_feature}, */
   /* { "edit-search-for-refdes", NULL, "Search for refdes", "", "", x_dialog_unimplemented_feature}, */
@@ -416,7 +500,53 @@ x_window_add_items()
   }
 #endif
 
+  x_window_debug_dump_sheet (GATTRIB_SHEET (sheets[0]));
+
   gtk_widget_show_all( GTK_WIDGET(window) );
+}
+
+
+/*! \brief Print the contents of a sheet to stderr, if requested
+ *
+ *  \par Function Description
+ *  Dumps the row and column labels and every populated cell of \a sheet to
+ *  stderr.  This exists because the tables are the only place the component
+ *  and attribute data are visible, and inspecting them by eye in a GUI is
+ *  awkward when debugging the loading path.
+ *
+ *  The dump is enabled by setting the GATTRIB_DEBUG_DUMP environment
+ *  variable to any non-empty value; this is a diagnostic aid only, so it is
+ *  silent unless explicitly asked for.
+ *
+ *  \param [in] sheet The sheet to dump.
+ */
+static void
+x_window_debug_dump_sheet (GattribSheet *sheet)
+{
+  gint r, c, n_rows, n_cols;
+
+  if (g_getenv ("GATTRIB_DEBUG_DUMP") == NULL) {
+    return;
+  }
+
+  n_rows = gattrib_sheet_get_n_rows (sheet);
+  n_cols = gattrib_sheet_get_n_cols (sheet);
+
+  g_printerr ("GATTRIB_DEBUG_DUMP: %d rows, %d columns\n", n_rows, n_cols);
+
+  for (c = 0; c < n_cols; c++) {
+    g_printerr ("  column %d: %s\n", c,
+                gattrib_sheet_get_column_label (sheet, c));
+  }
+  for (r = 0; r < n_rows; r++) {
+    g_printerr ("  row %d: %s", r, gattrib_sheet_get_row_label (sheet, r));
+    for (c = 0; c < n_cols; c++) {
+      const gchar *text = gattrib_sheet_get_cell_text (sheet, r, c);
+      g_printerr (" | %s=%s", gattrib_sheet_get_column_label (sheet, c),
+                  text != NULL ? text : "");
+    }
+    g_printerr ("\n");
+  }
 }
 
 

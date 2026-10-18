@@ -519,24 +519,33 @@ gattrib_sheet_set_cell (GattribSheet *sheet, gint row, gint col,
 const gchar *
 gattrib_sheet_get_cell_text (GattribSheet *sheet, gint row, gint col)
 {
-  static const gchar *empty = "";
   GtkTreeIter iter;
   gchar *text = NULL;
   const gchar *result;
 
-  g_return_val_if_fail (GATTRIB_IS_SHEET (sheet), empty);
+  g_return_val_if_fail (GATTRIB_IS_SHEET (sheet), NULL);
   if (col < 0 || col >= sheet->n_cols)
-    return empty;
+    return NULL;
   if (!get_row_iter (sheet, row, &iter))
-    return empty;
+    return NULL;
 
   gtk_tree_model_get (GTK_TREE_MODEL (sheet->store), &iter,
                       ATTR_TEXT (col), &text, -1);
 
   /* Callers historically treated the result as borrowed (gtk_sheet_cell_get_text
    * returned a pointer into the widget), so hand back an interned copy rather
-   * than leaking a freshly duplicated string per read. */
-  result = text ? g_intern_string (text) : empty;
+   * than leaking a freshly duplicated string per read.
+   *
+   * An empty cell is reported as NULL, which is what the header promises and
+   * what callers use to tell "no attribute" from "attribute with an empty
+   * value".  The store itself holds "" because GtkTreeView renderers want a
+   * string. */
+  if (text == NULL || text[0] == '\0') {
+    g_free (text);
+    return NULL;
+  }
+
+  result = g_intern_string (text);
   g_free (text);
   return result;
 }
