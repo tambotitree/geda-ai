@@ -32,6 +32,7 @@
 #include <glib/gstdio.h> /* For g_build_filename */
 
 #include "gschem.h"
+#include "gschem_appearance.h"
 
 #ifdef HAVE_LOCALE_H
 #include <locale.h>
@@ -264,23 +265,12 @@ void main_prog(void *closure, int argc, char *argv[])
   setlocale(LC_NUMERIC, "C");
 #endif
 
+  gschem_appearance_prepare ();
   gtk_init(&argc, &argv);
+  gschem_appearance_init ();
 
-    /* Add our application's icon directory to the theme search path */
-  /* This should be done after gtk_init() */
-  GtkIconTheme *icon_theme = gtk_icon_theme_get_default();
-  if (icon_theme) {
-    /* PKGDATADIR is defined in config.h, which is included via gschem.h */
-    /* It will expand to something like "$HOME/geda/share/geda-ai" */
-    gchar *app_icon_dir = g_build_filename(PKGDATADIR, "icons", NULL);
-    if (g_file_test(app_icon_dir, G_FILE_TEST_IS_DIR)) {
-      gtk_icon_theme_append_search_path(icon_theme, app_icon_dir);
-      s_log_message(_("Added icon search path: %s\n"), app_icon_dir);
-    } else {
-      s_log_message(_("Icon search path not found or not a directory: %s\n"), app_icon_dir);
-    }
-    g_free(app_icon_dir);
-  }
+  /* Register built-in icons before any configuration can create widgets. */
+  x_window_init_icons ();
 
   argv_index = parse_commandline(argc, argv);
   cwd = g_get_current_dir();
@@ -400,9 +390,8 @@ void main_prog(void *closure, int argc, char *argv[])
   g_rc_parse_gtkrc();
   x_rc_parse_gschem (toplevel, NULL);
 
-  /* Set default icon theme and make sure we can find our own icons */
+  /* The action icons were registered immediately after gtk_init(). */
   x_window_set_default_icon();
-  x_window_init_icons();
 
   /* At end, complete set up of window. */
   x_color_allocate();
