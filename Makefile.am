@@ -9,7 +9,7 @@ SUBDIRS += libgeda libgedacairo gaf gschem ${GATTRIB_DIR} \
 
 ACLOCAL_AMFLAGS = -I m4
 
-EXTRA_DIST = +=environment.yml.in
+EXTRA_DIST = environment.yml.in README.md screenshots/DOMeter.jpg TODO.md
 
 # We need to ensure that `make distcheck' *doesn't* find a git
 # repository!
