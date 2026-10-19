@@ -14,7 +14,7 @@ void usage(char *cmd);
 int parse_commandline(int argc, char *argv[]);
 /* s_check.c */
 int s_check_all(TOPLEVEL *pr_current);
-int s_check_symbol(TOPLEVEL *pr_current, PAGE *p_current, const GList *obj_list);
+int s_check_symbol(PAGE *p_current, const GList *obj_list);
 gboolean s_check_list_has_item(char **list , char *item);
 void s_check_symbol_structure(const GList *obj_list, SYMCHECK *s_current);
 void s_check_text (const GList *obj_list, SYMCHECK *s_current);

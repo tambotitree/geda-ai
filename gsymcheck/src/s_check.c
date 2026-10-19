@@ -55,7 +55,7 @@ s_check_all(TOPLEVEL *pr_current)
 
     if (s_page_objects (p_current)) {
       return_status = return_status +
-        s_check_symbol (pr_current, p_current,
+        s_check_symbol (p_current,
                         s_page_objects (p_current));
       if (!quiet_mode) s_log_message("\n");
     }
@@ -66,7 +66,7 @@ s_check_all(TOPLEVEL *pr_current)
 
 
 int
-s_check_symbol (TOPLEVEL *pr_current, PAGE *p_current, const GList *obj_list)
+s_check_symbol (PAGE *p_current, const GList *obj_list)
 {
   SYMCHECK *s_symcheck=NULL;
   int errors=0, warnings=0;
@@ -711,10 +711,8 @@ s_check_pinnumber (const GList *obj_list, SYMCHECK *s_current)
   s_current->info_messages = g_list_append(s_current->info_messages,
                                            message);
 
-  g_list_foreach(pin_numbers, (GFunc) g_free, NULL);
-  g_list_free(pin_numbers);
-  g_list_foreach(net_numbers, (GFunc) g_free, NULL);
-  g_list_free(net_numbers);
+  g_list_free_full (pin_numbers, g_free);
+  g_list_free_full (net_numbers, g_free);
 }
 
 void

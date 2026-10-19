@@ -38,7 +38,7 @@
 #include "../include/gettext.h"
 
 void
-gsymcheck_quit()
+gsymcheck_quit (void)
 {
   
   s_clib_free();
@@ -55,7 +55,10 @@ main_prog(void *closure, int argc, char *argv[])
   char *cwd;
 
   TOPLEVEL *pr_current;
-  
+
+  /* scm_boot_guile supplies this callback slot; main passes no user data. */
+  (void) closure;
+
   argv_index = parse_commandline(argc, argv);
   cwd = g_get_current_dir();
 
