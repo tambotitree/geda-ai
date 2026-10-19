@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([geda-ai], [1.0.0], [https://github.com/tambotitree/geda-ai/issues], [geda-ai])
+AC_INIT([geda-ai], [1.0.0-20261019], [https://github.com/tambotitree/geda-ai/issues], [geda-ai])
 AC_USE_SYSTEM_EXTENSIONS
 AC_CONFIG_AUX_DIR([build-tools]) # Tell automake where helper scripts are
 AM_INIT_AUTOMAKE([foreign -Wall -Werror subdir-objects])
@@ -26,12 +26,12 @@ AC_CONFIG_HEADERS([config.h version.h]) # Ensure version.h is listed for generat
 # Get detailed git version information using AX_GIT_VERSION.
 # This macro typically sets its own variables (e.g., AX_GIT_COMMIT) and might
 # also influence how PACKAGE_VERSION or similar are defined if not already set by AC_INIT.
-AX_GIT_VERSION([$PACKAGE_VERSION])
+AX_GIT_VERSION([20261019])
 
 # For consistency in user-facing messages and to simplify gschemrc version checks,
 # we will ensure PACKAGE_DATE_VERSION (used in C code and messages)
-# is the same as the simple PACKAGE_VERSION (e.g., "1.0.0").
-temp_package_date_version="$PACKAGE_VERSION"
+# remains the dotted version (e.g., "1.0.0"), without the release date.
+temp_package_date_version="$DOTTED_VERSION"
 AC_DEFINE_UNQUOTED([PACKAGE_DATE_VERSION], ["$temp_package_date_version"], [The package version string, simplified to dotted version for geda-ai.])
 AC_SUBST([PACKAGE_DATE_VERSION], [$temp_package_date_version])
 
@@ -231,9 +231,6 @@ AX_DESKTOP_I18N # Use the macro from geda-desktop-i18n.m4
 # Define the text domain for libgeda
 AC_DEFINE_UNQUOTED([LIBGEDA_GETTEXT_DOMAIN], ["libgeda"], [The gettext domain for libgeda])
 
-# Define PKGDATADIR for use in C code
-AC_DEFINE_UNQUOTED([PKGDATADIR], ["${pkgdatadir}"], [Package data directory])
-
 # Define GETOPT_OPTIONS for gnetlist-legacy
 AC_SUBST(GNETLIST_GETOPT_OPTIONS) # For Makefiles, if needed
 AC_DEFINE_UNQUOTED(GETOPT_OPTIONS, "$GNETLIST_GETOPT_OPTIONS", [Getopt options string for gnetlist-legacy])
@@ -255,7 +252,6 @@ AX_LIBGEDACAIRO([1:0:0])
 #####################################################################
 
 export GEDADATADIR
-GEDAIDATADIR="${GEDADATADIR}"
 export GEDAIDATADIR
 export GEDARCDIR
 

@@ -31,7 +31,7 @@ AC_DEFUN([AX_GIT_VERSION],
 changequote(,)
   init_sed_pattern="^\([\.0-9]*\)\.\([0-9]*\)$"
 changequote([,])
-  DOTTED_VERSION="$PACKAGE_VERSION"
+  DOTTED_VERSION=`echo "$PACKAGE_VERSION" | cut -d- -f1`
   DATE_VERSION="$1"
 
   # If we're in a git repository, get the detailed version from git
@@ -42,7 +42,7 @@ changequote([,])
     AC_MSG_RESULT([$GIT_VERSION])
 
     AC_MSG_CHECKING([descriptive git version])
-    GIT_DESCRIBE_VERSION=`cd $srcdir && $GIT describe 2>/dev/null`
+    GIT_DESCRIBE_VERSION=`cd $srcdir && $GIT describe --match "${DOTTED_VERSION}-[[0-9]][[0-9]][[0-9]][[0-9]][[0-9]][[0-9]][[0-9]][[0-9]]" 2>/dev/null`
     if test "$?" = "0"; then
       AC_MSG_RESULT([$GIT_DESCRIBE_VERSION])
     else

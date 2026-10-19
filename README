@@ -162,6 +162,19 @@ export LDFLAGS="-L/opt/homebrew/lib"
 export CPPFLAGS="-I/opt/homebrew/include"
 ```
 
+Shared data is installed under `share/geda-ai-1.0.0-20261019`, matching
+Automake's source archive directory (`PACKAGE_TARNAME-PACKAGE_VERSION`).
+The release version is recorded in `configure.ac`, so source archives do not
+need Git to recover their data directory. Release tags use `<version>-<YYYYMMDD>`;
+checkpoint tags are excluded from release detection.
+
+`GEDADATADIR` is the authoritative build variable; `GEDAIDATADIR` is an alias.
+Both the C runtime default and Xorn use this directory. `GEDADATA` overrides
+the shared data directory at runtime; `GEDADATARC` overrides configuration.
+Configuration defaults to the same release directory and can be installed
+elsewhere explicitly with `--with-rcdir=DIR`. Avoid overrides pointing at a
+different release. For an installed build, no environment overrides are needed.
+
 ### 5.5 Building and Installing
 
 To compile the suite:

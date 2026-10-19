@@ -56,14 +56,14 @@ and to run the tests, without an account.
 ## Running from the source tree
 
 libgeda finds its menus and component library through `GEDADATA`, and the
-compiled-in default (`/usr/local/share/geda`) usually does not exist.  Source
+compiled-in default (`/usr/local/share/<release-directory>`) usually does not exist.  Source
 the helper script first:
 
     . ./gattrib_env.sh
     gattrib gattrib/tests/bom_test.sch
 
-`gattrib_env.sh` sets `GEDADATA`/`GEDADATARC` from `GEDA_PREFIX` (default
-`/Users/johnryan/geda`) and puts the uninstalled binaries on `PATH`.
+`gattrib_env.sh` sets `GEDADATA`/`GEDADATARC` from the configured data directory (or from
+`GEDA_PREFIX/share/<release-directory>` when `GEDA_PREFIX` is set) and puts the uninstalled binaries on `PATH`.
 
 gattrib reads its menu definition from `$GEDADATA/gattrib-menus.xml`.  After
 editing `gattrib/lib/gattrib-menus.xml` you must install it (`make install` in
