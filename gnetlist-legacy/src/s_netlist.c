@@ -194,7 +194,7 @@ void s_netlist_post_process(TOPLEVEL * pr_current, NETLIST * head)
 	printf("- Renaming nets:\n");
     }
 
-    s_rename_all(pr_current, head);
+    s_rename_all(head);
 
     verbose_done();
     if (verbose_mode) {
@@ -213,7 +213,7 @@ void s_netlist_post_process(TOPLEVEL * pr_current, NETLIST * head)
     verbose_done();
 }
 
-void s_netlist_name_named_nets (TOPLEVEL *pr_current,
+void s_netlist_name_named_nets (
 				NETLIST *named_netlist,
 				NETLIST *unnamed_netlist) {
 
@@ -245,7 +245,7 @@ void s_netlist_name_named_nets (TOPLEVEL *pr_current,
 	  n_current = pl_current->nets;
 	  while (n_current != NULL) {
 	    g_free (n_current->net_name);
-	    n_current->net_name = s_netlist_netname_of_netid(pr_current,
+	    n_current->net_name = s_netlist_netname_of_netid(
 							     named_netlist,
 							     n_current->nid);
 
@@ -268,7 +268,7 @@ void s_netlist_name_named_nets (TOPLEVEL *pr_current,
 
 }
 
-char *s_netlist_netname_of_netid (TOPLEVEL *pr_current,
+char *s_netlist_netname_of_netid (
 				  NETLIST *netlist_head,
 				  int net_id) {
 

@@ -67,8 +67,8 @@ void gnetlist_quit()
  *
  * \param pr_current  Current #TOPLEVEL structure.
  */
-void
-gnetlist_backends (TOPLEVEL *pr_current)
+static void
+gnetlist_backends (void)
 {
   SCM s_load_path;
   GList *backend_names = NULL, *iter = NULL;
@@ -143,6 +143,9 @@ void main_prog(void *closure, int argc, char *argv[])
 
     TOPLEVEL *pr_current;
 
+    /* Guile requires a context slot; scm_boot_guile passes NULL here. */
+    (void) closure;
+
     /* set default output filename */
     output_filename = g_strdup("output.net");
 
@@ -197,7 +200,7 @@ void main_prog(void *closure, int argc, char *argv[])
     s_rename_init();
 
     if(list_backends) {
-      gnetlist_backends(pr_current);
+      gnetlist_backends();
       exit (0);
     }
 

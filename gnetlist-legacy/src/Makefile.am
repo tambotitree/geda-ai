@@ -24,7 +24,9 @@ gnetlist_legacy_SOURCES = \
 gnetlist_legacy_CPPFLAGS = -I$(top_srcdir)/libgeda/include \
 	-I$(srcdir)/../include -I$(top_srcdir) -I$(includedir)
 gnetlist_legacy_CFLAGS = $(GCC_CFLAGS) $(MINGW_CFLAGS) $(GLIB_CFLAGS) \
-	$(GIO_CFLAGS) $(GUILE_CFLAGS) $(GDK_PIXBUF_CFLAGS)
+	$(GIO_CFLAGS) $(GUILE_CFLAGS) $(GDK_PIXBUF_CFLAGS) \
+	-Wall -Wextra -Werror -Wpedantic -Wstrict-prototypes \
+	-Wmissing-prototypes -Wformat=2
 gnetlist_legacy_LDFLAGS = $(GLIB_LIBS) $(GIO_LIBS) $(GUILE_LIBS) \
 	$(GDK_PIXBUF_LIBS)
 gnetlist_legacy_LDADD = $(top_builddir)/libgeda/src/libgeda.la

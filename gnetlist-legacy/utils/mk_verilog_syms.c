@@ -90,9 +90,9 @@ struct Table generate[] = {
 unsigned int nGenerate = sizeof(generate)/sizeof(struct Table);
 
 int
-main(int argc, char **argv)
+main(void)
 {
-  int i,j;
+  unsigned int i, j;
   int rc;
   char name[127];
 

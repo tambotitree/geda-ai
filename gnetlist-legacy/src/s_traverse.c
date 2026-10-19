@@ -39,13 +39,6 @@
  */
 static GHashTable *visit_table = NULL;
 
-/*! Trivial function used when clearing #visit_table. */
-static gboolean
-returns_true (gpointer key, gpointer value, gpointer user_data)
-{
-  return TRUE;
-}
-
 /*! Retrieve the current visit count for a particular OBJECT. */
 static inline gint
 is_visited(OBJECT *obj)
@@ -70,11 +63,9 @@ visit(OBJECT *obj)
 
 /*! Reset all visit counts. Simply clears the hashtable completely. */
 static inline void
-s_traverse_clear_all_visited (const GList *obj_list)
+s_traverse_clear_all_visited (void)
 {
-  g_hash_table_foreach_remove (visit_table,
-                               (GHRFunc) returns_true,
-                               NULL);
+  g_hash_table_remove_all (visit_table);
 }
 
 void s_traverse_init()
@@ -134,7 +125,7 @@ void s_traverse_start(TOPLEVEL * pr_current)
   s_netlist_post_process(pr_current, netlist_head);
 
   /* Now match the graphical netlist with the net names already assigned */
-  s_netlist_name_named_nets(pr_current, netlist_head,
+  s_netlist_name_named_nets( netlist_head,
                             graphical_netlist_head);
 
   if (verbose_mode) {
@@ -298,7 +289,7 @@ CPINLIST *s_traverse_component(TOPLEVEL * pr_current, OBJECT * component,
     if (o_current->conn_list != NULL) {
       s_traverse_net (pr_current, nets, TRUE,
 		      o_current, hierarchy_tag, cpins->type);
-      s_traverse_clear_all_visited (s_page_objects (pr_current->page_current));
+      s_traverse_clear_all_visited ();
     }
 
     cpins->nets = nets_head;
