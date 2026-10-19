@@ -1,6 +1,9 @@
 ## Process this file with automake to produce Makefile.in
 
 noinst_HEADERS = \
+	gschem_signal.h \
+	gschem_icons.h \
+	gschem_appearance.h \
 	globals.h i_vars.h prototype.h x_dialog.h x_states.h \
 	gettext.h \
 	gschem.h \
