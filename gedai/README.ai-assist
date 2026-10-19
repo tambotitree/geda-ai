@@ -1,0 +1,67 @@
+AI Assist chat
+==============
+
+Open AI Assist in gschem. The Chat tab uses the current page's live edit
+buffer, including unsaved changes. It never saves or applies a model reply
+to the schematic. The existing Schematic text and Design and SPICE tabs are
+still available for inspection; each Send refreshes them.
+
+Choose Ollama, OpenAI, DeepSeek, OpenRouter or Other compatible. Select Load
+Models, then choose a chat-capable model from the editable dropdown. You can
+also type a model ID. Provider endpoints and model choices are remembered
+separately in the user's geda-ai/ai-assist.ini under the GLib user config
+directory. Endpoints are editable, including for remote Ollama servers.
+Model lists may include non-chat models; a model must support the selected
+provider's chat API. Nothing downloads a model automatically.
+
+Credentials
+-----------
+
+Hosted providers require their own keys:
+
+  OpenAI:     OPENAI_API_KEY
+  DeepSeek:   DEEPSEEK_API_KEY (or existing DEEPSEEK_API)
+  OpenRouter: OPENROUTER_API_KEY (or OPENROUTER_API)
+  Ollama:     optional OLLAMA_API_KEY
+  Other:      optional GEDA_AI_API_KEY
+
+Resolution order is the masked API key field, the selected provider's
+environment variables, then its key in the specified .env file. A blank
+.env path uses .env in the application's current working directory.
+An explicit missing file or missing required key is reported in Chat;
+enter a path or key and retry. Switching providers clears the typed key.
+Keys are not written into preferences, the transcript, argv, or the schematic.
+The .env reader accepts KEY=value, single/double quotes, export and comments;
+it never executes shell substitutions or changes the process environment.
+
+Enter a question and press Enter or Send. The chosen server receives the
+latest schematic and report plus successful earlier turns. Only the latest
+snapshot is included as current context. Switching schematic pages starts
+a new conversation. New chat clears history manually. The dialog remains
+responsive during requests. Cancel or closing the dialog terminates its
+helper process; failed/cancelled requests do not enter conversation history.
+Provider/model settings cannot change during an outstanding request.
+
+Build and verification
+----------------------
+
+The GTK dialog uses GIO subprocess communication and the configured Python
+interpreter. gedai/chat_backend.py uses Python's standard library only.
+Install it into the same versioned GEDADATADIR as the rest of the runtime:
+
+  make -C gedai install-data
+  make -C gschem/src check
+
+The backend tests simulate provider HTTP responses and credentials. The GTK
+integration test exercises the real controls and async pipes using an isolated
+fixture helper/config directory; it skips if no GTK display is available.
+The optional real loopback HTTP test needs permission to bind a local port:
+
+  python3 tests/test_ai_chat_http.py
+
+Protocol references:
+  https://docs.ollama.com/api/chat
+  https://developers.openai.com/api/reference/chat-completions/overview
+  https://api-docs.deepseek.com/api/list-models/
+  https://openrouter.ai/docs/api/api-reference/chat/create-a-chat-completion
+  https://openrouter.ai/docs/api/api-reference/models/list-all-models-and-their-properties
