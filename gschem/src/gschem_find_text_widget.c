@@ -40,6 +40,9 @@
 
 #include "gschem.h"
 
+static void gschem_find_text_widget_class_init_gtype_adapter (gpointer klass, gpointer data);
+static void gschem_find_text_widget_init_gtype_adapter (GTypeInstance *instance, gpointer klass);
+
 #include "../include/gschem_find_text_dockable.h"
 
 
@@ -112,6 +115,7 @@ static GObjectClass *gschem_find_text_widget_parent_class = NULL;
 static gboolean
 key_press_event (GtkWidget *widget, GdkEventKey *event, gpointer user_data)
 {
+  (void) widget;
   if (event->keyval == GDK_KEY_Escape &&
       (event->state & gtk_accelerator_get_default_mod_mask()) == 0) {
     gtk_info_bar_response (GTK_INFO_BAR (user_data), GTK_RESPONSE_CANCEL);
@@ -128,6 +132,7 @@ key_press_event (GtkWidget *widget, GdkEventKey *event, gpointer user_data)
 static void
 activate_entry (GtkWidget *entry, GschemFindTextWidget *widget)
 {
+  (void) entry;
   g_return_if_fail (widget != NULL);
 
   if (gtk_entry_get_text_length (GTK_ENTRY (widget->entry)) > 0) {
@@ -145,6 +150,7 @@ activate_entry (GtkWidget *entry, GschemFindTextWidget *widget)
 static void
 click_cancel (GtkWidget *button, GschemFindTextWidget *widget)
 {
+  (void) button;
   gtk_info_bar_response (GTK_INFO_BAR (widget), GTK_RESPONSE_CANCEL);
 }
 
@@ -155,6 +161,7 @@ click_cancel (GtkWidget *button, GschemFindTextWidget *widget)
 static void
 click_find (GtkWidget *entry, GschemFindTextWidget *widget)
 {
+  (void) entry;
   g_return_if_fail (widget != NULL);
 
   if (gtk_entry_get_text_length (GTK_ENTRY (widget->entry)) > 0) {
@@ -373,12 +380,13 @@ gschem_find_text_widget_get_type()
       sizeof(GschemFindTextWidgetClass),
       NULL,                                                    /* base_init */
       NULL,                                                    /* base_finalize */
-      (GClassInitFunc) gschem_find_text_widget_class_init,
+      gschem_find_text_widget_class_init_gtype_adapter,
       NULL,                                                    /* class_finalize */
       NULL,                                                    /* class_data */
       sizeof(GschemFindTextWidget),
       0,                                                       /* n_preallocs */
-      (GInstanceInitFunc) gschem_find_text_widget_init,
+      gschem_find_text_widget_init_gtype_adapter,
+      NULL /* value_table */
     };
 
     type = g_type_register_static (GTK_TYPE_INFO_BAR, "GschemFindTextWidget", &info, 0);
@@ -424,7 +432,7 @@ gschem_find_text_widget_init (GschemFindTextWidget *widget)
   gtk_widget_set_visible (widget->descend_button, TRUE);
   gtk_box_pack_start (GTK_BOX (content), widget->descend_button, FALSE, FALSE, 0);
 
-  button_box = gtk_hbutton_box_new();
+  button_box = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
   gtk_widget_set_visible (button_box, TRUE);
   gtk_box_pack_start (GTK_BOX (content), button_box, FALSE, FALSE, 0);
 
@@ -433,7 +441,7 @@ gschem_find_text_widget_init (GschemFindTextWidget *widget)
   gtk_widget_set_visible (widget->find_button, TRUE);
   gtk_box_pack_start (GTK_BOX (button_box), widget->find_button, FALSE, FALSE, 0);
 
-  cancel_button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
+  cancel_button = gtk_button_new_with_mnemonic (_("_Cancel"));
   gtk_widget_set_visible (cancel_button, TRUE);
   gtk_box_pack_start (GTK_BOX (button_box), cancel_button, FALSE, FALSE, 0);
 
@@ -578,6 +586,8 @@ create_find_type_store()
 static void
 notify_entry_text (GtkWidget *entry, GParamSpec *pspec, GschemFindTextWidget *widget)
 {
+  (void) entry;
+  (void) pspec;
   g_return_if_fail (widget != NULL);
 
   gtk_widget_set_sensitive (widget->find_button,
@@ -609,4 +619,20 @@ set_property (GObject *object, guint param_id, const GValue *value, GParamSpec *
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
   }
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+gschem_find_text_widget_class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  gschem_find_text_widget_class_init (klass);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+gschem_find_text_widget_init_gtype_adapter (GTypeInstance *instance, gpointer klass)
+{
+  (void) klass;
+  gschem_find_text_widget_init ((void *) instance);
 }

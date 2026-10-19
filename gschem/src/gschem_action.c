@@ -64,6 +64,7 @@
 
 #include "gschem.h"
 
+
 /* - Getting rid of old macro expantions that break modern pedantic compilation.:w
 
 #define DEFINE_ACTION(c_id, id, icon, name, label, menu_label, tooltip, type) \
@@ -536,13 +537,13 @@ gschem_action_state_dispatcher_get_type(void)
       sizeof (DispatcherClass),
       NULL,                                     /* base_init */
       NULL,                                     /* base_finalize */
-      // (GClassInitFunc) dispatcher_class_init,
+      // dispatcher_class_init_gtype_adapter,
       (GClassInitFunc) dispatcher_class_init_wrapper,
       NULL,                                     /* class_finalize */
       NULL,                                     /* class_data */
       sizeof (Dispatcher),
       0,                                        /* n_preallocs */
-      // (GInstanceInitFunc) dispatcher_instance_init,
+      // dispatcher_instance_init_gtype_adapter,
       (GInstanceInitFunc) dispatcher_instance_init_wrapper,
       NULL                                      /* value_table */
     };

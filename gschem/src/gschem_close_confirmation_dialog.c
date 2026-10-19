@@ -98,7 +98,7 @@ GList *close_confirmation_dialog_get_selected_pages (CloseConfirmationDialog *di
 
 
 
-GType
+static GType
 close_confirmation_dialog_get_type(void)
 {
   static GType close_confirmation_dialog_type = 0;

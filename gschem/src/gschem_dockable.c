@@ -20,6 +20,9 @@
 
 #include <config.h>
 #include "gschem.h"
+
+static void class_init_gtype_adapter (gpointer klass, gpointer data);
+static void instance_init_gtype_adapter (GTypeInstance *instance, gpointer klass);
 #include <gdk/gdkkeysyms.h>
 
 
@@ -197,12 +200,12 @@ gschem_dockable_get_type()
       sizeof (GschemDockableClass),
       NULL,                             /* base_init */
       NULL,                             /* base_finalize */
-      (GClassInitFunc) class_init,
+      class_init_gtype_adapter,
       NULL,                             /* class_finalize */
       NULL,                             /* class_data */
       sizeof (GschemDockable),
       0,                                /* n_preallocs */
-      (GInstanceInitFunc) instance_init,
+      instance_init_gtype_adapter,
       NULL                              /* value_table */
     };
 
@@ -518,6 +521,7 @@ get_property (GObject *object, guint property_id,
 static GtkWidget *
 real_create_widget (GschemDockable *dockable)
 {
+  (void) dockable;
   g_assert_not_reached();
 }
 
@@ -525,6 +529,7 @@ real_create_widget (GschemDockable *dockable)
 static void
 real_post_present (GschemDockable *dockable)
 {
+  (void) dockable;
   /* default action: none */
 }
 
@@ -532,6 +537,7 @@ real_post_present (GschemDockable *dockable)
 static void
 real_cancel (GschemDockable *dockable)
 {
+  (void) dockable;
   /* default action: ignore */
 }
 
@@ -540,6 +546,9 @@ static void
 real_save_internal_geometry (GschemDockable *dockable,
                              EdaConfig *cfg, gchar *group_name)
 {
+  (void) dockable;
+  (void) cfg;
+  (void) group_name;
   /* override if dockable has internal geometry */
 }
 
@@ -548,6 +557,9 @@ static void
 real_restore_internal_geometry (GschemDockable *dockable,
                                 EdaConfig *cfg, gchar *group_name)
 {
+  (void) dockable;
+  (void) cfg;
+  (void) group_name;
   /* override if dockable has internal geometry */
 }
 
@@ -571,6 +583,7 @@ get_notebook_group_name (GschemToplevel *w_current, GtkNotebook *notebook)
 static GschemDockable *
 get_dockable_by_widget (GschemToplevel *w_current, GtkWidget *widget)
 {
+  (void) w_current;
   g_return_val_if_fail (widget != NULL, NULL);
 
   /* See the note in get_widget(): "user-data" is a GtkWidget *construct-only*
@@ -767,7 +780,7 @@ restore_page_order (GschemToplevel *w_current,
 
   gchar **list;
   gsize page_count = 0;
-  gint page_num;
+  gsize page_num;
 
   list = eda_config_get_string_list (
     cfg, get_notebook_group_name (w_current, notebook),
@@ -938,14 +951,14 @@ create_window (GschemDockable *dockable)
 
   /* create containers */
 
-  dockable->vbox = g_object_new (GTK_TYPE_VBOX,
+  dockable->vbox = g_object_new (GTK_TYPE_BOX, "orientation", GTK_ORIENTATION_VERTICAL,
                                  "border-width", 2,
                                  "spacing",      0,
                                  NULL);
   gtk_container_add (GTK_CONTAINER (dockable->window), dockable->vbox);
   gtk_widget_show (dockable->vbox);
 
-  dockable->action_area = g_object_new (GTK_TYPE_HBUTTON_BOX,
+  dockable->action_area = g_object_new (GTK_TYPE_BUTTON_BOX, "orientation", GTK_ORIENTATION_HORIZONTAL,
                                         "border-width", 5,
                                         "spacing",      6,
                                         "layout-style", GTK_BUTTONBOX_END,
@@ -959,7 +972,7 @@ create_window (GschemDockable *dockable)
   /* add buttons */
 
   if (dockable->cancellable) {
-    dockable->cancel_button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
+    dockable->cancel_button = gtk_button_new_with_mnemonic (_("_Cancel"));
     gtk_widget_set_can_default (dockable->cancel_button, TRUE);
     gtk_widget_show (dockable->cancel_button);
     g_signal_connect (dockable->cancel_button, "clicked",
@@ -969,8 +982,8 @@ create_window (GschemDockable *dockable)
                       FALSE, TRUE, 0);
   }
 
-  dockable->hide_button = gtk_button_new_from_stock (
-    dockable->cancellable ? GTK_STOCK_OK : GTK_STOCK_CLOSE);
+  dockable->hide_button = gtk_button_new_with_mnemonic (
+    dockable->cancellable ? _("_OK") : _("_Close"));
   gtk_widget_set_can_default (dockable->hide_button, TRUE);
   gtk_widget_show (dockable->hide_button);
   g_signal_connect (dockable->hide_button, "clicked",
@@ -980,7 +993,7 @@ create_window (GschemDockable *dockable)
                     FALSE, TRUE, 0);
 
   if (dockable->help_page != NULL) {
-    dockable->help_button = gtk_button_new_from_stock (GTK_STOCK_HELP);
+    dockable->help_button = gtk_button_new_with_mnemonic (_("_Help"));
     gtk_widget_set_can_default (dockable->help_button, TRUE);
     gtk_widget_show (dockable->help_button);
     g_signal_connect (dockable->help_button, "clicked",
@@ -990,18 +1003,6 @@ create_window (GschemDockable *dockable)
                       FALSE, TRUE, 0);
     gtk_button_box_set_child_secondary (GTK_BUTTON_BOX (dockable->action_area),
                                         dockable->help_button, TRUE);
-  }
-
-  GdkScreen *screen = gtk_widget_get_screen (dockable->window);
-  if (gtk_alternative_dialog_button_order (screen)) {
-    gtk_box_reorder_child (GTK_BOX (dockable->action_area),
-                           dockable->hide_button, 0);
-    if (dockable->cancel_button != NULL)
-      gtk_box_reorder_child (GTK_BOX (dockable->action_area),
-                             dockable->cancel_button, 1);
-    if (dockable->help_button != NULL)
-      gtk_box_reorder_child (GTK_BOX (dockable->action_area),
-                             dockable->help_button, 2);
   }
 
   gtk_widget_grab_default (dockable->hide_button);
@@ -1049,8 +1050,7 @@ create_menu (GschemDockable *dockable)
   gtk_menu_shell_append (GTK_MENU_SHELL (dockable->menu),
                          gtk_separator_menu_item_new());
 
-  dockable->close_item = gtk_image_menu_item_new_from_stock (GTK_STOCK_CLOSE,
-                                                             NULL);
+  dockable->close_item = gtk_menu_item_new_with_mnemonic (_("_Close"));
   g_signal_connect (dockable->close_item, "activate",
                     G_CALLBACK (callback_menu_item_activate), dockable);
   gtk_menu_shell_append (GTK_MENU_SHELL (dockable->menu),
@@ -1494,6 +1494,7 @@ callback_after_window_key_press_event (GtkWidget *widget,
                                        GdkEventKey *event,
                                        GschemDockable *dockable)
 {
+  (void) widget;
   if ((event->keyval == GDK_KEY_Return ||
        event->keyval == GDK_KEY_ISO_Enter ||
        event->keyval == GDK_KEY_KP_Enter) &&
@@ -1530,6 +1531,8 @@ callback_window_delete_event (GtkWidget *widget,
                               GdkEvent *event,
                               GschemDockable *dockable)
 {
+  (void) widget;
+  (void) event;
   GschemDockableState state = gschem_dockable_get_state (dockable);
   g_return_val_if_fail (state == GSCHEM_DOCKABLE_STATE_DIALOG ||
                         state == GSCHEM_DOCKABLE_STATE_WINDOW, FALSE);
@@ -1547,6 +1550,7 @@ static void
 callback_hide_button_clicked (GtkWidget *button,
                               GschemDockable *dockable)
 {
+  (void) button;
   gschem_dockable_hide (dockable);
 }
 
@@ -1555,6 +1559,7 @@ static void
 callback_cancel_button_clicked (GtkWidget *button,
                                 GschemDockable *dockable)
 {
+  (void) button;
   gschem_dockable_hide (dockable);
 
   if (dockable->cancellable)
@@ -1566,6 +1571,7 @@ static void
 callback_help_button_clicked (GtkWidget *button,
                               GschemDockable *dockable)
 {
+  (void) button;
   g_return_if_fail (dockable->help_page != NULL);
 
   scm_dynwind_begin (0);
@@ -1630,6 +1636,7 @@ callback_event_box_button_press_event (GtkWidget *widget,
                                        GdkEventButton *event,
                                        GschemDockable *dockable)
 {
+  (void) widget;
   if (event->button == 2 && event->type == GDK_BUTTON_PRESS) {
     gschem_dockable_hide (dockable);
     return TRUE;
@@ -1651,8 +1658,7 @@ callback_event_box_button_press_event (GtkWidget *widget,
     gtk_widget_set_sensitive (dockable->close_item,
                               state != GSCHEM_DOCKABLE_STATE_HIDDEN);
 
-    gtk_menu_popup (GTK_MENU (dockable->menu), NULL, NULL, NULL, NULL,
-                    event->button, event->time);
+    gtk_menu_popup_at_pointer (GTK_MENU (dockable->menu), NULL);
     return TRUE;
   }
 
@@ -1665,6 +1671,8 @@ callback_main_window_focus_in_event (GtkWidget *widget,
                                      GdkEvent *event,
                                      GschemToplevel *w_current)
 {
+  (void) widget;
+  (void) event;
   static gboolean initialized = FALSE;
 
   for (GList *l = w_current->dockables; l != NULL; l = l->next) {
@@ -1688,6 +1696,8 @@ callback_notebook_page_added (GtkWidget *notebook,
                               guint page_num,
                               GschemToplevel *w_current)
 {
+  (void) notebook;
+  (void) page_num;
   GschemDockable *dockable = get_dockable_by_widget (w_current, child);
   g_return_if_fail (dockable != NULL);
 
@@ -1702,6 +1712,8 @@ callback_notebook_page_added_removed_reordered (GtkWidget *notebook,
                                                 guint page_num,
                                                 GschemToplevel *w_current)
 {
+  (void) child;
+  (void) page_num;
   save_page_order (w_current, GTK_NOTEBOOK (notebook));
 
   /* show or hide notebook as appropriate */
@@ -1718,6 +1730,7 @@ callback_notebook_switch_page (GtkWidget *notebook,
                                guint arg2,
                                GschemToplevel *w_current)
 {
+  (void) arg2;
   GschemDockable *dockable = get_dockable_by_widget (w_current, arg1);
   g_return_if_fail (dockable != NULL);
 
@@ -1731,6 +1744,7 @@ callback_notebook_create_window (GtkWidget *notebook,
                                  gint x, gint y,
                                  GschemToplevel *w_current)
 {
+  (void) notebook;
   GschemDockable *dockable = get_dockable_by_widget (w_current, page);
   g_return_val_if_fail (dockable != NULL, NULL);
 
@@ -1799,8 +1813,23 @@ callback_notebook_button_press_event (GtkWidget *notebook,
                     notebook == w_current->right_notebook ?
                       w_current->right_docking_area_menu : NULL;
   g_return_val_if_fail (menu != NULL, FALSE);
-  gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL,
-                  event->button, event->time);
+  gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);
 
   return TRUE;
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  class_init (klass);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+instance_init_gtype_adapter (GTypeInstance *instance, gpointer klass)
+{
+  (void) klass;
+  instance_init ((void *) instance);
 }

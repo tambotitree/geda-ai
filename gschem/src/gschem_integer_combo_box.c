@@ -39,6 +39,9 @@
 
 #include "gschem.h"
 
+static void gschem_integer_combo_box_class_init_gtype_adapter (gpointer klass, gpointer data);
+static void gschem_integer_combo_box_init_gtype_adapter (GTypeInstance *instance, gpointer klass);
+
 
 
 static void
@@ -76,10 +79,11 @@ value_changed (GschemIntegerComboBox *combo, gpointer unused);
 static void
 add_widget (GschemIntegerComboBox *combo, GtkWidget *widget, gpointer unused)
 {
+  (void) unused;
   g_return_if_fail (combo != NULL);
   g_return_if_fail (widget != NULL);
 
-  g_signal_connect(G_OBJECT (widget),
+  gschem_signal_connect (G_OBJECT (widget),
                    "focus-out-event",
                    G_CALLBACK (focus_out_event),
                    combo);
@@ -96,6 +100,7 @@ add_widget (GschemIntegerComboBox *combo, GtkWidget *widget, gpointer unused)
 static gboolean
 focus_out_event (GtkEntry *entry, GdkEvent *event, GschemIntegerComboBox *combo)
 {
+  (void) event;
   g_return_val_if_fail (entry != NULL, FALSE);
   g_return_val_if_fail (combo != NULL, FALSE);
 
@@ -146,12 +151,13 @@ gschem_integer_combo_box_get_type()
       sizeof(GschemIntegerComboBoxClass),
       NULL,                                                    /* base_init */
       NULL,                                                    /* base_finalize */
-      (GClassInitFunc) gschem_integer_combo_box_class_init,
+      gschem_integer_combo_box_class_init_gtype_adapter,
       NULL,                                                    /* class_finalize */
       NULL,                                                    /* class_data */
       sizeof(GschemIntegerComboBox),
       0,                                                       /* n_preallocs */
-      (GInstanceInitFunc) gschem_integer_combo_box_init,
+      gschem_integer_combo_box_init_gtype_adapter,
+      NULL /* value_table */
     };
 
 #if GTK_CHECK_VERSION (2, 24, 0)
@@ -228,22 +234,22 @@ gschem_integer_combo_box_init (GschemIntegerComboBox *combo)
 
   combo->changed = FALSE;
 
-  g_signal_connect(G_OBJECT (combo),
+  gschem_signal_connect (G_OBJECT (combo),
                    "notify::active",
                    G_CALLBACK (notify_active),
                    NULL);
 
-  g_signal_connect(G_OBJECT (combo),
+  gschem_signal_connect (G_OBJECT (combo),
                    "add",
                    G_CALLBACK (add_widget),
                    NULL);
 
-  g_signal_connect(G_OBJECT (combo),
+  gschem_signal_connect (G_OBJECT (combo),
                    "changed",
                    G_CALLBACK (value_changed),
                    NULL);
 
-  g_signal_connect(G_OBJECT (combo),
+  gschem_signal_connect (G_OBJECT (combo),
                    "remove",
                    G_CALLBACK (remove_widget),
                    NULL);
@@ -300,7 +306,7 @@ gschem_integer_combo_box_set_value (GtkWidget *widget, int value)
 {
   GtkWidget *entry;
   g_return_if_fail (widget != NULL);
-  entry = gschem_integer_combo_box_get_entry(widget);
+  entry = GTK_WIDGET (gschem_integer_combo_box_get_entry(widget));
   g_return_if_fail (entry != NULL);
 
   if (value >= 0) {
@@ -322,6 +328,8 @@ gschem_integer_combo_box_set_value (GtkWidget *widget, int value)
 static void
 notify_active (GschemIntegerComboBox *combo, GParamSpec *pspec, gpointer unused)
 {
+  (void) pspec;
+  (void) unused;
   g_return_if_fail (combo != NULL);
 
   g_signal_emit_by_name (combo, "apply");
@@ -342,12 +350,11 @@ notify_active (GschemIntegerComboBox *combo, GParamSpec *pspec, gpointer unused)
 static void
 remove_widget (GschemIntegerComboBox *combo, GtkWidget *widget, gpointer unused)
 {
+  (void) unused;
   g_return_if_fail (combo != NULL);
   g_return_if_fail (widget != NULL);
 
-  g_signal_handlers_disconnect_by_func(G_OBJECT (widget),
-                                       G_CALLBACK (focus_out_event),
-                                       combo);
+  gschem_signal_handlers_disconnect (G_OBJECT (widget), G_CALLBACK (focus_out_event), combo);
 }
 
 
@@ -366,6 +373,7 @@ remove_widget (GschemIntegerComboBox *combo, GtkWidget *widget, gpointer unused)
 static void
 value_changed (GschemIntegerComboBox *combo, gpointer unused)
 {
+  (void) unused;
   g_return_if_fail (combo != NULL);
 
   if (gtk_widget_is_focus (GTK_WIDGET (gschem_integer_combo_box_get_entry (GTK_WIDGET (combo))))) {
@@ -380,4 +388,20 @@ value_changed (GschemIntegerComboBox *combo, gpointer unused)
    */
 
 /* All code below is unchanged */
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+gschem_integer_combo_box_class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  gschem_integer_combo_box_class_init (klass);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+gschem_integer_combo_box_init_gtype_adapter (GTypeInstance *instance, gpointer klass)
+{
+  (void) klass;
+  gschem_integer_combo_box_init ((void *) instance);
 }

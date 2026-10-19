@@ -35,6 +35,9 @@
 
 #include "gschem.h"
 
+static void class_init_gtype_adapter (gpointer klass, gpointer data);
+static void instance_init_gtype_adapter (GTypeInstance *instance, gpointer klass);
+
 #include "../include/gschem_find_text_dockable.h"
 
 
@@ -166,12 +169,13 @@ gschem_find_text_dockable_get_type()
       sizeof(GschemFindTextDockableClass),
       NULL,                                /* base_init */
       NULL,                                /* base_finalize */
-      (GClassInitFunc) class_init,
+      class_init_gtype_adapter,
       NULL,                                /* class_finalize */
       NULL,                                /* class_data */
       sizeof(GschemFindTextDockable),
       0,                                   /* n_preallocs */
-      (GInstanceInitFunc) instance_init,
+      instance_init_gtype_adapter,
+      NULL /* value_table */
     };
 
     type = g_type_register_static (GSCHEM_TYPE_DOCKABLE,
@@ -418,7 +422,11 @@ find_objects_using_pattern (GSList *pages, const char *text)
         continue;
       }
 
+#if GLIB_CHECK_VERSION (2, 70, 0)
+      if (g_pattern_spec_match_string (pattern, str)) {
+#else
       if (g_pattern_match_string (pattern, str)) {
+#endif
         object_list = g_slist_prepend (object_list, object);
       }
     }
@@ -627,6 +635,7 @@ get_pages (GList *pages, gboolean descend)
 static void
 get_property (GObject *object, guint param_id, GValue *value, GParamSpec *pspec)
 {
+  (void) value;
   /* GschemFindTextDockable *state = GSCHEM_FIND_TEXT_DOCKABLE (object); */
 
   switch (param_id) {
@@ -878,10 +887,27 @@ select_cb (GtkTreeSelection *selection, GschemFindTextDockable *state)
 static void
 set_property (GObject *object, guint param_id, const GValue *value, GParamSpec *pspec)
 {
+  (void) value;
   /* GschemFindTextDockable *state = GSCHEM_FIND_TEXT_DOCKABLE (object); */
 
   switch (param_id) {
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
   }
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  class_init (klass);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+instance_init_gtype_adapter (GTypeInstance *instance, gpointer klass)
+{
+  (void) klass;
+  instance_init ((void *) instance);
 }

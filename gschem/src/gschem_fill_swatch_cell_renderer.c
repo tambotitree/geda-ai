@@ -26,6 +26,9 @@
 #include <config.h>
 #include "gschem.h"
 
+static void class_init_gtype_adapter (gpointer klass, gpointer data);
+static void instance_init_gtype_adapter (GTypeInstance *instance, gpointer klass);
+
 
 
 /* Specifies the width of the border around the swatch, in pixels (double).
@@ -92,12 +95,13 @@ gschem_fill_swatch_cell_renderer_get_type()
       sizeof (GschemFillSwatchCellRendererClass),
       NULL,                                         /* base_init */
       NULL,                                         /* base_finalize */
-      (GClassInitFunc) class_init,
+      class_init_gtype_adapter,
       NULL,                                         /* class_finalize */
       NULL,                                         /* class_data */
       sizeof (GschemFillSwatchCellRenderer),
       0,                                            /* n_preallocs */
-      (GInstanceInitFunc) instance_init,
+      instance_init_gtype_adapter,
+      NULL /* value_table */
     };
 
     type = g_type_register_static (GTK_TYPE_CELL_RENDERER_TEXT,
@@ -225,6 +229,8 @@ render(GtkCellRenderer      *cell,
        const GdkRectangle   *cell_area,
        GtkCellRendererState  flags)
 {
+  (void) background_area;
+  (void) flags;
   GschemFillSwatchCellRenderer *swatch = GSCHEM_FILL_SWATCH_CELL_RENDERER(cell);
 
   if (!swatch->enabled) return;
@@ -259,7 +265,7 @@ render(GtkCellRenderer      *cell,
 
   if ((swatch->fill_type == FILLING_HATCH) || (swatch->fill_type == FILLING_MESH)) {
     BOX box;
-    int index;
+    guint index;
     GArray *lines = g_array_new(FALSE, FALSE, sizeof(LINE));
     cairo_path_t *save_path = cairo_copy_path(cr);
 
@@ -331,4 +337,20 @@ set_property (GObject      *object,
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
       break;
   }
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  class_init (klass);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+instance_init_gtype_adapter (GTypeInstance *instance, gpointer klass)
+{
+  (void) klass;
+  instance_init ((void *) instance);
 }

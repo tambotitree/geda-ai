@@ -34,6 +34,8 @@
 #endif
 
 #include "gschem.h"
+
+static void compselect_class_init_gtype_adapter (gpointer klass, gpointer data);
 // #include "actions.decl.x"
 #include "actions.h"
 #include <gdk/gdkkeysyms.h>
@@ -167,11 +169,9 @@ select_symbol (GschemCompselectDockable *compselect, CLibSymbol *symbol)
     CLibSymbol *sym = NULL;
     gtk_tree_model_get (model, &iter, INUSE_COLUMN_SYMBOL, &sym, -1);
     if (sym != symbol) {
-      g_signal_handlers_block_by_func (
-        selection, compselect_callback_tree_selection_changed, compselect);
+      gschem_signal_handlers_block (selection, G_CALLBACK (compselect_callback_tree_selection_changed), compselect);
       gtk_tree_selection_unselect_all (selection);
-      g_signal_handlers_unblock_by_func (
-        selection, compselect_callback_tree_selection_changed, compselect);
+      gschem_signal_handlers_unblock (selection, G_CALLBACK (compselect_callback_tree_selection_changed), compselect);
     }
   }
 
@@ -182,11 +182,9 @@ select_symbol (GschemCompselectDockable *compselect, CLibSymbol *symbol)
     gtk_tree_model_get (model, &iter, LIB_COLUMN_SYMBOL_OR_SOURCE, &sym,
                                       LIB_COLUMN_IS_SYMBOL, &is_sym, -1);
     if (is_sym && sym != symbol) {
-      g_signal_handlers_block_by_func (
-        selection, compselect_callback_tree_selection_changed, compselect);
+      gschem_signal_handlers_block (selection, G_CALLBACK (compselect_callback_tree_selection_changed), compselect);
       gtk_tree_selection_unselect_all (selection);
-      g_signal_handlers_unblock_by_func (
-        selection, compselect_callback_tree_selection_changed, compselect);
+      gschem_signal_handlers_unblock (selection, G_CALLBACK (compselect_callback_tree_selection_changed), compselect);
     }
   }
 
@@ -281,6 +279,8 @@ inuse_treeview_set_cell_data (GtkTreeViewColumn *tree_column,
                             GtkTreeIter       *iter,
                             gpointer           data)
 {
+  (void) tree_column;
+  (void) data;
   CLibSymbol *symbol;
 
   gtk_tree_model_get (tree_model, iter, INUSE_COLUMN_SYMBOL, &symbol, -1);
@@ -377,6 +377,7 @@ tree_row_activated (GtkTreeView       *tree_view,
                     GtkTreeViewColumn *column,
                     gpointer           user_data)
 {
+  (void) column;
   GtkTreeModel *model;
   GtkTreeIter iter;
   GschemCompselectDockable *compselect = GSCHEM_COMPSELECT_DOCKABLE (user_data);
@@ -441,7 +442,7 @@ update_attributes_model (GschemCompselectDockable *compselect, gchar *filename)
   OBJECT *o_current;
   EdaConfig *cfg;
   gchar **filter_list;
-  gint i;
+  gsize i;
   gsize n;
 
   model = GTK_LIST_STORE (gtk_tree_view_get_model (compselect->attrtreeview));
@@ -602,6 +603,7 @@ static void
 compselect_callback_filter_entry_changed (GtkEditable *editable,
                                           gpointer  user_data)
 {
+  (void) editable;
   GschemCompselectDockable *compselect = GSCHEM_COMPSELECT_DOCKABLE (user_data);
   GtkWidget *button;
   gboolean sensitive;
@@ -643,6 +645,7 @@ static void
 compselect_callback_filter_button_clicked (GtkButton *button,
                                            gpointer   user_data)
 {
+  (void) button;
   GschemCompselectDockable *compselect = GSCHEM_COMPSELECT_DOCKABLE (user_data);
 
   /* clears text in text entry for filter */
@@ -665,6 +668,7 @@ static void
 compselect_callback_behavior_changed (GtkComboBoxText *combobox,
                                       gpointer user_data)
 {
+  (void) combobox;
   GschemCompselectDockable *compselect = GSCHEM_COMPSELECT_DOCKABLE (user_data);
 
   compselect_place (compselect);
@@ -953,6 +957,8 @@ x_compselect_select_previous_symbol (GschemToplevel *w_current)
 static void
 compselect_callback_refresh_library (GtkButton *button, gpointer user_data)
 {
+  (void) button;
+  (void) user_data;
   /* Rescan the libraries for symbols */
   s_clib_refresh();
 }
@@ -966,7 +972,7 @@ create_inuse_treeview (GschemCompselectDockable *compselect)
   GtkCellRenderer *renderer;
   GtkTreeViewColumn *column;
 
-  vbox = GTK_WIDGET (g_object_new (GTK_TYPE_VBOX,
+  vbox = GTK_WIDGET (g_object_new (GTK_TYPE_BOX, "orientation", GTK_ORIENTATION_VERTICAL,
                                    /* GtkContainer */
                                    "border-width", 5,
                                    /* GtkBox */
@@ -997,7 +1003,7 @@ create_inuse_treeview (GschemCompselectDockable *compselect)
 
   create_inuse_tree_model (compselect);
 
-  g_signal_connect (treeview,
+  gschem_signal_connect (treeview,
                     "row-activated",
                     G_CALLBACK (tree_row_activated),
                     compselect);
@@ -1005,7 +1011,7 @@ create_inuse_treeview (GschemCompselectDockable *compselect)
   /* Connect callback to selection */
   selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview));
   gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
-  g_signal_connect (selection,
+  gschem_signal_connect (selection,
                     "changed",
                     G_CALLBACK (compselect_callback_tree_selection_changed),
                     compselect);
@@ -1035,7 +1041,7 @@ create_inuse_treeview (GschemCompselectDockable *compselect)
                       TRUE, TRUE, 0);
 
   /* -- refresh button area -- */
-  hbox = GTK_WIDGET (g_object_new (GTK_TYPE_HBOX,
+  hbox = GTK_WIDGET (g_object_new (GTK_TYPE_BOX, "orientation", GTK_ORIENTATION_HORIZONTAL,
                                           /* GtkBox */
                                           "homogeneous", FALSE,
                                           "spacing",     3,
@@ -1048,11 +1054,11 @@ create_inuse_treeview (GschemCompselectDockable *compselect)
                                      "relief",    GTK_RELIEF_NONE,
                                      NULL));
   gtk_container_add (GTK_CONTAINER (button),
-                     gtk_image_new_from_stock (GTK_STOCK_REFRESH,
+                     gtk_image_new_from_icon_name ("view-refresh",
                                             GTK_ICON_SIZE_SMALL_TOOLBAR));
   /* add the refresh button to the horizontal box at the end */
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0);
-  g_signal_connect (button,
+  gschem_signal_connect (button,
                     "clicked",
                     G_CALLBACK (compselect_callback_refresh_library),
                     compselect);
@@ -1077,7 +1083,7 @@ create_lib_treeview (GschemCompselectDockable *compselect)
   /* -- library selection view -- */
 
   /* vertical box for component selection and search entry */
-  vbox = GTK_WIDGET (g_object_new (GTK_TYPE_VBOX,
+  vbox = GTK_WIDGET (g_object_new (GTK_TYPE_BOX, "orientation", GTK_ORIENTATION_VERTICAL,
                                    /* GtkContainer */
                                    "border-width", 5,
                                    /* GtkBox */
@@ -1106,7 +1112,7 @@ create_lib_treeview (GschemCompselectDockable *compselect)
 
   create_lib_tree_model (compselect);
 
-  g_signal_connect (libtreeview,
+  gschem_signal_connect (libtreeview,
                     "row-activated",
                     G_CALLBACK (tree_row_activated),
                     compselect);
@@ -1114,7 +1120,7 @@ create_lib_treeview (GschemCompselectDockable *compselect)
   /* connect callback to selection */
   selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (libtreeview));
   gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
-  g_signal_connect (selection,
+  gschem_signal_connect (selection,
                     "changed",
                     G_CALLBACK (compselect_callback_tree_selection_changed),
                     compselect);
@@ -1144,7 +1150,7 @@ create_lib_treeview (GschemCompselectDockable *compselect)
 
 
   /* -- filter area -- */
-  hbox = GTK_WIDGET (g_object_new (GTK_TYPE_HBOX,
+  hbox = GTK_WIDGET (g_object_new (GTK_TYPE_BOX, "orientation", GTK_ORIENTATION_HORIZONTAL,
                                           /* GtkBox */
                                           "homogeneous", FALSE,
                                           "spacing",     3,
@@ -1167,7 +1173,7 @@ create_lib_treeview (GschemCompselectDockable *compselect)
                                     "text", "",
                                     NULL));
   gtk_widget_set_size_request (entry, 10, -1);
-  g_signal_connect (entry,
+  gschem_signal_connect (entry,
                     "changed",
                     G_CALLBACK (compselect_callback_filter_entry_changed),
                     compselect);
@@ -1189,9 +1195,9 @@ create_lib_treeview (GschemCompselectDockable *compselect)
                                      NULL));
 
   gtk_container_add (GTK_CONTAINER (button),
-                     gtk_image_new_from_stock (GTK_STOCK_CLEAR,
+                     gtk_image_new_from_icon_name ("edit-clear",
                                                GTK_ICON_SIZE_SMALL_TOOLBAR));
-  g_signal_connect (button,
+  gschem_signal_connect (button,
                     "clicked",
                     G_CALLBACK (compselect_callback_filter_button_clicked),
                     compselect);
@@ -1209,11 +1215,11 @@ create_lib_treeview (GschemCompselectDockable *compselect)
                                      "relief",    GTK_RELIEF_NONE,
                                      NULL));
   gtk_container_add (GTK_CONTAINER (button),
-                     gtk_image_new_from_stock (GTK_STOCK_REFRESH,
+                     gtk_image_new_from_icon_name ("view-refresh",
                                             GTK_ICON_SIZE_SMALL_TOOLBAR));
   /* add the refresh button to the filter area */
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
-  g_signal_connect (button,
+  gschem_signal_connect (button,
                     "clicked",
                     G_CALLBACK (compselect_callback_refresh_library),
                     compselect);
@@ -1324,12 +1330,13 @@ gschem_compselect_dockable_get_type()
       sizeof (GschemCompselectDockableClass),
       NULL, /* base_init */
       NULL, /* base_finalize */
-      (GClassInitFunc) compselect_class_init,
+      compselect_class_init_gtype_adapter,
       NULL, /* class_finalize */
       NULL, /* class_data */
       sizeof (GschemCompselectDockable),
       0,    /* n_preallocs */
-      NULL  /* instance_init */
+      NULL,  /* instance_init */
+      NULL /* value_table */
     };
 
     compselect_type = g_type_register_static (GSCHEM_TYPE_DOCKABLE,
@@ -1630,6 +1637,7 @@ compselect_top_size_allocate (GtkWidget *widget,
                               GtkAllocation *alloc,
                               gpointer user_data)
 {
+  (void) widget;
   // Aspect ratio logic: width / height > 0.5 triggers tiled layout
   gboolean is_tiled = (alloc->width * 2 > alloc->height);
 
@@ -1761,7 +1769,7 @@ compselect_create_widget (GschemDockable *dockable)
   // Behavior combo box
   combobox = create_behaviors_combo_box();
   compselect->combobox_behaviors = GTK_COMBO_BOX (combobox);
-  g_signal_connect (combobox, "changed",
+  gschem_signal_connect (combobox, "changed",
                     G_CALLBACK (compselect_callback_behavior_changed),
                     compselect);
 
@@ -1779,7 +1787,7 @@ compselect_create_widget (GschemDockable *dockable)
 
   compselect->preview_content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   gtk_widget_set_size_request (compselect->preview_content, 0, 15);
-  g_signal_connect (compselect->preview_content, "size-allocate",
+  gschem_signal_connect (compselect->preview_content, "size-allocate",
                     G_CALLBACK (compselect_content_size_allocate), compselect);
   gtk_container_add (GTK_CONTAINER (compselect->preview_content), GTK_WIDGET (preview));
   gtk_widget_show_all (compselect->preview_content);
@@ -1788,7 +1796,7 @@ compselect_create_widget (GschemDockable *dockable)
   // Attributes
   compselect->attribs_content = create_attributes_treeview (compselect);
   gtk_widget_set_size_request (compselect->attribs_content, -1, 20);
-  g_signal_connect (compselect->attribs_content, "size-allocate",
+  gschem_signal_connect (compselect->attribs_content, "size-allocate",
                     G_CALLBACK (compselect_content_size_allocate), compselect);
   gtk_widget_show_all (compselect->attribs_content);
   g_object_ref (compselect->attribs_content);
@@ -1799,7 +1807,7 @@ compselect_create_widget (GschemDockable *dockable)
   gtk_widget_set_margin_bottom (compselect->top, DIALOG_BORDER_SPACING);
   gtk_widget_set_margin_start (compselect->top, DIALOG_BORDER_SPACING);
   gtk_widget_set_margin_end (compselect->top, DIALOG_BORDER_SPACING);
-  g_signal_connect (compselect->top, "size-allocate",
+  gschem_signal_connect (compselect->top, "size-allocate",
                     G_CALLBACK (compselect_top_size_allocate), compselect);
   gtk_box_pack_start (GTK_BOX (compselect->top), compselect->vbox, TRUE, TRUE, 0);
   gtk_widget_show (compselect->top);
@@ -1850,4 +1858,12 @@ compselect_finalize (GObject *object)
   }
 
   G_OBJECT_CLASS (compselect_parent_class)->finalize (object);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+compselect_class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  compselect_class_init (klass);
 }
