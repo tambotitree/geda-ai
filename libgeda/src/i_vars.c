@@ -75,8 +75,7 @@ void i_vars_libgeda_set(TOPLEVEL *toplevel)
   toplevel->make_backup_files = default_make_backup_files;
 
   /* copy the always_promote_attributes list from the default */
-  g_list_foreach(toplevel->always_promote_attributes, (GFunc) g_free, NULL);
-  g_list_free(toplevel->always_promote_attributes);
+  g_list_free_full (toplevel->always_promote_attributes, g_free);
   toplevel->always_promote_attributes = g_list_copy(default_always_promote_attributes);
   for (iter = toplevel->always_promote_attributes; iter != NULL;
        iter = g_list_next(iter))
@@ -87,7 +86,7 @@ void i_vars_libgeda_set(TOPLEVEL *toplevel)
   bitmap_directory = g_build_filename (s_path_sys_data (), "bitmap", NULL);
   INIT_STR(toplevel, bitmap_directory, bitmap_directory);
   g_free (bitmap_directory);
-  fprintf(stderr, "🧠 BITMAP DIR SET TO: %s\n", toplevel->bitmap_directory);
+  g_debug ("Bitmap directory: %s", toplevel->bitmap_directory);
   INIT_STR(toplevel, bus_ripper_symname, DEFAULT_BUS_RIPPER_SYMNAME);
 }
 
@@ -102,7 +101,6 @@ void i_vars_libgeda_freenames()
   g_free(default_bitmap_directory);
   g_free(default_bus_ripper_symname);
 
-  g_list_foreach(default_always_promote_attributes, (GFunc) g_free, NULL);
-  g_list_free(default_always_promote_attributes);
+  g_list_free_full (default_always_promote_attributes, g_free);
   default_always_promote_attributes = NULL;
 }

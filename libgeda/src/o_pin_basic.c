@@ -127,6 +127,7 @@ OBJECT *o_pin_new(TOPLEVEL *toplevel,
 OBJECT *o_pin_read (TOPLEVEL *toplevel, const char buf[],
                     unsigned int release_ver, unsigned int fileformat_ver, GError **err)
 {
+  (void) fileformat_ver;
   OBJECT *new_obj;
   char type; 
   int x1, y1;
@@ -265,6 +266,7 @@ void o_pin_rotate_world(TOPLEVEL *toplevel, int world_centerx,
 			int world_centery, int angle,
 			OBJECT *object)
 {
+  (void) toplevel;
   int newx, newy;
 
   g_return_if_fail (object != NULL);
@@ -305,6 +307,7 @@ void o_pin_rotate_world(TOPLEVEL *toplevel, int world_centerx,
 void o_pin_mirror_world(TOPLEVEL *toplevel,
 			int world_centerx, int world_centery, OBJECT *object)
 {
+  (void) toplevel;
   g_return_if_fail (object != NULL);
   g_return_if_fail (object->line != NULL);
   g_return_if_fail (object->type == OBJ_PIN);
@@ -335,6 +338,7 @@ void o_pin_mirror_world(TOPLEVEL *toplevel,
 void o_pin_modify(TOPLEVEL *toplevel, OBJECT *object,
 		  int x, int y, int whichone)
 {
+  (void) toplevel;
   g_return_if_fail (object != NULL);
   g_return_if_fail (object->line != NULL);
   g_return_if_fail (object->type == OBJ_PIN);

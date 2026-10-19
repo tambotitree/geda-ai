@@ -53,6 +53,8 @@ OBJECT *o_picture_read (TOPLEVEL *toplevel,
                         unsigned int fileformat_ver,
                         GError **err)
 {
+  (void) release_ver;
+  (void) fileformat_ver;
   OBJECT *new_obj;
   int x1, y1;
   int width, height, angle;
@@ -309,7 +311,8 @@ OBJECT *o_picture_new (TOPLEVEL *toplevel,
 
       /* Force the data into the object anyway, so as to prevent data
        * loss of embedded images. */
-      picture->file_content = g_memdup (file_content, file_length);
+      picture->file_content = g_malloc (file_length);
+      memcpy (picture->file_content, file_content, file_length);
       picture->file_length = file_length;
     }
   }
@@ -346,6 +349,7 @@ OBJECT *o_picture_new (TOPLEVEL *toplevel,
 void world_get_picture_bounds(TOPLEVEL *toplevel, OBJECT *object,
                               int *left, int *top, int *right, int *bottom)
 {
+  (void) toplevel;
   *left   = min(object->picture->upper_x, object->picture->lower_x);
   *top    = min(object->picture->upper_y, object->picture->lower_y);
   *right  = max(object->picture->upper_x, object->picture->lower_x);
@@ -393,6 +397,7 @@ gboolean o_picture_get_position (OBJECT *object, gint *x, gint *y)
 double
 o_picture_get_ratio (TOPLEVEL *toplevel, OBJECT *object)
 {
+  (void) toplevel;
   g_return_val_if_fail (object != NULL, 1);
   g_return_val_if_fail (object->picture != NULL, 1);
 
@@ -406,7 +411,7 @@ o_picture_get_ratio (TOPLEVEL *toplevel, OBJECT *object)
   case 270:
     return 1.0 / object->picture->ratio;
   default:
-    g_critical (_("Picture %p has invalid angle %i\n"), object,
+    g_critical (_("Picture %p has invalid angle %i\n"), (void *) object,
                 object->picture->angle);
   }
   return 0;
@@ -553,6 +558,7 @@ void o_picture_rotate_world(TOPLEVEL *toplevel,
                             int world_centerx, int world_centery, int angle,
                             OBJECT *object)
 {
+  (void) toplevel;
   int newx1, newy1;
   int newx2, newy2;
 
@@ -621,6 +627,7 @@ void o_picture_mirror_world(TOPLEVEL *toplevel,
                             int world_centerx, int world_centery,
                             OBJECT *object)
 {
+  (void) toplevel;
   int newx1, newy1;
   int newx2, newy2;
 
@@ -724,8 +731,9 @@ OBJECT *o_picture_copy(TOPLEVEL *toplevel, OBJECT *object)
   picture->lower_y = object->picture->lower_y;
 
   if (object->picture->file_content != NULL) {
-    picture->file_content = g_memdup (object->picture->file_content,
-                                      object->picture->file_length);
+    picture->file_content = g_malloc (object->picture->file_length);
+    memcpy (picture->file_content, object->picture->file_content,
+            object->picture->file_length);
   } else {
     picture->file_content = NULL;
   }
@@ -756,6 +764,7 @@ OBJECT *o_picture_copy(TOPLEVEL *toplevel, OBJECT *object)
  */
 void o_picture_embed (TOPLEVEL *toplevel, OBJECT *object)
 {
+  (void) toplevel;
   const gchar *filename = o_picture_get_filename (object);
   gchar *basename;
 
@@ -825,6 +834,8 @@ void o_picture_unembed (TOPLEVEL *toplevel, OBJECT *object)
 double o_picture_shortest_distance (TOPLEVEL *toplevel, OBJECT *object,
                                     int x, int y, int force_solid)
 {
+  (void) toplevel;
+  (void) force_solid;
   double dx, dy;
   double x1, y1, x2, y2;
 
@@ -877,6 +888,7 @@ o_picture_is_embedded (OBJECT *object)
 GdkPixbuf *
 o_picture_get_pixbuf (TOPLEVEL *toplevel, OBJECT *object)
 {
+  (void) toplevel;
   g_return_val_if_fail (object != NULL, NULL);
   g_return_val_if_fail (object->picture != NULL, NULL);
 
@@ -901,6 +913,7 @@ const char *
 o_picture_get_data (TOPLEVEL *toplevel, OBJECT *object,
                     size_t *len)
 {
+  (void) toplevel;
   g_return_val_if_fail (object != NULL, NULL);
   g_return_val_if_fail (object->picture != NULL, NULL);
 

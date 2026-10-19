@@ -88,6 +88,7 @@ OBJECT *o_bus_new(TOPLEVEL *toplevel,
 		  int x1, int y1, int x2, int y2,
 		  int bus_ripper_direction)
 {
+  (void) toplevel;
   OBJECT *new_node;
 
   new_node = s_basic_new_object(OBJ_BUS, "bus");
@@ -124,6 +125,7 @@ OBJECT *o_bus_new(TOPLEVEL *toplevel,
 OBJECT *o_bus_read (TOPLEVEL *toplevel, const char buf[],
                     unsigned int release_ver, unsigned int fileformat_ver, GError **err)
 {
+  (void) fileformat_ver;
   OBJECT *new_obj;
   char type; 
   int x1, y1;
@@ -259,6 +261,7 @@ void o_bus_rotate_world(TOPLEVEL *toplevel,
 			int world_centerx, int world_centery, int angle,
 			OBJECT *object)
 {
+  (void) toplevel;
   int newx, newy;
 
   g_return_if_fail (object != NULL);
@@ -300,6 +303,7 @@ void o_bus_rotate_world(TOPLEVEL *toplevel,
 void o_bus_mirror_world(TOPLEVEL *toplevel,
 			int world_centerx, int world_centery, OBJECT *object)
 {
+  (void) toplevel;
   g_return_if_fail (object != NULL);
   g_return_if_fail (object->line != NULL);
   g_return_if_fail (object->type == OBJ_BUS);
@@ -353,6 +357,7 @@ int o_bus_orientation(OBJECT *object)
 void o_bus_modify(TOPLEVEL *toplevel, OBJECT *object,
 		  int x, int y, int whichone)
 {
+  (void) toplevel;
   g_return_if_fail (object != NULL);
   g_return_if_fail (object->line != NULL);
   g_return_if_fail (object->type == OBJ_BUS);

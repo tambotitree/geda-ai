@@ -103,7 +103,7 @@ void m_transform_line(TRANSFORM *transform, LINE *line)
  */
 void m_transform_lines(TRANSFORM *transform, GArray *lines)
 {
-  gint index;
+  guint index;
 
   g_return_if_fail(transform!=NULL);
   g_return_if_fail(lines!=NULL);
@@ -143,7 +143,7 @@ void m_transform_point(TRANSFORM *transform, gint *x, gint *y)
  */
 void m_transform_points(TRANSFORM *transform, GArray *points)
 {
-  gint index;
+  guint index;
 
   g_return_if_fail(transform!=NULL);
   g_return_if_fail(points!=NULL);

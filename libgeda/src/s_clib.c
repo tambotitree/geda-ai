@@ -287,6 +287,7 @@ void s_clib_init ()
  */
 static void free_symbol (gpointer data, gpointer user_data)
 {
+  (void) user_data;
   CLibSymbol *symbol = data;
   if (symbol != NULL) {
     if (symbol->source != NULL) {
@@ -318,6 +319,7 @@ static void free_symbol_cache_entry (gpointer data)
  */
 static void free_source (gpointer data, gpointer user_data)
 {
+  (void) user_data;
   CLibSource *source = data;
   if (source != NULL) {
     if (source->name != NULL) {
@@ -422,6 +424,7 @@ static void cache_find_oldest (gpointer key,
                                gpointer value,
                                gpointer user_data)
 {
+  (void) key;
   CacheEntry *current = value;
   CacheEntry **oldest = user_data;
 
@@ -802,7 +805,7 @@ void s_clib_refresh ()
 	break;
       default:
 	g_critical("s_clib_refresh: source %p has bad source type %i\n",
-                   source, (gint) source->type);
+                   (void *) source, (gint) source->type);
         break;
       }
   }
@@ -1212,7 +1215,7 @@ gchar *s_clib_symbol_get_data (const CLibSymbol *symbol)
       break;
     default:
       g_critical("s_clib_symbol_get_data: source %p has bad source type %i\n",
-                 symbol->source, (gint) symbol->source->type);
+                 (void *) symbol->source, (gint) symbol->source->type);
       return NULL;
     }
 
@@ -1320,7 +1323,11 @@ GList *s_clib_search (const gchar *pattern, const CLibSearchMode mode)
 	  }
 	  break;
 	case CLIB_GLOB:
-	  if (g_pattern_match_string (globpattern, symbol->name)) {
+	  #if GLIB_CHECK_VERSION(2, 70, 0)
+          if (g_pattern_spec_match_string (globpattern, symbol->name)) {
+#else
+          if (g_pattern_match_string (globpattern, symbol->name)) {
+#endif
 	    result = g_list_prepend (result, symbol);
 	  }
 	  break;
@@ -1523,6 +1530,9 @@ update_marshal (GClosure *closure,
                 gpointer invocation_hint,
                 gpointer marshal_data)
 {
+  (void) return_value;
+  (void) param_values;
+  (void) invocation_hint;
   GCClosure *cclosure = (GCClosure *) closure;
   g_return_if_fail (n_param_values == 0);
 

@@ -42,7 +42,8 @@
 #include <time.h>
 
 /*! Default setting for log update callback function. */
-void (*x_log_update_func)() = NULL;
+void (*x_log_update_func)(const char *log_domain, int log_level,
+                          const char *message) = NULL;
 
 /*! Default setting for log enable. */
 int do_logging = TRUE;
@@ -255,6 +256,8 @@ static void s_log_handler (const gchar *log_domain,
 			   gpointer user_data)
 {
   int status;
+
+  (void) user_data;
 
   if (do_logging == FALSE) {
     return;

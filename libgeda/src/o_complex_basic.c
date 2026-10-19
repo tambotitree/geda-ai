@@ -658,6 +658,7 @@ OBJECT *o_complex_new_embedded(TOPLEVEL *toplevel,
 			       char type, int color, int x, int y, int angle, int mirror,
 			       const gchar *basename, int selectable)
 {
+  (void) toplevel;
   OBJECT *new_node=NULL;
 
   new_node = s_basic_new_object(type, "complex");
@@ -699,6 +700,8 @@ OBJECT *o_complex_read (TOPLEVEL *toplevel,
                         const char buf[], unsigned int release_ver,
                         unsigned int fileformat_ver, GError **err)
 {
+  (void) release_ver;
+  (void) fileformat_ver;
   OBJECT *new_obj;
   char type; 
   int x1, y1;
@@ -939,6 +942,7 @@ void o_complex_mirror_world(TOPLEVEL *toplevel,
                             int world_centerx, int world_centery,
                             OBJECT *object)
 {
+  (void) world_centery;
   int x, y;
 
   g_return_if_fail( object != NULL );
@@ -1024,6 +1028,7 @@ OBJECT *o_complex_find_pin_by_attribute (OBJECT *object, char *name, char *wante
 void
 o_complex_check_symversion(TOPLEVEL* toplevel, OBJECT* object)
 {
+  (void) toplevel;
   char *inside = NULL;
   char *outside = NULL;
   char *refdes = NULL;
@@ -1202,6 +1207,7 @@ done:
 double o_complex_shortest_distance (TOPLEVEL *toplevel, OBJECT *object,
                                     int x, int y, int force_solid)
 {
+  (void) force_solid;
   double shortest_distance = G_MAXDOUBLE;
   double distance;
   int found_line_bounds = 0;

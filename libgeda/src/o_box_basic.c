@@ -254,6 +254,7 @@ void o_box_modify(TOPLEVEL *toplevel, OBJECT *object,
 OBJECT *o_box_read (TOPLEVEL *toplevel, const char buf[],
                     unsigned int release_ver, unsigned int fileformat_ver, GError **err)
 {
+  (void) fileformat_ver;
   OBJECT *new_obj;
   char type;
   int x1, y1;
@@ -464,6 +465,7 @@ void o_box_rotate_world(TOPLEVEL *toplevel,
 			int world_centerx, int world_centery, int angle,
 			OBJECT *object)
 {
+  (void) toplevel;
   int newx1, newy1;
   int newx2, newy2;
 
@@ -533,6 +535,7 @@ void o_box_mirror_world(TOPLEVEL *toplevel,
 			int world_centerx, int world_centery,
 			OBJECT *object)
 {
+  (void) toplevel;
   int newx1, newy1;
   int newx2, newy2;
 
@@ -585,6 +588,7 @@ void o_box_mirror_world(TOPLEVEL *toplevel,
 void world_get_box_bounds(TOPLEVEL *toplevel, OBJECT *object,
                           int *left, int *top, int *right, int *bottom)
 {
+  (void) toplevel;
   int halfwidth;
 
   halfwidth = object->line_width / 2;
@@ -641,6 +645,7 @@ gboolean o_box_get_position (OBJECT *object, gint *x, gint *y)
 double o_box_shortest_distance (TOPLEVEL *toplevel, OBJECT *object,
                                 int x, int y, int force_solid)
 {
+  (void) toplevel;
   int solid;
 
   g_return_val_if_fail (object->box != NULL, G_MAXDOUBLE);

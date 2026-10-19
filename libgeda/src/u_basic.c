@@ -39,7 +39,7 @@
 /* count starts at zero */
 char *u_basic_breakup_string(char *string, char delimiter, int count)
 {
-  int i=0, j=0;
+  size_t i=0, j=0;
   int internal_counter=0;
   int done=FALSE;
   char *return_value;

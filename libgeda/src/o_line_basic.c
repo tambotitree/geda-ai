@@ -200,6 +200,7 @@ void o_line_modify(TOPLEVEL *toplevel, OBJECT *object,
 OBJECT *o_line_read (TOPLEVEL *toplevel, const char buf[],
                      unsigned int release_ver, unsigned int fileformat_ver, GError ** err)
 {
+  (void) fileformat_ver;
   OBJECT *new_obj;
   char type;
   int x1, y1;
@@ -351,6 +352,7 @@ void o_line_rotate_world(TOPLEVEL *toplevel,
 			 int world_centerx, int world_centery, int angle,
 			 OBJECT *object)
 {
+  (void) toplevel;
   int newx, newy;
 
   g_return_if_fail (object != NULL);
@@ -409,6 +411,7 @@ void o_line_rotate_world(TOPLEVEL *toplevel,
 void o_line_mirror_world(TOPLEVEL *toplevel, int world_centerx,
 			 int world_centery, OBJECT *object)
 {
+  (void) toplevel;
   g_return_if_fail (object != NULL);
   g_return_if_fail (object->line != NULL);
   g_return_if_fail (object->type == OBJ_LINE);
@@ -441,6 +444,7 @@ void o_line_mirror_world(TOPLEVEL *toplevel, int world_centerx,
 void world_get_line_bounds(TOPLEVEL *toplevel, OBJECT *object,
                            int *left, int *top, int *right, int *bottom)
 {
+  (void) toplevel;
   int expand;
 
   expand = ceil (0.5 * G_SQRT2 * object->line_width);
@@ -528,6 +532,8 @@ double o_line_length(OBJECT *object)
 double o_line_shortest_distance (TOPLEVEL *toplevel, OBJECT *object,
                                  int x, int y, int force_solid)
 {
+  (void) toplevel;
+  (void) force_solid;
   return m_line_shortest_distance (object->line, x, y);
 }
 

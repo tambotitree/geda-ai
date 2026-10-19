@@ -41,6 +41,7 @@
 
 #include <ctype.h>
 #include <glib.h>
+#include "libgeda_priv.h"
 #ifdef HAVE_STRING_H
 #include <string.h>
 #endif

@@ -173,6 +173,8 @@ OBJECT *o_path_read (TOPLEVEL *toplevel,
                      const char *first_line, TextBuffer *tb,
                      unsigned int release_ver, unsigned int fileformat_ver, GError **err)
 {
+  (void) release_ver;
+  (void) fileformat_ver;
   OBJECT *new_obj;
   char type;
   int color;
@@ -418,6 +420,7 @@ void o_path_rotate_world (TOPLEVEL *toplevel,
                           int world_centerx, int world_centery, int angle,
                           OBJECT *object)
 {
+  (void) toplevel;
   PATH_SECTION *section;
   int i;
 
@@ -467,6 +470,8 @@ void o_path_rotate_world (TOPLEVEL *toplevel,
 void o_path_mirror_world (TOPLEVEL *toplevel, int world_centerx,
                           int world_centery, OBJECT *object)
 {
+  (void) toplevel;
+  (void) world_centery;
   PATH_SECTION *section;
   int i;
 
@@ -517,6 +522,7 @@ void o_path_mirror_world (TOPLEVEL *toplevel, int world_centerx,
 void world_get_path_bounds (TOPLEVEL *toplevel, OBJECT *object,
                             int *left, int *top, int *right, int *bottom)
 {
+  (void) toplevel;
   PATH_SECTION *section;
   int halfwidth;
   int i;
@@ -607,6 +613,7 @@ gboolean o_path_get_position (OBJECT *object, gint *x, gint *y)
 double o_path_shortest_distance (TOPLEVEL *toplevel, OBJECT *object,
                                  int x, int y, int force_solid)
 {
+  (void) toplevel;
   int solid;
 
   solid = force_solid || object->fill_type != FILLING_HOLLOW;
