@@ -103,7 +103,7 @@ void print_test_objects_x_window_main() {
         GschemMainWindowRoster *r = &gschem_widget_roster[i];
         printf("ID: %2d (%-20s) → Widget: %p [%dx%d at (%d,%d)] visible=%d mapped=%d\n",
             r->id, r->name ? r->name : "unnamed",
-            r->widget,
+            (void *) r->widget,
             r->width, r->height,
             r->top_left_x, r->top_left_y,
             r->visible, r->mapped);

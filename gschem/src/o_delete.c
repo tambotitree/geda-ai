@@ -78,9 +78,9 @@ void o_delete_selected (GschemToplevel *w_current, gchar *undo_desc)
         ngettext ("Delete locked object?", "Delete %u locked objects?",
           locked_num), locked_num);
     gtk_dialog_add_buttons (GTK_DIALOG (dialog),
-        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-        GTK_STOCK_YES, GTK_RESPONSE_YES,
-        GTK_STOCK_NO, GTK_RESPONSE_NO, NULL);
+        _("_Cancel"), GTK_RESPONSE_CANCEL,
+        _("_Yes"), GTK_RESPONSE_YES,
+        _("_No"), GTK_RESPONSE_NO, NULL);
     gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_NO);
 
     resp = gtk_dialog_run (GTK_DIALOG (dialog));

@@ -443,6 +443,8 @@ o_path_motion (GschemToplevel *w_current, int w_x, int w_y)
 void
 o_path_end(GschemToplevel *w_current, int w_x, int w_y)
 {
+  (void) w_x;
+  (void) w_y;
   gboolean close_path, end_path, start_path;
   PATH *p;
   PATH_SECTION *section, *prev_section;

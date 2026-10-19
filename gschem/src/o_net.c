@@ -454,6 +454,8 @@ void o_net_start(GschemToplevel *w_current, int w_x, int w_y)
  */
 void o_net_end(GschemToplevel *w_current, int w_x, int w_y)
 {
+  (void) w_x;
+  (void) w_y;
   int primary_zero_length, secondary_zero_length;
   int found_primary_connection = FALSE;
   int save_wx, save_wy;

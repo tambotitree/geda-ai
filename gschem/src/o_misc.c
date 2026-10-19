@@ -279,7 +279,7 @@ void o_edit_show_hidden (GschemToplevel *w_current, const GList *o_list)
     s_log_message(_("Hidden text is now invisible\n"));
   }
 
-  gschem_action_set_active ("edit-show-hidden",
+  gschem_action_set_active (action_edit_show_hidden,
                             w_current->toplevel->show_hidden_text,
                             w_current);
 }

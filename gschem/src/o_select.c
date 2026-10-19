@@ -319,6 +319,8 @@ void o_select_box_start(GschemToplevel *w_current, int w_x, int w_y)
  */
 void o_select_box_end(GschemToplevel *w_current, int w_x, int w_y)
 {
+  (void) w_x;
+  (void) w_y;
   g_assert (w_current->inside_action != 0);
 
   o_select_box_invalidate_rubber (w_current);

@@ -208,6 +208,7 @@ static gboolean inside_grip( int x, int y, int grip_x, int grip_y, int size )
 OBJECT *o_grips_search_arc_world(GschemToplevel *w_current, OBJECT *o_current,
                                  int x, int y, int size, int *whichone)
 {
+  (void) w_current;
   int centerx, centery, radius, start_angle, sweep_angle;
   double tmp;
 
@@ -273,6 +274,7 @@ OBJECT *o_grips_search_arc_world(GschemToplevel *w_current, OBJECT *o_current,
 OBJECT *o_grips_search_box_world(GschemToplevel *w_current, OBJECT *o_current,
                                  int x, int y, int size, int *whichone)
 {
+  (void) w_current;
   /* inside upper left grip ? */
   if (inside_grip(x, y,
                   o_current->box->upper_x,
@@ -338,6 +340,7 @@ OBJECT *o_grips_search_box_world(GschemToplevel *w_current, OBJECT *o_current,
 OBJECT *o_grips_search_path_world(GschemToplevel *w_current, OBJECT *o_current,
                                      int x, int y, int size, int *whichone)
 {
+  (void) w_current;
   PATH_SECTION *section;
   int i;
   int grip_no = 0;
@@ -408,6 +411,7 @@ OBJECT *o_grips_search_path_world(GschemToplevel *w_current, OBJECT *o_current,
 OBJECT *o_grips_search_picture_world(GschemToplevel *w_current, OBJECT *o_current,
                                      int x, int y, int size, int *whichone)
 {
+  (void) w_current;
   /* inside upper left grip ? */
   if (inside_grip(x, y,
                   o_current->picture->upper_x,
@@ -471,6 +475,7 @@ OBJECT *o_grips_search_picture_world(GschemToplevel *w_current, OBJECT *o_curren
 OBJECT *o_grips_search_circle_world(GschemToplevel *w_current, OBJECT *o_current,
                                     int x, int y, int size, int *whichone)
 {
+  (void) w_current;
   /* check the grip for radius */
   if (inside_grip(x, y,
                   o_current->circle->center_x + o_current->circle->radius,
@@ -506,6 +511,7 @@ OBJECT *o_grips_search_circle_world(GschemToplevel *w_current, OBJECT *o_current
 OBJECT *o_grips_search_line_world(GschemToplevel *w_current, OBJECT *o_current,
                                   int x, int y, int size, int *whichone)
 {
+  (void) w_current;
   /* check the grip on the end of line 1 */
   if (inside_grip(x, y,
                   o_current->line->x[LINE_END1],
@@ -553,6 +559,9 @@ OBJECT *o_grips_search_line_world(GschemToplevel *w_current, OBJECT *o_current,
 static void o_grips_start_arc(GschemToplevel *w_current, OBJECT *o_current,
                               int x, int y, int whichone)
 {
+  (void) x;
+  (void) y;
+  (void) whichone;
   w_current->last_drawb_mode = LAST_DRAWB_MODE_NONE;
 
   /* describe the arc with GschemToplevel variables */
@@ -594,6 +603,8 @@ static void o_grips_start_arc(GschemToplevel *w_current, OBJECT *o_current,
 static void o_grips_start_box(GschemToplevel *w_current, OBJECT *o_current,
                               int x, int y, int whichone)
 {
+  (void) x;
+  (void) y;
   w_current->last_drawb_mode = LAST_DRAWB_MODE_NONE;
 
   /* (second_wx, second_wy) is the selected corner */
@@ -657,6 +668,8 @@ static void o_grips_start_box(GschemToplevel *w_current, OBJECT *o_current,
 static void o_grips_start_path(GschemToplevel *w_current, OBJECT *o_current,
                                int x, int y, int whichone)
 {
+  (void) x;
+  (void) y;
   PATH_SECTION *section;
   int i;
   int grip_no = 0;
@@ -727,6 +740,8 @@ static void o_grips_start_path(GschemToplevel *w_current, OBJECT *o_current,
 static void o_grips_start_picture(GschemToplevel *w_current, OBJECT *o_current,
                                   int x, int y, int whichone)
 {
+  (void) x;
+  (void) y;
   TOPLEVEL *toplevel = gschem_toplevel_get_toplevel (w_current);
   w_current->last_drawb_mode = LAST_DRAWB_MODE_NONE;
 
@@ -795,6 +810,9 @@ static void o_grips_start_picture(GschemToplevel *w_current, OBJECT *o_current,
 static void o_grips_start_circle(GschemToplevel *w_current, OBJECT *o_current,
                                  int x, int y, int whichone)
 {
+  (void) x;
+  (void) y;
+  (void) whichone;
 
   w_current->last_drawb_mode = LAST_DRAWB_MODE_NONE;
 
@@ -828,6 +846,8 @@ static void o_grips_start_circle(GschemToplevel *w_current, OBJECT *o_current,
 static void o_grips_start_line(GschemToplevel *w_current, OBJECT *o_current,
                                int x, int y, int whichone)
 {
+  (void) x;
+  (void) y;
   w_current->last_drawb_mode = LAST_DRAWB_MODE_NONE;
 
   /* describe the line with GschemToplevel variables */
@@ -1142,6 +1162,7 @@ static void o_grips_end_picture(GschemToplevel *w_current, OBJECT *o_current,
 static void o_grips_end_circle(GschemToplevel *w_current, OBJECT *o_current,
                                int whichone)
 {
+  (void) whichone;
   TOPLEVEL *toplevel = gschem_toplevel_get_toplevel (w_current);
 
   /* don't allow zero radius circles
@@ -1213,6 +1234,7 @@ static void o_grips_end_line(GschemToplevel *w_current, OBJECT *o_current,
 static void o_grips_end_net(GschemToplevel *w_current, OBJECT *o_current,
                             int whichone)
 {
+  (void) whichone;
   TOPLEVEL *toplevel = gschem_toplevel_get_toplevel (w_current);
   GList *connected_objects;
 
@@ -1255,6 +1277,7 @@ static void o_grips_end_net(GschemToplevel *w_current, OBJECT *o_current,
 static void o_grips_end_pin(GschemToplevel *w_current, OBJECT *o_current,
                             int whichone)
 {
+  (void) whichone;
   TOPLEVEL *toplevel = gschem_toplevel_get_toplevel (w_current);
 
   s_conn_remove_object_connections (toplevel, o_current);
@@ -1282,6 +1305,7 @@ static void o_grips_end_pin(GschemToplevel *w_current, OBJECT *o_current,
 static void o_grips_end_bus(GschemToplevel *w_current, OBJECT *o_current,
                             int whichone)
 {
+  (void) whichone;
   TOPLEVEL *toplevel = gschem_toplevel_get_toplevel (w_current);
 
   /* don't allow zero length bus

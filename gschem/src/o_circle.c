@@ -93,6 +93,8 @@ void o_circle_start(GschemToplevel *w_current, int w_x, int w_y)
  */
 void o_circle_end(GschemToplevel *w_current, int w_x, int w_y)
 {
+  (void) w_x;
+  (void) w_y;
   OBJECT *new_obj;
 
   GschemPageView *page_view = gschem_toplevel_get_current_page_view (w_current);

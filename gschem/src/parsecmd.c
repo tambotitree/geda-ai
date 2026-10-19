@@ -31,7 +31,7 @@
 
 #include "gschem.h"
 
-#define GETOPT_OPTIONS "c:hL:o:pqr:s:vV"
+#define GSCHEM_GETOPT_OPTIONS "c:hL:o:pqr:s:vV"
 
 #ifndef OPTARG_IN_UNISTD
 extern char *optarg;
@@ -144,9 +144,9 @@ parse_commandline(int argc, char *argv[])
   SCM sym_eval_string = scm_from_utf8_symbol ("eval-string");
 
 #ifdef HAVE_GETOPT_LONG
-  while ((ch = getopt_long (argc, argv, GETOPT_OPTIONS, long_options, NULL)) != -1) {
+  while ((ch = getopt_long (argc, argv, GSCHEM_GETOPT_OPTIONS, long_options, NULL)) != -1) {
 #else
-  while ((ch = getopt (argc, argv, GETOPT_OPTIONS)) != -1) {
+  while ((ch = getopt (argc, argv, GSCHEM_GETOPT_OPTIONS)) != -1) {
 #endif
     switch (ch) {
       case 'v':
@@ -219,7 +219,7 @@ parse_commandline(int argc, char *argv[])
 
       case '?':
 #ifndef HAVE_GETOPT_LONG
-        if ((optopt != ':') && (strchr (GETOPT_OPTIONS, optopt) != NULL)) {
+        if ((optopt != ':') && (strchr (GSCHEM_GETOPT_OPTIONS, optopt) != NULL)) {
           fprintf (stderr,
                    "ERROR: -%c option requires an argument.\n\n",
                    optopt);

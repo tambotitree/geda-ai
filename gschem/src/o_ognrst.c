@@ -47,6 +47,8 @@ o_ognrst_invalidate_rubber (GschemToplevel *w_current)
 void
 o_ognrst_end (GschemToplevel *w_current, int w_x, int w_y)
 {
+  (void) w_x;
+  (void) w_y;
   if (w_current->first_wx == 0 && w_current->first_wy == 0) {
     s_log_message (_("Not translating schematic\n"));
     o_ognrst_invalidate_rubber (w_current);

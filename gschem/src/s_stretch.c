@@ -90,6 +90,5 @@ GList *s_stretch_remove (GList *list, OBJECT *object)
  */
 void s_stretch_destroy_all (GList *list)
 {
-  g_list_foreach (list, (GFunc)g_free, NULL);
-  g_list_free (list);
+  g_list_free_full (list, g_free);
 }

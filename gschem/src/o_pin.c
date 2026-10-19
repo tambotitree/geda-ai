@@ -44,6 +44,8 @@ void o_pin_start(GschemToplevel *w_current, int w_x, int w_y)
  */
 void o_pin_end(GschemToplevel *w_current, int x, int y)
 {
+  (void) x;
+  (void) y;
   OBJECT *new_obj;
 
   g_assert( w_current->inside_action != 0 );
