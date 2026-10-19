@@ -1,0 +1,5 @@
+; Run from this fixture directory so local symbols are available before loading.
+(component-library "." "DO meter logical interfaces")
+(component-library "../../../symbols/micro" "DO meter microcontrollers")
+(component-library "../../../symbols/maxim" "DO meter RTC")
+(component-library "../../../symbols/analog" "DO meter analog")
