@@ -167,6 +167,9 @@ Automake's source archive directory (`PACKAGE_TARNAME-PACKAGE_VERSION`).
 The release version is recorded in `configure.ac`, so source archives do not
 need Git to recover their data directory. Release tags use `<version>-<YYYYMMDD>`;
 checkpoint tags are excluded from release detection.
+The dotted version (`1.0.0`) and RC compatibility date (`20261019`) are
+separate: `PACKAGE_DATE_VERSION` must match `DATE_VERSION`, which generates
+the `gschem-version` declaration in `system-gschemrc`.
 
 `GEDADATADIR` is the authoritative build variable; `GEDAIDATADIR` is an alias.
 Both the C runtime default and Xorn use this directory. `GEDADATA` overrides
@@ -280,3 +283,60 @@ gEDA-AI is divided into several interlocking modules:
 Build configuration is managed through autotools. Eventually, AI prompts will be managed using a plug-in architecture under `gedai/plugins`.
 
 This section will expand as tools are added and stabilized.
+
+### Working gschem startup checkpoint (2026-10-19)
+
+The checkpoint/gschem-startup-1 tag records the first verified macOS startup
+with menus, bundled icons, drawing grid, titleblock, and symbol libraries.
+Component placement draws symbols, but the user has observed drawing trails
+and incomplete-looking placement previews. Their cause is not yet verified.
+Connected nets and save/reload remain acceptance checks; this checkpoint
+does not claim those workflows are verified.
+
+On the Homebrew development machine, reproduce the debug build with:
+
+```sh
+./bootstrap.sh
+geda_arg_limit=$(getconf ARG_MAX)
+lt_cv_sys_max_cmd_len=$((geda_arg_limit / 4)) ./configure \
+  --prefix=/tmp/geda-test PYTHON=/opt/homebrew/bin/python3.12 CFLAGS='-g3 -O0'
+geda_warnings='-Wall -Wextra -Werror -Wpedantic -Wstrict-prototypes -Wmissing-prototypes -Wformat=2'
+make -C libgeda/src -j2 GCC_CFLAGS="$geda_warnings"
+make -C libgedacairo -j2 GCC_CFLAGS="$geda_warnings"
+make -C gschem/src -j2
+make -C libgeda/lib install-data
+make -C libgeda/scheme install-data
+make -C gschem/lib install-data
+make -C gschem/scheme install-data
+make -C gschem/bitmap install-data
+make -C symbols install-data
+env -u GEDADATA -u GEDADATARC ./gschem/src/gschem -vv
+```
+
+The libtool argument limit avoids a sandboxed sysctl probe. GTK appearance
+is fixed at compile time in gschem/include/gschem_appearance.h. Icons are
+compiled from gschem/icon-theme; no desktop theme installation is needed.
+Use a minimal ~/.gEDA/gschemrc with release-matched defaults. Do not redefine
+bitmap-directory as a string or point it into another installation.
+
+Run the focused regression checks with:
+
+```sh
+make -C libgeda/src check GCC_CFLAGS="$geda_warnings"
+make -C libgedacairo check GCC_CFLAGS="$geda_warnings"
+make -C gschem/src check
+python3 tests/test_data_dirs.py
+python3 tests/test_release_versions.py
+python3 tests/test_scheme_config_events.py
+python3 tests/test_clipboard_query.py
+```
+
+Keep debug objects and avoid install-strip. On macOS, collect source-level
+symbols alongside the build after linking:
+
+```sh
+xcrun dsymutil gschem/src/.libs/gschem -o gschem/src/gschem.dSYM
+```
+
+Generated files, compiled binaries, local configuration, and debug bundles
+are not part of the source checkpoint.
