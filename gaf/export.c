@@ -29,6 +29,7 @@
 
 /* Gettext translation */
 #include "gettext.h"
+#include "builtins.h"
 
 #include <libgeda/libgeda.h>
 #include <libgeda/libgedaguile.h>
@@ -155,6 +156,9 @@ cmd_export_impl (void *data, int argc, char **argv)
   struct ExportFormat *exporter = NULL;
   GArray *render_color_map = NULL;
   gchar *original_cwd = g_get_current_dir ();
+
+  /* scm_boot_guile requires this slot; the caller passes NULL user data. */
+  (void) data;
 
   gtk_init_check (&argc, &argv);
   scm_init_guile ();

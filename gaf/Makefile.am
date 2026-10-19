@@ -28,9 +28,12 @@ gaf_CPPFLAGS = \
 gaf_CFLAGS = \
 	$(GCC_CFLAGS) $(MINGW_CFLAGS) $(GUILE_CFLAGS) $(GTK_CFLAGS) \
 	$(GDK_PIXBUF_CFLAGS) $(CAIRO_CFLAGS) $(CAIRO_PNG_CFLAGS) \
-	$(CAIRO_PDF_CLAGS) $(CAIRO_PS_CFLAGS) $(CAIRO_SVG_CFLAGS)
+	$(CAIRO_PDF_CFLAGS) $(CAIRO_PS_CFLAGS) $(CAIRO_SVG_CFLAGS)
+# Keep command callbacks and public prototypes checked on every build.
+gaf_CFLAGS += -Wall -Wextra -Werror -Wpedantic \
+  -Wstrict-prototypes -Wmissing-prototypes -Wformat=2
 gaf_LDFLAGS = $(GUILE_LIBS) $(GTK_LIBS) $(GDK_PIXBUF_LIBS) $(CAIRO_LIBS) \
-	$(CAIRO_PNG_LIBS) $(CAIRO_PDF_CLAGS) $(CAIRO_PS_LIBS) $(CAIRO_SVG_LIBS)
+	$(CAIRO_PNG_LIBS) $(CAIRO_PDF_LIBS) $(CAIRO_PS_LIBS) $(CAIRO_SVG_LIBS)
 gaf_LDADD = \
 	$(top_builddir)/libgedacairo/libgedacairo.la \
 	$(top_builddir)/libgeda/src/libgeda.la
@@ -83,3 +86,8 @@ SUFFIXES = .x .1.in .1 .html
 
 CLEANFILES = $(BUILT_SOURCES)
 MAINTAINERCLEANFILES = ChangeLog
+
+EXTRA_DIST += $(top_srcdir)/tests/test_gaf_commands.py
+check-local: gaf
+	GEDA_TEST_BUILD_ROOT='$(abs_top_builddir)' $(PYTHON) \
+	  $(top_srcdir)/tests/test_gaf_commands.py
