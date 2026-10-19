@@ -297,3 +297,15 @@ nodist_test_gschem_icons_SOURCES = gschem_icon_resources.c gschem_icon_resources
 test_gschem_icons_CPPFLAGS = -I$(srcdir)/../include $(GTK_CFLAGS)
 test_gschem_icons_CFLAGS = $(GCC_CFLAGS) $(GSCHEM_WARNING_CFLAGS)
 test_gschem_icons_LDADD = $(GTK_LIBS)
+
+# Render the production viewport path without a display server.
+EXTRA_DIST += $(top_srcdir)/tests/test_viewport_rendering.py \
+  $(top_srcdir)/tests/test_picker_attributes.py \
+  $(top_srcdir)/tests/test_net_interaction.py
+check-local: gschem-gschem_page_geometry.o
+	GEDA_TEST_BUILD_ROOT='$(abs_top_builddir)' $(PYTHON) \
+	  $(top_srcdir)/tests/test_viewport_rendering.py
+	GEDA_TEST_BUILD_ROOT='$(abs_top_builddir)' $(PYTHON) \
+	  $(top_srcdir)/tests/test_picker_attributes.py
+	GEDA_TEST_BUILD_ROOT='$(abs_top_builddir)' $(PYTHON) \
+	  $(top_srcdir)/tests/test_net_interaction.py
