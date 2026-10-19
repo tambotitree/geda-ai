@@ -28,6 +28,12 @@
 #endif
 
 #include "gschem.h"
+
+static void cellrenderermultilinetext_class_init_gtype_adapter (gpointer klass, gpointer data);
+static void celltextview_class_init_gtype_adapter (gpointer klass, gpointer data);
+static void multiattrib_class_init_gtype_adapter (gpointer klass, gpointer data);
+static void celltextview_init_gtype_adapter (GTypeInstance *instance, gpointer klass);
+static void celltextview_cell_editable_init_gtype_adapter (gpointer klass, gpointer data);
 #include "../include/gschem_multiattrib_dockable.h"
 #include <gdk/gdkkeysyms.h>
 
@@ -120,6 +126,7 @@ celltextview_key_press_event(GtkWidget *widget,
                              GdkEventKey *key_event,
                              gpointer data)
 {
+  (void) data;
   CellTextView *celltextview = (CellTextView *)widget;
 
   /* If the Escape key is pressed, we flag the edit as canceled */
@@ -150,6 +157,7 @@ static void
 celltextview_start_editing(GtkCellEditable *cell_editable,
                            GdkEvent *event)
 {
+  (void) event;
   g_signal_connect(cell_editable,
                    "key_press_event",
                    G_CALLBACK(celltextview_key_press_event),
@@ -171,16 +179,17 @@ GType celltextview_get_type()
         sizeof(CellTextViewClass),
         NULL, /* base_init */
         NULL, /* base_finalize */
-        (GClassInitFunc)celltextview_class_init,
+        celltextview_class_init_gtype_adapter,
         NULL, /* class_finalize */
         NULL, /* class_data */
         sizeof(CellTextView),
         0, /* n_preallocs */
-        (GInstanceInitFunc)celltextview_init,
+        celltextview_init_gtype_adapter,
+      NULL /* value_table */
     };
 
     static const GInterfaceInfo cell_editable_info = {
-        (GInterfaceInitFunc)celltextview_cell_editable_init,
+        celltextview_cell_editable_init_gtype_adapter,
         NULL, /* interface_finalize */
         NULL  /* interface_data */
     };
@@ -269,6 +278,10 @@ cellrenderermultilinetext_start_editing(GtkCellRenderer *cell,
                                         const GdkRectangle *cell_area,
                                         GtkCellRendererState flags)
 {
+  (void) event;
+  (void) widget;
+  (void) background_area;
+  (void) flags;
   GtkCellRendererText *cell_text;
   CellRendererMultiLineText *cell_mlt;
   GtkWidget *textview;
@@ -373,6 +386,9 @@ cellrenderermultilinetext_focus_out_event(GtkWidget *widget,
                                           GdkEvent *event,
                                           gpointer user_data)
 {
+  (void) widget;
+  (void) event;
+  (void) user_data;
   //  cellrenderermultilinetext_editing_done (GTK_CELL_EDITABLE (widget),
   //                                          user_data);
 
@@ -394,12 +410,13 @@ GType cellrenderermultilinetext_get_type()
         sizeof(CellRendererMultiLineTextClass),
         NULL, /* base_init */
         NULL, /* base_finalize */
-        (GClassInitFunc)cellrenderermultilinetext_class_init,
+        cellrenderermultilinetext_class_init_gtype_adapter,
         NULL, /* class_finalize */
         NULL, /* class_data */
         sizeof(CellRendererMultiLineText),
         0,    /* n_preallocs */
         NULL, /* instance_init */
+      NULL /* value_table */
     };
 
     cellrenderermultilinetext_type = g_type_register_static(
@@ -765,6 +782,7 @@ multiattrib_column_set_data_name(GtkTreeViewColumn *tree_column,
                                  GtkTreeIter *iter,
                                  gpointer data)
 {
+  (void) tree_column;
   GschemMultiattribDockable *dialog = GSCHEM_MULTIATTRIB_DOCKABLE(data);
   gchar *name;
   gboolean present_in_all;
@@ -797,6 +815,7 @@ multiattrib_column_set_data_value(GtkTreeViewColumn *tree_column,
                                   GtkTreeIter *iter,
                                   gpointer data)
 {
+  (void) tree_column;
   GschemMultiattribDockable *dialog = GSCHEM_MULTIATTRIB_DOCKABLE(data);
   gchar *value;
   gboolean identical_value;
@@ -828,6 +847,8 @@ multiattrib_column_set_data_visible(GtkTreeViewColumn *tree_column,
                                     GtkTreeIter *iter,
                                     gpointer data)
 {
+  (void) tree_column;
+  (void) data;
   gboolean visibility;
   gboolean identical_visibility;
   int inherited;
@@ -858,6 +879,8 @@ multiattrib_column_set_data_show_name(GtkTreeViewColumn *tree_column,
                                       GtkTreeIter *iter,
                                       gpointer data)
 {
+  (void) tree_column;
+  (void) data;
   int show_name_value;
   gboolean identical_show_name;
   int inherited;
@@ -888,6 +911,8 @@ multiattrib_column_set_data_show_value(GtkTreeViewColumn *tree_column,
                                        GtkTreeIter *iter,
                                        gpointer data)
 {
+  (void) tree_column;
+  (void) data;
   int show_name_value;
   gboolean identical_show_value;
   int inherited;
@@ -917,6 +942,7 @@ multiattrib_callback_edited_name(GtkCellRendererText *cellrenderertext,
                                  gchar *new_name,
                                  gpointer user_data)
 {
+  (void) cellrenderertext;
   GschemMultiattribDockable *multiattrib =
       GSCHEM_MULTIATTRIB_DOCKABLE(user_data);
   GtkTreeIter iter;
@@ -1010,6 +1036,7 @@ multiattrib_callback_edited_value(GtkCellRendererText *cell_renderer,
                                   gchar *new_value,
                                   gpointer user_data)
 {
+  (void) cell_renderer;
   GschemMultiattribDockable *multiattrib =
       GSCHEM_MULTIATTRIB_DOCKABLE(user_data);
   GtkTreeIter iter;
@@ -1303,6 +1330,7 @@ multiattrib_callback_key_pressed(GtkWidget *widget,
                                  GdkEventKey *event,
                                  gpointer user_data)
 {
+  (void) widget;
   GschemMultiattribDockable *multiattrib =
       GSCHEM_MULTIATTRIB_DOCKABLE(user_data);
 
@@ -1492,6 +1520,7 @@ multiattrib_callback_button_pressed(GtkWidget *widget,
                                     GdkEventButton *event,
                                     gpointer user_data)
 {
+  (void) widget;
   GschemMultiattribDockable *multiattrib =
       GSCHEM_MULTIATTRIB_DOCKABLE(user_data);
   gboolean ret = FALSE;
@@ -1613,6 +1642,7 @@ static gboolean
 multiattrib_callback_popup_menu(GtkWidget *widget,
                                 gpointer user_data)
 {
+  (void) widget;
   GschemMultiattribDockable *multiattrib =
       GSCHEM_MULTIATTRIB_DOCKABLE(user_data);
 
@@ -1636,6 +1666,7 @@ static void
 multiattrib_callback_popup_duplicate(GtkMenuItem *menuitem,
                                      gpointer user_data)
 {
+  (void) menuitem;
   GschemMultiattribDockable *multiattrib =
       GSCHEM_MULTIATTRIB_DOCKABLE(user_data);
   GtkTreeModel *model;
@@ -1675,6 +1706,7 @@ static void
 multiattrib_callback_popup_promote(GtkMenuItem *menuitem,
                                    gpointer user_data)
 {
+  (void) menuitem;
   GschemMultiattribDockable *multiattrib =
       GSCHEM_MULTIATTRIB_DOCKABLE(user_data);
   GtkTreeModel *model;
@@ -1714,6 +1746,7 @@ static void
 multiattrib_callback_popup_delete(GtkMenuItem *menuitem,
                                   gpointer user_data)
 {
+  (void) menuitem;
   GschemMultiattribDockable *multiattrib =
       GSCHEM_MULTIATTRIB_DOCKABLE(user_data);
   GtkTreeModel *model;
@@ -1753,6 +1786,7 @@ static void
 multiattrib_callback_popup_copy_to_all(GtkMenuItem *menuitem,
                                        gpointer user_data)
 {
+  (void) menuitem;
   GschemMultiattribDockable *multiattrib =
       GSCHEM_MULTIATTRIB_DOCKABLE(user_data);
   GtkTreeModel *model;
@@ -1794,6 +1828,7 @@ multiattrib_callback_value_key_pressed(GtkWidget *widget,
                                        GdkEventKey *event,
                                        gpointer user_data)
 {
+  (void) widget;
   GschemMultiattribDockable *multiattrib =
       GSCHEM_MULTIATTRIB_DOCKABLE(user_data);
   gboolean retval = FALSE;
@@ -1837,6 +1872,7 @@ multiattrib_callback_value_key_pressed(GtkWidget *widget,
 static void
 multiattrib_callback_value_grab_focus(GtkWidget *widget, gpointer user_data)
 {
+  (void) user_data;
     GtkTextView *textview = GTK_TEXT_VIEW(widget);
     GtkTextBuffer *textbuffer;
     GtkTextIter startiter, enditer;
@@ -1870,6 +1906,7 @@ multiattrib_callback_value_grab_focus(GtkWidget *widget, gpointer user_data)
 static void
 multiattrib_callback_button_add(GtkButton *button, gpointer user_data)
 {
+  (void) button;
   GschemMultiattribDockable *multiattrib =
       GSCHEM_MULTIATTRIB_DOCKABLE(user_data);
 
@@ -1941,15 +1978,7 @@ multiattrib_init_attrib_names(GtkComboBoxText *combobox)
  *
  * \param combobox A GtkComboBoxText widget where the options will be inserted.
  */
-static void
-multiattrib_init_visible_types(GtkComboBoxText *combobox)
-{
-  gtk_combo_box_text_append_text(combobox, _("Show Name & Value"));
-  gtk_combo_box_text_append_text(combobox, _("Show Value only"));
-  gtk_combo_box_text_append_text(combobox, _("Show Name only"));
 
-  gtk_combo_box_set_active(GTK_COMBO_BOX(combobox), 0); // Default to first option
-}
 
 /*! \brief Popup a context-sensitive menu.
  *  \par Function Description
@@ -2033,9 +2062,7 @@ multiattrib_popup_menu(GschemMultiattribDockable *multiattrib,
   }
   gtk_widget_show_all(menu);
   /* make menu a popup menu */
-  gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL,
-                 (event != NULL) ? event->button : 0,
-                 gdk_event_get_time((GdkEvent *)event));
+  gtk_menu_popup_at_pointer (GTK_MENU(menu), NULL);
 }
 
 /*! \brief GschemDockable "save_internal_geometry" class method handler
@@ -2105,12 +2132,13 @@ GType gschem_multiattrib_dockable_get_type()
         sizeof(GschemMultiattribDockableClass),
         NULL, /* base_init */
         NULL, /* base_finalize */
-        (GClassInitFunc)multiattrib_class_init,
+        multiattrib_class_init_gtype_adapter,
         NULL, /* class_finalize */
         NULL, /* class_data */
         sizeof(GschemMultiattribDockable),
         0,    /* n_preallocs */
         NULL, /* multiattrib_init */
+      NULL /* value_table */
     };
 
     multiattrib_type = g_type_register_static(GSCHEM_TYPE_DOCKABLE,
@@ -2132,6 +2160,7 @@ static void
 object_list_changed_cb(GedaList *object_list,
                        GschemMultiattribDockable *multiattrib)
 {
+  (void) object_list;
   multiattrib_update(multiattrib);
 }
 
@@ -2150,6 +2179,7 @@ object_list_changed_cb(GedaList *object_list,
 static void
 object_list_weak_ref_cb(gpointer data, GObject *where_the_object_was)
 {
+  (void) where_the_object_was;
   GschemMultiattribDockable *multiattrib = GSCHEM_MULTIATTRIB_DOCKABLE(data);
 
   multiattrib->object_list = NULL;
@@ -2276,6 +2306,7 @@ static void
 multiattrib_show_inherited_toggled(GtkToggleButton *button,
                                    gpointer user_data)
 {
+  (void) button;
   GschemMultiattribDockable *multiattrib =
       GSCHEM_MULTIATTRIB_DOCKABLE(user_data);
 
@@ -2313,6 +2344,7 @@ attribute_sort_func(GtkTreeModel *model,
                     GtkTreeIter *iter0, GtkTreeIter *iter1,
                     gpointer user_data)
 {
+  (void) model;
   GschemMultiattribDockable *multiattrib =
       GSCHEM_MULTIATTRIB_DOCKABLE(user_data);
   gboolean inherited0, inherited1;
@@ -2374,12 +2406,11 @@ multiattrib_create_widget(GschemDockable *dockable)
       GSCHEM_MULTIATTRIB_DOCKABLE(dockable);
   GtkWidget *vbox;
   GtkWidget *label, *scrolled_win, *treeview;
-  GtkWidget *table, *textview, *combo, *optionm, *button;
+  GtkWidget *table, *textview, *combo;
   GtkWidget *attrib_vbox, *show_inherited;
   GtkCellRenderer *renderer;
   GtkTreeViewColumn *column;
   GtkTreeSelection *selection;
-  GtkStyle *style;
   GtkStyleContext *context;
 
   vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, DIALOG_V_SPACING);
@@ -2799,6 +2830,7 @@ static GList *
 object_attributes_to_model_rows(GschemMultiattribDockable *multiattrib,
                                 OBJECT *object)
 {
+  (void) multiattrib;
   GList *model_rows = NULL;
   GList *a_iter;
   GList *object_attribs = o_attrib_return_attribs(object);
@@ -2938,7 +2970,7 @@ multiattrib_populate_liststore(GschemMultiattribDockable *multiattrib,
     MODEL_ROW *model_row = m_iter->data;
 
     model_row->present_in_all =
-        (g_list_length(geda_list_get_glist(model_row->attribute_gedalist)) == multiattrib->total_num_in_list);
+        (g_list_length(geda_list_get_glist(model_row->attribute_gedalist)) == (guint) multiattrib->total_num_in_list);
 
     gtk_list_store_append(liststore, &tree_iter);
     gtk_list_store_set(liststore,
@@ -2960,9 +2992,12 @@ multiattrib_populate_liststore(GschemMultiattribDockable *multiattrib,
     g_object_unref(model_row->attribute_gedalist);
   }
 
-  g_list_foreach(model_rows, (GFunc)g_free, NULL);
-  g_list_free(model_rows);
+  g_list_free_full (model_rows, g_free);
 }
+
+static void append_dialog_title_extra (GString *title_string,
+                                       int *num_title_extras,
+                                       char *text, ...) G_GNUC_PRINTF (3, 4);
 
 static void
 append_dialog_title_extra(GString *title_string,
@@ -3044,7 +3079,6 @@ static void
 multiattrib_update(GschemMultiattribDockable *multiattrib)
 {
   GList *o_iter;
-  GtkStyle *style;
   gboolean show_inherited;
   gboolean list_sensitive;
   gboolean add_sensitive;
@@ -3196,11 +3230,46 @@ multiattrib_update(GschemMultiattribDockable *multiattrib)
   gtk_widget_set_sensitive(GTK_WIDGET(multiattrib->list_frame), list_sensitive);
   gtk_widget_set_sensitive(GTK_WIDGET(multiattrib->add_frame), add_sensitive);
 
-  /* Work around GtkTextView's stubborn indifference
-   * to GTK_STATE_INSENSITIVE when rendering its text. */
-  style = gtk_widget_get_style(GTK_WIDGET(multiattrib->textview_value));
-  gtk_widget_modify_text(GTK_WIDGET(multiattrib->textview_value),
-                         GTK_STATE_NORMAL,
-                         add_sensitive ? &multiattrib->value_normal_text_color
-                                       : &style->text[GTK_STATE_INSENSITIVE]);
+  /* GTK 3 propagates the widget sensitivity to its text style. */
+  gtk_widget_set_sensitive (GTK_WIDGET (multiattrib->textview_value), add_sensitive);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+cellrenderermultilinetext_class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  cellrenderermultilinetext_class_init (klass);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+celltextview_class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  celltextview_class_init (klass);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+multiattrib_class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  multiattrib_class_init (klass);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+celltextview_init_gtype_adapter (GTypeInstance *instance, gpointer klass)
+{
+  (void) klass;
+  celltextview_init ((void *) instance);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+celltextview_cell_editable_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  celltextview_cell_editable_init (klass);
 }

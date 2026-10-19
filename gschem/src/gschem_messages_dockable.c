@@ -35,6 +35,9 @@
 #include <math.h>  /* for floor(3) */
 
 #include "gschem.h"
+
+static void class_init_gtype_adapter (gpointer klass, gpointer data);
+static void instance_init_gtype_adapter (GTypeInstance *instance, gpointer klass);
 #include "../include/gschem_messages_dockable.h"
 
 
@@ -85,12 +88,12 @@ gschem_messages_dockable_get_type()
       sizeof (GschemMessagesDockableClass),
       NULL,                                     /* base_init */
       NULL,                                     /* base_finalize */
-      (GClassInitFunc) class_init,
+      class_init_gtype_adapter,
       NULL,                                     /* class_finalize */
       NULL,                                     /* class_data */
       sizeof (GschemMessagesDockable),
       0,                                        /* n_preallocs */
-      (GInstanceInitFunc) instance_init,
+      instance_init_gtype_adapter,
       NULL                                      /* value_table */
     };
 
@@ -169,6 +172,12 @@ weakref_notify_func (void *dead_obj, void *user_data)
      weakref invocation (and happens automatically, anyway) */
 }
 
+
+static void add_message (GschemMessagesDockable *messages_dockable,
+                         gint type, gint severity,
+                         const gchar *filename, const gchar *refdes, OBJECT *obj,
+                         const gchar *tooltip, const gchar *format, ...)
+  G_GNUC_PRINTF (8, 9);
 
 static void
 add_message (GschemMessagesDockable *messages_dockable,
@@ -364,6 +373,8 @@ icon_cell_data_func (GtkTreeViewColumn *tree_column, GtkCellRenderer *cell,
                      GtkTreeModel *tree_model, GtkTreeIter *iter,
                      gpointer data)
 {
+  (void) tree_column;
+  (void) data;
   gint severity;
   gtk_tree_model_get (tree_model, iter,
                       COLUMN_SEVERITY, &severity,
@@ -371,9 +382,9 @@ icon_cell_data_func (GtkTreeViewColumn *tree_column, GtkCellRenderer *cell,
 
   g_object_set (cell,
                 "icon-name",
-                  severity == severity_error ? GTK_STOCK_DIALOG_ERROR :
-                  severity == severity_warning ? GTK_STOCK_DIALOG_WARNING :
-                  severity == severity_message ? GTK_STOCK_DIALOG_INFO : "",
+                  severity == severity_error ? "dialog-error" :
+                  severity == severity_warning ? "dialog-warning" :
+                  severity == severity_message ? "dialog-information" : "",
                 NULL);
 }
 
@@ -401,6 +412,7 @@ static void
 tree_view_row_activated (GtkTreeView *tree_view, GtkTreePath *path,
                          GtkTreeViewColumn *column, gpointer user_data)
 {
+  (void) column;
   GtkTreeModel *model = gtk_tree_view_get_model (tree_view);
   GtkTreeIter iter;
   OBJECT *obj;
@@ -438,6 +450,7 @@ get_message_object (GschemMessagesDockable *messages_dockable)
 static void
 select_item_activate (GtkMenuItem *menu_item, gpointer user_data)
 {
+  (void) menu_item;
   GschemMessagesDockable *messages_dockable =
     GSCHEM_MESSAGES_DOCKABLE (user_data);
 
@@ -450,6 +463,7 @@ select_item_activate (GtkMenuItem *menu_item, gpointer user_data)
 static void
 confirm_item_activate (GtkMenuItem *menu_item, gpointer user_data)
 {
+  (void) menu_item;
   GschemMessagesDockable *messages_dockable =
     GSCHEM_MESSAGES_DOCKABLE (user_data);
 
@@ -488,16 +502,6 @@ create_menu (GschemMessagesDockable *messages_dockable)
 }
 
 
-static void
-menu_position_func (GtkMenu *menu, gint *x, gint *y, gboolean *push_in,
-                    gpointer user_data)
-{
-  gint *pos = user_data;
-
-  *x = pos[0];
-  *y = pos[1];
-}
-
 
 static void
 popup (GschemMessagesDockable *messages_dockable,
@@ -525,24 +529,19 @@ popup (GschemMessagesDockable *messages_dockable,
                             type == type_symversion);
 
   if (event != NULL)
-    gtk_menu_popup (GTK_MENU (messages_dockable->menu), NULL, NULL,
-                    NULL, NULL, event->button, event->time);
+    gtk_menu_popup_at_pointer (GTK_MENU (messages_dockable->menu), NULL);
   else {
     GtkTreeView *tree_view = GTK_TREE_VIEW (messages_dockable->tree_view);
     GtkTreePath *path = gtk_tree_model_get_path (model, iter);
     GdkRectangle rect;
-    gint pos[2];
 
     gtk_tree_view_get_cell_area (tree_view, path, NULL, &rect);
     gtk_tree_path_free (path);
 
-    (void) gdk_window_get_origin (gtk_tree_view_get_bin_window (tree_view),
-                                  &pos[0], &pos[1]);
-    pos[0] += rect.x;
-    pos[1] += rect.y + rect.height;
-
-    gtk_menu_popup (GTK_MENU (messages_dockable->menu), NULL, NULL,
-                    menu_position_func, pos, 0, gtk_get_current_event_time());
+    gtk_menu_popup_at_rect (GTK_MENU (messages_dockable->menu),
+                             gtk_tree_view_get_bin_window (tree_view), &rect,
+                             GDK_GRAVITY_SOUTH_WEST, GDK_GRAVITY_NORTH_WEST,
+                             NULL);
     gtk_menu_shell_select_first (GTK_MENU_SHELL (messages_dockable->menu),
                                  FALSE);
   }
@@ -553,6 +552,7 @@ static gboolean
 tree_view_button_press_event (GtkWidget *widget, GdkEventButton *event,
                               gpointer user_data)
 {
+  (void) widget;
   GschemMessagesDockable *messages_dockable =
     GSCHEM_MESSAGES_DOCKABLE (user_data);
 
@@ -588,6 +588,7 @@ tree_view_button_press_event (GtkWidget *widget, GdkEventButton *event,
 static gboolean
 tree_view_popup_menu (GtkWidget *widget, gpointer user_data)
 {
+  (void) widget;
   GschemMessagesDockable *messages_dockable =
     GSCHEM_MESSAGES_DOCKABLE (user_data);
 
@@ -979,7 +980,7 @@ has_severity (GschemMessagesDockable *messages_dockable,
       gtk_tree_model_get (tree_model, &iter,
                           COLUMN_SEVERITY, &s,
                           -1);
-      if (severity >= s)
+      if ((gint) severity >= s)
         return TRUE;
     } while (gtk_tree_model_iter_next (tree_model, &iter));
 
@@ -1053,4 +1054,20 @@ x_messages_update (GschemToplevel *w_current)
     GSCHEM_MESSAGES_DOCKABLE (w_current->messages_dockable);
 
   update_messages (messages_dockable);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  class_init (klass);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+instance_init_gtype_adapter (GTypeInstance *instance, gpointer klass)
+{
+  (void) klass;
+  instance_init ((void *) instance);
 }

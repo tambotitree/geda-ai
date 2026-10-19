@@ -52,7 +52,9 @@ update_constants (GschemPageGeometry *geometry);
 GschemPageGeometry*
 gschem_page_geometry_copy (GschemPageGeometry *geometry)
 {
-  return (GschemPageGeometry*) g_memdup (geometry, sizeof (GschemPageGeometry));
+  GschemPageGeometry *copy = g_new (GschemPageGeometry, 1);
+  *copy = *geometry;
+  return copy;
 }
 
 
@@ -583,6 +585,7 @@ gschem_page_geometry_set_values (GschemPageGeometry *geometry,
                                  int viewport_right,
                                  int viewport_bottom)
 {
+  (void) scale;
   g_return_if_fail (geometry != NULL);
   g_return_if_fail (screen_width > 0);
   g_return_if_fail (screen_height > 0);
