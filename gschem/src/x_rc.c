@@ -25,8 +25,9 @@
 
 /* Error handler function used by x_rc_parse_gschem(). */
 static void
-x_rc_parse_gschem_error (GError **err)
+x_rc_parse_gschem_error (GError **err, void *user_data)
 {
+  (void) user_data;
   char *msg2; /* Secondary text */
   GtkWidget *dialog;
 
@@ -82,7 +83,7 @@ x_rc_parse_gschem_error (GError **err)
  */
 void
 x_rc_parse_gschem (TOPLEVEL *toplevel, const gchar *rcfile) {
-  return g_rc_parse_handler (toplevel, "gschemrc", rcfile,
-                      (ConfigParseErrorFunc) x_rc_parse_gschem_error,
+  g_rc_parse_handler (toplevel, "gschemrc", rcfile,
+                      x_rc_parse_gschem_error,
                       (void *) toplevel);
 }

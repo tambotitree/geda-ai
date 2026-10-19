@@ -120,14 +120,11 @@ x_fileselect_add_preview (GtkFileChooser *filechooser)
   frame = GTK_WIDGET (g_object_new (GTK_TYPE_FRAME,
                                     "label", _("Preview"),
                                     NULL));
-  alignment = GTK_WIDGET (g_object_new (GTK_TYPE_ALIGNMENT,
-                                        "right-padding", 5,
-                                        "left-padding", 5,
-                                        "xscale", 0.0,
-                                        "yscale", 0.0,
-                                        "xalign", 0.5,
-                                        "yalign", 0.5,
-                                        NULL));
+  alignment = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+  gtk_widget_set_margin_start (alignment, 5);
+  gtk_widget_set_margin_end (alignment, 5);
+  gtk_widget_set_halign (alignment, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (alignment, GTK_ALIGN_CENTER);
 
   preview = gschem_preview_new();
 
@@ -185,20 +182,17 @@ x_fileselect_create (GschemToplevel *w_current, const gchar *dirname,
   dialog = gtk_file_chooser_dialog_new (title,
                                         GTK_WINDOW (w_current->main_window),
                                         GTK_FILE_CHOOSER_ACTION_SAVE,
-                                        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                        _("_Cancel"), GTK_RESPONSE_CANCEL,
                                         NULL);
   button = gtk_button_new_with_mnemonic (_("_Create"));
   gtk_widget_set_can_default (button, TRUE);
   gtk_button_set_image (GTK_BUTTON (button),
-                        gtk_image_new_from_stock (GTK_STOCK_NEW,
+                        gtk_image_new_from_icon_name ("document-new",
                                                   GTK_ICON_SIZE_BUTTON));
   gtk_widget_show (button);
   gtk_dialog_add_action_widget (GTK_DIALOG (dialog), button,
                                 GTK_RESPONSE_ACCEPT);
-  gtk_dialog_set_alternative_button_order (GTK_DIALOG(dialog),
-                                           GTK_RESPONSE_ACCEPT,
-                                           GTK_RESPONSE_CANCEL,
-                                           -1);
+  /* Buttons retain their explicitly constructed order. */
   gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
 
   //x_fileselect_add_preview (GTK_FILE_CHOOSER (dialog));
@@ -292,15 +286,12 @@ x_fileselect_open(GschemToplevel *w_current)
   dialog = gtk_file_chooser_dialog_new (_("Open..."),
                                         GTK_WINDOW(w_current->main_window),
                                         GTK_FILE_CHOOSER_ACTION_OPEN,
-                                        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                        GTK_STOCK_OPEN,   GTK_RESPONSE_ACCEPT,
+                                        _("_Cancel"), GTK_RESPONSE_CANCEL,
+                                        _("_Open"),   GTK_RESPONSE_ACCEPT,
                                         NULL);
 
   /* Set the alternative button order (ok, cancel, help) for other systems */
-  gtk_dialog_set_alternative_button_order(GTK_DIALOG(dialog),
-					  GTK_RESPONSE_ACCEPT,
-					  GTK_RESPONSE_CANCEL,
-					  -1);
+  /* Buttons retain their explicitly constructed order. */
 
   x_fileselect_add_preview (GTK_FILE_CHOOSER (dialog));
   g_object_set (dialog,
@@ -354,13 +345,10 @@ run_extension_confirmation_dialog (GtkWindow *parent, const char *basename)
       "Do you want to save as \"%s\" anyway?"),
     basename, basename);
   gtk_dialog_add_buttons (GTK_DIALOG (dialog),
-                          GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                          GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+                          _("_Cancel"), GTK_RESPONSE_CANCEL,
+                          _("_Save"), GTK_RESPONSE_ACCEPT,
                           NULL);
-  gtk_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
-                                           GTK_RESPONSE_ACCEPT,
-                                           GTK_RESPONSE_CANCEL,
-                                           -1);
+  /* Buttons retain their explicitly constructed order. */
   gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
   if (gtk_window_has_group (parent))
     gtk_window_group_add_window (gtk_window_get_group (parent),
@@ -383,6 +371,7 @@ run_extension_confirmation_dialog (GtkWindow *parent, const char *basename)
 static void
 check_extension (GtkDialog *dialog, gint response_id, gpointer user_data)
 {
+  (void) user_data;
   if (response_id != GTK_RESPONSE_ACCEPT)
     return;
 
@@ -426,15 +415,12 @@ x_fileselect_save (GschemToplevel *w_current)
   dialog = gtk_file_chooser_dialog_new (_("Save as..."),
                                         GTK_WINDOW(w_current->main_window),
                                         GTK_FILE_CHOOSER_ACTION_SAVE,
-                                        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                        GTK_STOCK_SAVE,   GTK_RESPONSE_ACCEPT,
+                                        _("_Cancel"), GTK_RESPONSE_CANCEL,
+                                        _("_Save"),   GTK_RESPONSE_ACCEPT,
                                         NULL);
 
   /* Set the alternative button order (ok, cancel, help) for other systems */
-  gtk_dialog_set_alternative_button_order(GTK_DIALOG(dialog),
-					  GTK_RESPONSE_ACCEPT,
-					  GTK_RESPONSE_CANCEL,
-					  -1);
+  /* Buttons retain their explicitly constructed order. */
 
   /* set default response signal. This is usually triggered by the
      "Return" key */
@@ -528,10 +514,7 @@ int x_fileselect_load_backup(void *user_data, GString *message)
                                    "%s", message->str);
 
   /* Set the alternative button order (ok, cancel, help) for other systems */
-  gtk_dialog_set_alternative_button_order(GTK_DIALOG(dialog),
-					  GTK_RESPONSE_YES,
-					  GTK_RESPONSE_NO,
-					  -1);
+  /* Buttons retain their explicitly constructed order. */
 
   gtk_widget_show (dialog);
   if (gtk_dialog_run ((GtkDialog*)dialog) == GTK_RESPONSE_YES) {

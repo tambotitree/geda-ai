@@ -161,7 +161,7 @@ x_menus_create_main_popup (GschemToplevel *w_current)
  *
  * Will be called if element of recent-file-list is activated
  */
-void
+static void
 recent_chooser_item_activated (GtkRecentChooser *chooser, GschemToplevel *w_current)
 {
   gchar *uri;

@@ -34,6 +34,9 @@
 #endif
 
 #include "gschem.h"
+
+static void newtext_class_init_gtype_adapter (gpointer klass, gpointer data);
+static void newtext_init_gtype_adapter (GTypeInstance *instance, gpointer klass);
 #include <gdk/gdkkeysyms.h>
 
 
@@ -169,6 +172,7 @@ static void dialog_response_cancel(NewText *dialog)
  */
 static void text_input_dialog_response(NewText *dialog, gint response, gpointer unused)
 {
+  (void) unused;
   switch(response) {
     case GTK_RESPONSE_APPLY:
       dialog_response_apply(dialog);
@@ -194,6 +198,7 @@ static void text_input_dialog_response(NewText *dialog, gint response, gpointer 
  */
 static void newtext_class_init(NewTextClass *klass)
 {
+  (void) klass;
 }
 
 
@@ -214,10 +219,10 @@ static void newtext_init(NewText *dialog)
   GtkWidget *table;
 
   gtk_dialog_add_button(GTK_DIALOG(dialog),
-                        GTK_STOCK_CLOSE,
+                        _("_Close"),
                         GTK_RESPONSE_CLOSE);
   gtk_dialog_add_button(GTK_DIALOG(dialog),
-                        GTK_STOCK_APPLY,
+                        _("_Apply"),
                         GTK_RESPONSE_APPLY);
 
   g_signal_connect(G_OBJECT(dialog), "response",
@@ -324,7 +329,7 @@ static void newtext_init(NewText *dialog)
 
 /*! \brief Get/register NewText type.
  */
-GType newtext_get_type()
+static GType newtext_get_type (void)
 {
   static GType type = 0;
 
@@ -333,12 +338,13 @@ GType newtext_get_type()
       sizeof(NewTextClass),
       NULL,                                   /* base_init */
       NULL,                                   /* base_finalize */
-      (GClassInitFunc) newtext_class_init,
+      newtext_class_init_gtype_adapter,
       NULL,                                   /* class_finalize */
       NULL,                                   /* class_data */
       sizeof(NewText),
       0,                                      /* n_preallocs */
-      (GInstanceInitFunc) newtext_init,
+      newtext_init_gtype_adapter,
+      NULL /* value_table */
     };
 
     type = g_type_register_static (GSCHEM_TYPE_DIALOG, "NewText", &info, 0);
@@ -395,4 +401,20 @@ text_input_dialog (GschemToplevel *w_current)
   /* always select the text in the entry */
   select_all_text_in_textview (GTK_TEXT_VIEW (NEWTEXT (w_current->tiwindow)->text_view));
   gtk_widget_grab_focus (NEWTEXT (w_current->tiwindow)->text_view);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+newtext_class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  newtext_class_init (klass);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+newtext_init_gtype_adapter (GTypeInstance *instance, gpointer klass)
+{
+  (void) klass;
+  newtext_init ((void *) instance);
 }

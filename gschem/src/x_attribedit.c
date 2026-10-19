@@ -60,6 +60,7 @@ gint option_menu_get_history(GtkComboBoxText *combo_box)
  */
 void attrib_edit_dialog_ok(GtkWidget * w, GschemToplevel *w_current)
 {
+  (void) w;
   TOPLEVEL *toplevel = gschem_toplevel_get_toplevel (w_current);
   const char *value, *label;
   char *newtext;
@@ -257,9 +258,10 @@ void attrib_edit_dialog_ok(GtkWidget * w, GschemToplevel *w_current)
  *  This function catches the user response for the add and edit
  *  attribute dialog.
  */
-void attribute_edit_dialog_response(GtkWidget *w, gint response, 
+static void attribute_edit_dialog_response(GtkWidget *w, gint response,
 				 GschemToplevel *w_current)
 {
+  (void) w;
   switch(response) {
   case GTK_RESPONSE_APPLY:
     attrib_edit_dialog_ok(NULL, w_current);
@@ -288,8 +290,6 @@ void attrib_edit_dialog (GschemToplevel *w_current, OBJECT *attr_obj, int flag)
   GtkWidget *aewindow;
   GtkWidget *vbox, *label, *table, *alignment;
   GtkWidget *show_options;
-  GtkWidget *show_options_menu;
-  GtkWidget *glade_menuitem;
   GtkWidget *attrib_combo_box_entry;
   GtkWidget *attrib_combo_entry;
   GtkWidget *value_entry;
@@ -327,16 +327,13 @@ void attrib_edit_dialog (GschemToplevel *w_current, OBJECT *attr_obj, int flag)
                                             GTK_WINDOW(w_current->main_window),
                                             GTK_DIALOG_MODAL,
                                             "singleattrib", w_current,
-                                            GTK_STOCK_CANCEL,
+                                            _("_Cancel"),
                                             GTK_RESPONSE_REJECT,
-                                            GTK_STOCK_OK,
+                                            _("_OK"),
                                             GTK_RESPONSE_APPLY,
                                             NULL);
   /* Set the alternative button order (ok, cancel, help) for other systems */
-  gtk_dialog_set_alternative_button_order(GTK_DIALOG(aewindow),
-					  GTK_RESPONSE_APPLY,
-					  GTK_RESPONSE_REJECT,
-					  -1);
+  /* Buttons retain their explicitly constructed order. */
 					 
   g_signal_connect (G_OBJECT (aewindow), "response",
                     G_CALLBACK (attribute_edit_dialog_response),

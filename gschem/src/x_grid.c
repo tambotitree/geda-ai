@@ -167,6 +167,7 @@ static void draw_mesh (GschemToplevel *w_current,
                        int incr, int coarse_mult,
                        gboolean leave_out_origin)
 {
+  (void) w_current;
   int i, j;
   double x1, y1, x2, y2;
   int next_coarse_x, next_coarse_y;
@@ -255,6 +256,7 @@ static void draw_origin (GschemToplevel *w_current,
                          cairo_matrix_t *user_to_device_matrix,
                          int x_start, int y_start, int x_end, int y_end)
 {
+  (void) w_current;
   COLOR *c = x_color_lookup (ORIGIN_COLOR);
   cairo_set_source_rgba (cr, (double)c->r / 255.,
                              (double)c->g / 255.,

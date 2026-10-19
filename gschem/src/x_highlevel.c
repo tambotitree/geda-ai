@@ -118,17 +118,18 @@ x_highlevel_new_page (GschemToplevel *w_current, const gchar *filename)
 static gint
 x_dialog_reread_from_disk (GschemToplevel *w_current, PAGE *page)
 {
-  const gchar *fmt, *secondary_text;
+  gchar *message;
+  const gchar *secondary_text;
   GtkWidget *dialog, *button;
   gint response_id;
 
   if (page->exists_on_disk) {
-    fmt = _("The file \"%s\" has changed on disk."),
+    message = g_strdup_printf (_("The file \"%s\" has changed on disk."), page->page_filename);
     secondary_text = page->CHANGED
       ? _("Do you want to drop your changes and reload the file?")
       : _("Do you want to reload it?");
   } else {
-    fmt = _("The file \"%s\" has been created on disk."),
+    message = g_strdup_printf (_("The file \"%s\" has been created on disk."), page->page_filename);
     secondary_text = page->CHANGED
       ? _("Do you want to drop your changes and load the file?")
       : _("Do you want to open it?");
@@ -139,28 +140,25 @@ x_dialog_reread_from_disk (GschemToplevel *w_current, PAGE *page)
                                      GTK_DIALOG_DESTROY_WITH_PARENT,
                                    GTK_MESSAGE_WARNING,
                                    GTK_BUTTONS_NONE,
-                                   fmt, page->page_filename);
+                                   "%s", message);
+  g_free (message);
   g_object_set (dialog, "secondary-text", secondary_text, NULL);
   gtk_dialog_add_buttons (GTK_DIALOG (dialog),
-                          GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                          _("_Cancel"), GTK_RESPONSE_CANCEL,
                           NULL);
   button = gtk_button_new_with_mnemonic (page->CHANGED ? _("_Revert") :
                                          page->exists_on_disk ? _("_Reload") :
                                          _("_Open"));
   gtk_widget_set_can_default (button, TRUE);
   gtk_button_set_image (GTK_BUTTON (button),
-                        gtk_image_new_from_stock (
-                          page->CHANGED ? GTK_STOCK_REVERT_TO_SAVED :
-                          page->exists_on_disk ? GTK_STOCK_REFRESH :
-                          GTK_STOCK_OPEN,
+                        gtk_image_new_from_icon_name (
+                          page->CHANGED ? "document-revert" :
+                          page->exists_on_disk ? "view-refresh" : "document-open",
                           GTK_ICON_SIZE_BUTTON));
   gtk_widget_show (button);
   gtk_dialog_add_action_widget (GTK_DIALOG (dialog), button,
                                 GTK_RESPONSE_ACCEPT);
-  gtk_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
-                                           GTK_RESPONSE_ACCEPT,
-                                           GTK_RESPONSE_CANCEL,
-                                           -1);
+  /* Buttons retain their explicitly constructed order. */
   gtk_dialog_set_default_response (GTK_DIALOG (dialog),
                                    page->CHANGED ? GTK_RESPONSE_CANCEL
                                                  : GTK_RESPONSE_ACCEPT);
@@ -341,13 +339,10 @@ x_dialog_save_anyway (GschemToplevel *w_current, PAGE *page)
   g_free (basename);
   g_object_set (dialog, "secondary-text", _("Save anyway?"), NULL);
   gtk_dialog_add_buttons (GTK_DIALOG (dialog),
-                          GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                          GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+                          _("_Cancel"), GTK_RESPONSE_CANCEL,
+                          _("_Save"), GTK_RESPONSE_ACCEPT,
                           NULL);
-  gtk_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
-                                           GTK_RESPONSE_ACCEPT,
-                                           GTK_RESPONSE_CANCEL,
-                                           -1);
+  /* Buttons retain their explicitly constructed order. */
   gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_CANCEL);
   gtk_window_set_title (GTK_WINDOW (dialog), _("gschem"));
   response_id = gtk_dialog_run (GTK_DIALOG (dialog));
@@ -482,15 +477,12 @@ x_highlevel_revert_page (GschemToplevel *w_current, PAGE *page)
                     "you will lose your unsaved changes, including all "
                     "undo information."), NULL);
     gtk_dialog_add_buttons (GTK_DIALOG (dialog),
-                            GTK_STOCK_CANCEL,          GTK_RESPONSE_CANCEL,
-                            GTK_STOCK_REVERT_TO_SAVED, GTK_RESPONSE_ACCEPT,
+                            _("_Cancel"),          GTK_RESPONSE_CANCEL,
+                            _("_Revert"), GTK_RESPONSE_ACCEPT,
                             NULL);
 
     /* Set the alternative button order (ok, cancel, help) for other systems */
-    gtk_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
-                                             GTK_RESPONSE_ACCEPT,
-                                             GTK_RESPONSE_CANCEL,
-                                             -1);
+    /* Buttons retain their explicitly constructed order. */
 
     gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
     gtk_window_set_title (GTK_WINDOW (dialog), _("gschem"));

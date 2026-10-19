@@ -221,6 +221,7 @@ draw_page__print_operation (GtkPrintOperation *print,
                             gint page_nr,
                             gpointer user_data)
 {
+  (void) print;
   GschemToplevel *w_current = (GschemToplevel *) user_data;
   PAGE *page;
   cairo_t *cr;

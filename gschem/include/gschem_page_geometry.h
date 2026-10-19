@@ -157,4 +157,6 @@ gschem_page_geometry_set_viewport_top (GschemPageGeometry *geometry, int viewpor
 
 void
 gschem_page_geometry_zoom_extents (GschemPageGeometry *geometry, TOPLEVEL *toplevel, const GList *list);
+void gschem_page_geometry_set_screen_height (GschemPageGeometry *geometry, int height);
+void gschem_page_geometry_set_screen_width (GschemPageGeometry *geometry, int width);
 #endif /* GSCHEM_PAGE_GEOMETRY_H */

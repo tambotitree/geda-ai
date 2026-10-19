@@ -391,7 +391,7 @@ void show_text_dialog(GschemToplevel *w_current);
 gboolean x_dialog_close_changed_page (GschemToplevel *w_current, PAGE *page);
 gboolean x_dialog_close_window (GschemToplevel *w_current);
 int x_dialog_validate_attribute(GtkWindow* parent, char *attribute);
-gboolean x_dialog_confirm_create (GtkWindow *parent, const gchar *message, const gchar *filename);
+gboolean x_dialog_confirm_create (GtkWindow *parent, const gchar *message, ...) G_GNUC_PRINTF (2, 3);
 /* x_event.c */
 gboolean x_event_expose(GtkWidget *widget, cairo_t *cr, gpointer user_data);
 gboolean x_event_raise_dialog_boxes(GtkWidget *widget, cairo_t *cr, gpointer user_data);

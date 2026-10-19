@@ -251,7 +251,7 @@ split_args (gchar ***args_return, gint *count_return, gchar *buf)
   gchar **args = g_new (char *, count);
 
   GSList *l = tokens;
-  for (unsigned int i = 0; i < count; i++) {
+  for (gint i = 0; i < count; i++) {
     args[count - i - 1] = (char *) l->data;
     l = l->next;
   }
@@ -402,7 +402,7 @@ process_command (gchar *buf)
   else
     fprintf (stderr, "Unknown command \"%s\"\n", args[0]);
 
-  for (unsigned int i = 0; i < count; i++)
+  for (gint i = 0; i < count; i++)
     g_free (args[i]);
   g_free (args);
 }
@@ -415,6 +415,8 @@ process_command (gchar *buf)
 static gboolean
 can_read (gint fd, GIOCondition condition, gpointer user_data)
 {
+  (void) fd;
+  (void) user_data;
   char *buf = NULL;
   size_t bufsize = 0;
   ssize_t len;

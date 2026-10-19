@@ -123,28 +123,30 @@ static void create_type_menu(GtkComboBox *combo)
  *  \return The gdk-pixbuf type, or extension, of the image.
  *  \note This function is only used in this file.
  */
-static const char *
+static char *
 x_image_get_type_from_description (const char *description)
 {
-  GSList *ptr;
+  gchar *name = NULL;
+  GSList *formats;
 
-  if (strcmp (description, "Portable Document Format") == 0) {
-    return "pdf";
-  }
+  if (description == NULL)
+    return NULL;
+  if (strcmp (description, "Portable Document Format") == 0)
+    return g_strdup ("pdf");
 
-  ptr = gdk_pixbuf_get_formats();
-
-  while (ptr != NULL) {
-    gchar *ptr_descr = gdk_pixbuf_format_get_description (ptr->data);
-
-    if (ptr_descr && (strcasecmp (ptr_descr, description) == 0)) {
-      return gdk_pixbuf_format_get_name (ptr->data);
+  formats = gdk_pixbuf_get_formats ();
+  for (GSList *iter = formats; iter != NULL; iter = iter->next) {
+    gchar *format_description = gdk_pixbuf_format_get_description (iter->data);
+    gboolean matches = format_description != NULL &&
+        g_ascii_strcasecmp (format_description, description) == 0;
+    g_free (format_description);
+    if (matches) {
+      name = gdk_pixbuf_format_get_name (iter->data);
+      break;
     }
-
-    ptr = g_slist_next (ptr);
   }
-
-  return NULL;
+  g_slist_free (formats);
+  return name;
 }
 
 /*! \brief Update the filename of a file dialog, when the image type has changed.
@@ -174,7 +176,9 @@ static void x_image_update_dialog_filename(GtkComboBox *combo,
     image_type = x_image_get_type_from_description(image_type_descr);
     g_free(image_type_descr);  // free ONLY what GTK allocated
   }
-  image_type = x_image_get_type_from_description(image_type_descr);
+
+  if (image_type == NULL)
+    return;
 
   /* Get the parent dialog */
   file_chooser = gtk_widget_get_ancestor(GTK_WIDGET(combo),
@@ -183,7 +187,7 @@ static void x_image_update_dialog_filename(GtkComboBox *combo,
   /* Get the previous file name. If none, revert to the page filename */
   old_image_filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_chooser));
   if (!old_image_filename) {
-    old_image_filename = toplevel->page_current->page_filename;
+    old_image_filename = g_strdup (toplevel->page_current->page_filename);
   }
 
   /* Get the file name, without extension */
@@ -213,6 +217,8 @@ static void x_image_update_dialog_filename(GtkComboBox *combo,
     s_log_message("x_image_update_dialog_filename: No parent file chooser found!.\n");
   }
 
+  g_free (old_image_filename);
+  g_free (image_type);
   g_free(file_name);
   g_free(file_basename);
   g_free(new_image_filename);
@@ -312,7 +318,6 @@ void x_image_lowlevel(GschemToplevel *w_current, const char* filename,
           s_log_message(_("Wrote black and white image to [%s] [%d x %d]\n"), filename, width, height);
         }
       }
-      g_free(filetype);
       if (pixbuf != NULL)
         g_object_unref(pixbuf);
     }
@@ -477,7 +482,6 @@ x_image_get_pixbuf(GschemToplevel *w_current, int width, int height)
   cairo_surface_t *surface = NULL;
   cairo_t *cr = NULL;
   GschemPageView *page_view;
-  GtkWidget *widget;
   GdkRectangle rect;
   int origin_x = 0, origin_y = 0;
   GschemPageGeometry *old_geometry, *new_geometry;
@@ -486,7 +490,6 @@ x_image_get_pixbuf(GschemToplevel *w_current, int width, int height)
   TOPLEVEL toplevel;
 
   page_view = gschem_toplevel_get_current_page_view(w_current);
-  widget = GTK_WIDGET(page_view);
 
   old_geometry = gschem_page_view_get_page_geometry(page_view);
 

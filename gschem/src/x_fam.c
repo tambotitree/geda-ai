@@ -94,6 +94,10 @@ x_fam_monitor (const gchar *path,
                                       gpointer user_data),
                gpointer user_data)
 {
+  (void) path;
+  (void) exists_event;
+  (void) regular_event;
+  (void) user_data;
 #ifdef HAVE_LIBFAM
   if (fc == NULL)
     return NULL;
@@ -118,6 +122,7 @@ x_fam_monitor (const gchar *path,
 void
 x_fam_unmonitor (gpointer handle)
 {
+  (void) handle;
 #ifdef HAVE_LIBFAM
   struct request *req = handle;
 
