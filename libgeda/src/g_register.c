@@ -31,58 +31,71 @@
 
 #include "libgeda_priv.h"
 
-/*! \brief */
-struct gsubr_t {
-  char* name;
-  int req;
-  int opt;
-  int rst;
-  SCM (*fnc)();
-};
-
-/*! \brief */
-static struct gsubr_t libgeda_funcs[] = {
-  { "eval-protected",           1, 1, 0, g_scm_eval_protected },
-  { "eval-string-protected",    1, 0, 0, g_scm_eval_string_protected },
-
-  { "component-library",        1, 1, 0, g_rc_component_library },
-  { "component-library-command", 3, 0, 0, g_rc_component_library_command },
-  { "component-library-funcs",  3, 0, 0, g_rc_component_library_funcs },
-  { "source-library",           1, 0, 0, g_rc_source_library },
-  { "source-library-search",    1, 0, 0, g_rc_source_library_search },
-  
-  { "world-size",               3, 0, 0, g_rc_world_size },
-  
-  { "reset-component-library",  0, 0, 0, g_rc_reset_component_library },
-  { "reset-source-library",     0, 0, 0, g_rc_reset_source_library },
-  
-  { "scheme-directory",         1, 0, 0, g_rc_scheme_directory },
-  { "bitmap-directory",         1, 0, 0, g_rc_bitmap_directory },
-  { "bus-ripper-symname",       1, 0, 0, g_rc_bus_ripper_symname },
-  { "attribute-promotion",       1, 0, 0, g_rc_attribute_promotion },
-  { "promote-invisible",         1, 0, 0, g_rc_promote_invisible },
-  { "keep-invisible",            1, 0, 0, g_rc_keep_invisible },
-  { "always-promote-attributes",1, 0, 0, g_rc_always_promote_attributes },
-  { "make-backup-files",        1, 0, 0, g_rc_make_backup_files },
-  { "print-color-map", 0, 1, 0, g_rc_print_color_map },
-  { "rc-filename",              0, 0, 0, g_rc_rc_filename },
-  { "rc-config",                0, 0, 0, g_rc_rc_config },
-  { NULL,                       0, 0, 0, NULL } };
-
-/*! \brief Register all libgeda functions with scheme.
- *  \par Function Description
- *  Creates g_subr_t objects to make g_rc_* functions that are defined
- *  in g_rc.c visible to Scheme.
- */
-void g_register_libgeda_funcs ()
+/*! \brief Register a 0-argument procedure after checking its C signature. */
+static void
+register_subr_0 (const char *name, int required, int optional,
+                   SCM (*callback) (void))
 {
-  struct gsubr_t *tmp = libgeda_funcs;
-  
-  while (tmp->name != NULL) {
-    scm_c_define_gsubr (tmp->name, tmp->req, tmp->opt, tmp->rst, tmp->fnc);
-    tmp++;
-  }
-  
+  g_return_if_fail (required + optional == 0);
+  /* Guile's generic registration API erases the checked callback type. */
+  scm_c_define_gsubr (name, required, optional, 0, (scm_t_subr) callback);
+}
+
+/*! \brief Register a 1-argument procedure after checking its C signature. */
+static void
+register_subr_1 (const char *name, int required, int optional,
+                   SCM (*callback) (SCM))
+{
+  g_return_if_fail (required + optional == 1);
+  /* Guile's generic registration API erases the checked callback type. */
+  scm_c_define_gsubr (name, required, optional, 0, (scm_t_subr) callback);
+}
+
+/*! \brief Register a 2-argument procedure after checking its C signature. */
+static void
+register_subr_2 (const char *name, int required, int optional,
+                   SCM (*callback) (SCM, SCM))
+{
+  g_return_if_fail (required + optional == 2);
+  /* Guile's generic registration API erases the checked callback type. */
+  scm_c_define_gsubr (name, required, optional, 0, (scm_t_subr) callback);
+}
+
+/*! \brief Register a 3-argument procedure after checking its C signature. */
+static void
+register_subr_3 (const char *name, int required, int optional,
+                   SCM (*callback) (SCM, SCM, SCM))
+{
+  g_return_if_fail (required + optional == 3);
+  /* Guile's generic registration API erases the checked callback type. */
+  scm_c_define_gsubr (name, required, optional, 0, (scm_t_subr) callback);
+}
+
+/*! \brief Register libgeda procedures with explicit argument contracts. */
+void
+g_register_libgeda_funcs (void)
+{
+  register_subr_2 ("eval-protected", 1, 1, g_scm_eval_protected);
+  register_subr_1 ("eval-string-protected", 1, 0, g_scm_eval_string_protected);
+  register_subr_2 ("component-library", 1, 1, g_rc_component_library);
+  register_subr_3 ("component-library-command", 3, 0, g_rc_component_library_command);
+  register_subr_3 ("component-library-funcs", 3, 0, g_rc_component_library_funcs);
+  register_subr_1 ("source-library", 1, 0, g_rc_source_library);
+  register_subr_1 ("source-library-search", 1, 0, g_rc_source_library_search);
+  register_subr_3 ("world-size", 3, 0, g_rc_world_size);
+  register_subr_0 ("reset-component-library", 0, 0, g_rc_reset_component_library);
+  register_subr_0 ("reset-source-library", 0, 0, g_rc_reset_source_library);
+  register_subr_1 ("scheme-directory", 1, 0, g_rc_scheme_directory);
+  register_subr_1 ("bitmap-directory", 1, 0, g_rc_bitmap_directory);
+  register_subr_1 ("bus-ripper-symname", 1, 0, g_rc_bus_ripper_symname);
+  register_subr_1 ("attribute-promotion", 1, 0, g_rc_attribute_promotion);
+  register_subr_1 ("promote-invisible", 1, 0, g_rc_promote_invisible);
+  register_subr_1 ("keep-invisible", 1, 0, g_rc_keep_invisible);
+  register_subr_1 ("always-promote-attributes", 1, 0, g_rc_always_promote_attributes);
+  register_subr_1 ("make-backup-files", 1, 0, g_rc_make_backup_files);
+  register_subr_1 ("print-color-map", 0, 1, g_rc_print_color_map);
+  register_subr_0 ("rc-filename", 0, 0, g_rc_rc_filename);
+  register_subr_0 ("rc-config", 0, 0, g_rc_rc_config);
 }
 
 /*! \brief Register some libgeda directories with Scheme.

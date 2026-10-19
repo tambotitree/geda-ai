@@ -27,6 +27,50 @@
 #include "libgeda_priv.h"
 #include "libgedaguile_priv.h"
 
+/* Scheme entry points are private C functions registered in this module. */
+static SCM copy_object (SCM obj_s);
+static SCM object_type (SCM obj_s);
+static SCM object_bounds (SCM rst_s);
+static SCM object_stroke (SCM obj_s);
+static SCM set_object_stroke_x (SCM obj_s, SCM width_s, SCM cap_s, SCM dash_s, SCM space_s, SCM length_s);
+static SCM object_fill (SCM obj_s);
+static SCM set_object_fill_x (SCM obj_s, SCM type_s, SCM width_s, SCM space1_s, SCM angle1_s, SCM space2_s, SCM angle2_s);
+static SCM object_color (SCM obj_s);
+static SCM set_object_color_x (SCM obj_s, SCM color_s);
+static SCM make_line (void);
+static SCM set_line_x (SCM line_s, SCM x1_s, SCM y1_s, SCM x2_s, SCM y2_s, SCM color_s);
+static SCM line_info (SCM line_s);
+static SCM make_net (void);
+static SCM make_bus (void);
+static SCM make_pin (SCM type_s);
+static SCM pin_type (SCM pin_s);
+static SCM make_box (void);
+static SCM set_box_x (SCM box_s, SCM x1_s, SCM y1_s, SCM x2_s, SCM y2_s, SCM color_s);
+static SCM box_info (SCM box_s);
+static SCM make_circle (void);
+static SCM set_circle_x (SCM circle_s, SCM x_s, SCM y_s, SCM r_s, SCM color_s);
+static SCM circle_info (SCM circle_s);
+static SCM make_arc (void);
+static SCM set_arc_x (SCM arc_s, SCM x_s, SCM y_s, SCM r_s, SCM start_angle_s, SCM sweep_angle_s, SCM color_s);
+static SCM arc_info (SCM arc_s);
+static SCM make_text (void);
+static SCM set_text_x (SCM text_s, SCM x_s, SCM y_s, SCM align_s, SCM angle_s, SCM string_s, SCM size_s, SCM visible_s, SCM show_s, SCM color_s);
+static SCM text_info (SCM text_s);
+static SCM object_connections (SCM obj_s);
+static SCM object_complex (SCM obj_s);
+static SCM make_path (void);
+static SCM path_length (SCM obj_s);
+static SCM path_ref (SCM obj_s, SCM index_s);
+static SCM path_remove_x (SCM obj_s, SCM index_s);
+static SCM path_insert_x (SCM obj_s, SCM index_s, SCM type_s, SCM x1_s, SCM y1_s, SCM x2_s, SCM y2_s, SCM x3_s, SCM y3_s);
+static SCM make_picture (void);
+static SCM picture_info (SCM obj_s);
+static SCM set_picture_x (SCM obj_s, SCM x1_s, SCM y1_s, SCM x2_s, SCM y2_s, SCM angle_s, SCM mirror_s);
+static SCM set_picture_data_vector_x (SCM obj_s, SCM data_s, SCM filename_s);
+static SCM translate_object_x (SCM obj_s, SCM dx_s, SCM dy_s);
+static SCM rotate_object_x (SCM obj_s, SCM x_s, SCM y_s, SCM angle_s);
+static SCM mirror_object_x (SCM obj_s, SCM x_s);
+
 SCM_SYMBOL (wrong_type_arg_sym , "wrong-type-arg");
 SCM_SYMBOL (line_sym , "line");
 SCM_SYMBOL (net_sym , "net");
@@ -2012,9 +2056,9 @@ SCM_DEFINE (set_picture_data_vector_x, "%set-picture-data/vector!",
   scm_t_array_handle handle;
   size_t len;
   ssize_t inc;
-  const scm_t_int8 *elt = scm_s8vector_elements (vec_s, &handle, &len, &inc);
+  const int8_t *elt = scm_s8vector_elements (vec_s, &handle, &len, &inc);
   gchar *buf = g_malloc (len);
-  int i;
+  size_t i;
 
   scm_dynwind_unwind_handler (g_free, buf, SCM_F_WIND_EXPLICITLY);
 
@@ -2176,8 +2220,11 @@ SCM_DEFINE (mirror_object_x, "%mirror-object!", 2, 0, 0,
  * be accessed using (use-modules (geda core object)).
  */
 static void
-init_module_geda_core_object ()
+init_module_geda_core_object (void *unused_data)
 {
+  /* Guile supplies this argument; module registration needs no context. */
+  (void) unused_data;
+
   /* Register the functions and symbols */
   #include "scheme_object.x"
 

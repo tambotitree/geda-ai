@@ -990,8 +990,7 @@ SCM g_rc_always_promote_attributes(SCM attrlist)
   gchar *attr;
   gchar **attr2;
 
-  g_list_foreach(default_always_promote_attributes, (GFunc)g_free, NULL);
-  g_list_free(default_always_promote_attributes);
+  g_list_free_full (default_always_promote_attributes, g_free);
 
   if (scm_is_string (attrlist)) {
     char *temp;

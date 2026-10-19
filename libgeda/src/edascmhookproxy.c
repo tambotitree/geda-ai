@@ -248,6 +248,9 @@ cclosure_marshal_VOID__SCM (GClosure *closure,
   register GCClosure *cc = (GCClosure *) closure;
   register gpointer data1, data2;
 
+  (void) return_value;
+  (void) invocation_hint;
+
   g_return_if_fail (n_param_values == 2);
   if (G_CCLOSURE_SWAP_DATA (closure)) {
     data1 = closure->data;

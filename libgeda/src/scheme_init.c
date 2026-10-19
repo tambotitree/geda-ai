@@ -38,6 +38,7 @@ SCM_GLOBAL_SYMBOL (edascm_object_state_sym, "object-state");
 static void *
 edascm_init_impl (void *data)
 {
+  (void) data;
   #include "scheme_init.x"
 
   scm_setlocale(scm_variable_ref(scm_c_lookup("LC_ALL")), scm_from_locale_string(""));

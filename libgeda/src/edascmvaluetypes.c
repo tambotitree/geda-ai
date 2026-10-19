@@ -111,6 +111,8 @@ value_collect_scm (GValue *value,
                    GTypeCValue *collect_values,
                    guint collect_flags)
 {
+  (void) n_collect_values;
+  (void) collect_flags;
   SCM val = SCM_PACK (collect_values[0].v_long);
 
   if (!SCM_UNBNDP (val)) {
@@ -142,6 +144,7 @@ value_lcopy_scm (const GValue *value,
                  GTypeCValue *collect_values,
                  guint collect_flags)
 {
+  (void) n_collect_values;
   SCM val = SCM_PACK (value->data[0].v_long);
   glong *long_p = collect_values[0].v_pointer;
 
@@ -264,6 +267,7 @@ param_scm_values_cmp (GParamSpec *pspec,
                       const GValue *value1,
                       const GValue *value2)
 {
+  (void) pspec;
   SCM a = edascm_value_get_scm (value1);
   SCM b = edascm_value_get_scm (value2);
 

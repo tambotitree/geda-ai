@@ -27,6 +27,21 @@
 #include "libgeda_priv.h"
 #include "libgedaguile_priv.h"
 
+/* Scheme entry points are private C functions registered in this module. */
+static SCM active_pages (void);
+static SCM new_page (SCM filename_s);
+static SCM close_page_x (SCM page_s);
+static SCM page_filename (SCM page_s);
+static SCM set_page_filename_x (SCM page_s, SCM filename_s);
+static SCM page_contents (SCM page_s);
+static SCM object_page (SCM obj_s);
+static SCM page_append_x (SCM page_s, SCM obj_s);
+static SCM page_remove_x (SCM page_s, SCM obj_s);
+static SCM page_dirty (SCM page_s);
+static SCM set_page_dirty_x (SCM page_s, SCM flag_s);
+static SCM page_to_string (SCM page_s);
+static SCM string_to_page (SCM filename_s, SCM str_s);
+
 SCM_SYMBOL (edascm_string_format_sym , "string-format");
 
 /*! \brief Get a of open pages.
@@ -456,8 +471,11 @@ SCM_DEFINE (string_to_page, "%string->page", 2, 0, 0,
  * be accessed using (use-modules (geda core page)).
  */
 static void
-init_module_geda_core_page ()
+init_module_geda_core_page (void *unused_data)
 {
+  /* Guile supplies this argument; module registration needs no context. */
+  (void) unused_data;
+
   /* Register the functions */
   #include "scheme_page.x"
 

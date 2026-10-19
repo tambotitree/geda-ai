@@ -27,6 +27,14 @@
 #include "libgeda_priv.h"
 #include "libgedaguile_priv.h"
 
+/* Scheme entry points are private C functions registered in this module. */
+static SCM parse_attrib (SCM text_s);
+static SCM object_attribs (SCM obj_s);
+static SCM attrib_attachment (SCM attrib_s);
+static SCM attach_attrib_x (SCM obj_s, SCM attrib_s);
+static SCM detach_attrib_x (SCM obj_s, SCM attrib_s);
+static SCM promotable_attribs (SCM complex_s);
+
 SCM_SYMBOL (attribute_format_sym, "attribute-format");
 
 /*! \brief Parse an attribute text object into name and value strings.
@@ -277,8 +285,11 @@ SCM_DEFINE (promotable_attribs, "%promotable-attribs", 1, 0, 0,
  * be accessed using (use-modules (geda core attrib)).
  */
 static void
-init_module_geda_core_attrib ()
+init_module_geda_core_attrib (void *unused_data)
 {
+  /* Guile supplies this argument; module registration needs no context. */
+  (void) unused_data;
+
   /* Register the functions */
   #include "scheme_attrib.x"
 
