@@ -227,7 +227,7 @@ void i_set_state(GschemToplevel *w_current, enum x_states newstate)
 void i_set_state_msg(GschemToplevel *w_current, enum x_states newstate,
 		     const char *message)
 {
-  if ((newstate != w_current->event_state) || (message != NULL)) {
+  if (((int) newstate != w_current->event_state) || (message != NULL)) {
     w_current->event_state = newstate;
     i_update_toolbar (w_current);
   }
@@ -302,7 +302,7 @@ void i_update_middle_button (GschemToplevel *w_current,
  */
 void i_update_toolbar(GschemToplevel *w_current)
 {
-  gschem_action_set_active ("edit-select",
+  gschem_action_set_active (action_edit_select,
                             w_current->event_state == SELECT ||
                             w_current->event_state == GRIPS ||
                             w_current->event_state == MOVEMODE ||
@@ -335,21 +335,21 @@ void i_update_toolbar(GschemToplevel *w_current)
   gschem_action_set_active (action_add_text,
                             w_current->event_state == TEXTMODE, w_current);
 
-  gschem_action_set_active ("edit-copy",
+  gschem_action_set_active (action_edit_copy,
                             w_current->event_state == COPYMODE, w_current);
-  gschem_action_set_active ("edit-mcopy",
+  gschem_action_set_active (action_edit_mcopy,
                             w_current->event_state == MCOPYMODE, w_current);
-  gschem_action_set_active ("edit-rotate-90",
+  gschem_action_set_active (action_edit_rotate_90,
                             w_current->event_state == ROTATEMODE, w_current);
-  gschem_action_set_active ("edit-mirror",
+  gschem_action_set_active (action_edit_mirror,
                             w_current->event_state == MIRRORMODE, w_current);
 
-  gschem_action_set_active ("view-pan",
+  gschem_action_set_active (action_view_pan,
                             w_current->event_state == PAN, w_current);
-  gschem_action_set_active ("view-zoom-box",
+  gschem_action_set_active (action_view_zoom_box,
                             w_current->event_state == ZOOMBOX, w_current);
 
-  gschem_action_set_active ("edit-translate",
+  gschem_action_set_active (action_edit_translate,
                             w_current->event_state == OGNRSTMODE, w_current);
 }
 
@@ -488,48 +488,48 @@ void i_update_menus(GschemToplevel *w_current)
   gschem_action_set_sensitive (action_clipboard_copy, sel_object, w_current);
   gschem_action_set_sensitive (action_edit_deselect, sel_object, w_current);
   gschem_action_set_sensitive (action_edit_delete, sel_object, w_current);
-  gschem_action_set_sensitive ("edit-copy", sel_object, w_current);
-  gschem_action_set_sensitive ("edit-mcopy", sel_object, w_current);
-  gschem_action_set_sensitive ("edit-move", sel_object, w_current);
-  gschem_action_set_sensitive ("edit-rotate-90", sel_object, w_current);
-  gschem_action_set_sensitive ("edit-mirror", sel_object, w_current);
+  gschem_action_set_sensitive (action_edit_copy, sel_object, w_current);
+  gschem_action_set_sensitive (action_edit_mcopy, sel_object, w_current);
+  gschem_action_set_sensitive (action_edit_move, sel_object, w_current);
+  gschem_action_set_sensitive (action_edit_rotate_90, sel_object, w_current);
+  gschem_action_set_sensitive (action_edit_mirror, sel_object, w_current);
 
-  gschem_action_set_sensitive ("edit-edit", sel_editable, w_current);
-  gschem_action_set_sensitive ("edit-text", sel_text, w_current);
-  gschem_action_set_sensitive ("edit-slot", sel_slotted, w_current);
-  gschem_action_set_sensitive ("edit-properties",
+  gschem_action_set_sensitive (action_edit_edit, sel_editable, w_current);
+  gschem_action_set_sensitive (action_edit_text, sel_text, w_current);
+  gschem_action_set_sensitive (action_edit_slot, sel_slotted, w_current);
+  gschem_action_set_sensitive (action_edit_properties,
                                sel_has_properties, w_current);
 
-  gschem_action_set_sensitive ("edit-lock", sel_unlocked, w_current);
-  gschem_action_set_sensitive ("edit-unlock", sel_locked, w_current);
-  gschem_action_set_sensitive ("edit-update", sel_component, w_current);
+  gschem_action_set_sensitive (action_edit_lock, sel_unlocked, w_current);
+  gschem_action_set_sensitive (action_edit_unlock, sel_locked, w_current);
+  gschem_action_set_sensitive (action_edit_update, sel_component, w_current);
 
-  gschem_action_set_sensitive ("edit-embed",
+  gschem_action_set_sensitive (action_edit_embed,
                                sel_embeddable, w_current);
-  gschem_action_set_sensitive ("edit-unembed",
+  gschem_action_set_sensitive (action_edit_unembed,
                                sel_embeddable, w_current);
 
-  gschem_action_set_sensitive ("hierarchy-down-schematic",
+  gschem_action_set_sensitive (action_hierarchy_down_schematic,
                                sel_subsheet, w_current);
-  gschem_action_set_sensitive ("hierarchy-down-symbol",
+  gschem_action_set_sensitive (action_hierarchy_down_symbol,
                                sel_referenced, w_current);
-  gschem_action_set_sensitive ("hierarchy-documentation",
+  gschem_action_set_sensitive (action_hierarchy_documentation,
                                sel_documented, w_current);
 
-  gschem_action_set_sensitive ("attributes-attach",
+  gschem_action_set_sensitive (action_attributes_attach,
                                sel_floating && sel_attachable == 1, w_current);
-  gschem_action_set_sensitive ("attributes-detach",
+  gschem_action_set_sensitive (action_attributes_detach,
                                sel_attached, w_current);
 
-  gschem_action_set_sensitive ("attributes-show-value",
+  gschem_action_set_sensitive (action_attributes_show_value,
                                sel_text, w_current);
-  gschem_action_set_sensitive ("attributes-show-name",
+  gschem_action_set_sensitive (action_attributes_show_name,
                                sel_text, w_current);
-  gschem_action_set_sensitive ("attributes-show-both",
+  gschem_action_set_sensitive (action_attributes_show_both,
                                sel_text, w_current);
-  gschem_action_set_sensitive ("attributes-visibility-toggle",
+  gschem_action_set_sensitive (action_attributes_visibility_toggle,
                                sel_text, w_current);
-  gschem_action_set_sensitive ("attributes-overbar-toggle",
+  gschem_action_set_sensitive (action_attributes_overbar_toggle,
                                sel_text, w_current);
 }
 
@@ -596,6 +596,7 @@ i_update_grid_info (GschemToplevel *w_current)
 void
 i_update_grid_info_callback (GschemPageView *view, GschemToplevel *w_current)
 {
+  (void) view;
   i_update_grid_info (w_current);
 }
 

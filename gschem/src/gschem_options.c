@@ -34,6 +34,9 @@
 #endif
 
 #include "gschem.h"
+
+static void class_init_gtype_adapter (gpointer klass, gpointer data);
+static void instance_init_gtype_adapter (GTypeInstance *instance, gpointer klass);
 // #include "actions.decl.x"
 #include "actions.h"
 
@@ -261,12 +264,13 @@ gschem_options_get_type()
       sizeof(GschemOptionsClass),
       NULL,                                  /* base_init */
       NULL,                                  /* base_finalize */
-      (GClassInitFunc) class_init,
+      class_init_gtype_adapter,
       NULL,                                  /* class_finalize */
       NULL,                                  /* class_data */
       sizeof(GschemOptions),
       0,                                     /* n_preallocs */
-      (GInstanceInitFunc) instance_init,
+      instance_init_gtype_adapter,
+      NULL /* value_table */
     };
 
     type = g_type_register_static (G_TYPE_OBJECT, "GschemOptions", &info, 0);
@@ -343,13 +347,13 @@ gschem_options_set_grid_mode (GschemOptions *options, GRID_MODE grid_mode)
       break;
   }
 
-  gschem_action_set_active ("options-grid-none",
+  gschem_action_set_active (action_options_grid_none,
                             options->grid_mode == GRID_MODE_NONE,
                             options->w_current);
-  gschem_action_set_active ("options-grid-dots",
+  gschem_action_set_active (action_options_grid_dots,
                             options->grid_mode == GRID_MODE_DOTS,
                             options->w_current);
-  gschem_action_set_active ("options-grid-mesh",
+  gschem_action_set_active (action_options_grid_mesh,
                             options->grid_mode == GRID_MODE_MESH,
                             options->w_current);
 
@@ -370,7 +374,7 @@ gschem_options_set_show_origin (GschemOptions *options, gboolean show_origin)
 
   options->show_origin = show_origin;
 
-  gschem_action_set_active ("view-show-origin",
+  gschem_action_set_active (action_view_show_origin,
                             options->show_origin,
                             options->w_current);
 
@@ -391,7 +395,7 @@ gschem_options_set_magnetic_net_mode (GschemOptions *options, gboolean enabled)
 
   options->magnetic_net_mode = enabled;
 
-  gschem_action_set_active ("options-magneticnet",
+  gschem_action_set_active (action_options_magneticnet,
                             options->magnetic_net_mode,
                             options->w_current);
 
@@ -414,7 +418,7 @@ gschem_options_set_net_rubber_band_mode (GschemOptions *options, gboolean enable
 
   options->net_rubber_band_mode = enabled;
 
-  gschem_action_set_active ("options-rubberband",
+  gschem_action_set_active (action_options_rubberband,
                             options->net_rubber_band_mode,
                             options->w_current);
 
@@ -435,13 +439,13 @@ gschem_options_set_snap_mode (GschemOptions *options, SNAP_STATE snap_mode)
 
   options->snap_mode = snap_mode;
 
-  gschem_action_set_active ("options-snap-off",
+  gschem_action_set_active (action_options_snap_off,
                             options->snap_mode == SNAP_OFF,
                             options->w_current);
-  gschem_action_set_active ("options-snap-grid",
+  gschem_action_set_active (action_options_snap_grid,
                             options->snap_mode == SNAP_GRID,
                             options->w_current);
-  gschem_action_set_active ("options-snap-resnap",
+  gschem_action_set_active (action_options_snap_resnap,
                             options->snap_mode == SNAP_RESNAP,
                             options->w_current);
 
@@ -609,6 +613,7 @@ get_property (GObject *object, guint param_id, GValue *value, GParamSpec *pspec)
 static void
 instance_init (GschemOptions *options)
 {
+  (void) options;
 }
 
 
@@ -657,4 +662,20 @@ set_property (GObject *object, guint param_id, const GValue *value, GParamSpec *
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
   }
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  class_init (klass);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+instance_init_gtype_adapter (GTypeInstance *instance, gpointer klass)
+{
+  (void) klass;
+  instance_init ((void *) instance);
 }

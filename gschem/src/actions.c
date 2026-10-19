@@ -503,6 +503,7 @@ void
 action_callback_ai_assist (GschemAction *action,
                            GschemToplevel *w_current)
 {
+  (void) action;
   ai_assist_dialog (w_current);
 }
 
@@ -558,6 +559,7 @@ void
 action_callback_file_new (GschemAction *action,
                          GschemToplevel *w_current)
 {
+  (void) action;
   /*! \todo Perhaps this should be renamed to page_new... */
   PAGE *page;
 
@@ -573,6 +575,7 @@ void
 action_callback_file_open (GschemAction *action,
                           GschemToplevel *w_current)
 {
+  (void) action;
   /*! \todo Perhaps this should be renamed to page_open... */
   x_fileselect_open (w_current);
 }
@@ -582,6 +585,8 @@ void
 action_callback_file_open_recent (GschemAction *action,
                                  GschemToplevel *w_current)
 {
+  (void) action;
+  (void) w_current;
   /* submenu */
 }
 
@@ -590,6 +595,7 @@ void
 action_callback_file_save (GschemAction *action,
                           GschemToplevel *w_current)
 {
+  (void) action;
   x_highlevel_save_page (w_current, NULL);
 }
 
@@ -598,6 +604,7 @@ void
 action_callback_file_save_as (GschemAction *action,
                              GschemToplevel *w_current)
 {
+  (void) action;
   x_fileselect_save (w_current);
 }
 
@@ -606,6 +613,7 @@ void
 action_callback_file_save_all (GschemAction *action,
                               GschemToplevel *w_current)
 {
+  (void) action;
   x_highlevel_save_all (w_current);
 }
 
@@ -614,6 +622,7 @@ void
 action_callback_page_revert (GschemAction *action,
                             GschemToplevel *w_current)
 {
+  (void) action;
   x_highlevel_revert_page (w_current, NULL);
 }
 
@@ -622,6 +631,7 @@ void
 action_callback_page_close (GschemAction *action,
                            GschemToplevel *w_current)
 {
+  (void) action;
   x_highlevel_close_page (w_current, NULL);
 }
 
@@ -630,6 +640,7 @@ void
 action_callback_file_print (GschemAction *action,
                            GschemToplevel *w_current)
 {
+  (void) action;
   x_print (w_current);
 }
 
@@ -638,6 +649,7 @@ void
 action_callback_file_write_png (GschemAction *action,
                                GschemToplevel *w_current)
 {
+  (void) action;
   x_image_setup(w_current);
 }
 
@@ -646,6 +658,8 @@ void
 action_callback_file_new_window (GschemAction *action,
                                 GschemToplevel *w_current)
 {
+  (void) action;
+  (void) w_current;
   GschemToplevel *w_current_new = NULL;
   PAGE *page = NULL;
 
@@ -666,6 +680,7 @@ void
 action_callback_file_close (GschemAction *action,
                            GschemToplevel *w_current)
 {
+  (void) action;
   s_log_message(_("Closing Window\n"));
   x_window_close(w_current);
 }
@@ -675,6 +690,7 @@ void
 action_callback_file_quit (GschemAction *action,
                           GschemToplevel *w_current)
 {
+  (void) action;
   x_window_close_all(w_current);
 }
 
@@ -686,6 +702,7 @@ void
 action_callback_edit_undo (GschemAction *action,
                           GschemToplevel *w_current)
 {
+  (void) action;
   /* If we're cancelling from a move action, re-wind the
    * page contents back to their state before we started.
    *
@@ -714,6 +731,7 @@ void
 action_callback_edit_redo (GschemAction *action,
                           GschemToplevel *w_current)
 {
+  (void) action;
   GschemPageView *page_view = gschem_toplevel_get_current_page_view (w_current);
   g_return_if_fail (page_view != NULL);
 
@@ -808,6 +826,7 @@ void
 action_callback_edit_select_all (GschemAction *action,
                                 GschemToplevel *w_current)
 {
+  (void) action;
   o_redraw_cleanstates (w_current);
 
   o_select_visible_unlocked (w_current);
@@ -825,6 +844,7 @@ void
 action_callback_edit_deselect (GschemAction *action,
                               GschemToplevel *w_current)
 {
+  (void) action;
   o_redraw_cleanstates (w_current);
 
   o_select_unselect_all (w_current);
@@ -839,6 +859,7 @@ void
 action_callback_edit_find (GschemAction *action,
                           GschemToplevel *w_current)
 {
+  (void) action;
   /* This is a new addition 3/15 to prevent this from executing
    * inside an action */
   if (w_current->inside_action)
@@ -870,6 +891,7 @@ void
 action_callback_add_last_component (GschemAction *action,
                                    GschemToplevel *w_current)
 {
+  (void) action;
   GschemPageView *page_view =
     gschem_toplevel_get_current_page_view (w_current);
 
@@ -1052,6 +1074,7 @@ void
 action_callback_add_picture (GschemAction *action,
                             GschemToplevel *w_current)
 {
+  (void) action;
   o_redraw_cleanstates(w_current);
   o_invalidate_rubber (w_current);
 
@@ -1797,6 +1820,7 @@ void
 action_callback_hierarchy_documentation (GschemAction *action,
                                         GschemToplevel *w_current)
 {
+  (void) action;
   TOPLEVEL *toplevel = gschem_toplevel_get_toplevel (w_current);
   SCM s_show_documentation_proc =
     scm_variable_ref (
@@ -1832,6 +1856,7 @@ void
 action_callback_view_show_origin (GschemAction *action,
                                  GschemToplevel *w_current)
 {
+  (void) action;
   gschem_options_cycle_show_origin (w_current->options);
   i_show_state (w_current, NULL);
 }
@@ -1841,6 +1866,7 @@ void
 action_callback_view_zoom_in (GschemAction *action,
                              GschemToplevel *w_current)
 {
+  (void) action;
   /* repeat middle shortcut would get into the way of what user is try to do */
   GschemPageView *page_view = gschem_toplevel_get_current_page_view (w_current);
   g_return_if_fail (page_view != NULL);
@@ -1860,6 +1886,7 @@ void
 action_callback_view_zoom_out (GschemAction *action,
                               GschemToplevel *w_current)
 {
+  (void) action;
   /* repeat middle shortcut would get into the way of what user is try to do */
   GschemPageView *page_view = gschem_toplevel_get_current_page_view (w_current);
   g_return_if_fail (page_view != NULL);
@@ -1879,6 +1906,7 @@ void
 action_callback_view_zoom_extents (GschemAction *action,
                                   GschemToplevel *w_current)
 {
+  (void) action;
   /* repeat middle shortcut would get into the way of what user is try to do */
   GschemPageView *page_view = gschem_toplevel_get_current_page_view (w_current);
   g_return_if_fail (page_view != NULL);
@@ -1895,6 +1923,7 @@ void
 action_callback_view_zoom_full (GschemAction *action,
                                GschemToplevel *w_current)
 {
+  (void) action;
   /* repeat middle shortcut would get into the way of what user is try to do */
   GschemPageView *page_view = gschem_toplevel_get_current_page_view (w_current);
   g_return_if_fail (page_view != NULL);
@@ -1912,6 +1941,7 @@ void
 action_callback_view_zoom_box (GschemAction *action,
                               GschemToplevel *w_current)
 {
+  (void) action;
   /* repeat middle shortcut would get into the way of what user is try to do */
   gint wx, wy;
 
@@ -1953,6 +1983,7 @@ void
 action_callback_view_redraw (GschemAction *action,
                             GschemToplevel *w_current)
 {
+  (void) action;
   /* repeat middle shortcut doesn't make sense on redraw,
      just hit right button */
   gschem_page_view_invalidate_all (gschem_toplevel_get_current_page_view (w_current));
@@ -2057,6 +2088,8 @@ void
 action_callback_docking_area_left (GschemAction *action,
                                   GschemToplevel *w_current)
 {
+  (void) action;
+  (void) w_current;
   /* submenu */
 }
 
@@ -2065,6 +2098,8 @@ void
 action_callback_docking_area_bottom (GschemAction *action,
                                     GschemToplevel *w_current)
 {
+  (void) action;
+  (void) w_current;
   /* submenu */
 }
 
@@ -2073,6 +2108,8 @@ void
 action_callback_docking_area_right (GschemAction *action,
                                    GschemToplevel *w_current)
 {
+  (void) action;
+  (void) w_current;
   /* submenu */
 }
 
@@ -2084,6 +2121,7 @@ void
 action_callback_page_update_messages (GschemAction *action,
                                      GschemToplevel *w_current)
 {
+  (void) action;
   x_messages_update (w_current);
 }
 
@@ -2092,6 +2130,7 @@ void
 action_callback_hierarchy_down_schematic (GschemAction *action,
                                          GschemToplevel *w_current)
 {
+  (void) action;
   OBJECT *object = o_select_return_first_object (w_current);
 
   if (object != NULL)
@@ -2103,6 +2142,7 @@ void
 action_callback_hierarchy_down_symbol (GschemAction *action,
                                       GschemToplevel *w_current)
 {
+  (void) action;
   OBJECT *object = o_select_return_first_object (w_current);
 
   if (object != NULL)
@@ -2117,6 +2157,7 @@ void
 action_callback_hierarchy_up (GschemAction *action,
                              GschemToplevel *w_current)
 {
+  (void) action;
   x_hierarchy_up (w_current);
 }
 
@@ -2125,6 +2166,7 @@ void
 action_callback_page_prev (GschemAction *action,
                           GschemToplevel *w_current)
 {
+  (void) action;
   TOPLEVEL *toplevel = gschem_toplevel_get_toplevel (w_current);
   PAGE *p_current = toplevel->page_current;
   PAGE *p_new;
@@ -2154,6 +2196,7 @@ void
 action_callback_page_next (GschemAction *action,
                           GschemToplevel *w_current)
 {
+  (void) action;
   TOPLEVEL *toplevel = gschem_toplevel_get_toplevel (w_current);
   PAGE *p_current = toplevel->page_current;
   PAGE *p_new;
@@ -2184,6 +2227,7 @@ void
 action_callback_page_manager (GschemAction *action,
                              GschemToplevel *w_current)
 {
+  (void) action;
   gschem_dockable_present (w_current->pagesel_dockable);
 }
 
@@ -2195,6 +2239,7 @@ void
 action_callback_edit_autonumber_text (GschemAction *action,
                                      GschemToplevel *w_current)
 {
+  (void) action;
   /* This is a new addition 3/15 to prevent this from executing
    * inside an action */
   if (w_current->inside_action)
@@ -2245,6 +2290,7 @@ void
 action_callback_edit_find_patch (GschemAction *action,
                                 GschemToplevel *w_current)
 {
+  (void) action;
   x_patch_import (w_current);
 }
 
@@ -2253,6 +2299,7 @@ void
 action_callback_edit_hide_text (GschemAction *action,
                                GschemToplevel *w_current)
 {
+  (void) action;
   /* This is a new addition 3/15 to prevent this from executing
    * inside an action */
   if (w_current->inside_action)
@@ -2266,6 +2313,7 @@ void
 action_callback_edit_show_text (GschemAction *action,
                                GschemToplevel *w_current)
 {
+  (void) action;
   /* This is a new addition 3/15 to prevent this from executing
    * inside an action */
   if (w_current->inside_action)
@@ -2279,6 +2327,7 @@ void
 action_callback_edit_select_locked (GschemAction *action,
                                    GschemToplevel *w_current)
 {
+  (void) action;
   TOPLEVEL *toplevel = gschem_toplevel_get_toplevel (w_current);
   SELECTION *selection = toplevel->page_current->selection_list;
   GList *added;
@@ -2310,6 +2359,7 @@ void
 action_callback_options_show_log_window (GschemAction *action,
                                         GschemToplevel *w_current)
 {
+  (void) action;
   gschem_dockable_present (w_current->log_dockable);
 }
 
@@ -2334,6 +2384,7 @@ void
 action_callback_edit_invoke_macro (GschemAction *action,
                                   GschemToplevel *w_current)
 {
+  (void) action;
   gtk_widget_show (w_current->macro_widget);
   gtk_widget_grab_focus (gschem_macro_widget_get_entry (GSCHEM_MACRO_WIDGET (w_current->macro_widget)));
 }
@@ -2343,6 +2394,7 @@ void
 action_callback_file_script (GschemAction *action,
                             GschemToplevel *w_current)
 {
+  (void) action;
   setup_script_selector(w_current);
 }
 
@@ -2351,6 +2403,8 @@ void
 action_callback_file_repl (GschemAction *action,
                           GschemToplevel *w_current)
 {
+  (void) action;
+  (void) w_current;
   g_scm_eval_protected (scm_list_1 (
                           scm_variable_ref (
                             scm_c_public_variable (
@@ -2367,6 +2421,7 @@ void
 action_callback_options_options (GschemAction *action,
                                 GschemToplevel *w_current)
 {
+  (void) action;
   gschem_dockable_present (w_current->options_dockable);
 }
 
@@ -2375,6 +2430,7 @@ void
 action_callback_options_rubberband (GschemAction *action,
                                    GschemToplevel *w_current)
 {
+  (void) action;
   /* Rubber band is cool !
    * Added on/off option from the pull down menu
    * Chris Ellec - January 2001 */
@@ -2396,6 +2452,7 @@ void
 action_callback_options_magneticnet (GschemAction *action,
                                     GschemToplevel *w_current)
 {
+  (void) action;
   gschem_options_cycle_magnetic_net_mode (w_current->options);
 
   if (gschem_options_get_magnetic_net_mode (w_current->options)) {
@@ -2436,6 +2493,7 @@ void
 action_callback_options_snap_off (GschemAction *action,
                                  GschemToplevel *w_current)
 {
+  (void) action;
   gschem_options_set_snap_mode (w_current->options, SNAP_OFF);
 
   i_show_state (w_current, NULL); /* update status on screen */
@@ -2447,6 +2505,7 @@ void
 action_callback_options_snap_grid (GschemAction *action,
                                   GschemToplevel *w_current)
 {
+  (void) action;
   gschem_options_set_snap_mode (w_current->options, SNAP_GRID);
 
   i_show_state (w_current, NULL); /* update status on screen */
@@ -2458,6 +2517,7 @@ void
 action_callback_options_snap_resnap (GschemAction *action,
                                     GschemToplevel *w_current)
 {
+  (void) action;
   gschem_options_set_snap_mode (w_current->options, SNAP_RESNAP);
 
   i_show_state (w_current, NULL); /* update status on screen */
@@ -2472,6 +2532,7 @@ void
 action_callback_options_scale_up_snap_size (GschemAction *action,
                                            GschemToplevel *w_current)
 {
+  (void) action;
   gschem_options_scale_snap_up (w_current->options);
 }
 
@@ -2483,6 +2544,7 @@ void
 action_callback_options_scale_down_snap_size (GschemAction *action,
                                              GschemToplevel *w_current)
 {
+  (void) action;
   gschem_options_scale_snap_down (w_current->options);
 }
 
@@ -2491,6 +2553,7 @@ void
 action_callback_view_dark_colors (GschemAction *action,
                                  GschemToplevel *w_current)
 {
+  (void) action;
   x_color_free ();
   /* Change the scheme here */
   g_scm_c_eval_string_protected ("(load (build-path geda-rc-path \"gschem-colormap-darkbg\"))");
@@ -2504,6 +2567,7 @@ void
 action_callback_view_light_colors (GschemAction *action,
                                   GschemToplevel *w_current)
 {
+  (void) action;
   x_color_free ();
   /* Change the scheme here */
   g_scm_c_eval_string_protected ("(load (build-path geda-rc-path \"gschem-colormap-whitebg\"))");
@@ -2517,6 +2581,7 @@ void
 action_callback_view_light_bw_colors (GschemAction *action,
                                      GschemToplevel *w_current)
 {
+  (void) action;
   x_color_free ();
   /* Change the scheme here */
   g_scm_c_eval_string_protected ("(load (build-path geda-rc-path \"gschem-colormap-whitebg-bw\"))");
@@ -2530,6 +2595,7 @@ void
 action_callback_view_shaded_colors (GschemAction *action,
                                    GschemToplevel *w_current)
 {
+  (void) action;
   x_color_free ();
   /* Change the scheme here */
   g_scm_c_eval_string_protected ("(load (build-path geda-rc-path \"gschem-colormap-lightbg\"))");
@@ -2543,6 +2609,7 @@ void
 action_callback_view_shaded_bw_colors (GschemAction *action,
                                       GschemToplevel *w_current)
 {
+  (void) action;
   x_color_free ();
   /* Change the scheme here */
   g_scm_c_eval_string_protected ("(load (build-path geda-rc-path \"gschem-colormap-bw\"))");
@@ -2559,6 +2626,7 @@ void
 action_callback_help_hotkeys (GschemAction *action,
                              GschemToplevel *w_current)
 {
+  (void) action;
   x_dialog_hotkeys(w_current);
 }
 
@@ -2567,6 +2635,7 @@ void
 action_callback_help_about (GschemAction *action,
                            GschemToplevel *w_current)
 {
+  (void) action;
   about_dialog(w_current);
 }
 
@@ -2701,6 +2770,8 @@ void
 action_callback_options_grid_size (GschemAction *action,
                                   GschemToplevel *w_current)
 {
+  (void) action;
+  (void) w_current;
   /* grid size spinbox */
 }
 
@@ -2709,6 +2780,7 @@ void
 action_callback_options_grid (GschemAction *action,
                              GschemToplevel *w_current)
 {
+  (void) action;
   GRID_MODE grid_mode;
 
   gschem_options_cycle_grid_mode (w_current->options);
@@ -2728,6 +2800,7 @@ void
 action_callback_options_grid_none (GschemAction *action,
                                   GschemToplevel *w_current)
 {
+  (void) action;
   gschem_options_set_grid_mode (w_current->options, GRID_MODE_NONE);
 }
 
@@ -2736,6 +2809,7 @@ void
 action_callback_options_grid_dots (GschemAction *action,
                                   GschemToplevel *w_current)
 {
+  (void) action;
   gschem_options_set_grid_mode (w_current->options, GRID_MODE_DOTS);
 }
 
@@ -2744,6 +2818,7 @@ void
 action_callback_options_grid_mesh (GschemAction *action,
                                   GschemToplevel *w_current)
 {
+  (void) action;
   gschem_options_set_grid_mode (w_current->options, GRID_MODE_MESH);
 }
 
@@ -2752,6 +2827,7 @@ void
 action_callback_options_snap (GschemAction *action,
                              GschemToplevel *w_current)
 {
+  (void) action;
   SNAP_STATE snap_mode;
 
   gschem_options_cycle_snap_mode (w_current->options);
@@ -2782,6 +2858,7 @@ void
 action_callback_view_pan_left (GschemAction *action,
                               GschemToplevel *w_current)
 {
+  (void) action;
   GschemPageView *page_view = gschem_toplevel_get_current_page_view (w_current);
   g_return_if_fail (page_view != NULL);
 
@@ -2793,6 +2870,7 @@ void
 action_callback_view_pan_right (GschemAction *action,
                                GschemToplevel *w_current)
 {
+  (void) action;
   GschemPageView *page_view = gschem_toplevel_get_current_page_view (w_current);
   g_return_if_fail (page_view != NULL);
 
@@ -2805,6 +2883,7 @@ void
 action_callback_view_pan_up (GschemAction *action,
                             GschemToplevel *w_current)
 {
+  (void) action;
   GschemPageView *page_view = gschem_toplevel_get_current_page_view (w_current);
   g_return_if_fail (page_view != NULL);
 
@@ -2816,6 +2895,7 @@ void
 action_callback_view_pan_down (GschemAction *action,
                               GschemToplevel *w_current)
 {
+  (void) action;
   GschemPageView *page_view = gschem_toplevel_get_current_page_view (w_current);
   g_return_if_fail (page_view != NULL);
 
@@ -2828,6 +2908,7 @@ void
 action_callback_edit_select (GschemAction *action,
                             GschemToplevel *w_current)
 {
+  (void) action;
   /* Select also does not update the middle button shortcut. */
   o_redraw_cleanstates(w_current);
 
@@ -2841,6 +2922,7 @@ void
 action_callback_cancel (GschemAction *action,
                        GschemToplevel *w_current)
 {
+  (void) action;
   i_cancel (w_current);
 }
 
@@ -2849,6 +2931,7 @@ void
 action_callback_page_print (GschemAction *action,
                            GschemToplevel *w_current)
 {
+  (void) action;
   s_page_print_all(gschem_toplevel_get_toplevel (w_current));
 }
 
@@ -2860,6 +2943,7 @@ void
 action_callback_repeat_last_action (GschemAction *action,
                                    GschemToplevel *w_current)
 {
+  (void) action;
   if (w_current->last_action != NULL)
     gschem_action_activate (w_current->last_action, w_current);
 }

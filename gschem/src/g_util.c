@@ -25,6 +25,9 @@
 
 #include "gschem.h"
 
+/* Private C entry points exported through this Scheme module. */
+static SCM show_uri (SCM uri_s);
+
 /*! \brief Launch default application for a URI.
  * \par Function Description
  * Launches the default application associated with \a uri_s on the

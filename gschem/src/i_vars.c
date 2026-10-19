@@ -21,6 +21,7 @@
 #include <stdio.h>
 
 #include "gschem.h"
+#include "actions.h"
 // #include "actions.decl.x"
 #include "actions.h"
 
@@ -117,7 +118,7 @@ void i_vars_set(GschemToplevel *w_current)
 
   w_current->zoom_with_pan           = default_zoom_with_pan;
   w_current->actionfeedback_mode     = default_actionfeedback_mode;
-  gschem_action_set_active ("options-afeedback",
+  gschem_action_set_active (action_options_afeedback,
                             w_current->actionfeedback_mode == BOUNDINGBOX,
                             w_current);
   w_current->scrollbars_flag         = default_scrollbars_flag;
@@ -215,6 +216,7 @@ i_vars_init_gschem_defaults()
 void
 i_vars_atexit_save_user_config (gpointer user_data)
 {
+  (void) user_data;
   EdaConfig *cfg = eda_config_get_user_context ();
   GError *err = NULL;
 

@@ -20,6 +20,12 @@
 
 #include "gschem.h"
 
+/* Private C entry points exported through this Scheme module. */
+static SCM page_selection (SCM page_s);
+static SCM select_object_x (SCM obj_s);
+static SCM deselect_object_x (SCM obj_s);
+static SCM object_selected_p (SCM obj_s);
+
 SCM_SYMBOL (object_state_sym, "object-state");
 
 /*! \brief Get a list of selected objects on a page.

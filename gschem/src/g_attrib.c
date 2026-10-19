@@ -27,6 +27,9 @@
 
 #include "gschem.h"
 
+/* Private C entry points exported through this Scheme module. */
+static SCM add_attrib_x (SCM target_s, SCM name_s, SCM value_s, SCM visible_s, SCM show_s);
+
 SCM_SYMBOL (name_sym , "name");
 SCM_SYMBOL (value_sym , "value");
 SCM_SYMBOL (both_sym , "both");

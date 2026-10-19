@@ -34,6 +34,12 @@
 
 #include "gschem.h"
 
+/* Private C entry points exported through this Scheme module. */
+static SCM g_keyp (SCM key_s);
+static SCM g_string_to_key (SCM str_s);
+static SCM g_key_to_string (SCM key_s);
+static SCM g_key_to_display_string (SCM key_s);
+
 #include <gdk/gdkkeysyms-compat.h>
 
 

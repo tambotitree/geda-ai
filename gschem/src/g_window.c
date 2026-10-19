@@ -20,6 +20,14 @@
 
 #include "gschem.h"
 
+/* Private C entry points exported through this Scheme module. */
+static SCM current_window (void);
+static SCM active_page (void);
+static SCM set_active_page_x (SCM page_s);
+static SCM override_close_page_x (SCM page_s);
+static SCM pointer_position (void);
+static SCM snap_point (SCM x_s, SCM y_s);
+
 SCM scheme_window_fluid = SCM_UNDEFINED;
 
 scm_t_bits window_smob_tag;
@@ -78,7 +86,7 @@ smob_print (SCM smob, SCM port, scm_print_state *pstate)
  * \param window #GschemToplevel to obtain a smob for.
  * \param a smob representing \a window.
  */
-SCM
+static SCM
 g_scm_from_window (GschemToplevel *w_current)
 {
   g_assert (w_current != NULL);

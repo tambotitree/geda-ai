@@ -61,6 +61,8 @@ extern SCM complex_place_list_changed_hook;
 # define GETTEXT_CONTEXT_GLUE "\004"
 # define pgettext(Msgctxt, Msgid) \
    pgettext_aux (Msgctxt GETTEXT_CONTEXT_GLUE Msgid, Msgid)
+  static inline const char *pgettext_aux (const char *, const char *)
+    G_GNUC_FORMAT (2);
   static inline const char *
   pgettext_aux (const char *msg_ctxt_id, const char *msgid)
   {
