@@ -33,6 +33,10 @@ gschem_SOURCES = \
 	gschem_accel_label.c \
 	gschem_action.c \
 	gschem_ai_assist_dialog.c \
+	gschem_ai_chat.c \
+	gschem_ai_chat_json.c \
+	gschem_ai_chat_settings.c \
+	gschem_ai_chat_internal.h \
 	gschem_alignment_combo.c \
 	gschem_arc_dialog.c \
 	gschem_binding.c \
@@ -134,7 +138,8 @@ gschem_SOURCES = \
 	unit_tests.c
 
 gschem_CPPFLAGS = -I$(top_srcdir)/libgeda/include  -I$(srcdir)/../include \
-	-I$(top_srcdir) -I$(includedir)
+	-I$(top_srcdir) -I$(includedir) \
+	-DGSCHEM_AI_PYTHON='"$(PYTHON)"'
 gschem_CFLAGS = $(GCC_CFLAGS) $(LIBFAM_CFLAGS) \
 	$(MINGW_CFLAGS) \
 	$(GLIB_CFLAGS) $(GIO_CFLAGS) $(GTK_CFLAGS) $(GTHREAD_CFLAGS) \
@@ -298,10 +303,13 @@ test_gschem_icons_CPPFLAGS = -I$(srcdir)/../include $(GTK_CFLAGS)
 test_gschem_icons_CFLAGS = $(GCC_CFLAGS) $(GSCHEM_WARNING_CFLAGS)
 test_gschem_icons_LDADD = $(GTK_LIBS)
 
-# Render the production viewport path without a display server.
+# Focused viewport, connectivity and AI Assist regression checks.
 EXTRA_DIST += $(top_srcdir)/tests/test_viewport_rendering.py \
   $(top_srcdir)/tests/test_picker_attributes.py \
-  $(top_srcdir)/tests/test_net_interaction.py
+  $(top_srcdir)/tests/test_net_interaction.py \
+  $(top_srcdir)/tests/test_ai_chat_backend.py \
+  $(top_srcdir)/tests/test_ai_chat_ui.py \
+  $(top_srcdir)/tests/test_ai_chat_http.py
 check-local: gschem-gschem_page_geometry.o
 	GEDA_TEST_BUILD_ROOT='$(abs_top_builddir)' $(PYTHON) \
 	  $(top_srcdir)/tests/test_viewport_rendering.py
@@ -309,3 +317,6 @@ check-local: gschem-gschem_page_geometry.o
 	  $(top_srcdir)/tests/test_picker_attributes.py
 	GEDA_TEST_BUILD_ROOT='$(abs_top_builddir)' $(PYTHON) \
 	  $(top_srcdir)/tests/test_net_interaction.py
+	$(PYTHON) $(top_srcdir)/tests/test_ai_chat_backend.py
+	GEDA_TEST_BUILD_ROOT='$(abs_top_builddir)' $(PYTHON) \
+	  $(top_srcdir)/tests/test_ai_chat_ui.py

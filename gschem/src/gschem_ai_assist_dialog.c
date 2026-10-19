@@ -27,9 +27,8 @@
  * schematic as text and reports whether the design is ready to be netlisted
  * for SPICE, then hands the text to whatever assistant the user has.
  *
- * \note This dialog does not itself call any model.  It collects text and
- *       presents it; wiring an API call in is a separate change.  The
- *       schematic shown is rendered from the edit buffer, so unsaved work is
+ * The chat tab sends the live page to a configurable model provider. The
+ * schematic shown is rendered from the edit buffer, so unsaved work is
  *       included and opening the dialog never writes to disk.
  */
 
@@ -45,7 +44,7 @@
 
 #include "gschem.h"
 #include "gschem_ai_assist.h"
-
+#include "gschem_ai_chat.h"
 
 /*! \brief Response id for the dialog's Refresh button.
  *
@@ -53,7 +52,6 @@
  *  which are all negative.
  */
 #define AI_ASSIST_RESPONSE_REFRESH 1
-
 
 /*! \brief Look up one of the dialog's two text views.
  *
@@ -66,7 +64,6 @@ ai_assist_get_view (GtkWidget *dialog, const gchar *key)
 {
   return g_object_get_data (G_OBJECT (dialog), key);
 }
-
 
 /*! \brief Replace the whole contents of one of the dialog's text views.
  *
@@ -86,7 +83,6 @@ ai_assist_set_text (GtkWidget *dialog, const gchar *key, const gchar *text)
   gtk_text_buffer_set_text (gtk_text_view_get_buffer (GTK_TEXT_VIEW (view)),
                             text != NULL ? text : "", -1);
 }
-
 
 /*! \brief Render the current page as gEDA text.
  *
@@ -112,7 +108,6 @@ ai_assist_schematic_text (GschemToplevel *w_current)
 
   return o_save_buffer (s_page_objects (page));
 }
-
 
 /*! \brief Fill the text view with the current page as gEDA text.
  *
@@ -222,7 +217,6 @@ ai_assist_describe_schematic (GschemToplevel *w_current)
   return g_string_free (out, FALSE);
 }
 
-
 /*! \brief Bring the dialog's contents up to date with the current page.
  *
  *  Called when the dialog is opened and whenever the user presses Refresh,
@@ -246,7 +240,6 @@ ai_assist_refresh (GschemToplevel *w_current)
   ai_assist_set_text (dialog, "textview-report", report);
   g_free (report);
 }
-
 
 /*! \brief Handle a signal from the AI Assist dialog.
  *
@@ -274,9 +267,18 @@ ai_assist_dialog_response (GtkWidget *widget, gint response,
   }
 
   gtk_widget_destroy (widget);
-  w_current->ai_assist_window = NULL;
 }
 
+/*! \brief Clear the editor's dialog pointer on every destruction path.
+ * \param widget Destroyed dialog (unused).
+ * \param w_current Editor, still alive while its dialog is destroyed.
+ */
+static void
+ai_assist_dialog_destroyed (GtkWidget *widget, GschemToplevel *w_current)
+{
+  (void) widget;
+  w_current->ai_assist_window = NULL;
+}
 
 /*! \brief Create (or re-present) the AI Assist dialog.
  *
@@ -312,6 +314,9 @@ ai_assist_dialog (GschemToplevel *w_current)
   g_signal_connect (G_OBJECT (w_current->ai_assist_window), "response",
                     G_CALLBACK (ai_assist_dialog_response), w_current);
 
+  g_signal_connect (w_current->ai_assist_window, "destroy",
+                    G_CALLBACK (ai_assist_dialog_destroyed), w_current);
+
   gtk_container_set_border_width (
     GTK_CONTAINER (w_current->ai_assist_window), DIALOG_BORDER_SPACING);
 
@@ -321,8 +326,8 @@ ai_assist_dialog (GschemToplevel *w_current)
 
   /* A short explanation, so the dialog makes sense on first use. */
   label = gtk_label_new (
-    _("gEDA schematics are plain text.  The text below is the current page "
-      "exactly as it would be saved, and can be copied to an assistant."));
+    _("Each message includes the current schematic, including unsaved edits. "
+      "Choose a provider and model below."));
   gtk_label_set_line_wrap (GTK_LABEL (label), TRUE);
   gtk_label_set_xalign (GTK_LABEL (label), 0.0);
   gtk_label_set_max_width_chars (GTK_LABEL (label), 60);
@@ -331,6 +336,11 @@ ai_assist_dialog (GschemToplevel *w_current)
   notebook = gtk_notebook_new ();
   gtk_widget_set_size_request (notebook, 640, 420);
   gtk_box_pack_start (GTK_BOX (vbox), notebook, TRUE, TRUE, 0);
+
+  gtk_notebook_append_page (GTK_NOTEBOOK (notebook),
+                            gschem_ai_chat_new (w_current), gtk_label_new (_("Chat")));
+  gtk_window_set_default_size (GTK_WINDOW (w_current->ai_assist_window), 800, 700);
+  gtk_window_set_destroy_with_parent (GTK_WINDOW (w_current->ai_assist_window), TRUE);
 
   /* Tab 1: the schematic as gEDA text. */
   scrolled = gtk_scrolled_window_new (NULL, NULL);
@@ -380,7 +390,6 @@ ai_assist_dialog (GschemToplevel *w_current)
 }
 
 
-
 /*! \brief Build the text handed to an assistant for one prompt.
  *
  *  The format is fixed and deliberately not translated: it is read back by a
@@ -421,7 +430,6 @@ ai_assist_build_prompt (GschemToplevel *w_current, const gchar *prompt)
 
   return g_string_free (out, FALSE);
 }
-
 
 /*! \brief Write a prompt bundle for the headless AI Assist command.
  *
