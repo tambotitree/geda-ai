@@ -340,3 +340,10 @@ xcrun dsymutil gschem/src/.libs/gschem -o gschem/src/gschem.dSYM
 
 Generated files, compiled binaries, local configuration, and debug bundles
 are not part of the source checkpoint.
+
+The 1.1.0-20261019 milestone adds a working library preview, compact preview
+and attribute layout, editable placement attributes, and refreshed net pin
+snapping at each click. The user verified placing two resistors and joining
+them with a net. Automated checks cover grid conversions across zoom/pan,
+electrical connections to both pins, and schematic serialization/reload.
+The desktop save/close/reopen workflow remains a separate manual check.
