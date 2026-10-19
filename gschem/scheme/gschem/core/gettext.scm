@@ -21,7 +21,8 @@
 ;;
 ;; This module is for internal use only.
 
-(define-module (gschem core gettext))
+(define-module (gschem core gettext)
+  #:replace (_))
 
 (define %gschem-gettext-domain "geda-gschem")
-(define-public (_ msg) (gettext msg %gschem-gettext-domain))
+(define (_ msg) (gettext msg %gschem-gettext-domain))
