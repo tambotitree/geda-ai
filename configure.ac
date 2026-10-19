@@ -28,12 +28,11 @@ AC_CONFIG_HEADERS([config.h version.h]) # Ensure version.h is listed for generat
 # also influence how PACKAGE_VERSION or similar are defined if not already set by AC_INIT.
 AX_GIT_VERSION([20261019])
 
-# For consistency in user-facing messages and to simplify gschemrc version checks,
-# we will ensure PACKAGE_DATE_VERSION (used in C code and messages)
-# remains the dotted version (e.g., "1.0.0"), without the release date.
-temp_package_date_version="$DOTTED_VERSION"
-AC_DEFINE_UNQUOTED([PACKAGE_DATE_VERSION], ["$temp_package_date_version"], [The package version string, simplified to dotted version for geda-ai.])
-AC_SUBST([PACKAGE_DATE_VERSION], [$temp_package_date_version])
+# RC compatibility uses the release date, matching @DATE_VERSION@ in the
+# generated system RC files. Keep it distinct from the dotted version.
+PACKAGE_DATE_VERSION="$DATE_VERSION"
+AC_DEFINE_UNQUOTED([PACKAGE_DATE_VERSION], ["$PACKAGE_DATE_VERSION"], [Date part of package version string.])
+AC_SUBST([PACKAGE_DATE_VERSION])
 
 # version.h is generated from version.h.in via AC_CONFIG_HEADERS, but
 # AX_GIT_VERSION only AC_SUBSTs DOTTED_VERSION and DATE_VERSION, while the
@@ -119,9 +118,7 @@ AC_SUBST(MINGW_LDFLAGS)
 
 
 # Check for Guile and its development tools (needed for libgeda)
-GEDA_GUILE_CHECKS
-# GEDA_GUILE_CHECKS # This macro might not be defined in the current m4/geda-guile.m4
-AX_CHECK_GUILE([1.8.0]) # Call the macro that is defined in m4/geda-guile.m4
+AX_CHECK_GUILE([1.8.0])
 
 # Set up libgeda with the correct ld version number
 LIBGEDA_LT_CURRENT=1
@@ -148,6 +145,11 @@ PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.32,
 if test "x$have_glib" = "xno"; then
   AC_MSG_ERROR([GLib >= 2.32 not found. Please install the GLib development package.])
 fi
+
+# Embed gschem's icons without relying on an installed desktop icon theme.
+AC_PATH_PROG([GLIB_COMPILE_RESOURCES], [glib-compile-resources])
+AS_IF([test -z "$GLIB_COMPILE_RESOURCES"],
+      [AC_MSG_ERROR([glib-compile-resources is required to build gschem icons])])
 
 # Check for GDK-Pixbuf (needed by libgeda for image handling)
 PKG_CHECK_MODULES(GDK_PIXBUF, gdk-pixbuf-2.0 >= 2.24.0,
@@ -197,7 +199,7 @@ AC_SUBST(GDK_LIBS)
 
 # --- Checks for header files ---
 AC_FUNC_ALLOCA
-AC_CHECK_HEADERS([argz.h ctype.h fcntl.h inttypes.h langinfo.h libintl.h malloc.h stdint.h stdio_ext.h strings.h sys/param.h sys/time.h unistd.h])
+AC_CHECK_HEADERS([argz.h ctype.h fcntl.h inttypes.h langinfo.h libintl.h malloc.h stdint.h stdio_ext.h strings.h sys/param.h sys/time.h sys/wait.h unistd.h])
 
 # getopt_long is what makes gschem's long options (--control-fd, --help,
 # --quiet, --verbose) work at all: without HAVE_GETOPT_LONG, parsecmd.c falls
@@ -315,7 +317,6 @@ if test "x$enable_kde_desktop_data" = xyes; then
 fi
 AM_CONDITIONAL(ENABLE_KDE_DESKTOP_DATA, test "x$enable_kde_desktop_data" = xyes)
 
-AX_CREATE_CONDA_ENVIRONMENT_YML
 
 # --- Configuration Files and Output (MUST BE AT THE END) ---
 AC_CONFIG_FILES([Makefile
@@ -375,6 +376,7 @@ AC_CONFIG_FILES([Makefile
                  gschem/data/Makefile
                  gschem/docs/Makefile
                  gschem/examples/Makefile
+                 gschem/icon-theme/Makefile
                  gschem/include/Makefile
                  gschem/lib/Makefile
                  gschem/scheme/Makefile
