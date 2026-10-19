@@ -29,6 +29,7 @@
 #endif
 
 #include "gschem.h"
+#include "gschem_icons.h"
 #include "roster.h"
 #include "unit_tests.h"
 // #include "actions.decl.x"
@@ -167,7 +168,7 @@ void x_window_setup_draw_events(GschemToplevel *w_current)
 
   for (tmp = drawing_area_events; tmp->detailed_signal != NULL; tmp++)
   {
-    g_signal_connect(w_current->drawing_area,
+    gschem_signal_connect (w_current->drawing_area,
                      tmp->detailed_signal,
                      tmp->c_handler,
                      w_current);
@@ -175,7 +176,7 @@ void x_window_setup_draw_events(GschemToplevel *w_current)
 
   for (tmp = main_window_events; tmp->detailed_signal != NULL; tmp++)
   {
-    g_signal_connect(w_current->main_window,
+    gschem_signal_connect (w_current->main_window,
                      tmp->detailed_signal,
                      tmp->c_handler,
                      w_current);
@@ -280,6 +281,7 @@ x_window_invoke_macro(GschemMacroWidget *widget, int response, GschemToplevel *w
 static void
 x_window_select_text(GschemFindTextDockable *dockable, OBJECT *object, GschemToplevel *w_current)
 {
+  (void) dockable;
   GschemPageView *view = gschem_toplevel_get_current_page_view(w_current);
   g_return_if_fail(view != NULL);
 
@@ -299,6 +301,8 @@ x_window_state_event(GtkWidget *widget,
                      GdkEventWindowState *event,
                      gpointer user_data)
 {
+  (void) widget;
+  (void) user_data;
   eda_config_set_string(
       eda_config_get_user_context(),
       "gschem.window-geometry", "state",
@@ -495,9 +499,7 @@ x_window_restore_menu_geometry(GtkMenuShell *menu_shell,
 static gboolean
 x_window_restore_all_menu_geometry(GschemToplevel *w_current)
 {
-  g_signal_handlers_disconnect_by_func(
-      G_OBJECT(w_current->main_window),
-      G_CALLBACK(x_window_restore_all_menu_geometry), w_current);
+  gschem_signal_handlers_disconnect (G_OBJECT(w_current->main_window), G_CALLBACK(x_window_restore_all_menu_geometry), w_current);
 
   if (w_current->menubar != NULL)
   {
@@ -555,7 +557,7 @@ x_window_restore_geometry(GschemToplevel *w_current)
   g_free(window_state);
 
   /* Defer menu geometry restoration until focus-in */
-  g_signal_connect_swapped(
+  gschem_signal_connect_swapped (
       G_OBJECT(w_current->main_window), "focus-in-event",
       G_CALLBACK(x_window_restore_all_menu_geometry), w_current);
 
@@ -594,6 +596,8 @@ x_window_restore_geometry(GschemToplevel *w_current)
 static gboolean
 x_window_close_wm(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
+  (void) widget;
+  (void) event;
   GschemToplevel *w_current = GSCHEM_TOPLEVEL(data);
   g_return_val_if_fail(w_current != NULL, TRUE);
 
@@ -637,8 +641,8 @@ void x_window_update_file_change_notification(GschemToplevel *w_current,
                "path", page->page_filename,
                "has-known-mtime", page->exists_on_disk,
                "known-mtime", &page->last_modified,
-               "button-stock-id", page->CHANGED ? GTK_STOCK_REVERT_TO_SAVED : page->exists_on_disk ? GTK_STOCK_REFRESH
-                                                                                                   : GTK_STOCK_OPEN,
+               "button-stock-id", page->CHANGED ? "document-revert" :
+                 page->exists_on_disk ? "view-refresh" : "document-open",
                "button-label", page->CHANGED ? _("_Revert") : page->exists_on_disk ? _("_Reload")
                                                                                    : _("_Open"),
                "markup", markup,
@@ -651,6 +655,7 @@ static void
 x_window_file_change_response(GschemChangeNotification *chnot,
                               gint response_id, gpointer user_data)
 {
+  (void) user_data;
   if (response_id == GTK_RESPONSE_ACCEPT)
     x_lowlevel_revert_page(chnot->w_current, chnot->page);
   else
@@ -715,6 +720,7 @@ static void
 x_window_patch_change_response(GschemChangeNotification *chnot,
                                gint response_id, gpointer user_data)
 {
+  (void) user_data;
   if (response_id == GTK_RESPONSE_ACCEPT)
   {
     if (chnot->page->patch_filename == NULL)
@@ -738,32 +744,17 @@ x_window_patch_change_response(GschemChangeNotification *chnot,
  * connects the delete-event handler, and ensures it is displayed.
  * If auto_place_mode is enabled, the window is positioned after realization.
  */
-static void
-x_window_setup_main_window(GschemToplevel *w_current)
+
+
+/* Invalidate an object through the libgeda change-notification contract.
+ * The notification dispatcher ignores the returned status.
+ */
+static int
+invalidate_changed_object (void *user_data, OBJECT *object)
 {
-  w_current->main_window = GTK_WIDGET(gschem_main_window_new());
-
-  gtk_widget_set_name(w_current->main_window, "gschem");
-
-  /* GTK 3 deprecated gtk_window_set_policy; safe to remove */
-  // gtk_window_set_policy(GTK_WINDOW(w_current->main_window), TRUE, TRUE, TRUE);
-
-  /* Signal connection for window close (delete-event) */
-  g_signal_connect(G_OBJECT(w_current->main_window), "delete-event",
-                   G_CALLBACK(x_window_close_wm), w_current);
-
-  /* Realize the window so we can position it later if needed */
-  gtk_widget_realize(w_current->main_window);
-  gtk_widget_show(w_current->main_window); // now safe to position in GTK 3
-
-  /*
-   * Normally we let the window manager handle window location.
-   * But for batch runs (like rendering PDFs), auto_place_mode overrides this.
-   */
-  if (auto_place_mode)
-  {
-    gtk_window_move(GTK_WINDOW(w_current->main_window), 10, 10);
-  }
+  GschemToplevel *w_current = user_data;
+  o_invalidate (w_current, object);
+  return 0;
 }
 
 /*!
@@ -778,7 +769,7 @@ x_window_setup_main_window(GschemToplevel *w_current)
  *
  * This includes:
  * - Initializing the main GtkWindow and connecting signals (e.g., close handlers)
- * - Creating the menu and toolbar, optionally placing them in GtkHandleBoxes
+ * - Creating the menu and toolbar in the main vertical box
  * - Creating left, right, and bottom dockable notebooks for additional UI panels
  * - Constructing the work area with a scrolled drawing widget
  * - Adding custom GObject-based widgets for file change notifications, find/hide/show text,
@@ -791,13 +782,12 @@ x_window_setup_main_window(GschemToplevel *w_current)
  *
  * \param w_current A pointer to the current GschemToplevel object representing the top-level state.
  */
+
 void x_window_create_main(GschemToplevel *w_current)
 {
   TOPLEVEL *toplevel = gschem_toplevel_get_toplevel(w_current);
 
-  GtkPolicyType policy;
   GtkWidget *main_box = NULL;
-  GtkWidget *handlebox = NULL;
   GtkWidget *scrolled;
   GtkAdjustment *hadjustment;
   GtkAdjustment *vadjustment;
@@ -826,22 +816,8 @@ void x_window_create_main(GschemToplevel *w_current)
    * gtk_window_move(), which must be called after the window is shown.
    */
 
-  g_signal_connect(w_current->main_window, "delete_event",
+  gschem_signal_connect (w_current->main_window, "delete_event",
                    G_CALLBACK(x_window_close_wm), w_current);
-
-  // add_roster_item(XWIN_MAIN_WINDOW, "Main Window", w_current->main_window);
-  /* TODO: gtk_widget_show_all is called here too early — move it to just before gtk_window_move()
-   * and after all children have been packed to ensure complete layout.
-   * This will also allow inserting debug/roster instrumentation at logical construction steps.
-   */
-  gtk_widget_show_all(w_current->main_window);
-
-  if (auto_place_mode)
-  {
-    gtk_window_move(GTK_WINDOW(w_current->main_window), 10, 10);
-  }
-
-  /* Don't connect 'delete_event' twice */
 
   /* Containers first */
   main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 1);
@@ -854,20 +830,7 @@ void x_window_create_main(GschemToplevel *w_current)
   x_menus_create_main_menu(w_current);
   if (w_current->menubar != NULL)
   {
-    if (w_current->handleboxes)
-    {
-      handlebox = gtk_handle_box_new(); // Deprecated, but keep for now
-      gtk_container_add(GTK_CONTAINER(handlebox), w_current->menubar);
-      gtk_box_pack_start(GTK_BOX(main_box), handlebox, FALSE, FALSE, 0);
-
-      // TODO: add_roster_item(XWIN_MENU_BAR, "Menubar in Handlebox", handlebox);
-    }
-    else
-    {
-      gtk_box_pack_start(GTK_BOX(main_box), w_current->menubar, FALSE, FALSE, 0);
-
-      // TODO: add_roster_item(XWIN_MENU_BAR, "Menubar", w_current->menubar);
-    }
+    gtk_box_pack_start (GTK_BOX (main_box), w_current->menubar, FALSE, FALSE, 0);
   }
 
   gschem_action_set_sensitive(action_view_menubar, w_current->menubar != NULL, w_current);
@@ -879,24 +842,9 @@ void x_window_create_main(GschemToplevel *w_current)
   x_menus_create_toolbar(w_current);
   if (w_current->toolbar != NULL)
   {
-    if (w_current->handleboxes)
-    {
-      handlebox = gtk_handle_box_new(); // Deprecated, but kept for legacy users
-      gtk_container_add(GTK_CONTAINER(handlebox), w_current->toolbar);
-      gtk_box_pack_start(GTK_BOX(main_box), handlebox, FALSE, FALSE, 0);
-      gtk_widget_set_visible(handlebox, w_current->toolbars);
-      gtk_widget_set_no_show_all(handlebox, TRUE);
-
-      // TODO: add_roster_item(XWIN_TOOLBAR, "Toolbar in Handlebox", handlebox);
-    }
-    else
-    {
-      gtk_box_pack_start(GTK_BOX(main_box), w_current->toolbar, FALSE, FALSE, 0);
-      gtk_widget_set_visible(w_current->toolbar, w_current->toolbars);
-      gtk_widget_set_no_show_all(w_current->toolbar, TRUE);
-
-      // TODO: add_roster_item(XWIN_TOOLBAR, "Toolbar", w_current->toolbar);
-    }
+    gtk_box_pack_start (GTK_BOX (main_box), w_current->toolbar, FALSE, FALSE, 0);
+    gtk_widget_set_visible (w_current->toolbar, w_current->toolbars);
+    gtk_widget_set_no_show_all (w_current->toolbar, TRUE);
   }
 
   gschem_action_set_sensitive(action_view_toolbar, w_current->toolbar != NULL, w_current);
@@ -904,7 +852,7 @@ void x_window_create_main(GschemToplevel *w_current)
                            w_current->toolbars && w_current->toolbar != NULL,
                            w_current);
 
-  left_hpaned = gtk_hpaned_new(); // GTK 3 okay
+  left_hpaned = gtk_paned_new (GTK_ORIENTATION_HORIZONTAL); // GTK 3 okay
   gtk_container_add(GTK_CONTAINER(main_box), left_hpaned);
 
   // TODO: add_roster_item(XWIN_PANED_LEFT, "Left HPaned Container", left_hpaned);
@@ -919,7 +867,7 @@ void x_window_create_main(GschemToplevel *w_current)
 
   // TODO: add_roster_item(XWIN_LEFT_NOTEBOOK, "Left Notebook", w_current->left_notebook);
 
-  right_hpaned = gtk_hpaned_new(); // GTK 3 okay
+  right_hpaned = gtk_paned_new (GTK_ORIENTATION_HORIZONTAL); // GTK 3 okay
   gtk_paned_pack2(GTK_PANED(left_hpaned),
                   right_hpaned,
                   TRUE,
@@ -937,7 +885,7 @@ void x_window_create_main(GschemToplevel *w_current)
 
   // TODO: add_roster_item(XWIN_RIGHT_NOTEBOOK, "Right Notebook", w_current->right_notebook);
 
-  vpaned = gtk_vpaned_new(); // GTK 3 okay
+  vpaned = gtk_paned_new (GTK_ORIENTATION_VERTICAL); // GTK 3 okay
   gtk_paned_pack1(GTK_PANED(right_hpaned),
                   vpaned,
                   TRUE,
@@ -966,7 +914,7 @@ void x_window_create_main(GschemToplevel *w_current)
       "gschem-toplevel", w_current,
       "message-type", GTK_MESSAGE_QUESTION,
       NULL);
-  g_signal_connect(w_current->file_change_notification, "response",
+  gschem_signal_connect (w_current->file_change_notification, "response",
                    G_CALLBACK(x_window_file_change_response), NULL);
   gtk_box_pack_start(GTK_BOX(work_box),
                      w_current->file_change_notification->info_bar,
@@ -980,7 +928,7 @@ void x_window_create_main(GschemToplevel *w_current)
       "gschem-toplevel", w_current,
       "message-type", GTK_MESSAGE_INFO,
       NULL);
-  g_signal_connect(w_current->patch_change_notification, "response",
+  gschem_signal_connect (w_current->patch_change_notification, "response",
                    G_CALLBACK(x_window_patch_change_response), NULL);
   gtk_box_pack_start(GTK_BOX(work_box),
                      w_current->patch_change_notification->info_bar,
@@ -1031,7 +979,7 @@ void x_window_create_main(GschemToplevel *w_current)
   gtk_box_pack_start(GTK_BOX(work_box),
                      w_current->find_text_widget,
                      FALSE, FALSE, 0);
-  g_signal_connect(w_current->find_text_widget,
+  gschem_signal_connect (w_current->find_text_widget,
                    "response",
                    G_CALLBACK(x_window_find_text),
                    w_current);
@@ -1048,7 +996,7 @@ void x_window_create_main(GschemToplevel *w_current)
   gtk_box_pack_start(GTK_BOX(work_box),
                      w_current->hide_text_widget,
                      FALSE, FALSE, 0);
-  g_signal_connect(w_current->hide_text_widget,
+  gschem_signal_connect (w_current->hide_text_widget,
                    "response",
                    G_CALLBACK(x_window_hide_text),
                    w_current);
@@ -1065,7 +1013,7 @@ void x_window_create_main(GschemToplevel *w_current)
   gtk_box_pack_start(GTK_BOX(work_box),
                      w_current->show_text_widget,
                      FALSE, FALSE, 0);
-  g_signal_connect(w_current->show_text_widget,
+  gschem_signal_connect (w_current->show_text_widget,
                    "response",
                    G_CALLBACK(x_window_show_text),
                    w_current);
@@ -1077,7 +1025,7 @@ void x_window_create_main(GschemToplevel *w_current)
   gtk_box_pack_start(GTK_BOX(work_box),
                      w_current->macro_widget,
                      FALSE, FALSE, 0);
-  g_signal_connect(w_current->macro_widget,
+  gschem_signal_connect (w_current->macro_widget,
                    "response",
                    G_CALLBACK(x_window_invoke_macro),
                    w_current);
@@ -1165,7 +1113,7 @@ void x_window_create_main(GschemToplevel *w_current)
       "initial-height", 300,
       "gschem-toplevel", w_current,
       NULL);
-  g_signal_connect(w_current->find_text_dockable,
+  gschem_signal_connect (w_current->find_text_dockable,
                    "select-object",
                    G_CALLBACK(x_window_select_text),
                    w_current);
@@ -1221,12 +1169,13 @@ void x_window_create_main(GschemToplevel *w_current)
 
   x_window_restore_geometry(w_current);
 
-  g_signal_connect(G_OBJECT(w_current->main_window), "window-state-event",
+  gschem_signal_connect (G_OBJECT(w_current->main_window), "window-state-event",
                    G_CALLBACK(x_window_state_event), w_current);
 
-  // gtk_widget_show_all() should come *here*, after all widgets are created and packed
-  // Otherwise, some elements may fail to render or connect correctly
-  gtk_widget_show_all(w_current->main_window);
+  /* Map the completed hierarchy once, after geometry and children are ready. */
+  gtk_widget_show_all (w_current->main_window);
+  if (auto_place_mode)
+    gtk_window_move (GTK_WINDOW (w_current->main_window), 10, 10);
 
   /* Hide unused notebooks after initial render */
   if (gtk_notebook_get_n_pages(GTK_NOTEBOOK(w_current->left_notebook)) == 0)
@@ -1349,6 +1298,7 @@ void x_window_close(GschemToplevel *w_current)
  */
 void x_window_close_all(GschemToplevel *w_current)
 {
+  (void) w_current;
   GschemToplevel *current;
   GList *list_copy, *iter;
 
@@ -1471,21 +1421,12 @@ void x_window_set_default_icon()
   gtk_window_set_default_icon_name(GSCHEM_THEME_ICON_NAME);
 }
 
-/*! \brief Setup icon search paths.
- * \par Function Description
- * Add the icons installed by gschem to the search path for the
- * default icon theme, so that they can be automatically found by GTK.
+/*! \brief Make the compiled action icons available to GTK name lookups.
+ * This does not require GEDADATADIR or an installed icon theme cache.
  */
-void x_window_init_icons()
+void x_window_init_icons (void)
 {
-  gchar *icon_path;
-
-  g_return_if_fail(s_path_sys_data() != NULL);
-
-  icon_path = g_build_filename(s_path_sys_data(), "icons", NULL);
-  gtk_icon_theme_append_search_path(gtk_icon_theme_get_default(),
-                                    icon_path);
-  g_free(icon_path);
+  gschem_icons_init (gtk_icon_theme_get_default ());
 }
 
 /*! \brief Creates a new X window.
@@ -1514,8 +1455,8 @@ GschemToplevel *x_window_new(TOPLEVEL *toplevel)
 
   /* Damage notifications should invalidate the object on screen */
   o_add_change_notify(gschem_toplevel_get_toplevel(w_current),
-                      (ChangeNotifyFunc)o_invalidate,
-                      (ChangeNotifyFunc)o_invalidate, w_current);
+                      invalidate_changed_object,
+                      invalidate_changed_object, w_current);
 
   x_window_setup(w_current);
 

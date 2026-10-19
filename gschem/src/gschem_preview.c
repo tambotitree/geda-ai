@@ -38,6 +38,9 @@
 
 #include "gschem.h"
 
+static void preview_class_init_gtype_adapter (gpointer klass, gpointer data);
+static void preview_init_gtype_adapter (GTypeInstance *instance, gpointer klass);
+
 #define OVER_ZOOM_FACTOR 0.1
 
 
@@ -99,6 +102,7 @@ preview_get_filename (GschemPreview *preview)
 static void
 preview_callback_realize (GtkWidget *widget, gpointer user_data)
 {
+  (void) user_data;
   g_return_if_fail (widget != NULL);
 
   gtk_widget_grab_focus (widget);
@@ -120,16 +124,7 @@ preview_callback_draw(GtkWidget *widget,
     preview->needs_zoom = FALSE;
   }
 
-  // Simulate the old expose_event using the current allocation rectangle
-  GtkAllocation allocation;
-  gtk_widget_get_allocation(widget, &allocation);
 
-  GdkRectangle rect = {
-    .x = allocation.x,
-    .y = allocation.y,
-    .width = allocation.width,
-    .height = allocation.height
-  };
 
   // Old -> return x_event_expose(GSCHEM_PAGE_VIEW(widget), cr, &rect, user_data);
   return x_event_expose(widget, cr, user_data);
@@ -152,6 +147,7 @@ preview_callback_button_press (GtkWidget *widget,
                                GdkEventButton *event,
                                gpointer user_data)
 {
+  (void) user_data;
   GschemPreview *preview = GSCHEM_PREVIEW (widget);
   GschemToplevel *preview_w_current = preview->preview_w_current;
   gint wx, wy;
@@ -289,12 +285,13 @@ gschem_preview_get_type()
       sizeof(GschemPreviewClass),
       NULL, /* base_init */
       NULL, /* base_finalize */
-      (GClassInitFunc) preview_class_init,
+      preview_class_init_gtype_adapter,
       NULL, /* class_finalize */
       NULL, /* class_data */
       sizeof(GschemPreview),
       0,    /* n_preallocs */
-      (GInstanceInitFunc) preview_init,
+      preview_init_gtype_adapter,
+      NULL /* value_table */
     };
 
     preview_type = g_type_register_static (GSCHEM_TYPE_PAGE_VIEW,
@@ -347,10 +344,11 @@ preview_event_scroll (GtkWidget *widget,
                       GdkEventScroll *event,
                       GschemToplevel *w_current)
 {
+  (void) w_current;
   if (!GSCHEM_PREVIEW (widget)->active) {
     return TRUE;
   }
-  return x_event_scroll (widget, event, GSCHEM_PREVIEW (widget)->preview_w_current);
+  return x_event_scroll (GSCHEM_PAGE_VIEW (widget), event, GSCHEM_PREVIEW (widget)->preview_w_current);
 }
 
 static void
@@ -495,4 +493,20 @@ preview_dispose (GObject *self)
   }
 
   G_OBJECT_CLASS (preview_parent_class)->dispose (self);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+preview_class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  preview_class_init (klass);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+preview_init_gtype_adapter (GTypeInstance *instance, gpointer klass)
+{
+  (void) klass;
+  preview_init ((void *) instance);
 }

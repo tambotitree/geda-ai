@@ -36,6 +36,9 @@
 #include <math.h>
 
 #include "gschem.h"
+
+static void gschem_page_view_class_init_gtype_adapter (gpointer klass, gpointer data);
+static void gschem_page_view_init_gtype_adapter (GTypeInstance *instance, gpointer klass);
 #include <gdk/gdkkeysyms.h>
 
 
@@ -95,49 +98,6 @@ vadjustment_value_changed (GtkAdjustment *vadjustment, GschemPageView *view);
 static GObjectClass *gschem_page_view_parent_class = NULL;
 
 
-/*
- *  In later versions of GTK+, the GtkScrolledWindow uses an interface, instead
- *  of signals, to set the scrollbar adjustments. When Gschem uses on of these
- *  more recent version of GTK+, this function will no longer be needed.
- */
-static void
-cclosure_marshal_VOID__OBJECT_OBJECT (GClosure     *closure,
-                                      GValue       *return_value G_GNUC_UNUSED,
-                                      guint         n_param_values,
-                                      const GValue *param_values,
-                                      gpointer      invocation_hint G_GNUC_UNUSED,
-                                      gpointer      marshal_data)
-{
-  typedef void (*GMarshalFunc_VOID__OBJECT_OBJECT) (gpointer     data1,
-                                                    gpointer     arg_1,
-                                                    gpointer     arg_2,
-                                                    gpointer     data2);
-
-  register GMarshalFunc_VOID__OBJECT_OBJECT callback;
-  register GCClosure *cc = (GCClosure*) closure;
-  register gpointer data1, data2;
-
-  g_return_if_fail (n_param_values == 3);
-
-  if (G_CCLOSURE_SWAP_DATA (closure)) {
-    data1 = closure->data;
-    data2 = g_value_peek_pointer (param_values + 0);
-  }
-  else {
-    data1 = g_value_peek_pointer (param_values + 0);
-    data2 = closure->data;
-  }
-
-  callback = (GMarshalFunc_VOID__OBJECT_OBJECT) (marshal_data ? marshal_data : cc->callback);
-
-  callback (data1,
-            g_value_get_object (param_values + 1),
-            g_value_get_object (param_values + 2),
-            data2);
-}
-
-
-
 /*! \brief Dispose of the object
  */
 static void
@@ -183,6 +143,7 @@ dispose (GObject *object)
 static void
 event_realize(GtkWidget *widget, gpointer unused)
 {
+  (void) unused;
   GschemPageView *view = GSCHEM_PAGE_VIEW(widget);
   GdkWindow *window = gtk_widget_get_window(widget);
 
@@ -199,6 +160,7 @@ event_realize(GtkWidget *widget, gpointer unused)
 static void
 event_unrealize(GtkWidget *widget, gpointer unused)
 {
+  (void) unused;
   GschemPageView *view = GSCHEM_PAGE_VIEW(widget);
 
   g_return_if_fail (view != NULL);
@@ -426,12 +388,13 @@ gschem_page_view_get_type()
       sizeof(GschemPageViewClass),
       NULL,                                                    /* base_init */
       NULL,                                                    /* base_finalize */
-      (GClassInitFunc) gschem_page_view_class_init,
+      gschem_page_view_class_init_gtype_adapter,
       NULL,                                                    /* class_finalize */
       NULL,                                                    /* class_data */
       sizeof(GschemPageView),
       0,                                                       /* n_preallocs */
-      (GInstanceInitFunc) gschem_page_view_init,
+      gschem_page_view_init_gtype_adapter,
+      NULL /* value_table */
     };
 
     type = g_type_register_static (GTK_TYPE_DRAWING_AREA, "GschemPageView", &info, 0);
@@ -615,19 +578,17 @@ gschem_page_view_init (GschemPageView *view)
   view->pan_y = 0;
   view->throttle = 0;
 
-  g_signal_connect(view,
+  gschem_signal_connect (view,
                    "realize",
                    G_CALLBACK (event_realize),
                    NULL);
 
-  g_signal_connect(view,
+  gschem_signal_connect (view,
                    "unrealize",
                    G_CALLBACK (event_unrealize),
                    NULL);
- g_signal_connect(view,
-                    "draw",
-                    G_CALLBACK(gschem_page_view_redraw),
-                    NULL);
+  /* The owning window connects x_event_expose with its GschemToplevel.
+   * This constructor has no window state to supply to the renderer. */
 }
 
 
@@ -863,9 +824,7 @@ gschem_page_view_set_hadjustment (GschemPageView *view, GtkAdjustment *hadjustme
   g_return_if_fail (view != NULL);
 
   if (view->hadjustment != NULL) {
-    g_signal_handlers_disconnect_by_func (G_OBJECT (view->hadjustment),
-                                          G_CALLBACK (hadjustment_value_changed),
-                                          view);
+    gschem_signal_handlers_disconnect (G_OBJECT (view->hadjustment), G_CALLBACK (hadjustment_value_changed), view);
 
     g_object_unref (view->hadjustment);
   }
@@ -875,7 +834,7 @@ gschem_page_view_set_hadjustment (GschemPageView *view, GtkAdjustment *hadjustme
   if (view->hadjustment != NULL) {
     g_object_ref (view->hadjustment);
 
-    g_signal_connect (G_OBJECT (view->hadjustment),
+    gschem_signal_connect (G_OBJECT (view->hadjustment),
                       "value-changed",
                       G_CALLBACK (hadjustment_value_changed),
                       view);
@@ -945,9 +904,7 @@ gschem_page_view_set_vadjustment (GschemPageView *view, GtkAdjustment *vadjustme
   g_return_if_fail (view != NULL);
 
   if (view->vadjustment != NULL) {
-    g_signal_handlers_disconnect_by_func (G_OBJECT (view->vadjustment),
-                                          G_CALLBACK (vadjustment_value_changed),
-                                          view);
+    gschem_signal_handlers_disconnect (G_OBJECT (view->vadjustment), G_CALLBACK (vadjustment_value_changed), view);
 
     g_object_unref (view->vadjustment);
   }
@@ -957,7 +914,7 @@ gschem_page_view_set_vadjustment (GschemPageView *view, GtkAdjustment *vadjustme
   if (view->vadjustment != NULL) {
     g_object_ref (view->vadjustment);
 
-    g_signal_connect (G_OBJECT (view->vadjustment),
+    gschem_signal_connect (G_OBJECT (view->vadjustment),
                       "value-changed",
                       G_CALLBACK (vadjustment_value_changed),
                       view);
@@ -1181,6 +1138,7 @@ gschem_page_view_WORLDabs(GschemPageView *page_view, int val)
 static void
 remove_page_weak_reference (PAGE *page, gpointer geometry, GschemPageView *view)
 {
+  (void) geometry;
   typedef void (*NotifyFunction) (void*,void*);
 
   g_return_if_fail (page != NULL);
@@ -1433,4 +1391,20 @@ if (geometry) {
 #endif
     o_redraw_rect(w_current, cr, page, geometry, &rect);
   }
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+gschem_page_view_class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  gschem_page_view_class_init (klass);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+gschem_page_view_init_gtype_adapter (GTypeInstance *instance, gpointer klass)
+{
+  (void) klass;
+  gschem_page_view_init ((void *) instance);
 }

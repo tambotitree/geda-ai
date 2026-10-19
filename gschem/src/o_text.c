@@ -55,7 +55,9 @@ int o_text_get_rendered_bounds (void *user_data, OBJECT *o_current,
   toplevel = gschem_toplevel_get_toplevel (w_current);
   g_return_val_if_fail ((toplevel != NULL), FALSE);
 
-  cr = gdk_cairo_create (gtk_widget_get_window (GTK_WIDGET(page_view)));
+  cairo_surface_t *surface = cairo_recording_surface_create (CAIRO_CONTENT_COLOR_ALPHA, NULL);
+  cr = cairo_create (surface);
+  cairo_surface_destroy (surface);
 
   /* Set up renderer based on configuration in w_current. Note that we
    * *don't* enable hinting, because if its enabled the calculated

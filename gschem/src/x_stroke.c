@@ -115,7 +115,11 @@ x_stroke_record (GschemToplevel *w_current, gint x, gint y)
 
     GtkWidget *widget = GTK_WIDGET(view);
     if (gtk_widget_get_window(widget) != NULL) {
-      cairo_t *cr = gdk_cairo_create(gtk_widget_get_window(widget));
+      GdkWindow *window = gtk_widget_get_window (widget);
+      cairo_region_t *region = gdk_window_get_visible_region (window);
+      GdkDrawingContext *drawing = gdk_window_begin_draw_frame (window, region);
+      cairo_region_destroy (region);
+      cairo_t *cr = gdk_drawing_context_get_cairo_context (drawing);
       g_return_if_fail(cr != NULL);
 
       COLOR *color = x_color_lookup (STROKE_COLOR);
@@ -146,7 +150,7 @@ x_stroke_record (GschemToplevel *w_current, gint x, gint y)
       cairo_line_to (cr, x1, y1);
       cairo_stroke (cr);
       cairo_restore (cr);
-      cairo_destroy (cr);
+      gdk_window_end_draw_frame (window, drawing);
     }
   } // <-- closes STROKE_MAX_POINTS guard
 }
@@ -166,7 +170,7 @@ x_stroke_translate_and_execute (GschemToplevel *w_current)
   gchar sequence[STROKE_MAX_SEQUENCE];
   StrokePoint *point;
   int min_x, min_y, max_x, max_y;
-  gint i;
+  guint i;
 
   g_assert (stroke_points != NULL);
 
