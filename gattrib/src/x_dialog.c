@@ -73,8 +73,8 @@ void x_dialog_newattrib()
   /* Create the dialog */
   dialog = gtk_dialog_new_with_buttons(_("Add new attribute"), NULL, 
 				       GTK_DIALOG_MODAL,
-				       GTK_STOCK_OK, GTK_RESPONSE_OK,
-				       GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+				       _("_OK"), GTK_RESPONSE_OK,
+				       _("_Cancel"), GTK_RESPONSE_CANCEL,
 				       NULL);
  
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
@@ -172,7 +172,8 @@ void x_dialog_delattrib()
 void x_dialog_missing_sym()
 {
   GtkWidget *dialog;
-  const char *string = _("One or more components have been found with missing symbol files!\n\nThis probably happened because gattrib couldn't find your component libraries, perhaps because your gafrc or gattribrc files are misconfigured.\n\nChoose \"Quit\" to leave gattrib and fix the problem, or\n\"Forward\" to continue working with gattrib.\n");
+  const gchar *string = _("One or more components have been found with missing symbol files!\n\nThis probably happened because gattrib couldn't find your component libraries, perhaps because your gafrc or gattribrc files are misconfigured.\n\nChoose \"Quit\" to leave gattrib and fix the problem, or\n\"Forward\" to continue working with gattrib.\n");
+
 
   /* Create the dialog */
   dialog = gtk_message_dialog_new (NULL, GTK_DIALOG_MODAL,
@@ -181,8 +182,8 @@ void x_dialog_missing_sym()
                                   "%s", string);
 
   gtk_dialog_add_buttons(GTK_DIALOG(dialog), 
-                  GTK_STOCK_QUIT, GTK_RESPONSE_REJECT,
-                  GTK_STOCK_GO_FORWARD, GTK_RESPONSE_ACCEPT,
+                  _("_Quit"), GTK_RESPONSE_REJECT,
+                  _("_Continue"), GTK_RESPONSE_ACCEPT,
                   NULL);
 
   gtk_window_set_title(GTK_WINDOW(dialog), _("Missing symbol file found for component!"));
@@ -210,14 +211,18 @@ void x_dialog_missing_sym()
 void x_dialog_unsaved_data()
 {
   GtkWidget *dialog;
-  gchar *tmp;
+  const gchar *tmp;
   gchar *str;
 
   tmp = _("Save the changes before closing?");
   str = g_strconcat (N_("<big><b>"), tmp, N_("</b></big>"), NULL);
 
   tmp = _("If you don't save, all your changes will be permanently lost.");
-  str = g_strconcat (str, "\n\n", tmp, NULL);
+  {
+    gchar *heading = str;
+    str = g_strconcat (heading, "\n\n", tmp, NULL);
+    g_free(heading);
+  }
 
   dialog = gtk_message_dialog_new (GTK_WINDOW (window),
                                    GTK_DIALOG_MODAL |
@@ -227,16 +232,9 @@ void x_dialog_unsaved_data()
   gtk_message_dialog_set_markup (GTK_MESSAGE_DIALOG (dialog), str);
   gtk_dialog_add_buttons (GTK_DIALOG (dialog),
                           _("Close without saving"), GTK_RESPONSE_NO,
-                          GTK_STOCK_CANCEL,          GTK_RESPONSE_CANCEL,
-                          GTK_STOCK_SAVE,            GTK_RESPONSE_YES,
+                          _("_Cancel"),          GTK_RESPONSE_CANCEL,
+                          _("_Save"),            GTK_RESPONSE_YES,
                           NULL);
-
-  /* Set the alternative button order (ok, cancel, help) for other systems */
-  gtk_dialog_set_alternative_button_order(GTK_DIALOG(dialog),
-                                          GTK_RESPONSE_YES,
-                                          GTK_RESPONSE_NO,
-                                          GTK_RESPONSE_CANCEL,
-                                          -1);
 
   gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_YES);
 
@@ -273,7 +271,10 @@ void x_dialog_unsaved_data()
 void x_dialog_unimplemented_feature()
 {
   GtkWidget *dialog;
-  const char *string = _("Sorry -- you have chosen a feature which has not been\nimplemented yet.\n\nGattrib is an open-source program which\nI work on as a hobby.  It is still a work in progress.\nIf you wish to contribute (perhaps by implementing this\nfeature), please do so!  Please send patches to gattrib\nto Stuart Brorson: sdb@cloud9.net.\n\nOtherwise, just hang tight -- I'll implement this feature soon!\n");
+  const gchar *string = _("This feature is not implemented yet.\n\n"
+                          "gEDA-ai maintainer: John Ryan, Aquana Press (Aqnana.net).\n"
+                          "Requests and contributions: https://github.com/tambotitree/geda-ai/issues");
+
 
   /* Create the dialog */
   dialog = gtk_message_dialog_new (NULL, GTK_DIALOG_MODAL,
@@ -294,9 +295,8 @@ void x_dialog_unimplemented_feature()
  *
  *  \param [in] string the error string
  *  \param [in] return_code the exit code
- *  \todo Is the GPOINTER_TO_INT() call needed in exit()?
  */
-void x_dialog_fatal_error(gchar *string, gint return_code)
+void x_dialog_fatal_error(const gchar *string, gint return_code)
 {
   GtkWidget *dialog;
   
@@ -313,31 +313,33 @@ void x_dialog_fatal_error(gchar *string, gint return_code)
   gtk_dialog_run(GTK_DIALOG(dialog));
   gtk_widget_destroy(dialog);
   
-  exit(GPOINTER_TO_INT(return_code));
+  exit(return_code);
 }
 
 /*! \brief About gattrib dialog
  *
  * This dosplays the about dialog.
  */
-void x_dialog_about_dialog()
+void x_dialog_about_dialog(void)
 {
-  GtkWidget *dialog;
-  const char *string = _("gEDA : GPL Electronic Design Automation\n\nThis is gattrib -- gEDA's attribute editor\n\nGattrib version: %s%s.%s\n\nGattrib is written by: Stuart Brorson (sdb@cloud9.net)\nwith generous helpings of code from gschem, gnetlist, \nand gtkextra, as well as support from the gEDA community.");
+  const gchar *authors[] = {
+    "John Ryan — gEDA-ai maintainer — Aquana Press (Aqnana.net)",
+    "Stuart Brorson (original gattrib author)",
+    "The gEDA community and gEDA-ai contributors",
+    NULL
+  };
 
-
-  /* Create the dialog */
-  dialog = gtk_message_dialog_new (NULL, GTK_DIALOG_MODAL,
-                                   GTK_MESSAGE_INFO,
-                                   GTK_BUTTONS_OK,
-                                   string, PREPEND_VERSION_STRING, 
-                                   PACKAGE_DOTTED_VERSION,
-                                   PACKAGE_DATE_VERSION);
-  
-  gtk_window_set_title(GTK_WINDOW(dialog), _("About..."));
-
-  gtk_dialog_run(GTK_DIALOG(dialog));
-  gtk_widget_destroy(dialog);
+  gtk_show_about_dialog(GTK_WINDOW(window),
+                        "program-name", "gattrib — gEDA-ai",
+                        "version", PACKAGE_VERSION,
+                        "comments", _("gEDA attribute editor\n"
+                                      "Maintained by John Ryan, Aquana Press (Aqnana.net)\n"
+                                      "Support and bug reports: GitHub Issues"),
+                        "website", PACKAGE_BUGREPORT,
+                        "website-label", _("Support / Report an issue"),
+                        "authors", authors,
+                        "license-type", GTK_LICENSE_GPL_2_0,
+                        NULL);
 }
 
 /*! \brief Export file dialog
@@ -352,8 +354,8 @@ void x_dialog_export_file()
 
   dialog = gtk_file_chooser_dialog_new(_("Export CSV"), NULL,
       GTK_FILE_CHOOSER_ACTION_SAVE,
-      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-      GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+      _("_Cancel"), GTK_RESPONSE_CANCEL,
+      _("_Save"), GTK_RESPONSE_ACCEPT,
       NULL);
 
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_ACCEPT);

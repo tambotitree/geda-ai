@@ -66,6 +66,16 @@ x_window_set_default_icon();
 static void
 x_window_debug_dump_sheet (GattribSheet *sheet);
 
+/*! \brief Adapt GTK's delete-event contract to the quit confirmation. */
+static gboolean
+window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+  (void) widget;
+  (void) event;
+  (void) user_data;
+  return gattrib_really_quit();
+}
+
 /*! \brief Initialises the toplevel gtksheet
  *
  * This function initializes the toplevel gtksheet stuff.
@@ -94,14 +104,19 @@ x_window_init()
   /*  window is a global declared in globals.h.  */
   window = gtk_window_new(GTK_WINDOW_TOPLEVEL);  
 
+  /* Leave room for the component names, four attribute columns and at
+   * least five rows, plus the menu, headings and notebook tab.  A default
+   * size keeps the window freely resizable rather than imposing a minimum. */
+  gtk_window_set_default_size(GTK_WINDOW(window), 900, 450);
+
   gtk_window_set_title( GTK_WINDOW(window), _("gattrib -- gEDA attribute editor")); 
   
   g_signal_connect(window, "delete_event",
-                   G_CALLBACK (gattrib_really_quit), 0);
+                   G_CALLBACK (window_delete_event), NULL);
 
   /* -----  Now create main_vbox.  This is a container which organizes child  ----- */  
   /* -----  widgets into a vertical column.  ----- */  
-  main_vbox = gtk_vbox_new(FALSE,1);
+  main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 1);
   gtk_container_set_border_width(GTK_CONTAINER(main_vbox), 1);
   gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(main_vbox) );
 
@@ -292,87 +307,96 @@ menu_edit_fetch_bom_data()
   gattrib_bom_hook_stats_clear (&stats);
 }
 
-/*!
- * The Gtk action table
- */
-static const GtkActionEntry actions[] = {
-  /* name, stock-id, label, accelerator, tooltip, callback function */
-  /* File menu */
-  { "file", NULL, "_File"},
-  /* { "file-open", GTK_STOCK_OPEN, "Open", "<Control>O", "", menu_file_open}, */
-  { "file-save", GTK_STOCK_SAVE, "Save", "<Control>S", "", menu_file_save},
-  { "file-export-csv", NULL, "Export CSV", "", "", menu_file_export_csv},
-  /* { "file-print", GTK_STOCK_PRINT, "Print", "<Control>P", "", x_dialog_unimplemented_feature}, */
-  { "file-quit", GTK_STOCK_QUIT, "Quit", "<Control>Q", "", G_CALLBACK(gattrib_really_quit)},
+/* Menu callbacks retain their concrete no-argument function type. */
+typedef struct {
+  const gchar *label;
+  void (*invoke)(void);
+  guint key;
+} GattribMenuItem;
 
-  /* Edit menu */
-  { "edit", NULL, "_Edit"},
-  { "edit-add-attrib", NULL, "Add new attrib column", "", "", menu_edit_newattrib},
-  { "edit-delete-attrib", NULL, "Delete attrib column", "", "", menu_edit_delattrib},
-  { "edit-fetch-bom-data", NULL, "Fetch BOM data", "", "Fill in part number, "
-    "price and datasheet columns from a supplier", menu_edit_fetch_bom_data},
-  /* { "edit-find-attrib", GTK_STOCK_FIND, "Find attrib value", "<Control>F", "", x_dialog_unimplemented_feature}, */
-  /* { "edit-search-replace-attrib-value", NULL, "Search and replace attrib value", "", "", x_dialog_unimplemented_feature}, */
-  /* { "edit-search-for-refdes", NULL, "Search for refdes", "", "", x_dialog_unimplemented_feature}, */
+static void
+menu_file_quit(void)
+{
+  (void) gattrib_really_quit();
+}
 
-  /* Visibility menu */
-  { "visibility", NULL, "_Visibility"},
-  { "visibility-invisible", NULL, "Set selected invisible", "", "", s_visibility_set_invisible},
-  { "visibility-name-only", NULL, "Set selected name visible only", "", "", s_visibility_set_name_only},
-  { "visibility-value-only", NULL, "Set selected value visible only", "", "", s_visibility_set_value_only},
-  { "visibility-name-value", NULL, "Set selected name and value visible", "", "", s_visibility_set_name_and_value},
+/* GTK owns the widgets; callback records below have static lifetime. */
+static void
+menu_activate(GtkMenuItem *item, gpointer user_data)
+{
+  const GattribMenuItem *entry = user_data;
+  (void) item;
+  entry->invoke();
+}
 
-  /* Help menu */
-  { "help", NULL, "_Help"},
-  { "help-about", GTK_STOCK_ABOUT, "About", "", "", x_dialog_about_dialog},
+static const GattribMenuItem file_items[] = {
+  {N_("Save"), menu_file_save, GDK_KEY_s},
+  {N_("Export CSV"), menu_file_export_csv, 0},
+  {NULL, NULL, 0},
+  {N_("Quit"), menu_file_quit, GDK_KEY_q}
+};
+static const GattribMenuItem edit_items[] = {
+  {N_("Add new attrib column"), menu_edit_newattrib, 0},
+  {N_("Delete attrib column"), menu_edit_delattrib, 0},
+  {NULL, NULL, 0},
+  {N_("Fetch BOM data"), menu_edit_fetch_bom_data, 0}
+};
+static const GattribMenuItem visibility_items[] = {
+  {N_("Set selected invisible"), s_visibility_set_invisible, 0},
+  {N_("Set selected name visible only"), s_visibility_set_name_only, 0},
+  {N_("Set selected value visible only"), s_visibility_set_value_only, 0},
+  {N_("Set selected name and value visible"), s_visibility_set_name_and_value, 0}
+};
+static const GattribMenuItem help_items[] = {
+  {N_("About"), x_dialog_about_dialog, 0}
 };
 
+/*! \brief Append a menu with typed actions and optional Control shortcuts. */
+static void
+menu_append(GtkWidget *bar, GtkAccelGroup *accels, const gchar *label,
+            const GattribMenuItem *entries, gsize count)
+{
+  GtkWidget *root = gtk_menu_item_new_with_mnemonic(label);
+  GtkWidget *menu = gtk_menu_new();
+  gsize i;
+  gtk_menu_item_set_submenu(GTK_MENU_ITEM(root), menu);
+  gtk_menu_shell_append(GTK_MENU_SHELL(bar), root);
+  for (i = 0; i < count; i++) {
+    const GattribMenuItem *entry = &entries[i];
+    GtkWidget *item;
+    if (entry->label == NULL) {
+      item = gtk_separator_menu_item_new();
+    } else {
+      item = gtk_menu_item_new_with_label(_(entry->label));
+      g_signal_connect(item, "activate", G_CALLBACK(menu_activate),
+                       (gpointer) entry);
+      if (entry->key != 0)
+        gtk_widget_add_accelerator(item, "activate", accels, entry->key,
+                                   GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+    }
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+  }
+}
 
-/*! \brief Create and attach the menu bar
+/*! \brief Construct the application's fixed menus without theme stock IDs.
  *
- * Create the menu bar and attach it to the main window.
- *
- *  First, the GtkActionGroup object is created and filled with
- *  entries of type GtkActionEntry (each entry specifies a single
- *  action, such as opening a file). Then the GtkUIManager object
- *  is created and used to load menus.xml file with the menu
- *  description. Finally, the GtkAccelGroup is added to the
- *  main window to enable keyboard accelerators and a pointer
- *  to the menu bar is retrieved from the GtkUIManager object.
- * \param window Window to add the menubar to
- * \param [out] menubar Created menubar
+ * Hierarchy: window -> menu bar -> menu item -> submenu -> action items.
  */
 static void
 x_window_create_menu(GtkWindow *window, GtkWidget **menubar)
 {
-  gchar *menu_file;
-  GtkUIManager *ui;
-  GtkActionGroup *action_group;
-  GError *error = NULL;
-
-  /* Create and fill the action group object */
-  action_group = gtk_action_group_new("");
-  gtk_action_group_add_actions(action_group, actions, G_N_ELEMENTS(actions), NULL);
-
-  /* Create the UI manager object */
-  ui = gtk_ui_manager_new();
-
-  gtk_ui_manager_insert_action_group(ui, action_group, 0);
-
-  menu_file = g_build_filename(s_path_sys_data (), "gattrib-menus.xml", NULL);
-
-  gtk_ui_manager_add_ui_from_file(ui, menu_file, &error);
-  if(error != NULL) {
-    /* An error occured, terminate */
-    fprintf(stderr, _("Error loading %s:\n%s\n"), menu_file, error->message);
-    exit(1);
-  }
-
-  g_free(menu_file);
-
-  gtk_window_add_accel_group (window, gtk_ui_manager_get_accel_group(ui));
-
-  *menubar = gtk_ui_manager_get_widget(ui, "/ui/menubar/");
+  GtkAccelGroup *accels = gtk_accel_group_new();
+  *menubar = gtk_menu_bar_new();
+  gtk_window_add_accel_group(window, accels);
+  menu_append(*menubar, accels, _("_File"), file_items,
+              G_N_ELEMENTS(file_items));
+  menu_append(*menubar, accels, _("_Edit"), edit_items,
+              G_N_ELEMENTS(edit_items));
+  menu_append(*menubar, accels, _("_Visibility"), visibility_items,
+              G_N_ELEMENTS(visibility_items));
+  menu_append(*menubar, accels, _("_Help"), help_items,
+              G_N_ELEMENTS(help_items));
+  g_object_unref(accels);
 }
 
 
@@ -396,7 +420,8 @@ x_window_add_items()
 {
   gint i, j;
   gint num_rows, num_cols;
-  gchar *text, *error_string;
+  gchar *text;
+  const gchar *error_string;
   gint visibility, show_name_value;
   
   /* Do these sanity check to prevent later segfaults */

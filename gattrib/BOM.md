@@ -65,9 +65,9 @@ the helper script first:
 `gattrib_env.sh` sets `GEDADATA`/`GEDADATARC` from the configured data directory (or from
 `GEDA_PREFIX/share/<release-directory>` when `GEDA_PREFIX` is set) and puts the uninstalled binaries on `PATH`.
 
-gattrib reads its menu definition from `$GEDADATA/gattrib-menus.xml`.  After
-editing `gattrib/lib/gattrib-menus.xml` you must install it (`make install` in
-`gattrib/lib`, or copy the file) or the new menu item will not appear.
+Gattrib constructs its fixed menus in `src/x_window.c` using typed C actions.
+Menu changes require rebuilding the executable; `gattrib-menus.xml` is retained
+as a historical reference and is no longer loaded.
 
 `GATTRIB_DEBUG_DUMP=1` prints the loaded tables to stderr on startup, which is
 the quickest way to check that a schematic parsed as expected.

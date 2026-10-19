@@ -122,13 +122,16 @@ gint gattrib_quit(gint return_code)
  * \param argc Number of command line arguments
  * \param argv Command line arguments
  */
-void gattrib_main(void *closure, int argc, char *argv[])
+static void gattrib_main(void *closure, int argc, char *argv[])
 {
   /* TOPLEVEL *pr_current is a global */
   /* SHEET_DATA *sheet_head is a global */
   /* GtkWidget *main_window is a global */
 
   int argv_index;
+
+  /* Guile boot callback context is NULL; this application uses globals. */
+  (void) closure;
 
 #ifdef HAVE_GTHREAD
   /* Gattrib isn't threaded, but some of GTK's file chooser
@@ -205,8 +208,7 @@ void gattrib_main(void *closure, int argc, char *argv[])
      exit(1);
   }
 
-  g_slist_foreach(file_list, (GFunc)g_free, NULL);
-  g_slist_free(file_list);
+  g_slist_free_full(file_list, g_free);
 
   gtk_main();
   exit(0);

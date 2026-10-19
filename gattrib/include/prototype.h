@@ -96,12 +96,9 @@ void s_toplevel_update_component_attribs_in_toplevel(
 					    TOPLEVEL *toplevel,
 					    OBJECT *o_current,
 					    STRING_LIST *new_comp_attrib_list);
-STRING_LIST *s_toplevel_get_net_attribs_in_sheet(char *netname);
-void s_toplevel_update_net_attribs_in_toplevel(OBJECT *o_current, 
-					 STRING_LIST *new_net_attrib_list);
 STRING_LIST *s_toplevel_get_pin_attribs_in_sheet(char *refdes, OBJECT *pin);
 void s_toplevel_update_pin_attribs_in_toplevel(TOPLEVEL *toplevel,
-					 char *refdes, OBJECT *pin,
+					 OBJECT *pin,
 					 STRING_LIST *new_pin_attrib_list);
 
 
@@ -112,10 +109,6 @@ void s_object_add_comp_attrib_to_object (TOPLEVEL *toplevel,
                                          char *new_attrib_value,
                                          gint visibility,
                                          gint show_name_value);
-void s_object_add_net_attrib_to_object (TOPLEVEL *toplevel,
-                                        OBJECT *o_current,
-                                        char *new_attrib_name,
-                                        char *new_attrib_value);
 void s_object_add_pin_attrib_to_object (TOPLEVEL *toplevel,
                                         OBJECT *o_current,
                                         char *new_attrib_name,
@@ -147,7 +140,7 @@ void s_rename_print(void);
 int s_rename_search(char *src, char *dest, int quiet_flag);
 void s_rename_add(char *src, char *dest);
 void s_rename_all_lowlevel(NETLIST * netlist_head, char *src, char *dest);
-void s_rename_all(TOPLEVEL *toplevel, NETLIST *netlist_head);
+void s_rename_all(NETLIST *netlist_head);
 
 /* ------------- s_misc.c ------------- */
 void verbose_print(char *string);
@@ -173,7 +166,7 @@ void x_dialog_delattrib(void);
 void x_dialog_missing_sym(void);
 void x_dialog_unsaved_data(void);
 void x_dialog_unimplemented_feature(void);
-void x_dialog_fatal_error(gchar *string, gint return_code);
+void x_dialog_fatal_error(const gchar *string, gint return_code);
 void x_dialog_about_dialog(void);
 void x_dialog_export_file(void);
 

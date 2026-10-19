@@ -180,7 +180,6 @@ s_toplevel_gtksheet_to_toplevel(TOPLEVEL *toplevel)
 void s_toplevel_add_new_attrib(gchar *new_attrib_name) {
   gint cur_page;  /* current page in notbook  */
   gint old_comp_attrib_count;
-  gint new_index;
 
   if (strcmp(new_attrib_name, N_("_cancel")) == 0) {
     return;  /* user pressed cancel or closed window with no value in entry */
@@ -215,11 +214,6 @@ void s_toplevel_add_new_attrib(gchar *new_attrib_name) {
 			   new_attrib_name);
     s_string_list_sort_master_comp_attrib_list();
 
-    /* Now, determine what index the new attrib ended up at
-     * This is necessary to tell gtk_sheet_insert_columns
-     * where the data should be shifted                    */
-    new_index = s_string_list_find_in_list(sheet_head->master_comp_attrib_list_head, 
-                                           (char*)new_attrib_name);
 
 #ifdef DEBUG
     printf("In s_toplevel_add_new_attrib, just updated comp_attrib string list.\n");
@@ -503,7 +497,6 @@ s_toplevel_sheetdata_to_toplevel (TOPLEVEL *toplevel, PAGE *page)
             new_pin_attrib_list =
               s_toplevel_get_pin_attribs_in_sheet (temp_uref, comp_prim_obj);
            s_toplevel_update_pin_attribs_in_toplevel (toplevel,
-                                                      temp_uref,
                                                       comp_prim_obj,
                                                       new_pin_attrib_list);
          }
@@ -826,23 +819,12 @@ s_toplevel_update_component_attribs_in_toplevel (
 /*!
  * \todo Function doesn't do anything - candidate for removal?
  */
-STRING_LIST *s_toplevel_get_net_attribs_in_sheet(char *netname)
-{
-  /* must be filled in */
-  return NULL;
-}
 
 
 /*------------------------------------------------------------------*/
 /*!
  * \todo Function doesn't do anything - candidate for removal?
  */
-void s_toplevel_update_net_attribs_in_toplevel(OBJECT *o_current, 
-				   STRING_LIST *new_net_attrib_list)
-{
-  /* must be filled in */
-  return;
-}
 
 
 /*------------------------------------------------------------------*/
@@ -953,13 +935,11 @@ STRING_LIST *s_toplevel_get_pin_attribs_in_sheet(char *refdes, OBJECT *pin)
  * -# If the attribs doesn't exist on pin, but is non-null in
  *    the name=value pair, create an attrib object and add it to the pin.
  * \param toplevel TOPLEVEL structure
- * \param refdes Unused - needs refactored out
  * \param [in,out] o_pin pin to update
  * \param [in] new_pin_attrib_list New pin attribute list to apply
  */
 void
 s_toplevel_update_pin_attribs_in_toplevel (TOPLEVEL *toplevel,
-                                           char *refdes,
                                            OBJECT *o_pin,
                                            STRING_LIST *new_pin_attrib_list)
 {

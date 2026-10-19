@@ -88,6 +88,9 @@ x_gtksheet_text_bounds(void *user_data, OBJECT *object,
   gint width, height;
   gint origin_x, origin_y;
 
+  /* The registered libgeda callback needs no application context. */
+  (void) user_data;
+
   if ((object == NULL) || (object->text == NULL))
     return FALSE;
   if (object->type != OBJ_TEXT)
@@ -152,7 +155,7 @@ void
 x_gtksheet_init()
 {
   gint i;
-  gchar *folder[]= {_("Components")};
+  const gchar *folder[]= {_("Components")};
 
   /* ---  Create the Components sheet.  Its slot was malloc'ed in x_window_init  --- */
   if ((sheet_head->comp_count > 0) && (sheet_head->comp_attrib_count > 0)) {

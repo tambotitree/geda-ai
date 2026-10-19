@@ -98,7 +98,7 @@ void usage(char *cmd)
 "     If slots are present on the component, then the different slots appear\n"
 "     in different rows with the slot number after the period.  Example:  C101.2.\n"
 "\n"
-"Copyright (C) 2003 -- 2006 Stuart D. Brorson.  E-mail: sdb (AT) cloud9 (DOT) net.\n"
+"Copyright (C) 2003 -- 2006 Stuart D. Brorson. \n"
 "\n"), cmd);
     exit(0);
 }

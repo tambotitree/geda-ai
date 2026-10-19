@@ -275,7 +275,7 @@ void s_rename_all_lowlevel(NETLIST * netlist_head, char *src, char *dest)
 
 }
 
-void s_rename_all (TOPLEVEL *toplevel, NETLIST * netlist_head)
+void s_rename_all (NETLIST * netlist_head)
 {
     int i;
 

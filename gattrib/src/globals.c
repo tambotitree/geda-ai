@@ -54,8 +54,3 @@ GtkWidget *label;
 /* command line arguments */
 int verbose_mode=FALSE; //!< Reflects the value of the command line flag
 int quiet_mode=FALSE;   //!< Reflects the value of the command line flag
-
-/*!
- * these are required by libgeda
- */
-void (*variable_set_func)() = i_vars_set;

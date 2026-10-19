@@ -60,6 +60,7 @@ enum {
 /* Forward declarations for handlers referenced before their definitions. */
 static void on_column_clicked (GtkTreeViewColumn *column, gpointer user_data);
 static gboolean get_row_iter (GattribSheet *sheet, gint row, GtkTreeIter *iter);
+static GQuark gattrib_sheet_column_index_quark (void);
 
 
 G_DEFINE_TYPE (GattribSheet, gattrib_sheet, GTK_TYPE_BOX)

@@ -127,8 +127,10 @@ setenv PKG_CONFIG_PATH /usr/local/geda/lib/pkgconfig:$PKG_CONFIG_PATH
 CREDITS/CONTACT:
 
 Gattrib was cobbled together by Stuart Brorson starting in December
-2003 from parts culled from GtkSheet (GTK+Extra) and gEDA.  Please
-mail bug reports to: sdb@cloud9.net
+2003 from parts culled from GtkSheet (GTK+Extra) and gEDA.
+
+Current gEDA-ai maintainer: John Ryan, Aquana Press (Aqnana.net).
+Support and bug reports: https://github.com/tambotitree/geda-ai/issues
 
 
 
