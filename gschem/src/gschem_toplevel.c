@@ -609,6 +609,8 @@ gschem_toplevel_get_toplevel (GschemToplevel *w_current)
 void
 gschem_toplevel_notify_page_callback (GschemPageView *page_view, GParamSpec *pspec, GschemToplevel *w_current)
 {
+  (void) page_view;
+  (void) pspec;
   g_return_if_fail (w_current != NULL);
 
   gschem_toplevel_page_changed (w_current);

@@ -34,6 +34,9 @@
 #endif
 
 #include "gschem.h"
+
+static void class_init_gtype_adapter (gpointer klass, gpointer data);
+static void instance_init_gtype_adapter (GTypeInstance *instance, gpointer klass);
 #include <gdk/gdkkeysyms.h>
 
 /*! \private
@@ -117,7 +120,7 @@ gschem_selection_adapter_get_cap_style (GschemSelectionAdapter *adapter)
       if (cap_style < 0) {
         cap_style = temp_cap_style;
       }
-      else if (cap_style != temp_cap_style) {
+      else if (cap_style != (gint) temp_cap_style) {
         cap_style = MULTIPLE_VALUES;
         break;
       }
@@ -468,7 +471,7 @@ gschem_selection_adapter_get_fill_type (GschemSelectionAdapter *adapter)
       if (fill_type < 0) {
         fill_type = temp_fill_type;
       }
-      else if (fill_type != temp_fill_type) {
+      else if (fill_type != (gint) temp_fill_type) {
         fill_type = MULTIPLE_VALUES;
         break;
       }
@@ -567,7 +570,7 @@ gschem_selection_adapter_get_line_type (GschemSelectionAdapter *adapter)
       if (line_type < 0) {
         line_type = temp_line_type;
       }
-      else if (line_type != temp_line_type) {
+      else if (line_type != (gint) temp_line_type) {
         line_type = MULTIPLE_VALUES;
         break;
       }
@@ -950,12 +953,13 @@ gschem_selection_adapter_get_type()
       sizeof(GschemSelectionAdapterClass),
       NULL,                                  /* base_init */
       NULL,                                  /* base_finalize */
-      (GClassInitFunc) class_init,
+      class_init_gtype_adapter,
       NULL,                                  /* class_finalize */
       NULL,                                  /* class_data */
       sizeof(GschemSelectionAdapter),
       0,                                     /* n_preallocs */
-      (GInstanceInitFunc) instance_init,
+      instance_init_gtype_adapter,
+      NULL /* value_table */
     };
 
     type = g_type_register_static (G_TYPE_OBJECT, "GschemSelectionAdapter", &info, 0);
@@ -1718,9 +1722,7 @@ gschem_selection_adapter_set_selection (GschemSelectionAdapter *adapter, SELECTI
   g_return_if_fail (adapter != NULL);
 
    if (adapter->selection != NULL) {
-    g_signal_handlers_disconnect_by_func (adapter->selection,
-                                          G_CALLBACK (selection_changed),
-                                          adapter);
+    gschem_signal_handlers_disconnect (adapter->selection, G_CALLBACK (selection_changed), adapter);
 
     g_object_unref (adapter->selection);
   }
@@ -1730,7 +1732,7 @@ gschem_selection_adapter_set_selection (GschemSelectionAdapter *adapter, SELECTI
   if (adapter->selection != NULL) {
     g_object_ref (adapter->selection);
 
-    g_signal_connect (adapter->selection,
+    gschem_signal_connect (adapter->selection,
                       "changed",
                       G_CALLBACK (selection_changed),
                       adapter);
@@ -2273,6 +2275,7 @@ get_property (GObject *object, guint param_id, GValue *value, GParamSpec *pspec)
 static void
 instance_init (GschemSelectionAdapter *adapter)
 {
+  (void) adapter;
 }
 
 
@@ -2408,4 +2411,20 @@ set_property (GObject *object, guint param_id, const GValue *value, GParamSpec *
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
   }
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  class_init (klass);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+instance_init_gtype_adapter (GTypeInstance *instance, gpointer klass)
+{
+  (void) klass;
+  instance_init ((void *) instance);
 }
