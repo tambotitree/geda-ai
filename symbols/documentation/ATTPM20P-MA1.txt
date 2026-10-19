@@ -1,0 +1,47 @@
+ATTPM20P-MA1-1.sym
+==================
+
+Source: Microchip DS40002082A, December 2018, pages 4-5, 13-15 and 19.
+https://ww1.microchip.com/downloads/en/devicedoc/attpm20p-trusted-platform-module-tpm-2.0-spi-interface-summary-data-sheet-ds40002082a.pdf
+
+This symbol represents the MA1 eight-pad UDFN package, 2 x 3 mm body.
+Pin numbers were read from Figure 1-1 (top view); electrical types were
+checked against Table 1-2, including its continuation on page 5.
+
+Pin  Label      gEDA type
+1    SPI_CS#    in
+2    MISO       out
+3    SPI_RST#   in
+4    GND        pwr
+5    MOSI       in
+6    SPI_CLK    in
+7    PIRQ#      oc
+8    VCC        pwr
+
+The oc type represents the documented open-drain interrupt output.
+All external connection endpoints are on the 100-unit grid.
+
+Package and land-pattern data
+-----------------------------
+
+ATTPM20P-MA1.json records dimensions in millimetres, preserving each
+min/nom/max/basic qualifier from drawing C04-21355-Q4B Rev A.
+Package codes: Q4B / MA1 / legacy YNZ. Body: 2 x 3 mm, eight contacts,
+0.50 mm pitch. Height: 0.50/0.55/0.60 mm (min/nom/max).
+
+The land-pattern table specifies 2.90 mm row-centre spacing, contact
+width <=0.30 mm and length <=0.85 mm. The optional centre pad is limited
+to 1.60 x 1.40 mm; optional vias are 0.30 mm diameter at 1.00 mm pitch.
+The initial proposed variant omits the centre pad and thermal vias.
+
+Pad selection remains pending: 0.50 pitch minus 0.30 width leaves 0.20,
+below the stated G2 minimum of 0.33 mm. A width <=0.17 meets that gap
+arithmetically, but has not been approved as a solder-land selection.
+No footprint attribute or fabricated ninth electrical pin is assigned.
+
+Purchasing status
+-----------------
+
+No exact mpn is assigned. Page 19 documents G3/H3 temperature codes,
+whereas Nexar returned ATTPM20P-G6MA1-10. G6 remains unverified; do not
+infer its temperature rating from this older ordering table.

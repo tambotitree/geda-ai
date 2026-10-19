@@ -1,6 +1,6 @@
 doc_DATA = nc.pdf
 
-EXTRA_DIST = nc.doc geda.fig geda.pic nc.ps nc.pdf
+EXTRA_DIST = nc.doc geda.fig geda.pic nc.ps nc.pdf ATTPM20P-MA1.txt ATTPM20P-MA1.json
 
 BUILT_SOURCES = geda.pic nc.pdf nc.ps
 
