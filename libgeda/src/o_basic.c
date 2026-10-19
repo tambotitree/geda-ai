@@ -332,7 +332,7 @@ gboolean o_get_position (OBJECT *object, gint *x, gint *y)
       case OBJ_ARC:     func = o_arc_get_position;     break;
       default:
         g_critical ("o_get_position: object %p has bad type '%c'\n",
-                    object, object->type);
+                    (void *) object, object->type);
   }
 
   if (func != NULL) {
@@ -370,7 +370,7 @@ void o_translate_world (OBJECT *object, gint dx, gint dy)
       case OBJ_ARC:     func = o_arc_translate_world;     break;
       default:
         g_critical ("o_translate_world: object %p has bad type '%c'\n",
-                    object, object->type);
+                    (void *) object, object->type);
   }
 
   if (func != NULL) {
@@ -409,7 +409,7 @@ void o_rotate_world (TOPLEVEL *toplevel, int world_centerx, int world_centery, i
       case OBJ_ARC:     func = o_arc_rotate_world;        break;
       default:
         g_critical ("o_rotate_world: object %p has bad type '%c'\n",
-                    object, object->type);
+                    (void *) object, object->type);
   }
 
   if (func != NULL) {
@@ -447,7 +447,7 @@ void o_mirror_world (TOPLEVEL *toplevel, int world_centerx, int world_centery, O
       case OBJ_ARC:     func = o_arc_mirror_world;        break;
       default:
         g_critical ("o_mirror_world: object %p has bad type '%c'\n",
-                    object, object->type);
+                    (void *) object, object->type);
   }
 
   if (func != NULL) {
@@ -509,7 +509,7 @@ double o_shortest_distance_full (TOPLEVEL *toplevel, OBJECT *object,
     case OBJ_ARC:         func = o_arc_shortest_distance;      break;
     default:
       g_critical ("o_shortest_distance: object %p has bad type '%c'\n",
-                  object, object->type);
+                  (void *) object, object->type);
   }
 
   if (func != NULL) {
@@ -532,6 +532,7 @@ double o_shortest_distance_full (TOPLEVEL *toplevel, OBJECT *object,
  */
 void o_bounds_invalidate (TOPLEVEL *toplevel, OBJECT *object)
 {
+  (void) toplevel;
   OBJECT *iter = object;
 
   while (iter != NULL) {
@@ -573,7 +574,7 @@ void o_set_color (TOPLEVEL *toplevel, OBJECT *object, int color)
  * \param [in] object    The OBJECT for which to retrieve the parent PAGE.
  * \return The PAGE which owns \a object or NULL.
  *
- * \sa s_page_append_object() s_page_append() s_page_remove()
+ * \sa s_page_append_object(void) s_page_append() s_page_remove()
  */
 PAGE *
 o_get_page (TOPLEVEL *toplevel, OBJECT *object)
@@ -597,6 +598,7 @@ o_get_page (TOPLEVEL *toplevel, OBJECT *object)
 OBJECT *
 o_get_parent (TOPLEVEL *toplevel, OBJECT *object)
 {
+  (void) toplevel;
   g_return_val_if_fail ((object != NULL), NULL);
 
   if (object->parent != NULL) {

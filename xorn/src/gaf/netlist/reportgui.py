@@ -228,8 +228,8 @@ def report_crash():
     bottom_label.set_markup(_("You can help improving gEDA by reporting this "
                               "to <a href=\"%s\">%s</a> or\nsending an e-mail "
                               "to <a href=\"mailto:%s\">%s</a>.")
-                            % ('https://bugs.launchpad.net/geda',
-                               'https://bugs.launchpad.net/geda',
+                            % ('https://github.com/tambotitree/geda-ai/issues',
+                               'https://github.com/tambotitree/geda-ai/issues',
                                xorn.config.PACKAGE_BUGREPORT,
                                xorn.config.PACKAGE_BUGREPORT))
     bottom_label.set_alignment(0., .5)

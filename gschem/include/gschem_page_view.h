@@ -1,3 +1,5 @@
+#ifndef GSCHEM_PAGE_VIEW_H
+#define GSCHEM_PAGE_VIEW_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 1998-2010 Ales Hvezda
@@ -70,7 +72,7 @@ GschemPageGeometry*
 gschem_page_view_get_page_geometry (GschemPageView *view);
 
 GType
-gschem_page_view_get_type ();
+gschem_page_view_get_type (void);
 
 GtkAdjustment*
 gschem_page_view_get_vadjustment (GschemPageView *view);
@@ -143,3 +145,4 @@ gschem_page_view_zoom_text (GschemPageView *view, OBJECT *object, gboolean zoom_
 
 void
 gschem_page_view_update_scroll_adjustments (GschemPageView *view);
+#endif /* GSCHEM_PAGE_VIEW_H */

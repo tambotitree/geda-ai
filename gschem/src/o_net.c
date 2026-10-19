@@ -114,7 +114,7 @@ void o_net_guess_direction(GschemToplevel *w_current,
 	current_rules = (int*) bus_rules;
 	break;
       default:
-	g_assert_not_reached ();
+	g_assert_not_reached();
       }
 
       x1 = o_current->line->x[0];
@@ -419,6 +419,12 @@ void o_net_start_magnetic(GschemToplevel *w_current, int w_x, int w_y)
  */
 void o_net_start(GschemToplevel *w_current, int w_x, int w_y)
 {
+  /* A click may arrive without a motion event at the same coordinates. */
+  if (gschem_options_get_magnetic_net_mode (w_current->options))
+    o_net_start_magnetic (w_current, w_x, w_y);
+  else
+    w_current->magnetic_wx = w_current->magnetic_wy = -1;
+
   i_action_start (w_current);
 
   if (w_current->magnetic_wx != -1 && w_current->magnetic_wy != -1) {
@@ -472,6 +478,10 @@ void o_net_end(GschemToplevel *w_current, int w_x, int w_y)
   PAGE *page = gschem_page_view_get_page (page_view);
   g_return_if_fail (page != NULL);
 
+  /* Commit the click position, including a fresh pin/endpoint lookup.
+   * Motion events can be coalesced or absent before the button press.
+   */
+  o_net_motion (w_current, w_x, w_y);
   o_net_invalidate_rubber (w_current);
 
   if (w_current->magnetic_wx != -1 && w_current->magnetic_wy != -1)
@@ -603,6 +613,8 @@ void o_net_motion (GschemToplevel *w_current, int w_x, int w_y)
     else {
       o_net_find_magnetic(w_current, w_x, w_y);
     }
+  } else {
+    w_current->magnetic_wx = w_current->magnetic_wy = -1;
   }
 
   w_current->second_wx = w_x;

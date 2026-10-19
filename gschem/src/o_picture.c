@@ -22,7 +22,8 @@
 #include <stdio.h>
 
 #include "gschem.h"
-#include "actions.decl.x"
+// #include "actions.decl.x"
+#include "actions.h"
 
 /* This works, but using one macro inside of other doesn't */
 #define GET_PICTURE_WIDTH(w)			\
@@ -83,6 +84,8 @@ void o_picture_start(GschemToplevel *w_current, int w_x, int w_y)
  */
 void o_picture_end(GschemToplevel *w_current, int w_x, int w_y)
 {
+  (void) w_x;
+  (void) w_y;
   TOPLEVEL *toplevel = gschem_toplevel_get_toplevel (w_current);
   OBJECT *new_obj;
   int picture_width, picture_height;
@@ -134,16 +137,13 @@ void picture_selection_dialog (GschemToplevel *w_current)
   w_current->pfswindow = gtk_file_chooser_dialog_new (_("Select a picture file..."),
 						      GTK_WINDOW(w_current->main_window),
 						      GTK_FILE_CHOOSER_ACTION_OPEN,
-						      GTK_STOCK_CANCEL,
+						      _("_Cancel"),
 						      GTK_RESPONSE_CANCEL,
-						      GTK_STOCK_OPEN,
+						      _("_Open"),
 						      GTK_RESPONSE_ACCEPT,
 						      NULL);
   /* Set the alternative button order (ok, cancel, help) for other systems */
-  gtk_dialog_set_alternative_button_order(GTK_DIALOG(w_current->pfswindow),
-					  GTK_RESPONSE_ACCEPT,
-					  GTK_RESPONSE_CANCEL,
-					  -1);
+  /* Buttons retain their explicitly constructed order. */
 
   if (w_current->pixbuf_filename)
     gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(w_current->pfswindow),
@@ -341,17 +341,14 @@ void picture_change_filename_dialog (GschemToplevel *w_current)
   w_current->pfswindow = gtk_file_chooser_dialog_new (_("Select a picture file..."),
 						      GTK_WINDOW(w_current->main_window),
 						      GTK_FILE_CHOOSER_ACTION_OPEN,
-						      GTK_STOCK_CANCEL,
+						      _("_Cancel"),
 						      GTK_RESPONSE_CANCEL,
-						      GTK_STOCK_OPEN,
+						      _("_Open"),
 						      GTK_RESPONSE_ACCEPT,
 						      NULL);
 
   /* Set the alternative button order (ok, cancel, help) for other systems */
-  gtk_dialog_set_alternative_button_order(GTK_DIALOG(w_current->pfswindow),
-					  GTK_RESPONSE_ACCEPT,
-					  GTK_RESPONSE_CANCEL,
-					  -1);
+  /* Buttons retain their explicitly constructed order. */
 
   if (w_current->pixbuf_filename)
     gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(w_current->pfswindow),

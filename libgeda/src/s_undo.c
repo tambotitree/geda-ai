@@ -73,7 +73,7 @@ UNDO *s_undo_return_head(UNDO *tail)
  *  \par Function Description
  *
  */
-UNDO *s_undo_new_head(void)
+UNDO *s_undo_new_head()
 {
   UNDO *u_new;
 

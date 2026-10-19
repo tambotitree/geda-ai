@@ -22,11 +22,9 @@
 
 G_BEGIN_DECLS
 
-typedef enum _EdaCairoFlags EdaCairoFlags;
-
-enum _EdaCairoFlags {
-  EDA_CAIRO_ENABLE_HINTS = 1,
-};
+typedef enum {
+    EDA_CAIRO_ENABLE_HINTS = 1,
+} EdaCairoFlags;
 
 void eda_cairo_set_source_color (cairo_t *cr, int color, GArray *map);
 

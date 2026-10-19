@@ -110,7 +110,7 @@ void
 s_toplevel_delete (TOPLEVEL *toplevel);
 
 TOPLEVEL*
-s_toplevel_new (void);
+s_toplevel_new(void);
 
 void
 s_toplevel_remove_weak_ptr (TOPLEVEL *toplevel, void *weak_pointer_loc);

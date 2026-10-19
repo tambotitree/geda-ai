@@ -68,15 +68,25 @@ void o_redraw_rect(GschemToplevel *w_current,
   g_return_if_fail(geometry != NULL);
   g_return_if_fail(cr != NULL);
 
-  gdk_cairo_rectangle(cr, rectangle);
-  cairo_clip(cr);
+  /* GTK's context already positions this widget in its backing surface.
+   * Compose the page transform with it; replacing it loses sidebar offsets.
+   * Rectangle coordinates remain local to the widget for region queries.
+   */
+  const cairo_matrix_t *world_to_screen =
+      gschem_page_geometry_get_world_to_screen_matrix (geometry);
+  cairo_matrix_t screen_to_world = *world_to_screen;
+  cairo_matrix_t widget_to_device;
+  g_return_if_fail (cairo_matrix_invert (&screen_to_world) == CAIRO_STATUS_SUCCESS);
+  cairo_get_matrix (cr, &widget_to_device);
 
-  cairo_save(cr);
-  cairo_set_matrix(cr, gschem_page_geometry_get_world_to_screen_matrix(geometry));
+  cairo_save (cr);
+  gdk_cairo_rectangle (cr, rectangle);
+  cairo_clip (cr);
+  cairo_transform (cr, world_to_screen);
 
   grip_half_size = GRIP_SIZE / 2;
   cue_half_size = CUE_BOX_SIZE;
-  cairo_user_to_device(cr, &cue_half_size, &dummy);
+  cairo_matrix_transform_distance (world_to_screen, &cue_half_size, &dummy);
   bloat = MAX(grip_half_size, (int)cue_half_size);
 
   world_rect = g_new(BOX, 1);
@@ -86,8 +96,8 @@ void o_redraw_rect(GschemToplevel *w_current,
   double upper_x = rectangle->x + rectangle->width + bloat;
   double upper_y = rectangle->y - bloat;
 
-  cairo_device_to_user(cr, &lower_x, &lower_y);
-  cairo_device_to_user(cr, &upper_x, &upper_y);
+  cairo_matrix_transform_point (&screen_to_world, &lower_x, &lower_y);
+  cairo_matrix_transform_point (&screen_to_world, &upper_x, &upper_y);
 
   world_rect->lower_x = floor(lower_x);
   world_rect->lower_y = floor(lower_y);
@@ -127,9 +137,20 @@ void o_redraw_rect(GschemToplevel *w_current,
                         color->a / 255.0);
   cairo_paint(cr);
 
-  x_grid_draw_region(w_current, cr,
-                     rectangle->x, rectangle->y,
-                     rectangle->width, rectangle->height);
+  /* Grid drawing operates in Cairo device coordinates. Convert its damage
+   * bounds using GTK's original transform, without the page transform.
+   */
+  double grid_x1 = rectangle->x, grid_y1 = rectangle->y;
+  double grid_x2 = grid_x1 + rectangle->width;
+  double grid_y2 = grid_y1 + rectangle->height;
+  cairo_matrix_transform_point (&widget_to_device, &grid_x1, &grid_y1);
+  cairo_matrix_transform_point (&widget_to_device, &grid_x2, &grid_y2);
+  int grid_left = (int) floor (MIN (grid_x1, grid_x2));
+  int grid_top = (int) floor (MIN (grid_y1, grid_y2));
+  int grid_right = (int) ceil (MAX (grid_x1, grid_x2));
+  int grid_bottom = (int) ceil (MAX (grid_y1, grid_y2));
+  x_grid_draw_region (w_current, cr, grid_left, grid_top,
+                      grid_right - grid_left, grid_bottom - grid_top);
 
   draw_selected = !(w_current->inside_action &&
                     (w_current->event_state == MOVEMODE));
@@ -449,22 +470,8 @@ void o_invalidate_rect(GschemToplevel *w_current,
   GschemPageView *view = gschem_toplevel_get_current_page_view(w_current);
   g_return_if_fail(view != NULL);
 
-  int x = MIN(x1, x2);
-  int y = MIN(y1, y2);
-  int width = ABS(x2 - x1) + 1;
-  int height = ABS(y2 - y1) + 1;
-
-  // Apply conservative redraw padding
-  x -= (INVALIDATE_MARGIN + GRIP_MARGIN);
-  y -= (INVALIDATE_MARGIN + GRIP_MARGIN);
-  width += 2 * (INVALIDATE_MARGIN + GRIP_MARGIN);
-  height += 2 * (INVALIDATE_MARGIN + GRIP_MARGIN);
-
-  GtkWidget *widget = GTK_WIDGET(view);
-  if (!gtk_widget_get_realized(widget))
-    return;
-
-  gschem_page_view_invalidate_screen_rect(view, x, y, width, height);
+  /* The page-view API accepts two corners and adds cue/grip padding. */
+  gschem_page_view_invalidate_screen_rect (view, x1, y1, x2, y2);
 }
 
 /*! \brief Invalidate on-screen area for an object

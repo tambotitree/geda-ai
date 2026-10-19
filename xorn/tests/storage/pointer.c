@@ -31,7 +31,7 @@ static void dec(int *val)
 	(*val)--;
 }
 
-int main(void)
+int main()
 {
 	xorn_revision_t rev;
 	xorn_object_t ob0, ob1;

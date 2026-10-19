@@ -245,6 +245,8 @@ void s_sheet_data_add_master_comp_attrib_list_items (const GList *obj_list) {
  * attributes.
  */
 void s_sheet_data_add_master_net_list_items (const GList *obj_start) {
+  /* Net attributes are not implemented; preserve this placeholder API. */
+  (void) obj_start;
   return;
 }
 
@@ -257,6 +259,8 @@ void s_sheet_data_add_master_net_list_items (const GList *obj_start) {
  * attributes.
  */
 void s_sheet_data_add_master_net_attrib_list_items (const GList *obj_start) {
+  /* Net attributes are not implemented; preserve this placeholder API. */
+  (void) obj_start;
   return;
 }
 

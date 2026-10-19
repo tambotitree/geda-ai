@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([geda-ai], [1.0.0], [https://github.com/tambotitree/geda-ai/issues], [geda-ai])
+AC_INIT([geda-ai], [1.1.0-20261019], [https://github.com/tambotitree/geda-ai/issues], [geda-ai])
 AC_USE_SYSTEM_EXTENSIONS
 AC_CONFIG_AUX_DIR([build-tools]) # Tell automake where helper scripts are
 AM_INIT_AUTOMAKE([foreign -Wall -Werror subdir-objects])
@@ -26,15 +26,29 @@ AC_CONFIG_HEADERS([config.h version.h]) # Ensure version.h is listed for generat
 # Get detailed git version information using AX_GIT_VERSION.
 # This macro typically sets its own variables (e.g., AX_GIT_COMMIT) and might
 # also influence how PACKAGE_VERSION or similar are defined if not already set by AC_INIT.
-AX_GIT_VERSION([$PACKAGE_VERSION])
+AX_GIT_VERSION([20261019])
 
-# For consistency in user-facing messages and to simplify gschemrc version checks,
-# we will ensure PACKAGE_DATE_VERSION (used in C code and messages)
-# is the same as the simple PACKAGE_VERSION (e.g., "1.0.0").
-temp_package_date_version="$PACKAGE_VERSION"
-AC_DEFINE_UNQUOTED([PACKAGE_DATE_VERSION], ["$temp_package_date_version"], [The package version string, simplified to dotted version for geda-ai.])
-AC_SUBST([PACKAGE_DATE_VERSION], [$temp_package_date_version])
- 
+# RC compatibility uses the release date, matching @DATE_VERSION@ in the
+# generated system RC files. Keep it distinct from the dotted version.
+PACKAGE_DATE_VERSION="$DATE_VERSION"
+AC_DEFINE_UNQUOTED([PACKAGE_DATE_VERSION], ["$PACKAGE_DATE_VERSION"], [Date part of package version string.])
+AC_SUBST([PACKAGE_DATE_VERSION])
+
+# version.h is generated from version.h.in via AC_CONFIG_HEADERS, but
+# AX_GIT_VERSION only AC_SUBSTs DOTTED_VERSION and DATE_VERSION, while the
+# header wants the PACKAGE_-prefixed names.  Without the two substitutions
+# below, config.status wrote the literal "@PACKAGE_DOTTED_VERSION@" into
+# version.h and gschem -V printed
+#   gEDA @PACKAGE_DOTTED_VERSION@ (g@PACKAG)
+PACKAGE_DOTTED_VERSION=`echo "$PACKAGE_VERSION" | cut -d- -f1`
+if test -z "$PACKAGE_DOTTED_VERSION"; then
+  PACKAGE_DOTTED_VERSION="$PACKAGE_VERSION"
+fi
+PACKAGE_GIT_COMMIT=`cd "$srcdir" && git rev-parse HEAD 2>/dev/null | cut -c1-7`
+AC_SUBST([PACKAGE_DOTTED_VERSION], [$PACKAGE_DOTTED_VERSION])
+AC_SUBST([PACKAGE_GIT_COMMIT], [$PACKAGE_GIT_COMMIT])
+AC_DEFINE_UNQUOTED([PACKAGE_DOTTED_VERSION], ["$PACKAGE_DOTTED_VERSION"], [Dotted part of package version string.])
+AC_DEFINE_UNQUOTED([PACKAGE_GIT_COMMIT], ["$PACKAGE_GIT_COMMIT"], [Current git commit.])
 
 # --- Enable/Disable Arguments ---
 AC_ARG_ENABLE([gattrib],
@@ -56,6 +70,14 @@ AC_ARG_ENABLE([doxygen],
     esac],
     [ENABLE_DOXYGEN=no])
 AM_CONDITIONAL([ENABLE_DOXYGEN], [test "$ENABLE_DOXYGEN" = "yes"])
+
+AC_ARG_ENABLE([pedantic],
+  AS_HELP_STRING([--enable-pedantic],
+                 [Enable pedantic build warnings (default: no)]),
+  [PEDANTIC=$enableval],
+  [PEDANTIC=no])
+
+AM_CONDITIONAL([PEDANTIC], [test "x$PEDANTIC" = "xyes"])
 
 # --- Checks for programs ---
 AC_PROG_CXX
@@ -96,9 +118,7 @@ AC_SUBST(MINGW_LDFLAGS)
 
 
 # Check for Guile and its development tools (needed for libgeda)
-GEDA_GUILE_CHECKS
-# GEDA_GUILE_CHECKS # This macro might not be defined in the current m4/geda-guile.m4
-AX_CHECK_GUILE([1.8.0]) # Call the macro that is defined in m4/geda-guile.m4
+AX_CHECK_GUILE([1.8.0])
 
 # Set up libgeda with the correct ld version number
 LIBGEDA_LT_CURRENT=1
@@ -125,6 +145,11 @@ PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.32,
 if test "x$have_glib" = "xno"; then
   AC_MSG_ERROR([GLib >= 2.32 not found. Please install the GLib development package.])
 fi
+
+# Embed gschem's icons without relying on an installed desktop icon theme.
+AC_PATH_PROG([GLIB_COMPILE_RESOURCES], [glib-compile-resources])
+AS_IF([test -z "$GLIB_COMPILE_RESOURCES"],
+      [AC_MSG_ERROR([glib-compile-resources is required to build gschem icons])])
 
 # Check for GDK-Pixbuf (needed by libgeda for image handling)
 PKG_CHECK_MODULES(GDK_PIXBUF, gdk-pixbuf-2.0 >= 2.24.0,
@@ -174,7 +199,18 @@ AC_SUBST(GDK_LIBS)
 
 # --- Checks for header files ---
 AC_FUNC_ALLOCA
-AC_CHECK_HEADERS([argz.h ctype.h fcntl.h inttypes.h langinfo.h libintl.h malloc.h stdint.h stdio_ext.h strings.h sys/param.h sys/time.h unistd.h])
+AC_CHECK_HEADERS([argz.h ctype.h fcntl.h inttypes.h langinfo.h libintl.h malloc.h stdint.h stdio_ext.h strings.h sys/param.h sys/time.h sys/wait.h unistd.h])
+
+# getopt_long is what makes gschem's long options (--control-fd, --help,
+# --quiet, --verbose) work at all: without HAVE_GETOPT_LONG, parsecmd.c falls
+# back to the short option string and every "--name" argument is rejected as
+# an unknown option.  Headless control depends on --control-fd, so restore
+# these two checks alongside the other function checks.
+AC_CHECK_HEADERS([getopt.h])
+# On FreeBSD the 'gnugetopt' library is needed.
+AC_SEARCH_LIBS([getopt_long], [gnugetopt],
+               AC_DEFINE([HAVE_GETOPT_LONG], 1,
+                         [Define to 1 if you have the `getopt_long' function.]))
 
 # --- Checks for typedefs, structures, and compiler characteristics ---
 AC_CHECK_HEADER_STDBOOL
@@ -197,9 +233,6 @@ AX_DESKTOP_I18N # Use the macro from geda-desktop-i18n.m4
 # Define the text domain for libgeda
 AC_DEFINE_UNQUOTED([LIBGEDA_GETTEXT_DOMAIN], ["libgeda"], [The gettext domain for libgeda])
 
-# Define PKGDATADIR for use in C code
-AC_DEFINE_UNQUOTED([PKGDATADIR], ["${pkgdatadir}"], [Package data directory])
-
 # Define GETOPT_OPTIONS for gnetlist-legacy
 AC_SUBST(GNETLIST_GETOPT_OPTIONS) # For Makefiles, if needed
 AC_DEFINE_UNQUOTED(GETOPT_OPTIONS, "$GNETLIST_GETOPT_OPTIONS", [Getopt options string for gnetlist-legacy])
@@ -221,7 +254,6 @@ AX_LIBGEDACAIRO([1:0:0])
 #####################################################################
 
 export GEDADATADIR
-GEDAIDATADIR="${GEDADATADIR}"
 export GEDAIDATADIR
 export GEDARCDIR
 
@@ -285,7 +317,6 @@ if test "x$enable_kde_desktop_data" = xyes; then
 fi
 AM_CONDITIONAL(ENABLE_KDE_DESKTOP_DATA, test "x$enable_kde_desktop_data" = xyes)
 
-AX_CREATE_CONDA_ENVIRONMENT_YML
 
 # --- Configuration Files and Output (MUST BE AT THE END) ---
 AC_CONFIG_FILES([Makefile
@@ -345,6 +376,7 @@ AC_CONFIG_FILES([Makefile
                  gschem/data/Makefile
                  gschem/docs/Makefile
                  gschem/examples/Makefile
+                 gschem/icon-theme/Makefile
                  gschem/include/Makefile
                  gschem/lib/Makefile
                  gschem/scheme/Makefile

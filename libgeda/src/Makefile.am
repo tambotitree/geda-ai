@@ -2,6 +2,14 @@
 # Build a libtool library for installation in libdir.
 lib_LTLIBRARIES = libgeda.la
 
+check_PROGRAMS = test-libgeda-geometry
+TESTS = $(check_PROGRAMS)
+test_libgeda_geometry_SOURCES = $(top_srcdir)/tests/test_libgeda_geometry.c
+test_libgeda_geometry_CPPFLAGS = $(libgeda_la_CPPFLAGS)
+test_libgeda_geometry_CFLAGS = $(libgeda_la_CFLAGS)
+test_libgeda_geometry_LDADD = libgeda.la $(GUILE_LIBS) $(GLIB_LIBS) \
+                            $(GDK_PIXBUF_LIBS) -lm
+
 BUILT_SOURCES = \
 	scheme_init.x \
 	scheme_smob.x \

@@ -25,9 +25,20 @@
 
 #include <libgeda/libgeda.h>
 
+#include "../include/struct.h"
+#include "../include/prototype.h"
+
+/*! \brief Forward preformatted log text to the configured terminal destination.
+ * \param log_domain Required GLib callback argument; no prefix is added here.
+ * \param log_level Required callback argument; severity is handled upstream.
+ * \param buf Preformatted message, or NULL.
+ */
 void s_log_update (const gchar *log_domain, GLogLevelFlags log_level,
                    const gchar *buf)
 {
+  (void) log_domain;
+  (void) log_level;
+
   if (buf == NULL)
     return;
 

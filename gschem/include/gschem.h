@@ -1,3 +1,5 @@
+#ifndef GSCHEM_H
+#define GSCHEM_H
 /* System headers which gschem headers rely on */
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -10,13 +12,15 @@
 /* forward declaration, until everyone stops referencing it */
 typedef struct st_gschem_toplevel GschemToplevel;
 
+#include <glib/gi18n.h>
+#include "gschem_action.h"
+
 /* gschem headers */
 #include "gschem_defines.h"
 #include "gschem_bottom_widget.h"
 #include "gschem_find_text_widget.h"
 #include "gschem_macro_widget.h"
 #include "gschem_page_geometry.h"
-#include "gschem_page_view.h"
 #include "gschem_pin_type_combo.h"
 #include "gschem_main_window.h"
 #include "gschem_selection_adapter.h"
@@ -25,9 +29,11 @@ typedef struct st_gschem_toplevel GschemToplevel;
 #include "gschem_struct.h"
 #include "gschem_options.h"
 #include "gschem_dockable.h"
-#include "gschem_action.h"
 #include "gschem_change_notification.h"
 #include "gschem_toplevel.h"
+#include "gschem_page_view.h"
+#include "unit_tests.h"
+#include "x_window.h"
 #include "gschem_accel_label.h"
 #include "gschem_dialog.h"
 #include "gschem_dialog_misc.h"
@@ -39,10 +45,12 @@ typedef struct st_gschem_toplevel GschemToplevel;
 #include "gschem_swatch_column_renderer.h"
 #include "gschem_fill_swatch_cell_renderer.h"
 #include "globals.h"
+#include "gschem_signal.h"
 #include "prototype.h"
 #include "gschem_integer_combo_box.h"
 #include "gschem_binding.h"
 #include "gschem_binding_integer.h"
 
-/* Gettext translation */
-#include "gettext.h"
+#/* Gettext translation */
+#// #include "gettext.h"
+#endif /* GSCHEM_H */

@@ -42,7 +42,8 @@
 #include <time.h>
 
 /*! Default setting for log update callback function. */
-void (*x_log_update_func)() = NULL;
+void (*x_log_update_func)(const char *log_domain, int log_level,
+                          const char *message) = NULL;
 
 /*! Default setting for log enable. */
 int do_logging = TRUE;
@@ -178,7 +179,7 @@ void s_log_init (const gchar *prefix)
  *  This function deregisters the handler for redirection to the log file
  *  and closes it.
  */
-void s_log_close (void)
+void s_log_close ()
 {
   do_logging = FALSE; /* subsequent messages are lost after the close */
 
@@ -205,7 +206,7 @@ void s_log_close (void)
  *  \return Character string with current log's contents.
  *
  */
-gchar *s_log_read (void)
+gchar *s_log_read ()
 {
   gboolean tmp;
 #define BUFSIZE 200  
@@ -255,6 +256,8 @@ static void s_log_handler (const gchar *log_domain,
 			   gpointer user_data)
 {
   int status;
+
+  (void) user_data;
 
   if (do_logging == FALSE) {
     return;

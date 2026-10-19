@@ -1,3 +1,5 @@
+#ifndef GSCHEM_BINDING_INTEGER_H
+#define GSCHEM_BINDING_INTEGER_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 2013 Ales Hvezda
@@ -46,7 +48,8 @@ struct _GschemBindingInteger
 };
 
 GType
-gschem_binding_integer_get_type ();
+gschem_binding_integer_get_type (void);
 
 GschemBinding*
 gschem_binding_integer_new (const gchar *param_name, GtkWidget *widget);
+#endif /* GSCHEM_BINDING_INTEGER_H */

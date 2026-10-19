@@ -1,3 +1,5 @@
+#ifndef GSCHEM_OPTIONS_H
+#define GSCHEM_OPTIONS_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 2013 Ales Hvezda
@@ -140,7 +142,7 @@ int
 gschem_options_get_snap_size (GschemOptions *options);
 
 GType
-gschem_options_get_type ();
+gschem_options_get_type (void);
 
 GschemOptions*
 gschem_options_new (GschemToplevel *w_current);
@@ -168,3 +170,4 @@ gschem_options_set_snap_mode (GschemOptions *options, SNAP_STATE snap_mode);
 
 void
 gschem_options_set_snap_size (GschemOptions *options, int snap_size);
+#endif /* GSCHEM_OPTIONS_H */

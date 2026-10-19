@@ -688,6 +688,7 @@ void o_text_mirror_world(TOPLEVEL *toplevel,
 double o_text_shortest_distance (TOPLEVEL *toplevel, OBJECT *object,
                                  int x, int y, int force_solid)
 {
+  (void) force_solid;
   int left, top, right, bottom;
   double dx, dy;
 

@@ -42,6 +42,8 @@ static void process_error_stack (SCM s_stack, SCM s_key, SCM s_args, GError **er
  * thrown. */
 static SCM protected_pre_unwind_handler (void *data, SCM key, SCM args)
 {
+  (void) key;
+  (void) args;
   /* Capture the stack trace */
   *((SCM *) data) = scm_make_stack (SCM_BOOL_T, SCM_EOL);
 
@@ -163,7 +165,7 @@ struct g_read_file_data_t
 
 /* Body function for g_read_file(). Simply loads the specified
  * file. */
-SCM
+static SCM
 g_read_file__body (struct g_read_file_data_t *data)
 {
   return scm_primitive_load (data->filename);
@@ -171,7 +173,7 @@ g_read_file__body (struct g_read_file_data_t *data)
 
 /* Post-unwind handler for g_read_file(). Processes the stack captured
  * in the pre-unwind handler. */
-SCM
+static SCM
 g_read_file__post_handler (struct g_read_file_data_t *data, SCM key, SCM args)
 {
   process_error_stack (data->stack, key, args, &data->err);
@@ -180,9 +182,11 @@ g_read_file__post_handler (struct g_read_file_data_t *data, SCM key, SCM args)
 
 /* Pre-unwind handler for g_read_file().  Captures the Guile stack for
  * processing in the post-unwind handler. */
-SCM
+static SCM
 g_read_file__pre_handler (struct g_read_file_data_t *data, SCM key, SCM args)
 {
+  (void) key;
+  (void) args;
   data->stack = scm_make_stack (SCM_BOOL_T, SCM_EOL);
   return SCM_BOOL_F;
 }
@@ -240,6 +244,8 @@ process_error_stack (SCM s_stack, SCM s_key, SCM s_args, GError **err) {
   char *long_message;
   char *short_message;
   SCM s_port, s_subr, s_message, s_message_args, s_rest, s_location;
+
+  (void) s_key;
 
   /* Split s_args up */
   s_rest = s_args;

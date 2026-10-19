@@ -232,6 +232,7 @@ void o_arc_modify(TOPLEVEL *toplevel, OBJECT *object,
 OBJECT *o_arc_read (TOPLEVEL *toplevel, const char buf[],
            unsigned int release_ver, unsigned int fileformat_ver, GError **err)
 {
+  (void) fileformat_ver;
   OBJECT *new_obj;
   char type; 
   int x1, y1;
@@ -387,6 +388,7 @@ void o_arc_rotate_world(TOPLEVEL *toplevel,
 			int world_centerx, int world_centery, int angle,
 			OBJECT *object)
 {
+  (void) toplevel;
   int x, y, newx, newy;
 
   g_return_if_fail (object != NULL);
@@ -440,6 +442,8 @@ void o_arc_mirror_world(TOPLEVEL *toplevel,
 			int world_centerx, int world_centery,
 			OBJECT *object)
 {
+  (void) toplevel;
+  (void) world_centery;
   g_return_if_fail (object != NULL);
   g_return_if_fail (object->arc != NULL);
   g_return_if_fail (object->type == OBJ_ARC);
@@ -486,6 +490,7 @@ void o_arc_mirror_world(TOPLEVEL *toplevel,
 void world_get_arc_bounds(TOPLEVEL *toplevel, OBJECT *object, int *left,
 			  int *top, int *right, int *bottom)
 {
+  (void) toplevel;
   int x1, y1, x2, y2, x3, y3;
   int radius, start_angle, sweep_angle;
   int i, angle;
@@ -583,6 +588,8 @@ gboolean o_arc_get_position (OBJECT *object, gint *x, gint *y)
 double o_arc_shortest_distance (TOPLEVEL *toplevel, OBJECT *object,
                                 int x, int y, int force_solid)
 {
+  (void) toplevel;
+  (void) force_solid;
   double shortest_distance;
   double radius;
 

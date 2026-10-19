@@ -903,7 +903,7 @@ SCM g_rc_bus_ripper_symname(SCM scmsymname)
  *
  *  \return SCM_BOOL_T always.
  */
-SCM g_rc_reset_component_library(void)
+SCM g_rc_reset_component_library()
 {
   s_clib_init();
   
@@ -916,7 +916,7 @@ SCM g_rc_reset_component_library(void)
  *
  *  \return SCM_BOOL_T always.
  */
-SCM g_rc_reset_source_library(void)
+SCM g_rc_reset_source_library()
 {
   s_slib_free();
   s_slib_init();
@@ -990,8 +990,7 @@ SCM g_rc_always_promote_attributes(SCM attrlist)
   gchar *attr;
   gchar **attr2;
 
-  g_list_foreach(default_always_promote_attributes, (GFunc)g_free, NULL);
-  g_list_free(default_always_promote_attributes);
+  g_list_free_full (default_always_promote_attributes, g_free);
 
   if (scm_is_string (attrlist)) {
     char *temp;

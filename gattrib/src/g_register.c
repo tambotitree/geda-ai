@@ -54,14 +54,35 @@
  * gattrib.  They are mostly unnecessary, except for reading in the gattribrc
  * file at the beginning of the prog which gives the library search paths.
  */
-void g_register_funcs(void)
+/*! \brief Register a zero-argument callback with its C signature checked.
+ * \param name Scheme name to bind.
+ * \param callback Typed callback; conversion occurs only at the Guile call.
+ */
+static void
+register_subr_0 (const char *name, SCM (*callback) (void))
+{
+  scm_c_define_gsubr (name, 0, 0, 0, (scm_t_subr) callback);
+}
+
+/*! \brief Register a one-argument callback with its C signature checked.
+ * \param name Scheme name to bind.
+ * \param callback Typed callback taking one Scheme value.
+ */
+static void
+register_subr_1 (const char *name, SCM (*callback) (SCM))
+{
+  scm_c_define_gsubr (name, 1, 0, 0, (scm_t_subr) callback);
+}
+
+/*! \brief Register the exit and RC version-check procedures. */
+void g_register_funcs (void)
 {
   /* general functions */
-  scm_c_define_gsubr ("quit", 0, 0, 0, g_quit);
-  scm_c_define_gsubr ("exit", 0, 0, 0, g_quit);
+  register_subr_0 ("quit", g_quit);
+  register_subr_0 ("exit", g_quit);
 
   /* gattrib functions */
-  scm_c_define_gsubr ("gattrib-version", 1, 0, 0, g_rc_gattrib_version);
+  register_subr_1 ("gattrib-version", g_rc_gattrib_version);
 
 }
 
@@ -69,7 +90,7 @@ void g_register_funcs(void)
  *
  * Quit the application from within Scheme.
  */
-SCM g_quit(void)
+SCM g_quit (void)
 {
 #ifdef DEBUG
   printf("In g_quit, calling exit(0)\n");

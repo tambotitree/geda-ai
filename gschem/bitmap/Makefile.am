@@ -1,8 +1,8 @@
  # Makefile.am for bitmap data files in gschem
 
 # Directory where gschem expects its pixmaps at runtime.
-# pkgdatadir is typically $(prefix)/share/$(PACKAGE_TARNAME)
-gschempixmapsdir = $(pkgdatadir)/gschem/pixmaps
+# Use the same release directory as libgeda’s bitmap lookup.
+gschempixmapsdir = $(GEDADATADIR)/bitmap
 
 # Define where the gschembitmaps_DATA files (from bitmap_files.am) will be installed.
 gschembitmapsdir = $(gschempixmapsdir)

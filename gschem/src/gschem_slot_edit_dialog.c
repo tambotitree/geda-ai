@@ -43,8 +43,9 @@
  *  The function takes the dialog entry and applies the new slot to the
  *  symbol.
  */
-void slot_edit_dialog_response(GtkWidget *widget, gint response, GschemToplevel *w_current)
+static void slot_edit_dialog_response(GtkWidget *widget, gint response, GschemToplevel *w_current)
 {
+  (void) widget;
   GtkWidget *textentry;
   char *slot_string;
   int len;

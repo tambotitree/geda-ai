@@ -33,24 +33,21 @@
 #include <unistd.h>
 #endif
 
+
+#define _unused __attribute__((unused))
+
 #include "gschem.h"
 
-/*! \todo Finish function documentation!!!
- *  \brief
- *  \par Function Description
+/*! \brief Parse GTK resource files for gschem.
  *
+ *  GTK3 has removed gtk_rc_parse(), and this function used to build the
+ *  gschem-gtkrc paths and then emit a g_warning() for each one without ever
+ *  reading them.  Emitting a warning is not useful to users -- there is
+ *  nothing they can do about it -- so the function is now a no-op kept for
+ *  source and API compatibility.
  */
-void g_rc_parse_gtkrc()
+void g_rc_parse_gtkrc(void)
 {
-  gchar *filename;
-
-  filename = g_build_filename (s_path_sys_config (), "gschem-gtkrc", NULL);
-  gtk_rc_parse (filename);
-  g_free (filename);
-
-  filename = g_build_filename (s_path_user_config (), "gschem-gtkrc", NULL);
-  gtk_rc_parse (filename);
-  g_free (filename);
 }
 
 /*! \brief Verify the version of the RC file under evaluation.
@@ -82,7 +79,7 @@ SCM g_rc_gschem_version(SCM scm_version)
     char *sourcefile;
     GtkWidget *dialog;
 
-    rc_filename = g_rc_rc_filename ();
+    rc_filename = g_rc_rc_filename();
     if (scm_is_false (rc_filename))
       rc_filename = scm_from_utf8_string (_("(filename can't be determined)"));
     sourcefile = scm_to_utf8_string (rc_filename);
@@ -830,7 +827,7 @@ SCM g_rc_bus_ripper_type(SCM mode)
  *  \par Function Description
  *
  */
-SCM g_rc_bus_ripper_rotation(SCM mode)
+SCM g_rc_bus_ripper_rotation(SCM mode _unused)
 {
   /* obsolete option, keep for compatibility reasons */
   return SCM_BOOL_F;

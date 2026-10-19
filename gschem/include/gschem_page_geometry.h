@@ -1,3 +1,5 @@
+#ifndef GSCHEM_PAGE_GEOMETRY_H
+#define GSCHEM_PAGE_GEOMETRY_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 1998-2010 Ales Hvezda
@@ -70,7 +72,7 @@ int
 gschem_page_geometry_get_screen_width (GschemPageGeometry *geometry);
 
 GType
-gschem_page_geometry_get_type ();
+gschem_page_geometry_get_type (void);
 
 int
 gschem_page_geometry_get_viewport_bottom (GschemPageGeometry *geometry);
@@ -155,3 +157,6 @@ gschem_page_geometry_set_viewport_top (GschemPageGeometry *geometry, int viewpor
 
 void
 gschem_page_geometry_zoom_extents (GschemPageGeometry *geometry, TOPLEVEL *toplevel, const GList *list);
+void gschem_page_geometry_set_screen_height (GschemPageGeometry *geometry, int height);
+void gschem_page_geometry_set_screen_width (GschemPageGeometry *geometry, int width);
+#endif /* GSCHEM_PAGE_GEOMETRY_H */

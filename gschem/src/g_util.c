@@ -25,6 +25,9 @@
 
 #include "gschem.h"
 
+/* Private C entry points exported through this Scheme module. */
+static SCM show_uri (SCM uri_s);
+
 /*! \brief Launch default application for a URI.
  * \par Function Description
  * Launches the default application associated with \a uri_s on the
@@ -55,7 +58,7 @@ SCM_DEFINE (show_uri, "%show-uri", 1, 0, 0, (SCM uri_s),
     scm_misc_error (s_show_uri, _("Could not launch URI ~S: ~A"),
                     scm_list_2 (uri_s,
                                 scm_from_utf8_string (err->message)));
-    scm_dynwind_end ();
+    scm_dynwind_end();
   }
   return SCM_UNDEFINED;
 }
@@ -66,8 +69,9 @@ SCM_DEFINE (show_uri, "%show-uri", 1, 0, 0, (SCM uri_s),
  * be accessed using (use-modules (gschem core util)).
  */
 static void
-init_module_gschem_core_util ()
+init_module_gschem_core_util(void *data)
 {
+  (void)data; /* explicitly mark unused parameter */
   /* Register the functions */
   #include "g_util.x"
 
@@ -84,7 +88,7 @@ init_module_gschem_core_util ()
  * main_prog().
  */
 void
-g_init_util ()
+g_init_util(void)
 {
   /* Define the (gschem core util) module */
   scm_c_define_module ("gschem core util",

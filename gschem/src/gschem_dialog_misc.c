@@ -48,9 +48,8 @@ gschem_dialog_misc_create_property_label (const char *label)
 {
   GtkWidget *widget = gtk_label_new (label);
 
-  gtk_misc_set_alignment (GTK_MISC (widget),
-                          0.0,                  /* xalign */
-                          0.0);                 /* yalign */
+  gtk_label_set_xalign (GTK_LABEL (widget), 0.0);
+  gtk_label_set_yalign (GTK_LABEL (widget), 0.0);
 
   return widget;
 }
@@ -68,29 +67,13 @@ GtkWidget*
 gschem_dialog_misc_create_property_table (GtkWidget *label[], GtkWidget *widget[], int count)
 {
   int index;
-  GtkWidget *table = gtk_table_new (count, 2, FALSE);
-
-  gtk_table_set_row_spacings (GTK_TABLE (table), DIALOG_V_SPACING);
-  gtk_table_set_col_spacings (GTK_TABLE (table), DIALOG_H_SPACING);
-
-  for (index=0; index<count; index++) {
-    gtk_table_attach (GTK_TABLE (table),
-                      label[index],      /* child         */
-                      0,                 /* left_attach   */
-                      1,                 /* right_attach  */
-                      index,             /* top_attach    */
-                      index+1,           /* bottom_attach */
-                      GTK_FILL,          /* xoptions      */
-                      0,                 /* yoptions      */
-                      0,                 /* xpadding      */
-                      0);                /* ypadding      */
-
-    gtk_table_attach_defaults (GTK_TABLE (table),
-                               widget[index],     /* child         */
-                               1,                 /* left_attach   */
-                               2,                 /* right_attach  */
-                               index,             /* top_attach    */
-                               index+1);          /* bottom_attach */
+  GtkWidget *table = gtk_grid_new ();
+  gtk_grid_set_row_spacing (GTK_GRID (table), DIALOG_V_SPACING);
+  gtk_grid_set_column_spacing (GTK_GRID (table), DIALOG_H_SPACING);
+  for (index = 0; index < count; index++) {
+    gtk_widget_set_hexpand (widget[index], TRUE);
+    gtk_grid_attach (GTK_GRID (table), label[index], 0, index, 1, 1);
+    gtk_grid_attach (GTK_GRID (table), widget[index], 1, index, 1, 1);
   }
 
   return table;
@@ -113,16 +96,8 @@ gschem_dialog_misc_create_section_widget (const char *label, GtkWidget *child)
   GtkWidget *alignment;
   GtkWidget *expander;
 
-  alignment = gtk_alignment_new (0.0,     /* xalign */
-                                 0.0,     /* yalign */
-                                 1.0,     /* xscale */
-                                 1.0);    /* yscale */
-
-  gtk_alignment_set_padding (GTK_ALIGNMENT(alignment),
-                            0,                     /* padding_top    */
-                            0,                     /* padding_bottom */
-                            DIALOG_INDENTATION,    /* padding_left   */
-                            0);                    /* padding_right  */
+  alignment = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+  gtk_widget_set_margin_start (alignment, DIALOG_INDENTATION);
 
   gtk_container_add (GTK_CONTAINER (alignment), child);
 
@@ -154,6 +129,7 @@ gschem_dialog_misc_create_section_widget (const char *label, GtkWidget *child)
 void
 gschem_dialog_misc_entry_activate (GtkWidget *widget, GtkDialog *dialog)
 {
+  (void) widget;
   g_return_if_fail (dialog != NULL);
 
   gtk_widget_child_focus (GTK_WIDGET (dialog), GTK_DIR_DOWN);
@@ -175,6 +151,7 @@ gschem_dialog_misc_entry_activate (GtkWidget *widget, GtkDialog *dialog)
 void
 gschem_dialog_misc_response_non_modal (GtkDialog *dialog, gint response, gpointer unused)
 {
+  (void) unused;
   switch(response) {
     case GTK_RESPONSE_CLOSE:
     case GTK_RESPONSE_DELETE_EVENT:

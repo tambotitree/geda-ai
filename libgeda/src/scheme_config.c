@@ -27,6 +27,36 @@
 #include "libgeda_priv.h"
 #include "libgedaguile_priv.h"
 
+/* Scheme entry points are private C functions registered in this module. */
+static SCM default_config_context (void);
+static SCM system_config_context (void);
+static SCM user_config_context (void);
+static SCM path_config_context (SCM path_s);
+static SCM config_filename (SCM cfg_s);
+static SCM config_load_x (SCM cfg_s);
+static SCM config_loaded_p (SCM cfg_s);
+static SCM config_save_x (SCM cfg_s);
+static SCM config_changed_p (SCM cfg_s);
+static SCM config_parent (SCM cfg_s);
+static SCM set_config_parent_x (SCM cfg_s, SCM parent_s);
+static SCM config_trusted_p (SCM cfg_s);
+static SCM set_config_trusted_x (SCM cfg_s, SCM trusted_s);
+static SCM config_groups (SCM cfg_s);
+static SCM config_has_group_p (SCM cfg_s, SCM group_s);
+static SCM config_keys (SCM cfg_s, SCM group_s);
+static SCM config_source (SCM cfg_s, SCM group_s, SCM key_s);
+static SCM config_string (SCM cfg_s, SCM group_s, SCM key_s);
+static SCM config_boolean (SCM cfg_s, SCM group_s, SCM key_s);
+static SCM config_int (SCM cfg_s, SCM group_s, SCM key_s);
+static SCM config_real (SCM cfg_s, SCM group_s, SCM key_s);
+static SCM config_string_list (SCM cfg_s, SCM group_s, SCM key_s);
+static SCM config_boolean_list (SCM cfg_s, SCM group_s, SCM key_s);
+static SCM config_int_list (SCM cfg_s, SCM group_s, SCM key_s);
+static SCM config_real_list (SCM cfg_s, SCM group_s, SCM key_s);
+static SCM set_config_x (SCM cfg_s, SCM group_s, SCM key_s, SCM value_s);
+static SCM add_config_event_x (SCM cfg_s, SCM proc_s);
+static SCM remove_config_event_x (SCM cfg_s, SCM proc_s);
+
 SCM_SYMBOL (system_error_sym, "system-error");
 SCM_SYMBOL (config_error_sym, "config-error");
 SCM_SYMBOL (unknown_encoding_sym, "unknown-encoding");
@@ -1010,6 +1040,44 @@ SCM_DEFINE (set_config_x, "%set-config!", 4, 0, 0,
   return cfg_s;
 }
 
+/*! \brief One Scheme procedure and its exact GObject signal connection. */
+typedef struct {
+  SCM procedure;
+  gulong handler_id;
+} SchemeConfigEvent;
+
+/*! \brief Release a procedure when its configuration connection is removed. */
+static void
+scheme_config_event_free (gpointer data)
+{
+  SchemeConfigEvent *event = data;
+  scm_gc_unprotect_object (event->procedure);
+  g_free (event);
+}
+
+/*! \brief Release a configuration's Scheme event registry. */
+static void
+scheme_config_events_free (gpointer data)
+{
+  g_hash_table_unref (data);
+}
+
+/*! \brief Get the procedure-to-connection registry owned by a configuration. */
+static GHashTable *
+scheme_config_events (EdaConfig *cfg)
+{
+  const char *key = "libgeda-scheme-config-events";
+  GHashTable *events = g_object_get_data (G_OBJECT (cfg), key);
+
+  if (events == NULL) {
+    events = g_hash_table_new_full (g_direct_hash, g_direct_equal,
+                                    NULL, scheme_config_event_free);
+    g_object_set_data_full (G_OBJECT (cfg), key, events,
+                            scheme_config_events_free);
+  }
+  return events;
+}
+
 /*! \brief Dispatch to a Scheme configuration change event handler.
  * \par Function Description
  * Dispatcher function used by the Scheme API to run Scheme procedures
@@ -1019,7 +1087,8 @@ static void
 edascm_config_event_dispatcher (EdaConfig *cfg, const char *group,
                                 const char *key, void *user_data)
 {
-  SCM proc_s = SCM_PACK ((scm_t_bits) user_data);
+  const SchemeConfigEvent *event = user_data;
+  SCM proc_s = event->procedure;
   SCM expr = scm_list_4 (proc_s,
                          edascm_from_config (cfg),
                          scm_from_utf8_string (group),
@@ -1059,25 +1128,20 @@ SCM_DEFINE (add_config_event_x, "%add-config-event!", 2, 0, 0,
 
   EdaConfig *cfg = edascm_to_config (cfg_s);
 
-  /* Test if proc_s was already connected. */
-  guint signal_id = g_signal_lookup ("config-changed", EDA_TYPE_CONFIG);
-  gulong handler_id =
-    g_signal_handler_find (cfg,
-                           G_SIGNAL_MATCH_FUNC | G_SIGNAL_MATCH_DATA
-                           | G_SIGNAL_MATCH_ID,
-                           signal_id,
-                           0,
-                           NULL,
-                           edascm_config_event_dispatcher,
-                           (gpointer) SCM_UNPACK (proc_s));
-  if (handler_id) {
+  GHashTable *events = scheme_config_events (cfg);
+  gpointer key = (gpointer) SCM_UNPACK (proc_s);
+  SchemeConfigEvent *event = g_hash_table_lookup (events, key);
+
+  if (event != NULL) {
     return cfg_s;
   }
 
-  /* Protect proc_s against garbage collection */
-  g_signal_connect (cfg, "config-changed",
-                    G_CALLBACK (edascm_config_event_dispatcher),
-                    (gpointer) SCM_UNPACK (scm_gc_protect_object (proc_s)));
+  event = g_new0 (SchemeConfigEvent, 1);
+  event->procedure = scm_gc_protect_object (proc_s);
+  event->handler_id = g_signal_connect (cfg, "config-changed",
+                                        G_CALLBACK (edascm_config_event_dispatcher),
+                                        event);
+  g_hash_table_insert (events, key, event);
   return cfg_s;
 }
 
@@ -1102,20 +1166,13 @@ SCM_DEFINE (remove_config_event_x, "%remove-config-event!", 2, 0, 0,
               proc_s, SCM_ARG2, s_add_config_event_x);
 
   EdaConfig *cfg = edascm_to_config (cfg_s);
-  guint signal_id = g_signal_lookup ("config-changed", EDA_TYPE_CONFIG);
-  guint found =
-    g_signal_handlers_disconnect_matched (cfg,
-                                          G_SIGNAL_MATCH_FUNC
-                                          | G_SIGNAL_MATCH_DATA
-                                          | G_SIGNAL_MATCH_ID,
-                                          signal_id,
-                                          0,
-                                          NULL,
-                                          edascm_config_event_dispatcher,
-                                          (gpointer) SCM_UNPACK (proc_s));
-  g_warn_if_fail (found < 2);
-  if (found) {
-    scm_gc_unprotect_object (proc_s);
+  GHashTable *events = scheme_config_events (cfg);
+  gpointer key = (gpointer) SCM_UNPACK (proc_s);
+  SchemeConfigEvent *event = g_hash_table_lookup (events, key);
+
+  if (event != NULL) {
+    g_signal_handler_disconnect (cfg, event->handler_id);
+    g_hash_table_remove (events, key);
   }
   return cfg_s;
 }
@@ -1127,8 +1184,11 @@ SCM_DEFINE (remove_config_event_x, "%remove-config-event!", 2, 0, 0,
  * be accessed using (use-modules (geda core config)).
  */
 static void
-init_module_geda_core_config ()
+init_module_geda_core_config (void *unused_data)
 {
+  /* Guile supplies this argument; module registration needs no context. */
+  (void) unused_data;
+
   /* Register the functions and symbols */
   #include "scheme_config.x"
 

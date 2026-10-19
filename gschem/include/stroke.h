@@ -1,3 +1,5 @@
+#ifndef STROKE_H
+#define STROKE_H
 /*
    libstroke - a stroke interface library
    Copyright (c) 1996,1997,1998,1999,2000  Mark F. Willey, ETLA Technical
@@ -70,3 +72,4 @@ void stroke_record (int x, int y);
 
 /* initialize stroke functions */
 void stroke_init (void);
+#endif /* STROKE_H */

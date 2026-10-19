@@ -88,8 +88,8 @@ void usage(char *cmd)
 "  -V, --version   Show version information.\n"
 "  --              Treat all remaining arguments as filenames.\n"
 "\n"
-"Report bugs at <https://bugs.launchpad.net/geda>\n"
-"gEDA/gaf homepage: <http://www.geda-project.org/>\n"),
+"Report bugs at <https://github.com/tambotitree/geda-ai/issues>\n"
+"gEDA-ai project: <https://github.com/tambotitree/geda-ai>\n"),
           cmd);
   exit (0);
 }
@@ -117,6 +117,9 @@ version ()
 static SCM
 catch_handler (void *data, SCM tag, SCM throw_args)
 {
+  /* Guile catch ABI supplies context and payload; this handler reports the tag. */
+  (void) data;
+  (void) throw_args;
   fprintf (stderr, _("\nJust got an error; tag is\n        "));
   scm_display (tag, scm_current_output_port ());
   scm_newline (scm_current_output_port ());

@@ -110,6 +110,7 @@ gboolean
 x_show_uri (GschemToplevel *w_current, const gchar *uri,
             GError **error)
 {
+  (void) w_current;
 # if defined (SHOW_URI_GIO)
   GdkScreen *screen;
 

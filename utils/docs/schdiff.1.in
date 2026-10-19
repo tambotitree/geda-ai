@@ -69,7 +69,7 @@ svn diff \-\-diff-cmd schdiff \-c 49 power.sch
 
 .SH BUGS
 
-If you find one, please report it at https://bugs.launchpad.net/geda
+If you find one, please report it at https://github.com/tambotitree/geda-ai/issues
 
 .SH AUTHOR
 

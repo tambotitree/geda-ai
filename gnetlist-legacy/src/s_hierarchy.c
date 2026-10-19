@@ -247,7 +247,7 @@ void s_hierarchy_post_process(TOPLEVEL * pr_current, NETLIST * head)
 	nl_current = nl_current->next;
     }
 
-    s_rename_all(pr_current, head);
+    s_rename_all(head);
     s_hierarchy_remove_compsite_all(head);
 }
 

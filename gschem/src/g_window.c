@@ -20,6 +20,14 @@
 
 #include "gschem.h"
 
+/* Private C entry points exported through this Scheme module. */
+static SCM current_window (void);
+static SCM active_page (void);
+static SCM set_active_page_x (SCM page_s);
+static SCM override_close_page_x (SCM page_s);
+static SCM pointer_position (void);
+static SCM snap_point (SCM x_s, SCM y_s);
+
 SCM scheme_window_fluid = SCM_UNDEFINED;
 
 scm_t_bits window_smob_tag;
@@ -54,6 +62,7 @@ smob_free (SCM smob)
 static int
 smob_print (SCM smob, SCM port, scm_print_state *pstate)
 {
+  (void)pstate;
   gchar *hexstring;
 
   scm_puts ("#<gschem-window", port);
@@ -62,7 +71,7 @@ smob_print (SCM smob, SCM port, scm_print_state *pstate)
   hexstring = g_strdup_printf (" %zx", SCM_SMOB_DATA (smob));
   scm_dynwind_unwind_handler (g_free, hexstring, SCM_F_WIND_EXPLICITLY);
   scm_puts (hexstring, port);
-  scm_dynwind_end ();
+  scm_dynwind_end();
 
   scm_puts (">", port);
 
@@ -77,7 +86,7 @@ smob_print (SCM smob, SCM port, scm_print_state *pstate)
  * \param window #GschemToplevel to obtain a smob for.
  * \param a smob representing \a window.
  */
-SCM
+static SCM
 g_scm_from_window (GschemToplevel *w_current)
 {
   g_assert (w_current != NULL);
@@ -115,7 +124,7 @@ g_dynwind_window (GschemToplevel *w_current)
  * dynamic context.
  */
 SCM_DEFINE (current_window, "%current-window", 0, 0, 0,
-            (),
+            (void),
             "Get the GschemToplevel for the current dynamic context.")
 {
   return scm_fluid_ref (scheme_window_fluid);
@@ -128,9 +137,9 @@ SCM_DEFINE (current_window, "%current-window", 0, 0, 0,
  * context.
  */
 GschemToplevel *
-g_current_window ()
+g_current_window(void)
 {
-  SCM window_s = current_window ();
+  SCM window_s = current_window();
 
   if (!(SCM_SMOB_PREDICATE (window_smob_tag, window_s)
         &&  ((void *)SCM_SMOB_DATA (window_s) != NULL))) {
@@ -153,7 +162,7 @@ g_current_window ()
  * \return the active page.
  */
 SCM_DEFINE (active_page, "%active-page", 0, 0, 0,
-            (), "Get the active page.")
+            (void), "Get the active page.")
 {
   TOPLEVEL *toplevel = edascm_c_current_toplevel ();
   if (toplevel->page_current != NULL) {
@@ -181,7 +190,7 @@ SCM_DEFINE (set_active_page_x, "%set-active-page!", 1, 0, 0,
   SCM_ASSERT (edascm_is_page (page_s), page_s, SCM_ARG1, s_set_active_page_x);
 
   PAGE *page = edascm_to_page (page_s);
-  x_window_set_current_page (g_current_window (), page);
+  x_window_set_current_page (g_current_window(), page);
 
   return page_s;
 }
@@ -241,7 +250,7 @@ SCM_DEFINE (override_close_page_x, "%close-page!", 1, 0, 0,
  * \return The current pointer position, or SCM_BOOL_F.
  */
 SCM_DEFINE (pointer_position, "%pointer-position", 0, 0, 0,
-            (), "Get the current pointer position.")
+            (void), "Get the current pointer position.")
 {
   int x, y;
   GschemToplevel *w_current = g_current_window ();
@@ -294,8 +303,9 @@ SCM_DEFINE (snap_point, "%snap-point", 2, 0, 0,
  * can be accessed using (use-modules (gschem core window)).
  */
 static void
-init_module_gschem_core_window ()
+init_module_gschem_core_window(void *data)
 {
+  (void)data;
   /* Register the functions */
   #include "g_window.x"
 
@@ -322,7 +332,7 @@ init_module_gschem_core_window ()
  * by main_prog().
  */
 void
-g_init_window ()
+g_init_window(void)
 {
   /* Register gEDA smob type */
   window_smob_tag = scm_make_smob_type ("gschem-window", 0);
@@ -330,7 +340,7 @@ g_init_window ()
   scm_set_smob_print (window_smob_tag, smob_print);
 
   /* Create fluid */
-  scheme_window_fluid = scm_permanent_object (scm_make_fluid ());
+  scheme_window_fluid = scm_permanent_object (scm_make_fluid());
 
   /* Define the (gschem core window) module */
   scm_c_define_module ("gschem core window",

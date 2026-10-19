@@ -530,7 +530,7 @@ libgeda_module_handle ()
 {
   typedef BOOL (WINAPI *t_GetModuleHandleExA) (DWORD, LPCTSTR, HMODULE *);
   static t_GetModuleHandleExA p_GetModuleHandleExA = NULL;
-  static gconstpointer address = (void (*)(void)) &libgeda_module_handle;
+  static gconstpointer address = (void (*)()) &libgeda_module_handle;
   static HMODULE hmodule = NULL;
 
   if (hmodule != NULL) return (gpointer) hmodule;
@@ -584,7 +584,7 @@ const char *s_path_sys_data () {
      * DLL. */
     gchar *d =
       g_win32_get_package_installation_directory_of_module (libgeda_module_handle ());
-    p = g_build_filename (d, "share", "gEDA", NULL);
+    p = g_build_filename (d, "share", GEDA_PACKAGE_DIR, NULL);
     g_free (d);
 # else
     /* On other platforms, use the compiled-in path */

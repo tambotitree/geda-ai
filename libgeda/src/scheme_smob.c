@@ -63,6 +63,11 @@
 #include "libgeda_priv.h"
 #include "libgedaguile_priv.h"
 
+/* Scheme entry points are private C functions registered in this module. */
+static SCM page_p (SCM page_smob);
+static SCM object_p (SCM object_smob);
+static SCM config_p (SCM config_smob);
+
 scm_t_bits geda_smob_tag;
 
 /*! \brief Weak reference notify function for gEDA smobs.
@@ -71,6 +76,7 @@ scm_t_bits geda_smob_tag;
  */
 static void
 smob_weakref_notify (void *target, void *smob) {
+  (void) target;
   SCM s = SCM_PACK ((scm_t_bits) smob);
   SCM_SET_SMOB_DATA (s, NULL);
 }
@@ -84,6 +90,7 @@ smob_weakref_notify (void *target, void *smob) {
  */
 static void
 smob_weakref2_notify (void *target, void *smob) {
+  (void) target;
   SCM s = SCM_PACK ((scm_t_bits) smob);
   SCM_SET_SMOB_DATA_2 (s, NULL);
 }
@@ -176,6 +183,8 @@ static int
 smob_print (SCM smob, SCM port, scm_print_state *pstate)
 {
   gchar *hexstring;
+
+  (void) pstate;
 
   scm_puts ("#<geda-", port);
 
@@ -544,8 +553,11 @@ SCM_DEFINE (config_p, "%config?", 1, 0, 0,
  * be accessed using (use-modules (geda core smob)).
  */
 static void
-init_module_geda_core_smob ()
+init_module_geda_core_smob (void *unused_data)
 {
+  /* Guile supplies this argument; module registration needs no context. */
+  (void) unused_data;
+
   /* Register the functions. */
   #include "scheme_smob.x"
 

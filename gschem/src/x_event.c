@@ -61,6 +61,8 @@ x_event_expose(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 gboolean
 x_event_raise_dialog_boxes(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 {
+  (void) widget;
+  (void) cr;
   GschemToplevel *w_current = GSCHEM_TOPLEVEL(user_data);
 
   g_return_val_if_fail(w_current != NULL, FALSE);
@@ -126,7 +128,7 @@ x_event_button_pressed(GschemPageView *page_view, GdkEventButton *event, GschemT
      * manually here before processing the double-click event. */
     i_action_stop (w_current);
     o_edit (w_current, geda_list_get_glist (page->selection_list), TRUE);
-    scm_dynwind_end ();
+    scm_dynwind_end();
     return(0);
   }
 
@@ -260,7 +262,7 @@ x_event_button_pressed(GschemPageView *page_view, GdkEventButton *event, GschemT
                                     "eval-action-at-point!")),
                                 w_current->last_action->smob),
                               SCM_UNDEFINED);
-        scm_dynwind_end ();
+        scm_dynwind_end();
       }
       break;
       case(STROKE):
@@ -278,9 +280,7 @@ x_event_button_pressed(GschemPageView *page_view, GdkEventButton *event, GschemT
         /* (third-button "popup") */
         i_update_menus(w_current);  /* update menus before popup  */
         if (w_current->popup_menu != NULL)
-          gtk_menu_popup (GTK_MENU (w_current->popup_menu),
-                          NULL, NULL, NULL, NULL,
-                          event->button, event->time);
+          gtk_menu_popup_at_pointer (GTK_MENU (w_current->popup_menu), NULL);
       } else {
         /* (third-button "mousepan") */
         gschem_page_view_pan_start (page_view, (int) event->x, (int) event->y);
@@ -314,7 +314,7 @@ x_event_button_pressed(GschemPageView *page_view, GdkEventButton *event, GschemT
   }
 
  end_button_pressed:
-  scm_dynwind_end ();
+  scm_dynwind_end();
 
   return(0);
 }
@@ -440,7 +440,7 @@ x_event_button_released (GschemPageView *page_view, GdkEventButton *event, Gsche
       }
   }
  end_button_released:
-  scm_dynwind_end ();
+  scm_dynwind_end();
 
   return(0);
 }
@@ -546,7 +546,7 @@ x_event_motion (GschemPageView *page_view, GdkEventMotion *event, GschemToplevel
     }
   }
 
-  scm_dynwind_end ();
+  scm_dynwind_end();
 
   return(0);
 }
@@ -572,6 +572,8 @@ x_event_configure(GschemPageView *page_view,
                   GdkEventConfigure *event,
                   gpointer unused)
 {
+  (void) event;
+  (void) unused;
   GtkAllocation current_allocation;
   GList *iter;
   PAGE *p_current = gschem_page_view_get_page(page_view);
@@ -636,6 +638,8 @@ gint
 x_event_enter(GtkWidget *widget, GdkEventCrossing *event,
               GschemToplevel *w_current)
 {
+  (void) widget;
+  (void) event;
   g_return_val_if_fail(w_current != NULL, 0);
 
   // Currently unused; placeholder for future hover-related behavior
@@ -723,6 +727,7 @@ x_event_key(GschemPageView *page_view, GdkEventKey *event, GschemToplevel *w_cur
 gboolean
 x_event_scroll(GschemPageView *page_view, GdkEventScroll *event, GschemToplevel *w_current)
 {
+  (void) w_current;
   GtkAdjustment *adj;
   gint width, height;
   gint pan_direction = 0;
@@ -826,10 +831,8 @@ x_event_get_pointer_position(GschemToplevel *w_current, gboolean snapped, gint *
 
   gdk_window_get_geometry(window, NULL, NULL, &width, &height);
 
-  GdkDeviceManager *device_manager =
-      gdk_display_get_device_manager(gdk_display_get_default());
-  GdkDevice *pointer =
-      gdk_device_manager_get_client_pointer(device_manager);
+  GdkSeat *seat = gdk_display_get_default_seat (gdk_window_get_display (window));
+  GdkDevice *pointer = gdk_seat_get_pointer (seat);
 
   gdk_window_get_device_position(window, pointer, &sx, &sy, NULL);
 

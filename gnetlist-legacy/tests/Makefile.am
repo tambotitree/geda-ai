@@ -372,3 +372,11 @@ TESTS = stack_1-geda.out \
 	common/singlenet-verilog.out \
 	common/singlenet-vhdl.out \
 	common/singlenet-vipec.out
+
+# Offline application fixture: parser/serializer, connectivity and AI context.
+EXTRA_DIST += do-meter/do-meter.sch do-meter/esp32-interface.sym \
+  do-meter/README.md do-meter/gafrc do-meter/view.sh \
+  $(top_srcdir)/tests/test_do_meter.py
+check-local:
+	GEDA_TEST_BUILD_ROOT='$(abs_top_builddir)' $(PYTHON) \
+	  $(top_srcdir)/tests/test_do_meter.py

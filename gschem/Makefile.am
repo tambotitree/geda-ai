@@ -1,5 +1,5 @@
 SUBDIRS = \
-	bitmap data docs examples include lib scheme scripts \
+	bitmap data docs examples icon-theme include lib scheme scripts \
 	src tests
 
 EXTRA_DIST = BUGS ChangeLog ChangeLog-1.0 icon-theme-installer

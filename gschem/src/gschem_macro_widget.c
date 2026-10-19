@@ -40,6 +40,9 @@
 
 #include "gschem.h"
 
+static void gschem_macro_widget_class_init_gtype_adapter (gpointer klass, gpointer data);
+static void gschem_macro_widget_init_gtype_adapter (GTypeInstance *instance, gpointer klass);
+
 
 
 enum
@@ -96,8 +99,9 @@ static GObjectClass *gschem_macro_widget_parent_class = NULL;
 static gboolean
 key_press_event (GtkWidget *widget, GdkEventKey *event, gpointer user_data)
 {
+  (void) widget;
   if (event->keyval == GDK_KEY_Escape &&
-      (event->state & gtk_accelerator_get_default_mod_mask ()) == 0) {
+      (event->state & gtk_accelerator_get_default_mod_mask()) == 0) {
     gtk_info_bar_response (GTK_INFO_BAR (user_data), GTK_RESPONSE_CANCEL);
     return TRUE;
   }
@@ -112,6 +116,7 @@ key_press_event (GtkWidget *widget, GdkEventKey *event, gpointer user_data)
 static void
 activate_entry (GtkWidget *entry, GschemMacroWidget *widget)
 {
+  (void) entry;
   g_return_if_fail (widget != NULL);
 
   if (gtk_entry_get_text_length (GTK_ENTRY (widget->entry)) > 0) {
@@ -129,6 +134,7 @@ activate_entry (GtkWidget *entry, GschemMacroWidget *widget)
 static void
 click_cancel (GtkWidget *button, GschemMacroWidget *widget)
 {
+  (void) button;
   gtk_info_bar_response (GTK_INFO_BAR (widget), GTK_RESPONSE_CANCEL);
 }
 
@@ -139,6 +145,7 @@ click_cancel (GtkWidget *button, GschemMacroWidget *widget)
 static void
 click_evaluate (GtkWidget *entry, GschemMacroWidget *widget)
 {
+  (void) entry;
   g_return_if_fail (widget != NULL);
 
   if (gtk_entry_get_text_length (GTK_ENTRY (widget->entry)) > 0) {
@@ -284,7 +291,7 @@ gschem_macro_widget_get_macro_string (GschemMacroWidget *widget)
 /*! \brief Get/register GschemMacroWidget type.
  */
 GType
-gschem_macro_widget_get_type ()
+gschem_macro_widget_get_type()
 {
   static GType type = 0;
 
@@ -293,12 +300,13 @@ gschem_macro_widget_get_type ()
       sizeof(GschemMacroWidgetClass),
       NULL,                                                    /* base_init */
       NULL,                                                    /* base_finalize */
-      (GClassInitFunc) gschem_macro_widget_class_init,
+      gschem_macro_widget_class_init_gtype_adapter,
       NULL,                                                    /* class_finalize */
       NULL,                                                    /* class_data */
       sizeof(GschemMacroWidget),
       0,                                                       /* n_preallocs */
-      (GInstanceInitFunc) gschem_macro_widget_init,
+      gschem_macro_widget_init_gtype_adapter,
+      NULL /* value_table */
     };
 
     type = g_type_register_static (GTK_TYPE_INFO_BAR, "GschemMacroWidget", &info, 0);
@@ -329,11 +337,11 @@ gschem_macro_widget_init (GschemMacroWidget *widget)
   gtk_widget_set_visible (widget->label, TRUE);
   gtk_box_pack_start (GTK_BOX (content), widget->label, FALSE, FALSE, 0);
 
-  widget->entry = gtk_entry_new ();
+  widget->entry = gtk_entry_new();
   gtk_widget_set_visible (widget->entry, TRUE);
   gtk_box_pack_start (GTK_BOX (content), widget->entry, TRUE, TRUE, 0);
 
-  button_box = gtk_hbutton_box_new ();
+  button_box = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
   gtk_widget_set_visible (button_box, TRUE);
   gtk_box_pack_start (GTK_BOX (content), button_box, FALSE, FALSE, 0);
 
@@ -342,7 +350,7 @@ gschem_macro_widget_init (GschemMacroWidget *widget)
   gtk_widget_set_visible (widget->evaluate_button, TRUE);
   gtk_box_pack_start (GTK_BOX (button_box), widget->evaluate_button, FALSE, FALSE, 0);
 
-  cancel_button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
+  cancel_button = gtk_button_new_with_mnemonic (_("_Cancel"));
   gtk_widget_set_visible (cancel_button, TRUE);
   gtk_box_pack_start (GTK_BOX (button_box), cancel_button, FALSE, FALSE, 0);
 
@@ -416,6 +424,8 @@ gschem_macro_widget_set_macro_string (GschemMacroWidget *widget, const char *str
 static void
 notify_entry_text (GtkWidget *entry, GParamSpec *pspec, GschemMacroWidget *widget)
 {
+  (void) entry;
+  (void) pspec;
   g_return_if_fail (widget != NULL);
 
   gtk_widget_set_sensitive (widget->evaluate_button,
@@ -443,4 +453,20 @@ set_property (GObject *object, guint param_id, const GValue *value, GParamSpec *
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
   }
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+gschem_macro_widget_class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  gschem_macro_widget_class_init (klass);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+gschem_macro_widget_init_gtype_adapter (GTypeInstance *instance, gpointer klass)
+{
+  (void) klass;
+  gschem_macro_widget_init ((void *) instance);
 }

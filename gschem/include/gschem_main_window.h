@@ -1,3 +1,5 @@
+#ifndef GSCHEM_MAIN_WINDOW_H
+#define GSCHEM_MAIN_WINDOW_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 1998-2010 Ales Hvezda
@@ -43,7 +45,8 @@ struct _GschemMainWindow
 };
 
 GType
-gschem_main_window_get_type();
+gschem_main_window_get_type (void);
 
 GschemMainWindow*
-gschem_main_window_new ();
+gschem_main_window_new (void);
+#endif /* GSCHEM_MAIN_WINDOW_H */

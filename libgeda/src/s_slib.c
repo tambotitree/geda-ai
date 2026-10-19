@@ -454,7 +454,7 @@ char *s_slib_getfiles(char *directory, int flag)
  *  \par Function Description
  *
  */
-void s_slib_print(void)
+void s_slib_print()
 {
   int i;
 
@@ -491,7 +491,7 @@ int s_slib_uniq(char *path)
  *  \par Function Description
  *
  */
-void s_slib_print_dirs(void)
+void s_slib_print_dirs()
 {
   int i;
   char *string;

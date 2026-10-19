@@ -1,3 +1,5 @@
+#ifndef GSCHEM_FIND_TEXT_DOCKABLE_H
+#define GSCHEM_FIND_TEXT_DOCKABLE_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 1998-2010 Ales Hvezda
@@ -58,4 +60,5 @@ int
 gschem_find_text_dockable_find (GschemFindTextDockable *state, GList *pages, int type, const char *text, gboolean descend);
 
 GType
-gschem_find_text_dockable_get_type ();
+gschem_find_text_dockable_get_type (void);
+#endif /* GSCHEM_FIND_TEXT_DOCKABLE_H */

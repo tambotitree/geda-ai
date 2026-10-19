@@ -39,11 +39,11 @@ G_BEGIN_DECLS
  * Configuration contexts are represented by instances of the
  * #EdaConfig class. Since this is a a subclass of #GObject, the
  * instances are reference counted.  You can increment and decrement
- * their reference counters using g_object_ref() and g_object_unref().
+ * their reference counters using g_object_ref(void) and g_object_unref(void).
  *
  * Normally, you shouldn't create a configuration context directly;
  * you should obtain the configuration context associated with a path
- * using eda_config_get_context_for_path().
+ * using eda_config_get_context_for_path(void).
  */
 
 /*! Domain for errors relating to EdaConfig operations. */
@@ -58,7 +58,7 @@ typedef enum {
   EDA_CONFIG_ERROR_INVALID_VALUE,
 } EdaConfigError;
 
-GQuark eda_config_error_quark (void);
+GQuark eda_config_error_quark(void);
 
 /* ---------------------------------------------------------------- */
 
@@ -89,16 +89,16 @@ struct _EdaConfig
   EdaConfigPrivate *priv;
 };
 
-GType eda_config_get_type (void) G_GNUC_CONST;
+GType eda_config_get_type(void) G_GNUC_CONST;
 
 /* ---------------------------------------------------------------- */
 
 EdaConfig *eda_config_get_context_for_file (GFile *path) G_GNUC_WARN_UNUSED_RESULT;
 EdaConfig *eda_config_get_context_for_path (const gchar *path) G_GNUC_WARN_UNUSED_RESULT;
 
-EdaConfig *eda_config_get_default_context (void);
-EdaConfig *eda_config_get_system_context (void);
-EdaConfig *eda_config_get_user_context (void);
+EdaConfig *eda_config_get_default_context(void);
+EdaConfig *eda_config_get_system_context(void);
+EdaConfig *eda_config_get_user_context(void);
 
 GFile *eda_config_get_file (EdaConfig *cfg);
 const gchar *eda_config_get_filename (EdaConfig *cfg);

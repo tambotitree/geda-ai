@@ -155,7 +155,7 @@ static void assert_attached_objects_f(
 	assert(xorn_select_attached_to(rev, attached_to) == NULL);
 }
 
-int main(void)
+int main()
 {
 	xorn_revision_t rev;
 	struct xornsch_net net_data;

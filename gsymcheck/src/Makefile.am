@@ -18,6 +18,9 @@ gsymcheck_CPPFLAGS = -I$(top_srcdir)/libgeda/include -I$(srcdir)/../include \
 	-I$(top_srcdir) -I$(includedir)
 gsymcheck_CFLAGS = $(GCC_CFLAGS) $(MINGW_CFLAGS) $(GLIB_CFLAGS) \
 	$(GIO_CFLAGS) $(GUILE_CFLAGS) $(GDK_PIXBUF_CFLAGS)
+# Keep callback contracts, prototypes and format checks enabled by default.
+gsymcheck_CFLAGS += -Wall -Wextra -Werror -Wpedantic \
+  -Wstrict-prototypes -Wmissing-prototypes -Wformat=2
 gsymcheck_LDFLAGS = $(GLIB_LIBS) $(GIO_LIBS) $(GUILE_LIBS) $(GDK_PIXBUF_LIBS)
 gsymcheck_LDADD = $(top_builddir)/libgeda/src/libgeda.la
 

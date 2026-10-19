@@ -56,7 +56,7 @@ static GtkListStore* rotation_list_store = NULL;
 /*! \brief Create the GtkListStore of the avaialble text rotations.
  */
 static GtkListStore*
-create_rotation_list_store ()
+create_rotation_list_store()
 {
   GtkTreeIter iter;
   GtkListStore *store;
@@ -86,14 +86,14 @@ create_rotation_list_store ()
  *  \return A widget for selecting the gschem text rotations
  */
 GtkWidget*
-gschem_rotation_combo_new ()
+gschem_rotation_combo_new()
 {
   GtkComboBox *combo;
   GtkCellLayout *layout;
   GtkCellRenderer *text_cell;
 
   if (rotation_list_store == NULL) {
-    rotation_list_store = create_rotation_list_store ();
+    rotation_list_store = create_rotation_list_store();
   }
 
   combo = GTK_COMBO_BOX (gtk_combo_box_new_with_model (GTK_TREE_MODEL (rotation_list_store)));

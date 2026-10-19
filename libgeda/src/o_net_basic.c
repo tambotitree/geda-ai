@@ -87,6 +87,7 @@ void world_get_net_bounds(TOPLEVEL *toplevel, OBJECT *object, int *left,
 OBJECT *o_net_new(TOPLEVEL *toplevel, char type,
 		  int color, int x1, int y1, int x2, int y2)
 {
+  (void) toplevel;
   OBJECT *new_node;
 
   new_node = s_basic_new_object(type, "net");
@@ -122,6 +123,8 @@ OBJECT *o_net_new(TOPLEVEL *toplevel, char type,
 OBJECT *o_net_read (TOPLEVEL *toplevel, const char buf[],
                     unsigned int release_ver, unsigned int fileformat_ver, GError **err)
 {
+  (void) release_ver;
+  (void) fileformat_ver;
   OBJECT *new_obj;
   char type;
   int x1, y1;
@@ -235,6 +238,7 @@ void o_net_rotate_world(TOPLEVEL *toplevel,
 			int world_centerx, int world_centery, int angle,
 			OBJECT *object)
 {
+  (void) toplevel;
   int newx, newy;
 
   g_return_if_fail (object != NULL);
@@ -275,6 +279,7 @@ void o_net_rotate_world(TOPLEVEL *toplevel,
 void o_net_mirror_world(TOPLEVEL *toplevel, int world_centerx,
 			int world_centery, OBJECT *object)
 {
+  (void) toplevel;
   g_return_if_fail (object != NULL);
   g_return_if_fail (object->line != NULL);
   g_return_if_fail (object->type == OBJ_NET);
@@ -327,9 +332,9 @@ int o_net_orientation(OBJECT *object)
 static void o_net_consolidate_lowlevel (OBJECT *object,
                                         OBJECT *del_object, int orient)
 {
+  int changed = 0;
   int temp1, temp2;
   int final1, final2;
-  int changed = 0;
   GList *a_iter;
   OBJECT *a_current;
 
@@ -451,7 +456,6 @@ static int o_net_consolidate_segments (TOPLEVEL *toplevel, OBJECT *object)
   CONN *conn;
   OBJECT *other_object;
   PAGE *page;
-  int changed = 0;
 
   g_return_val_if_fail ((toplevel != NULL), 0);
   g_return_val_if_fail ((object != NULL), 0);
@@ -488,7 +492,6 @@ static int o_net_consolidate_segments (TOPLEVEL *toplevel, OBJECT *object)
 
           o_net_consolidate_lowlevel(object, other_object, other_orient);
 
-          changed++;
           if (other_object->selected == TRUE ) {
             o_selection_remove (toplevel, page->selection_list, other_object);
 
@@ -566,6 +569,7 @@ void o_net_consolidate(TOPLEVEL *toplevel, PAGE *page)
 void o_net_modify(TOPLEVEL *toplevel, OBJECT *object,
 		  int x, int y, int whichone)
 {
+  (void) toplevel;
   object->line->x[whichone] = x;
   object->line->y[whichone] = y;
 

@@ -27,6 +27,10 @@
 #include "libgeda_priv.h"
 #include "libgedaguile_priv.h"
 
+/* Scheme entry points are private C functions registered in this module. */
+static SCM edascm_current_toplevel (void);
+static SCM edascm_with_toplevel (SCM toplevel, SCM thunk);
+
 SCM scheme_toplevel_fluid = SCM_UNDEFINED;
 
 /*!
@@ -113,8 +117,11 @@ edascm_c_with_toplevel (TOPLEVEL *toplevel, SCM (*func)(void *),
  * can be accessed using (use-modules (geda core toplevel)).
  */
 static void
-init_module_geda_core_toplevel ()
+init_module_geda_core_toplevel (void *unused_data)
 {
+  /* Guile supplies this argument; module registration needs no context. */
+  (void) unused_data;
+
   /* Register the functions */
   #include "scheme_toplevel.x"
 

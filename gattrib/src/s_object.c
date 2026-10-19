@@ -101,20 +101,6 @@ s_object_add_comp_attrib_to_object (TOPLEVEL *toplevel,
 
 
 /*------------------------------------------------------------------*/
-/*!
- * \todo This needs to be filled in.
- */
-void
-s_object_add_net_attrib_to_object (TOPLEVEL *toplevel,
-                                   OBJECT *o_current,
-                                   char *new_attrib_name,
-                                   char *new_attrib_value)
-{
-  /* TBD */
-}
-
-
-/*------------------------------------------------------------------*/
 /*! \brief Add a new attribute to an pin OBJECT
  *
  * Add a new attribute to o_current, when o_current is a

@@ -1,3 +1,5 @@
+#ifndef GSCHEM_PIN_TYPE_COMBO_H
+#define GSCHEM_PIN_TYPE_COMBO_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 1998-2010 Ales Hvezda
@@ -24,7 +26,7 @@
  */
 
 GtkWidget*
-gschem_pin_type_combo_new ();
+gschem_pin_type_combo_new (void);
 
 int
 gschem_pin_type_combo_get_index (GtkWidget *widget);
@@ -32,3 +34,4 @@ gschem_pin_type_combo_get_index (GtkWidget *widget);
 void
 gschem_pin_type_combo_set_index (GtkWidget *widget, int type);
 
+#endif /* GSCHEM_PIN_TYPE_COMBO_H */

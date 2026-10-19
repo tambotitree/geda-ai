@@ -66,7 +66,7 @@
  *
  *  \return value 0 to the shell to denote a successful quit.
  */
-gboolean gattrib_really_quit(void)
+gboolean gattrib_really_quit()
 {
   if (sheet_head->CHANGED == TRUE) {
     x_dialog_unsaved_data();
@@ -122,13 +122,16 @@ gint gattrib_quit(gint return_code)
  * \param argc Number of command line arguments
  * \param argv Command line arguments
  */
-void gattrib_main(void *closure, int argc, char *argv[])
+static void gattrib_main(void *closure, int argc, char *argv[])
 {
   /* TOPLEVEL *pr_current is a global */
   /* SHEET_DATA *sheet_head is a global */
   /* GtkWidget *main_window is a global */
 
   int argv_index;
+
+  /* Guile boot callback context is NULL; this application uses globals. */
+  (void) closure;
 
 #ifdef HAVE_GTHREAD
   /* Gattrib isn't threaded, but some of GTK's file chooser
@@ -160,6 +163,11 @@ void gattrib_main(void *closure, int argc, char *argv[])
 
   /* ---------- Start creation of new project: (TOPLEVEL *pr_current) ---------- */
   pr_current = s_toplevel_new();
+
+  /* libgeda needs a text measuring callback before anything walks schematic
+   * text; without it world_get_text_bounds() raises a critical for every text
+   * object it meets.  gattrib has no page view, so it supplies its own. */
+  x_gtksheet_set_text_bounds_func(pr_current);
 
   /* ----- Read in RC files.   ----- */
   g_rc_parse (pr_current, argv[0], "gattribrc", NULL);
@@ -200,8 +208,7 @@ void gattrib_main(void *closure, int argc, char *argv[])
      exit(1);
   }
 
-  g_slist_foreach(file_list, (GFunc)g_free, NULL);
-  g_slist_free(file_list);
+  g_slist_free_full(file_list, g_free);
 
   gtk_main();
   exit(0);

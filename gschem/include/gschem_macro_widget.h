@@ -1,3 +1,5 @@
+#ifndef GSCHEM_MACRO_WIDGET_H
+#define GSCHEM_MACRO_WIDGET_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 1998-2010 Ales Hvezda
@@ -58,10 +60,11 @@ const char*
 gschem_macro_widget_get_macro_string (GschemMacroWidget *widget);
 
 GType
-gschem_macro_widget_get_type ();
+gschem_macro_widget_get_type (void);
 
 void
 gschem_macro_widget_set_label_text (GschemMacroWidget *widget, const char *text);
 
 void
 gschem_macro_widget_set_macro_string (GschemMacroWidget *widget, const char *str);
+#endif /* GSCHEM_MACRO_WIDGET_H */

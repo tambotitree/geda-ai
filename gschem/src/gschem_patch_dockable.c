@@ -36,6 +36,9 @@
 #include <libgen.h>  /* for dirname(3) */
 
 #include "gschem.h"
+
+static void class_init_gtype_adapter (gpointer klass, gpointer data);
+static void instance_init_gtype_adapter (GTypeInstance *instance, gpointer klass);
 #include "../include/gschem_patch_dockable.h"
 
 enum {
@@ -71,7 +74,7 @@ static void tree_selection_changed (GtkTreeSelection *selection,
 
 
 GType
-gschem_patch_dockable_get_type ()
+gschem_patch_dockable_get_type()
 {
   static GType type = 0;
 
@@ -80,12 +83,12 @@ gschem_patch_dockable_get_type ()
       sizeof (GschemPatchDockableClass),
       NULL,                                     /* base_init */
       NULL,                                     /* base_finalize */
-      (GClassInitFunc) class_init,
+      class_init_gtype_adapter,
       NULL,                                     /* class_finalize */
       NULL,                                     /* class_data */
       sizeof (GschemPatchDockable),
       0,                                        /* n_preallocs */
-      (GInstanceInitFunc) instance_init,
+      instance_init_gtype_adapter,
       NULL                                      /* value_table */
     };
 
@@ -156,13 +159,13 @@ create_widget (GschemDockable *dockable)
 
   /* filename column */
 
-  column = gtk_tree_view_column_new ();
+  column = gtk_tree_view_column_new();
   gtk_tree_view_column_set_resizable (column, TRUE);
   gtk_tree_view_column_set_title (column, _("Filename"));
 
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree_widget), column);
 
-  renderer = gtk_cell_renderer_text_new ();
+  renderer = gtk_cell_renderer_text_new();
   gtk_tree_view_column_pack_start (column, renderer, TRUE);
   gtk_tree_view_column_add_attribute (
     column, renderer, "text", COLUMN_FILENAME);
@@ -172,13 +175,13 @@ create_widget (GschemDockable *dockable)
 
   /* location column */
 
-  column = gtk_tree_view_column_new ();
+  column = gtk_tree_view_column_new();
   gtk_tree_view_column_set_resizable (column, TRUE);
   gtk_tree_view_column_set_title (column, _("Comp/Pin"));
 
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree_widget), column);
 
-  renderer = gtk_cell_renderer_text_new ();
+  renderer = gtk_cell_renderer_text_new();
   gtk_tree_view_column_pack_start (column, renderer, TRUE);
   gtk_tree_view_column_add_attribute (
     column, renderer, "text", COLUMN_LOCATION);
@@ -188,13 +191,13 @@ create_widget (GschemDockable *dockable)
 
   /* action column */
 
-  column = gtk_tree_view_column_new ();
+  column = gtk_tree_view_column_new();
   gtk_tree_view_column_set_resizable (column, TRUE);
   gtk_tree_view_column_set_title (column, _("Required action"));
 
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree_widget), column);
 
-  renderer = gtk_cell_renderer_text_new ();
+  renderer = gtk_cell_renderer_text_new();
   gtk_tree_view_column_pack_start (column, renderer, TRUE);
   gtk_tree_view_column_add_attribute (
     column, renderer, "text", COLUMN_ACTION);
@@ -251,12 +254,10 @@ x_patch_import (GschemToplevel *w_current)
   dialog = gtk_file_chooser_dialog_new (_("Import Patch..."),
                                         GTK_WINDOW (w_current->main_window),
                                         GTK_FILE_CHOOSER_ACTION_OPEN,
-                                        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                        GTK_STOCK_OPEN,   GTK_RESPONSE_ACCEPT,
+                                        _("_Cancel"), GTK_RESPONSE_CANCEL,
+                                        _("_Open"),   GTK_RESPONSE_ACCEPT,
                                         NULL);
-  gtk_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
-                                           GTK_RESPONSE_ACCEPT,
-                                           GTK_RESPONSE_CANCEL, -1);
+  /* Buttons retain their explicitly constructed order. */
 
   patch_filename = x_patch_guess_filename (page);
 
@@ -276,12 +277,12 @@ x_patch_import (GschemToplevel *w_current)
                                 page->patch_descend);
   gtk_file_chooser_set_extra_widget (GTK_FILE_CHOOSER (dialog), extra_widget);
 
-  filter = gtk_file_filter_new ();
+  filter = gtk_file_filter_new();
   gtk_file_filter_set_name (filter, _("Back-annotation patches"));
   gtk_file_filter_add_pattern (filter, "*.bap");
   gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog), filter);
 
-  filter = gtk_file_filter_new ();
+  filter = gtk_file_filter_new();
   gtk_file_filter_set_name (filter, _("All files"));
   gtk_file_filter_add_pattern (filter, "*");
   gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog), filter);
@@ -743,4 +744,20 @@ tree_selection_changed (GtkTreeSelection *selection, gpointer user_data)
                              page_obj->page);
 
   gschem_page_view_zoom_text (view, object, TRUE);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  class_init (klass);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+instance_init_gtype_adapter (GTypeInstance *instance, gpointer klass)
+{
+  (void) klass;
+  instance_init ((void *) instance);
 }

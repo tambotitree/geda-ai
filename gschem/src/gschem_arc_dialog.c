@@ -42,8 +42,9 @@
  *  the dialog and applies it on the current arc.
  *  If the dialog is closed or canceled the function destroys the dialog.
  */
-void arc_angle_dialog_response(GtkDialog *dialog, gint response_id, GschemToplevel *w_current)
+static void arc_angle_dialog_response(GtkDialog *dialog, gint response_id, GschemToplevel *w_current)
 {
+  (void)dialog;
   GtkWidget *spinentry;
   gint radius, start_angle, sweep_angle;
   OBJECT *arc_object = NULL;

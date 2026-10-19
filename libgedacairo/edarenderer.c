@@ -90,7 +90,7 @@ EDA_RENDERER_CAIRO_FLAGS (EdaRenderer *r) {
   return EDA_RENDERER_CHECK_FLAG (r, FLAG_HINTING) ? EDA_CAIRO_ENABLE_HINTS : 0;
 }
 static inline double
-EDA_RENDERER_STROKE_WIDTH (EdaRenderer *r, double width) {
+EDA_RENDERER_STROKE_WIDTH (double width) {
   /* For now, the minimum line width possible is half the net width. */
   return fmax (width, NET_WIDTH / 2);
 }
@@ -394,6 +394,15 @@ static void
 eda_renderer_update_contexts (EdaRenderer *renderer, cairo_t *new_cr,
                               PangoContext *new_pc)
 {
+  /* Incoming pointers may be borrowed from this renderer. Retain them before
+   * releasing the old contexts and the layouts/renderers that reference them. */
+  if (new_cr != NULL) {
+    cairo_reference (new_cr);
+  }
+  if (new_pc != NULL) {
+    g_object_ref (new_pc);
+  }
+
   /* First figure out what's invalidated */
   if (new_cr != NULL) {
     cairo_destroy (renderer->priv->cr);
@@ -416,7 +425,7 @@ eda_renderer_update_contexts (EdaRenderer *renderer, cairo_t *new_cr,
       }
     }
 
-    renderer->priv->cr = cairo_reference (new_cr);
+    renderer->priv->cr = new_cr;
   }
 
   if (new_pc != NULL) {
@@ -429,7 +438,7 @@ eda_renderer_update_contexts (EdaRenderer *renderer, cairo_t *new_cr,
       renderer->priv->pl = NULL;
     }
 
-    renderer->priv->pc = PANGO_CONTEXT (g_object_ref (G_OBJECT (new_pc)));
+    renderer->priv->pc = new_pc;
     renderer->priv->pc_from_cr = 0;
   }
 
@@ -530,7 +539,7 @@ eda_renderer_is_drawable_color (EdaRenderer *renderer, int color,
   }
   /* If color index out of color map bounds, don't draw */
   g_return_val_if_fail ((map != NULL), FALSE);
-  g_return_val_if_fail ((color >= 0) || (color < map->len), FALSE);
+  g_return_val_if_fail ((color >= 0) && ((guint) color < map->len), FALSE);
 
   /* Otherwise, return enabled flag of object's color */
   return (&g_array_index (map, COLOR, color))->enabled;
@@ -547,31 +556,33 @@ eda_renderer_is_drawable (EdaRenderer *renderer, OBJECT *object)
   return eda_renderer_is_drawable_color (renderer, color, TRUE);
 }
 
+/*! \brief Generate hatch segments through the matching geometry API. */
+static void
+eda_renderer_hatch_object (OBJECT *object, gint angle, gint pitch, GArray *lines)
+{
+  switch (object->type) {
+  case OBJ_BOX:
+    m_hatch_box (object->box, angle, pitch, lines);
+    break;
+  case OBJ_CIRCLE:
+    m_hatch_circle (object->circle, angle, pitch, lines);
+    break;
+  case OBJ_PATH:
+    m_hatch_path (object->path, angle, pitch, lines);
+    break;
+  default:
+    g_return_if_reached ();
+  }
+}
+
 static int
 eda_renderer_draw_hatch (EdaRenderer *renderer, OBJECT *object)
 {
-  void (*hatch_func)(void *, gint, gint, GArray *);
-  void *hatch_data;
   GArray *fill_lines;
-  int i;
+  guint i;
 
-  /* Horrible horrible hacks! */
-  switch (object->type) {
-  case OBJ_BOX:
-    hatch_func = (void *) m_hatch_box;
-    hatch_data = (void (*)(void *, gint, gint, GArray *)) object->box;
-    break;
-  case OBJ_CIRCLE:
-    hatch_func = (void *) m_hatch_circle;
-    hatch_data = (void (*)(void *, gint, gint, GArray *)) object->circle;
-    break;
-  case OBJ_PATH:
-    hatch_func = (void *) m_hatch_path;
-    hatch_data = (void (*)(void *, gint, gint, GArray *)) object->path;
-    break;
-  default:
-    g_return_val_if_reached (FALSE);
-  }
+  g_return_val_if_fail (object->type == OBJ_BOX || object->type == OBJ_CIRCLE
+                       || object->type == OBJ_PATH, FALSE);
 
   /* Handle solid and hollow fill types */
   switch (object->fill_type) {
@@ -590,10 +601,10 @@ eda_renderer_draw_hatch (EdaRenderer *renderer, OBJECT *object)
   fill_lines = g_array_new (FALSE, FALSE, sizeof (LINE));
   switch (object->fill_type) {
   case FILLING_MESH:
-    hatch_func (hatch_data, object->fill_angle2, object->fill_pitch2, fill_lines);
+    eda_renderer_hatch_object (object, object->fill_angle2, object->fill_pitch2, fill_lines);
     /* Intentionally fall through */
   case FILLING_HATCH:
-    hatch_func (hatch_data, object->fill_angle1, object->fill_pitch1, fill_lines);
+    eda_renderer_hatch_object (object, object->fill_angle1, object->fill_pitch1, fill_lines);
     break;
   default:
     break;
@@ -608,7 +619,7 @@ eda_renderer_draw_hatch (EdaRenderer *renderer, OBJECT *object)
   }
   eda_cairo_stroke (renderer->priv->cr, EDA_RENDERER_CAIRO_FLAGS (renderer),
                     TYPE_SOLID, END_NONE,
-                    EDA_RENDERER_STROKE_WIDTH (renderer, object->fill_width),
+                    EDA_RENDERER_STROKE_WIDTH (object->fill_width),
                     -1, -1);
 
   g_array_free (fill_lines, TRUE);
@@ -633,7 +644,7 @@ eda_renderer_draw_line (EdaRenderer *renderer, OBJECT *object)
   eda_cairo_stroke (renderer->priv->cr, EDA_RENDERER_CAIRO_FLAGS (renderer),
                     object->line_type,
                     object->line_end,
-                    EDA_RENDERER_STROKE_WIDTH (renderer, object->line_width),
+                    EDA_RENDERER_STROKE_WIDTH (object->line_width),
                     object->line_length,
                     object->line_space);
 }
@@ -647,7 +658,7 @@ eda_renderer_draw_net (EdaRenderer *renderer, OBJECT *object)
                   object->line->x[1], object->line->y[1]);
   eda_cairo_stroke (renderer->priv->cr, EDA_RENDERER_CAIRO_FLAGS (renderer),
                     TYPE_SOLID, END_SQUARE,
-                    EDA_RENDERER_STROKE_WIDTH (renderer, NET_WIDTH),
+                    EDA_RENDERER_STROKE_WIDTH (NET_WIDTH),
                     -1, -1);
 }
 
@@ -660,7 +671,7 @@ eda_renderer_draw_bus (EdaRenderer *renderer, OBJECT *object)
                   object->line->x[1], object->line->y[1]);
   eda_cairo_stroke (renderer->priv->cr, EDA_RENDERER_CAIRO_FLAGS (renderer),
                     TYPE_SOLID, END_SQUARE,
-                    EDA_RENDERER_STROKE_WIDTH (renderer, BUS_WIDTH),
+                    EDA_RENDERER_STROKE_WIDTH (BUS_WIDTH),
                     -1, -1);
 }
 
@@ -685,7 +696,7 @@ eda_renderer_draw_pin (EdaRenderer *renderer, OBJECT *object)
                   object->line->x[1], object->line->y[1]);
   eda_cairo_stroke (renderer->priv->cr, EDA_RENDERER_CAIRO_FLAGS (renderer),
                     TYPE_SOLID, END_SQUARE,
-                    EDA_RENDERER_STROKE_WIDTH (renderer, width),
+                    EDA_RENDERER_STROKE_WIDTH (width),
                     -1, -1);
 }
 
@@ -705,7 +716,7 @@ eda_renderer_draw_box (EdaRenderer *renderer, OBJECT *object)
   if (fill_solid) cairo_fill_preserve (renderer->priv->cr);
   eda_cairo_stroke (renderer->priv->cr, EDA_RENDERER_CAIRO_FLAGS (renderer),
                     object->line_type, object->line_end,
-                    EDA_RENDERER_STROKE_WIDTH (renderer, object->line_width),
+                    EDA_RENDERER_STROKE_WIDTH (object->line_width),
                     object->line_length, object->line_space);
 }
 
@@ -723,7 +734,7 @@ eda_renderer_draw_arc (EdaRenderer *renderer, OBJECT *object)
   eda_cairo_stroke (renderer->priv->cr, EDA_RENDERER_CAIRO_FLAGS (renderer),
                     object->line_type,
                     object->line_end,
-                    EDA_RENDERER_STROKE_WIDTH (renderer, object->line_width),
+                    EDA_RENDERER_STROKE_WIDTH (object->line_width),
                     object->line_length,
                     object->line_space);
 }
@@ -744,7 +755,7 @@ eda_renderer_draw_circle (EdaRenderer *renderer, OBJECT *object)
   if (fill_solid) cairo_fill_preserve (renderer->priv->cr);
   eda_cairo_stroke (renderer->priv->cr, EDA_RENDERER_CAIRO_FLAGS (renderer),
                     object->line_type, object->line_end,
-                    EDA_RENDERER_STROKE_WIDTH (renderer, object->line_width),
+                    EDA_RENDERER_STROKE_WIDTH (object->line_width),
                     object->line_length, object->line_space);
 }
 
@@ -764,7 +775,7 @@ eda_renderer_draw_path (EdaRenderer *renderer, OBJECT *object)
   if (fill_solid) cairo_fill_preserve (renderer->priv->cr);
   eda_cairo_stroke (renderer->priv->cr, EDA_RENDERER_CAIRO_FLAGS (renderer),
                     object->line_type, object->line_end,
-                    EDA_RENDERER_STROKE_WIDTH (renderer, object->line_width),
+                    EDA_RENDERER_STROKE_WIDTH (object->line_width),
                     object->line_length, object->line_space);
 }
 
@@ -791,7 +802,7 @@ eda_renderer_draw_text (EdaRenderer *renderer, OBJECT *object)
                    object->w_right, object->w_top);
     eda_cairo_stroke (renderer->priv->cr, EDA_RENDERER_CAIRO_FLAGS (renderer),
                       TYPE_SOLID, END_SQUARE,
-                      EDA_RENDERER_STROKE_WIDTH (renderer, 0),
+                      EDA_RENDERER_STROKE_WIDTH (0),
                       -1, -1);
     return;
   }
@@ -843,7 +854,7 @@ eda_renderer_draw_text (EdaRenderer *renderer, OBJECT *object)
                   x + TEXT_MARKER_SIZE, y - TEXT_MARKER_SIZE);
   eda_cairo_stroke (renderer->priv->cr, EDA_RENDERER_CAIRO_FLAGS (renderer),
                     TYPE_SOLID, END_NONE,
-                    EDA_RENDERER_STROKE_WIDTH (renderer, 0),
+                    EDA_RENDERER_STROKE_WIDTH (0),
                     -1, -1);
 }
 
@@ -1020,7 +1031,7 @@ eda_renderer_draw_picture (EdaRenderer *renderer, OBJECT *object)
                    object->picture->upper_x, object->picture->upper_y);
     eda_cairo_stroke (renderer->priv->cr, EDA_RENDERER_CAIRO_FLAGS (renderer),
                       TYPE_SOLID, END_SQUARE,
-                      EDA_RENDERER_STROKE_WIDTH (renderer, 0),
+                      EDA_RENDERER_STROKE_WIDTH (0),
                       -1, -1);
     return;
   }
@@ -1248,7 +1259,7 @@ eda_renderer_draw_path_grips (EdaRenderer *renderer, OBJECT *object)
                       next_x, next_y, section->x2, section->y2);
       eda_cairo_stroke (renderer->priv->cr, EDA_RENDERER_CAIRO_FLAGS (renderer),
                         TYPE_SOLID, END_NONE,
-                        EDA_RENDERER_STROKE_WIDTH (renderer, 0), -1, -1);
+                        EDA_RENDERER_STROKE_WIDTH (0), -1, -1);
       /* Two control point grips */
       eda_renderer_draw_grips_impl (renderer, GRIP_CIRCLE, 2,
                                     section->x1, section->y1,
@@ -1303,7 +1314,7 @@ eda_renderer_draw_text_grips (EdaRenderer *renderer, OBJECT *object)
                   x + TEXT_MARKER_SIZE, y - TEXT_MARKER_SIZE);
   eda_cairo_stroke (renderer->priv->cr, EDA_RENDERER_CAIRO_FLAGS (renderer),
                     TYPE_SOLID, END_NONE,
-                    EDA_RENDERER_STROKE_WIDTH (renderer, 0),
+                    EDA_RENDERER_STROKE_WIDTH (0),
                     -1, -1);
 }
 

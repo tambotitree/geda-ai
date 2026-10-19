@@ -1,3 +1,5 @@
+#ifndef GSCHEM_LOG_DOCKABLE_H
+#define GSCHEM_LOG_DOCKABLE_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 1998-2010 Ales Hvezda
@@ -43,3 +45,4 @@ struct _GschemLogDockable {
 
 GType
 gschem_log_dockable_get_type (void);
+#endif /* GSCHEM_LOG_DOCKABLE_H */

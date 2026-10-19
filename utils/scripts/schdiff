@@ -23,7 +23,7 @@ Usage with Mercurial:
 Usage with Subversion:
   svn diff --diff-cmd schdiff
 
-Report bugs to <http://bugs.launchpad.net/geda>
+Report bugs to <https://github.com/tambotitree/geda-ai/issues>
 gEDA/gaf homepage <http://www.geda-project.org/>
 EOF
 

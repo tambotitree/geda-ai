@@ -186,7 +186,6 @@ gschem_accel_label_get_preferred_width(GtkWidget *widget,
                                        gint *natural_width)
 {
     GschemAccelLabel *accel_label = GSCHEM_ACCEL_LABEL(widget);
-    GtkAccelLabel *gtk_accel_label = GTK_ACCEL_LABEL(widget);
     PangoLayout *layout;
     gint width;
 
@@ -268,16 +267,21 @@ gschem_accel_label_set_accel_string (GschemAccelLabel *accel_label,
   if (accel_string) {
     accel_label->accel_string = g_strdup (accel_string);
     substitute_underscores (accel_label->accel_string);
-    // gtk_widget_set_accessible_name(GTK_WIDGET(accel_label), accel_label->accel_string);
-    AtkObject *aobj = gtk_widget_get_accessible(GTK_WIDGET(accel_label));
-    atk_object_set_name(aobj, accel_label->accel_string);
-    gtk_widget_set_tooltip_text(GTK_WIDGET(accel_label), accel_label->accel_string);
+    AtkObject *aobj = gtk_widget_get_accessible (GTK_WIDGET (accel_label));
+    if (aobj != NULL)
+      atk_object_set_name (aobj, accel_label->accel_string);
+    gtk_widget_set_tooltip_text (GTK_WIDGET (accel_label),
+                                 accel_label->accel_string);
   } else {
     accel_label->accel_string = NULL;
-    // Clear the accessible name if none
-    // gtk_widget_set_accessible_name(GTK_WIDGET(accel_label), NULL); // GTK 4 only
-    AtkObject *aobj = gtk_widget_get_accessible(GTK_WIDGET(accel_label));
-    atk_object_set_name(aobj, NULL);
+    /* atk_object_set_name() asserts that the name is non-NULL, so this
+     * branch used to raise
+     *   Atk-CRITICAL: atk_object_set_name: assertion 'name != NULL' failed
+     * for every menu action without a key binding.  An empty name clears the
+     * accessible name just as well. */
+    AtkObject *aobj = gtk_widget_get_accessible (GTK_WIDGET (accel_label));
+    if (aobj != NULL)
+      atk_object_set_name (aobj, "");
   }
 
   g_object_notify (G_OBJECT (accel_label), "accel-string");
@@ -342,7 +346,7 @@ gschem_accel_label_draw(GtkWidget *widget, cairo_t *cr)
   guint ac_width = gschem_accel_label_get_accel_width(accel_label);
 
   // Not enough room? Chain up
-  if (allocation.width < requisition.width + ac_width) {
+  if ((guint)allocation.width < requisition.width + ac_width) {
     GtkWidgetClass *parent = GTK_WIDGET_CLASS(gschem_accel_label_parent_class);
     if (parent->draw)
       return parent->draw(widget, cr);

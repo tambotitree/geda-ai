@@ -27,6 +27,7 @@
 
 /* Gettext translation */
 #include "gettext.h"
+#include "builtins.h"
 
 #include <libgeda/libgeda.h>
 
@@ -38,10 +39,11 @@ static struct option config_long_options[] =
     {"project", 2, NULL, 'p'},
     {"system", 0, NULL, 's'},
     {"user", 0, NULL, 'u'},
+    {NULL, 0, NULL, 0},
   };
 
 static void
-config_usage (void)
+config_usage ()
 {
   printf (_("Usage: gaf config [OPTION] [GROUP KEY [VALUE]]\n"
 "\n"
@@ -74,6 +76,9 @@ cmd_config_impl (void *data, int argc, char **argv)
   EdaConfig *cfg = NULL, *parent;
   const gchar *project_store_path = NULL;
   const char *group, *key;
+
+  /* scm_boot_guile requires this slot; the caller passes NULL user data. */
+  (void) data;
 
   scm_init_guile ();
   libgeda_init ();

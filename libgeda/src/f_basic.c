@@ -333,7 +333,8 @@ int f_open_flags(TOPLEVEL *toplevel, PAGE *page,
  */
 void f_close(TOPLEVEL *toplevel)
 {
-
+  /* Compatibility entry point: file reads do not retain an open stream. */
+  (void) toplevel;
 }
 
 /*! \brief Save the schematic file

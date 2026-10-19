@@ -1082,7 +1082,7 @@ expand_dir (gchar * dir)
 }
 
 static void
-add_default_m4_files (void)
+add_default_m4_files ()
 {
   gchar *path;
 
@@ -1219,7 +1219,7 @@ load_project (gchar * path)
 }
 
 static void
-load_extra_project_files (void)
+load_extra_project_files ()
 {
   gchar *path;
   static gboolean done = FALSE;

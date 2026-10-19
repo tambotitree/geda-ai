@@ -35,6 +35,9 @@
 
 #include "gschem.h"
 
+static void swatchcr_class_init_gtype_adapter (gpointer klass, gpointer data);
+static void swatchcr_init_gtype_adapter (GTypeInstance *instance, gpointer klass);
+
 
 
 /* The width of the border around the swatch, in pixels.
@@ -89,11 +92,12 @@ get_property (GObject    *object,
 
   switch (param_id) {
     case PROP_COLOR: {
-        GdkColor color;
+        GdkRGBA color;
 
         color.red = swatch->color.red;
         color.green = swatch->color.green;
         color.blue = swatch->color.blue;
+        color.alpha = swatch->color.alpha;
 
         g_value_set_boxed (value, &color);
       }
@@ -132,7 +136,7 @@ swatchcr_class_init (GschemSwatchColumnRendererClass *klass)
                                    g_param_spec_boxed ("color",
                                                        "Swatch Color",
                                                        "Swatch Color",
-                                                       GDK_TYPE_COLOR,
+                                                       GDK_TYPE_RGBA,
                                                        G_PARAM_READWRITE));
   g_object_class_install_property (object_class,
                                    PROP_ENABLED,
@@ -155,6 +159,7 @@ swatchcr_init (GschemSwatchColumnRenderer *swatch)
   swatch->color.red = 0;
   swatch->color.green = 0;
   swatch->color.blue = 0;
+  swatch->color.alpha = 1;
 
   swatch->enabled = TRUE;
 
@@ -184,6 +189,9 @@ gschem_swatch_column_renderer_render (GtkCellRenderer      *cell,
         const GdkRectangle   *cell_area,
         GtkCellRendererState flags)
 {
+  (void) widget;
+  (void) background_area;
+  (void) flags;
   GschemSwatchColumnRenderer *swatch = GSCHEM_SWATCH_COLUMN_RENDERER (cell);
 
   if (swatch->enabled) {
@@ -220,9 +228,9 @@ gschem_swatch_column_renderer_render (GtkCellRenderer      *cell,
     cairo_set_line_width(cr, SWATCH_BORDER_WIDTH);
 
     cairo_set_source_rgb(cr,
-                         swatch->color.red   / 65535.0,
-                         swatch->color.green / 65535.0,
-                         swatch->color.blue  / 65535.0);
+                         swatch->color.red   ,
+                         swatch->color.green ,
+                         swatch->color.blue  );
     cairo_fill_preserve(cr);
 
     cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);  // Border: black
@@ -296,12 +304,13 @@ gschem_swatch_column_renderer_get_type()
       sizeof(GschemSwatchColumnRendererClass),
       NULL,                                   /* base_init */
       NULL,                                   /* base_finalize */
-      (GClassInitFunc) swatchcr_class_init,
+      swatchcr_class_init_gtype_adapter,
       NULL,                                   /* class_finalize */
       NULL,                                   /* class_data */
       sizeof(GschemSwatchColumnRenderer),
       0,                                      /* n_preallocs */
-      (GInstanceInitFunc) swatchcr_init,
+      swatchcr_init_gtype_adapter,
+      NULL /* value_table */
     };
 
     type = g_type_register_static (GTK_TYPE_CELL_RENDERER_TEXT, "GschemSwatchColumnRenderer", &info, 0);
@@ -320,4 +329,20 @@ gschem_swatch_column_renderer_new()
   GschemSwatchColumnRenderer *swatch = GSCHEM_SWATCH_COLUMN_RENDERER (g_object_new (GSCHEM_TYPE_SWATCH_COLUMN_RENDERER, NULL));
 
   return swatch;
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+swatchcr_class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  swatchcr_class_init (klass);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+swatchcr_init_gtype_adapter (GTypeInstance *instance, gpointer klass)
+{
+  (void) klass;
+  swatchcr_init ((void *) instance);
 }

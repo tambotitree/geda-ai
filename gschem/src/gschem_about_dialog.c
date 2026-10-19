@@ -44,20 +44,24 @@
  */
 void about_dialog (GschemToplevel *w_current)
 {
+  const gchar *authors[] = {
+    "John Ryan — gEDA-ai maintainer — Aquana Press (Aqnana.net)",
+    "Ales Hvezda and the original gEDA contributors",
+    NULL
+  };
   char *version_string;
   char *logo_file;
   GdkPixbuf *logo;
   GError *error = NULL;
 
   version_string = g_strdup_printf (_("%s (g%.7s)"),
-                                    PACKAGE_DOTTED_VERSION,
+                                    PACKAGE_VERSION,
                                     PACKAGE_GIT_COMMIT);
 
   logo_file = g_strconcat (w_current->toplevel->bitmap_directory,
                            G_DIR_SEPARATOR_S, "gschem-about-logo.png", NULL);
 
   logo = gdk_pixbuf_new_from_file (logo_file, &error);
-  g_free (logo_file);
 
   if (error != NULL) {
     g_assert (logo == NULL);
@@ -66,23 +70,30 @@ void about_dialog (GschemToplevel *w_current)
     g_error_free (error);
   }
 
+  g_free (logo_file);
+
   gtk_show_about_dialog (
       GTK_WINDOW (w_current->main_window),
       "version",        version_string,
       "logo",           logo,
       "title",          _("About gschem"),
-      "comments",       _("gEDA: GPL Electronic Design Automation"),
+      "comments",       _("gEDA: GPL Electronic Design Automation\n"
+                         "Maintained by John Ryan, Aquana Press (Aqnana.net)\n"
+                         "Support and bug reports: GitHub Issues"),
       "copyright",
       /* TRANSLATORS: "ChangeLog" is a literal filename; please don't translate it. */
       _("Copyright © 1998-2012 Ales Hvezda"
-        " <ahvezda@geda.seul.org>\n"
+        "\n"
         "Copyright © 1998-2020 gEDA Contributors"
         " (see ChangeLog for details)"),
-      "website",        "http://geda-project.org/",
+      "website",        PACKAGE_BUGREPORT,
+      "website-label",  _("Support / Report an issue"),
+      "authors",        authors,
       NULL);
 
   g_free (version_string);
-  g_object_unref (logo);
+  if (logo != NULL)
+    g_object_unref (logo);
 }
 
 /***************** End of help/about dialog box *********************/

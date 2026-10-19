@@ -1,11 +1,57 @@
-# Local terraform directory (contains heavy binaries)
-.terraform/
+*~
+.desktop-i18n
+ABOUT-NLS
+Makefile
+Makefile.in
+TAGS
+tags
+aclocal.m4
+autom4te.cache
+config.h
+config.h.in
+config.status
+config.log
+configure
+libtool
+tmpwrk*/
+stamp-git
+stamp-h1
+version.h
+INSTALL
+po/Makefile.in
+po/Makefile
+po/*.mo
+*.log
+test-suite.log
+xorn/tests/*.trs
+xorn/tests/*/*.trs
+xorn/tests/cpython/storage/*.log
+xorn/tests/cpython/storage/*.trs
+xorn/tests/*/*/*.trs
+xorn/tests/*.out
+xorn/tests/*/*.out
+xorn/tests/*/*/*.out
+xorn/tests/*.new
+xorn/tests/*/*.new
+xorn/tests/*/*/*.new
+xorn/tests/netlist/devfiles/*.txt
+xorn/tests/netlist/devfiles/*/*.txt
+requirements.txt
+DISTCLEANFILES = environment.yml
+.aider*
+.env
 
-# Local state files
+# Refactor run state (journal, snapshots, gate reports)
+.refactor/
+__pycache__/
+
+# Generated embedded gschem icon resources
+/gschem/src/gschem_icon_resources.c
+/gschem/src/gschem_icon_resources.h
+
+# Deployment state and Python caches retained from main
+.terraform/
 *.tfstate
 *.tfstate.backup
 .terraform.lock.hcl
-
-# Python cache
-__pycache__/
 *.py[cod]

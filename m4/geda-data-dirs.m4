@@ -23,48 +23,45 @@ AC_DEFUN([AX_DATA_DIRS],
 [
   AC_PREREQ([2.69])dnl
 
-  # Check where to install ordinary data files (e.g. symbols and
-  # gnetlist backends)
-  # FIXME at some point this should become "$datarootdir/geda-gaf" to
-  # match the tarball name.-> This is now $PACKAGE_TARNAME
+  # Match Automake's default source archive directory, including release.
+  GEDA_PACKAGE_DIR="$PACKAGE_TARNAME-$PACKAGE_VERSION"
+  AC_SUBST([GEDA_PACKAGE_DIR])
+  AC_DEFINE_UNQUOTED([GEDA_PACKAGE_DIR], ["$GEDA_PACKAGE_DIR"],
+    [Release-specific shared data directory name.])
+  GEDADATADIR='${datarootdir}/'"$GEDA_PACKAGE_DIR"
+  GEDAIDATADIR="$GEDADATADIR"
   AC_MSG_CHECKING([where to install gEDA shared data])
-  # Setting GEDADATADIR to datarootdir/$PACKAGE_TARNAME is a bad idea because the tar name mught be data specific.
-  # If we are that deep into specific build just do it a s branch and then merge back in.
-  GEDADATADIR=${datarootdir}/geda
-  GEDAIDATADIR=GEDADATADIR
- 
   AC_MSG_RESULT([$GEDADATADIR])
-  AC_MSG_RESULT([$GEDAIDATADIR])
 
-  # Check where to install rc files.
-  # FIXME at some point the rc directory needs to start *defaulting*
-  # to "$sysconfdir/geda-gaf" in order to comply with the GNU & Linux
-  # FHS guidelines.
-  AC_MSG_CHECKING([where to install gEDA rc files])
+  # Do not inherit a stale rc directory from a previous configure run.
+  GEDARCDIR="$GEDADATADIR"
   AC_ARG_WITH([rcdir],
-    AS_HELP_STRING([--with-rcdir[[[=DIR]]]],
-      [install system config in specific DIR]),
-    [ if test "X$with_rcdir" != "Xno"; then
-          if test "X$with_rcdir" = "Xyes"; then # Default for --with-rcdir without arg
-          GEDARCDIR="$sysconfdir/$PACKAGE_TARNAME"
-        else
-          GEDARCDIR="$with_rcdir"
-        fi
-        AC_MSG_RESULT([$GEDARCDIR])
-      else
-        AC_MSG_RESULT([$GEDADATADIR])
-      fi ],
-    [ AC_MSG_RESULT([$GEDADATADIR])
-  ])
+    AS_HELP_STRING([--with-rcdir=DIR], [install system configuration in DIR]),
+    [case "$withval" in
+       yes) GEDARCDIR='${sysconfdir}/'"$GEDA_PACKAGE_DIR" ;;
+       no) ;;
+       *) GEDARCDIR="$withval" ;;
+     esac])
+  AC_MSG_CHECKING([where to install gEDA rc files])
+  AC_MSG_RESULT([$GEDARCDIR])
 
+  # Fully expand configure directory variables only for C string defaults.
+  geda_saved_prefix="$prefix"
+  geda_saved_exec_prefix="$exec_prefix"
+  test "x$prefix" != xNONE || prefix="$ac_default_prefix"
+  test "x$exec_prefix" != xNONE || exec_prefix='$prefix'
   # Now define some preprocessor symbols with the *expanded* values
-  GEDADATADIR_expand=`eval "echo $GEDADATADIR" | sed -e"s:^NONE:$ac_default_prefix:"`
+  GEDADATADIR_expand=`eval "echo $GEDADATADIR"`
+  GEDADATADIR_expand=`eval "echo $GEDADATADIR_expand"`
+  GEDADATADIR_expand=`eval "echo $GEDADATADIR_expand"`
   AC_DEFINE_UNQUOTED([GEDADATADIR], ["$GEDADATADIR_expand"],
     [Define to gEDA/gaf shared data directory.
 Only libgeda should use this - apps should use s_path_sys_data()])
 
   if test "x$GEDARCDIR" != "x"; then
-    GEDARCDIR_expand=`eval "echo $GEDARCDIR" | sed -e"s:^NONE:$ac_default_prefix:"`
+    GEDARCDIR_expand=`eval "echo $GEDARCDIR"`
+    GEDARCDIR_expand=`eval "echo $GEDARCDIR_expand"`
+    GEDARCDIR_expand=`eval "echo $GEDARCDIR_expand"`
     AC_DEFINE_UNQUOTED([GEDARCDIR], ["$GEDARCDIR_expand"],
       [Define to gEDA/gaf rc directory if different from GEDADATADIR.
 Only libgeda should use this - apps should use s_path_sys_config()])
@@ -73,6 +70,11 @@ Only libgeda should use this - apps should use s_path_sys_config()])
     GEDARCDIR=$GEDADATADIR
   fi
 
+  AC_DEFINE_UNQUOTED([PKGDATADIR], ["$GEDADATADIR_expand"],
+    [Release-specific package data directory.])
+  prefix="$geda_saved_prefix"
+  exec_prefix="$geda_saved_exec_prefix"
+  AC_SUBST([GEDAIDATADIR])
   AC_SUBST([GEDADATADIR])
   AC_SUBST([GEDARCDIR])
 

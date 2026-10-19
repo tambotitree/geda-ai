@@ -1,8 +1,8 @@
 bin_PROGRAMS = gschem
 
 BUILT_SOURCES = \
-	actions.decl.x \
-	actions.init.x \
+	gschem_icon_resources.c \
+	gschem_icon_resources.h \
 	g_attrib.x \
 	g_hook.x \
 	g_keys.x \
@@ -13,6 +13,7 @@ BUILT_SOURCES = \
 gschem_SOURCES = \
 	a_zoom.c \
 	g_action.c \
+	actions.c \
 	g_attrib.c \
 	g_funcs.c \
 	g_hook.c \
@@ -24,10 +25,18 @@ gschem_SOURCES = \
 	g_window.c \
 	globals.c \
 	gschem.c \
+	gschem_signal.c \
+	gschem_icons.c \
+	gschem_appearance.c \
 	gschemhotkeystore.c \
 	gschem_about_dialog.c \
 	gschem_accel_label.c \
 	gschem_action.c \
+	gschem_ai_assist_dialog.c \
+	gschem_ai_chat.c \
+	gschem_ai_chat_json.c \
+	gschem_ai_chat_settings.c \
+	gschem_ai_chat_internal.h \
 	gschem_alignment_combo.c \
 	gschem_arc_dialog.c \
 	gschem_binding.c \
@@ -125,10 +134,12 @@ gschem_SOURCES = \
 	x_rc.c \
 	x_script.c \
 	x_stroke.c \
-	x_window.c
+	x_window.c \
+	unit_tests.c
 
 gschem_CPPFLAGS = -I$(top_srcdir)/libgeda/include  -I$(srcdir)/../include \
-	-I$(top_srcdir) -I$(includedir)
+	-I$(top_srcdir) -I$(includedir) \
+	-DGSCHEM_AI_PYTHON='"$(PYTHON)"'
 gschem_CFLAGS = $(GCC_CFLAGS) $(LIBFAM_CFLAGS) \
 	$(MINGW_CFLAGS) \
 	$(GLIB_CFLAGS) $(GIO_CFLAGS) $(GTK_CFLAGS) $(GTHREAD_CFLAGS) \
@@ -139,6 +150,90 @@ gschem_LDADD = \
 	$(top_builddir)/libgedacairo/libgedacairo.la \
 	$(top_builddir)/libgeda/src/libgeda.la
 
+# Resource inputs are distributed in ../icon-theme. Track PNG changes too.
+icon_theme_dir = $(top_srcdir)/gschem/icon-theme
+gschem_icon_xml = $(icon_theme_dir)/gschem-icons.gresource.xml
+gschem_icon_files = \
+	$(icon_theme_dir)/16x16/actions/attribute-attach.png \
+	$(icon_theme_dir)/16x16/actions/attribute-detach.png \
+	$(icon_theme_dir)/16x16/actions/attribute-show-both.png \
+	$(icon_theme_dir)/16x16/actions/attribute-show-name.png \
+	$(icon_theme_dir)/16x16/actions/attribute-show-value.png \
+	$(icon_theme_dir)/16x16/actions/clone.png \
+	$(icon_theme_dir)/16x16/actions/deselect.png \
+	$(icon_theme_dir)/16x16/actions/gtk-about.png \
+	$(icon_theme_dir)/16x16/actions/gtk-cancel.png \
+	$(icon_theme_dir)/16x16/actions/gtk-close.png \
+	$(icon_theme_dir)/16x16/actions/gtk-copy.png \
+	$(icon_theme_dir)/16x16/actions/gtk-cut.png \
+	$(icon_theme_dir)/16x16/actions/gtk-delete.png \
+	$(icon_theme_dir)/16x16/actions/gtk-edit.png \
+	$(icon_theme_dir)/16x16/actions/gtk-enable-accels.png \
+	$(icon_theme_dir)/16x16/actions/gtk-execute.png \
+	$(icon_theme_dir)/16x16/actions/gtk-find.png \
+	$(icon_theme_dir)/16x16/actions/gtk-go-back.png \
+	$(icon_theme_dir)/16x16/actions/gtk-go-down.png \
+	$(icon_theme_dir)/16x16/actions/gtk-go-forward.png \
+	$(icon_theme_dir)/16x16/actions/gtk-go-up.png \
+	$(icon_theme_dir)/16x16/actions/gtk-goto-bottom.png \
+	$(icon_theme_dir)/16x16/actions/gtk-new.png \
+	$(icon_theme_dir)/16x16/actions/gtk-ok.png \
+	$(icon_theme_dir)/16x16/actions/gtk-open.png \
+	$(icon_theme_dir)/16x16/actions/gtk-paste.png \
+	$(icon_theme_dir)/16x16/actions/gtk-preferences.png \
+	$(icon_theme_dir)/16x16/actions/gtk-print.png \
+	$(icon_theme_dir)/16x16/actions/gtk-properties.png \
+	$(icon_theme_dir)/16x16/actions/gtk-quit.png \
+	$(icon_theme_dir)/16x16/actions/gtk-redo.png \
+	$(icon_theme_dir)/16x16/actions/gtk-refresh.png \
+	$(icon_theme_dir)/16x16/actions/gtk-revert-to-saved.png \
+	$(icon_theme_dir)/16x16/actions/gtk-save-as.png \
+	$(icon_theme_dir)/16x16/actions/gtk-save.png \
+	$(icon_theme_dir)/16x16/actions/gtk-select-all.png \
+	$(icon_theme_dir)/16x16/actions/gtk-undo.png \
+	$(icon_theme_dir)/16x16/actions/gtk-zoom-fit.png \
+	$(icon_theme_dir)/16x16/actions/gtk-zoom-in.png \
+	$(icon_theme_dir)/16x16/actions/gtk-zoom-out.png \
+	$(icon_theme_dir)/16x16/actions/insert-arc.png \
+	$(icon_theme_dir)/16x16/actions/insert-attribute.png \
+	$(icon_theme_dir)/16x16/actions/insert-box.png \
+	$(icon_theme_dir)/16x16/actions/insert-bus.png \
+	$(icon_theme_dir)/16x16/actions/insert-circle.png \
+	$(icon_theme_dir)/16x16/actions/insert-line.png \
+	$(icon_theme_dir)/16x16/actions/insert-net.png \
+	$(icon_theme_dir)/16x16/actions/insert-path.png \
+	$(icon_theme_dir)/16x16/actions/insert-pin.png \
+	$(icon_theme_dir)/16x16/actions/insert-symbol.png \
+	$(icon_theme_dir)/16x16/actions/insert-text.png \
+	$(icon_theme_dir)/16x16/actions/multi-clone.png \
+	$(icon_theme_dir)/16x16/actions/select.png \
+	$(icon_theme_dir)/16x16/actions/symbol-datasheet.png \
+	$(icon_theme_dir)/24x24/actions/object-flip-horizontal.xpm \
+	$(icon_theme_dir)/24x24/actions/object-rotate-left.xpm \
+	$(icon_theme_dir)/scalable/actions/insert-image.svg \
+	$(icon_theme_dir)/scalable/actions/window-new.svg \
+	$(icon_theme_dir)/48x48/apps/geda-gschem.png \
+	$(icon_theme_dir)/scalable/actions/help-browser.svg \
+	$(icon_theme_dir)/scalable/actions/web-browser.svg
+nodist_gschem_SOURCES = gschem_icon_resources.c gschem_icon_resources.h
+
+# --compiler=msvc selects portable numeric byte arrays, avoiding oversized
+# string literals under -Wpedantic. It does not select or invoke our C compiler.
+gschem_icon_resources.c: $(gschem_icon_xml) $(gschem_icon_files)
+	$(AM_V_GEN) $(GLIB_COMPILE_RESOURCES) --target=$@.tmp \
+	  --sourcedir=$(icon_theme_dir) --generate-source --manual-register \
+	  --compiler=msvc --c-name=gschem_icon_data $(gschem_icon_xml) && mv $@.tmp $@
+
+gschem_icon_resources.h: $(gschem_icon_xml)
+	$(AM_V_GEN) $(GLIB_COMPILE_RESOURCES) --target=$@.tmp \
+	  --sourcedir=$(icon_theme_dir) --generate-header --manual-register \
+	  --c-name=gschem_icon_data \
+	  $(gschem_icon_xml) && mv $@.tmp $@
+
+# Keep strict diagnostics on source builds, outside configure's feature probes.
+GSCHEM_WARNING_CFLAGS = -Wall -Wextra -Werror -Wpedantic \
+  -Wstrict-prototypes -Wmissing-prototypes -Wformat=2
+gschem_CFLAGS += $(GSCHEM_WARNING_CFLAGS)
 
 # This is used to generate boilerplate for defining Scheme functions
 # in C.
@@ -152,22 +247,76 @@ am__v_SNARF_1 =
 .c.x:
 	$(AM_V_SNARF)CPP="$(CPP)" $(GUILE_SNARF) -o $@ $< $(snarf_cpp_opts)
 
-actions.decl.x: actions.decl.h actions.c Makefile
-	$(AM_V_GEN)$(CPP) -I$(srcdir) -c $(srcdir)/actions.decl.h | \
-	  sed -e '/^.*KEEP_LINE /!d' -e 's/^.*KEEP_LINE //' > $@.tmp && \
-	mv $@.tmp $@
 
-actions.init.x: actions.init.c actions.c Makefile
-	$(AM_V_GEN)$(CPP) -I$(srcdir) -c $(srcdir)/actions.init.c | \
-	  sed -e '/^.*KEEP_LINE /!d' -e 's/^.*KEEP_LINE //' > $@.tmp && \
-	mv $@.tmp $@
 
-EXTRA_DIST = actions.c actions.decl.h actions.init.c
+EXTRA_DIST = actions.c
 
 localedir = @datadir@/locale
 DEFS = -DLOCALEDIR=\"$(localedir)\" @DEFS@
+
+# Add a custom pedantic target ... make pedantic is for the obssesive complusively code cleaners
+#	1.	make PEDANTIC=1
+#	•	Runs clang-tidy and valgrind.
+#	•	If both succeed, creates pedantic.tidy.
+#	2.	make clean-pedantic
+#	•	Removes the sentinel, forcing a re-run next time.
+#	3.	If you change any .c file, make sees $(srcdir)/*.c newer than pedantic.tidy and re-runs.
+.PHONY: pedantic clean-pedantic
+
+PEDSENTINEL = pedantic.tidy
+
+pedantic: $(PEDSENTINEL)
+
+$(PEDSENTINEL): $(gschem_SOURCES)
+	@echo "🔍 Running clang-tidy on all source files..."
+	@for file in $(gschem_SOURCES); do \
+	  clang-tidy $(srcdir)/$$file -- $(gschem_CPPFLAGS) $(gschem_CFLAGS) || exit 1; \
+	  @command -v clang-tidy >/dev/null 2>&1 || { echo "clang-tidy not found!"; exit 1; }
+	  @echo "🔍 Running clang-tidy on all source files..."
+	done
+	@echo "🧪 Running valgrind on gschem binary..."
+	@valgrind --leak-check=full --track-origins=yes $(builddir)/gschem || exit 1
+	@touch $(PEDSENTINEL)
+
+clean-pedantic:
+	@rm -f $(PEDSENTINEL)
+
+clean-local: clean-pedantic
 
 MOSTLYCLEANFILES = *.log core FILE *~
 CLEANFILES = *.log core FILE *~ $(BUILT_SOURCES)
 DISTCLEANFILES = *.log core FILE *~
 MAINTAINERCLEANFILES = *.log core FILE *~ Makefile.in
+
+# Exercise signal bookkeeping without creating a GTK window.
+check_PROGRAMS = test-gschem-signal
+TESTS = $(check_PROGRAMS)
+test_gschem_signal_SOURCES = $(top_srcdir)/tests/test_gschem_signal.c gschem_signal.c
+test_gschem_signal_CPPFLAGS = -I$(srcdir)/../include $(GLIB_CFLAGS)
+test_gschem_signal_CFLAGS = $(GCC_CFLAGS) $(GSCHEM_WARNING_CFLAGS)
+test_gschem_signal_LDADD = $(GLIB_LIBS) -lgobject-2.0
+
+check_PROGRAMS += test-gschem-icons
+test_gschem_icons_SOURCES = $(top_srcdir)/tests/test_gschem_icons.c gschem_icons.c gschem_appearance.c
+nodist_test_gschem_icons_SOURCES = gschem_icon_resources.c gschem_icon_resources.h
+test_gschem_icons_CPPFLAGS = -I$(srcdir)/../include $(GTK_CFLAGS)
+test_gschem_icons_CFLAGS = $(GCC_CFLAGS) $(GSCHEM_WARNING_CFLAGS)
+test_gschem_icons_LDADD = $(GTK_LIBS)
+
+# Focused viewport, connectivity and AI Assist regression checks.
+EXTRA_DIST += $(top_srcdir)/tests/test_viewport_rendering.py \
+  $(top_srcdir)/tests/test_picker_attributes.py \
+  $(top_srcdir)/tests/test_net_interaction.py \
+  $(top_srcdir)/tests/test_ai_chat_backend.py \
+  $(top_srcdir)/tests/test_ai_chat_ui.py \
+  $(top_srcdir)/tests/test_ai_chat_http.py
+check-local: gschem-gschem_page_geometry.o
+	GEDA_TEST_BUILD_ROOT='$(abs_top_builddir)' $(PYTHON) \
+	  $(top_srcdir)/tests/test_viewport_rendering.py
+	GEDA_TEST_BUILD_ROOT='$(abs_top_builddir)' $(PYTHON) \
+	  $(top_srcdir)/tests/test_picker_attributes.py
+	GEDA_TEST_BUILD_ROOT='$(abs_top_builddir)' $(PYTHON) \
+	  $(top_srcdir)/tests/test_net_interaction.py
+	$(PYTHON) $(top_srcdir)/tests/test_ai_chat_backend.py
+	GEDA_TEST_BUILD_ROOT='$(abs_top_builddir)' $(PYTHON) \
+	  $(top_srcdir)/tests/test_ai_chat_ui.py

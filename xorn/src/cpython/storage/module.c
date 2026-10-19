@@ -456,7 +456,7 @@ static int add_type(PyObject *module, const char *name, PyTypeObject *value)
 	return PyModule_AddObject(module, name, (PyObject *)value);
 }
 
-PyMODINIT_FUNC PyInit_storage(void)
+PyMODINIT_FUNC PyInit_storage()
 {
     PyObject *m;
 

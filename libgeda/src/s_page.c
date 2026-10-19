@@ -63,7 +63,7 @@ object_added (TOPLEVEL *toplevel, PAGE *page, OBJECT *object)
   /* Set up object parent pointer */
 #ifndef NDEBUG
   if (object->page != NULL) {
-    g_critical ("Object %p already has parent page %p!", object, object->page);
+    g_critical ("Object %p already has parent page %p!", (void *) object, (void *) object->page);
   }
 #endif
   object->page = page;
@@ -86,7 +86,7 @@ pre_object_removed (TOPLEVEL *toplevel, PAGE *page, OBJECT *object)
   /* Clear object parent pointer */
 #ifndef NDEBUG
   if (object->page == NULL) {
-    g_critical ("Object %p has NULL parent page!", object);
+    g_critical ("Object %p has NULL parent page!", (void *) object);
   }
 #endif
   object->page = NULL;

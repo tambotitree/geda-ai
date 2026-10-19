@@ -37,8 +37,9 @@ enum
 
 
 
-static void
-class_init (GschemBindingClass *klass);
+// static void
+// class_init (GschemBindingClass *klass, gpointer user_data);
+static void class_init(GschemBindingIntegerClass *klass, gpointer user_data);
 
 static void
 get_property (GObject    *object,
@@ -46,8 +47,9 @@ get_property (GObject    *object,
               GValue     *value,
               GParamSpec *pspec);
 
-static void
-instance_init (GschemBinding *binding);
+// static void
+// instance_init (GschemBinding *binding, gpointer klass);
+static void instance_init(GschemBindingInteger *binding, gpointer klass);
 
 static void
 set_property (GObject      *object,
@@ -73,7 +75,7 @@ update_widget (GschemBinding *binding);
 /*! \brief Get/register GschemBinding type.
  */
 GType
-gschem_binding_get_type()
+gschem_binding_get_type(void)
 {
   static GType type = 0;
 
@@ -88,6 +90,7 @@ gschem_binding_get_type()
       sizeof(GschemBinding),
       0,                                            /* n_preallocs */
       (GInstanceInitFunc) instance_init,
+      NULL                                              /* value_table */
     };
 
     type = g_type_register_static (G_TYPE_OBJECT,
@@ -158,12 +161,15 @@ gschem_binding_update_widget (GschemBinding *binding)
  *  \param [in,out] klass The GschemBindingClass class
  */
 static void
-class_init (GschemBindingClass *klass)
+class_init(GschemBindingIntegerClass *klass, gpointer user_data)
 {
+  (void)user_data;
+
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  klass->update_model = update_model;
-  klass->update_widget = update_widget;
+  GschemBindingClass *base_klass = GSCHEM_BINDING_CLASS(klass);
+  base_klass->update_model = update_model;
+  base_klass->update_widget = update_widget;
 
   object_class->get_property = get_property;
   object_class->set_property = set_property;
@@ -195,8 +201,10 @@ class_init (GschemBindingClass *klass)
  *  \param [in,out] binding The GschemBinding
  */
 static void
-instance_init (GschemBinding *binding)
+instance_init(GschemBindingInteger *binding, gpointer klass)
 {
+  (void)binding;
+  (void)klass;
 }
 
 
@@ -215,6 +223,8 @@ get_property (GObject    *object,
               GValue     *value,
               GParamSpec *pspec)
 {
+  (void)value;
+
   //GschemBinding *binding = GSCHEM_BINDING (object);
 
   switch (param_id) {
@@ -240,6 +250,8 @@ set_property (GObject      *object,
               const GValue *value,
               GParamSpec   *pspec)
 {
+  (void)value;
+
   //GschemBinding *binding = GSCHEM_BINDING (object);
 
   switch (param_id) {
@@ -260,6 +272,7 @@ set_property (GObject      *object,
 static gboolean
 update_model (GschemBinding *binding)
 {
+  (void)binding;
   return FALSE;
 }
 
@@ -274,5 +287,6 @@ update_model (GschemBinding *binding)
 static gboolean
 update_widget (GschemBinding *binding)
 {
+  (void)binding;
   return FALSE;
 }

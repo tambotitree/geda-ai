@@ -59,7 +59,7 @@ typedef struct {
 static SET * first_set = NULL;
 static SET * last_set = NULL;
 
-void s_rename_init(void)
+void s_rename_init()
 {
     if (first_set)
     {
@@ -68,7 +68,7 @@ void s_rename_init(void)
     }
 }
 
-void s_rename_destroy_all(void)
+void s_rename_destroy_all()
 {
     RENAME * temp;
     void * to_free;
@@ -90,7 +90,7 @@ void s_rename_destroy_all(void)
     last_set = NULL;
 }
 
-void s_rename_next_set(void)
+void s_rename_next_set()
 {
     SET * new_set;
 
@@ -107,7 +107,7 @@ void s_rename_next_set(void)
     }
 }
 
-void s_rename_print(void)
+void s_rename_print()
 {
     SET * temp_set;
     RENAME * temp_rename;
@@ -287,7 +287,7 @@ void s_rename_all_lowlevel(NETLIST * netlist_head, char *src, char *dest)
     }
 }
 
-void s_rename_all(TOPLEVEL * pr_current, NETLIST * netlist_head)
+void s_rename_all(NETLIST * netlist_head)
 {
     RENAME * temp;
 

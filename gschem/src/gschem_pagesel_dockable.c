@@ -28,8 +28,11 @@
 #endif
 
 #include "gschem.h"
+
+static void pagesel_class_init_gtype_adapter (gpointer klass, gpointer data);
 #include "../include/gschem_pagesel_dockable.h"
-#include "actions.decl.x"
+// #include "actions.decl.x"
+#include "actions.h"
 
 
 static void pagesel_popup_menu (GschemPageselDockable *pagesel,
@@ -96,6 +99,7 @@ static void pagesel_callback_row_activated (GtkTreeView *tree_view,
                                             GtkTreeViewColumn *column,
                                             gpointer user_data)
 {
+  (void) column;
   GschemDockable *dockable = GSCHEM_DOCKABLE (user_data);
   GschemToplevel *w_current = dockable->w_current;
   GtkTreeModel *model;
@@ -124,6 +128,7 @@ static gboolean pagesel_callback_button_pressed (GtkWidget *widget,
 						 GdkEventButton *event,
 						 gpointer user_data)
 {
+  (void) widget;
   GschemPageselDockable *pagesel = GSCHEM_PAGESEL_DOCKABLE (user_data);
   gboolean ret = FALSE;
 
@@ -143,6 +148,7 @@ static gboolean pagesel_callback_button_pressed (GtkWidget *widget,
 static gboolean pagesel_callback_popup_menu (GtkWidget *widget,
 					     gpointer user_data)
 {
+  (void) widget;
   GschemPageselDockable *pagesel = GSCHEM_PAGESEL_DOCKABLE (user_data);
 
   pagesel_popup_menu (pagesel, NULL);
@@ -200,20 +206,25 @@ static void pagesel_popup_menu (GschemPageselDockable *pagesel,
   /* create the context menu */
   menu = gtk_menu_new();
 
-  menuitem = gtk_image_menu_item_new_with_mnemonic (_("_Refresh List"));
-  gtk_image_menu_item_set_image (
-    GTK_IMAGE_MENU_ITEM (menuitem),
-    gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU));
+  menuitem = gtk_menu_item_new ();
+  GtkWidget *refresh_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  GtkWidget *refresh_label = gtk_label_new_with_mnemonic (_("_Refresh List"));
+  gtk_label_set_mnemonic_widget (GTK_LABEL (refresh_label), menuitem);
+  gtk_box_pack_start (GTK_BOX (refresh_box),
+                      gtk_image_new_from_icon_name ("view-refresh", GTK_ICON_SIZE_MENU),
+                      FALSE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (refresh_box), refresh_label, FALSE, FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (menuitem), refresh_box);
   g_signal_connect_swapped (menuitem, "activate",
                             G_CALLBACK (pagesel_update), pagesel);
   gtk_menu_shell_append (GTK_MENU_SHELL (menu), menuitem);
 
-  menuitem = gtk_separator_menu_item_new ();
+  menuitem = gtk_separator_menu_item_new();
   gtk_menu_shell_append (GTK_MENU_SHELL (menu), menuitem);
 
   for (tmp = menuitems; tmp->label != NULL; tmp++) {
     if (strcmp (tmp->label, "-") == 0) {
-      menuitem = gtk_separator_menu_item_new ();
+      menuitem = gtk_separator_menu_item_new();
     } else {
       menuitem = gtk_menu_item_new_with_label (_(tmp->label));
       g_object_set_data (G_OBJECT (menuitem), "action", tmp->action);
@@ -226,9 +237,7 @@ static void pagesel_popup_menu (GschemPageselDockable *pagesel,
   }
   gtk_widget_show_all (menu);
   /* make menu a popup menu */
-  gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL,
-                  (event != NULL) ? event->button : 0,
-                  gdk_event_get_time ((GdkEvent*)event));
+  gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);
   
 }
 
@@ -248,6 +257,8 @@ static void notify_gschem_toplevel_cb (GObject    *gobject,
                                        GParamSpec *arg1,
                                        gpointer    user_data)
 {
+  (void) arg1;
+  (void) user_data;
   GschemPageselDockable *pagesel = GSCHEM_PAGESEL_DOCKABLE (gobject);
 
   pagesel_update( pagesel );
@@ -268,12 +279,13 @@ GType gschem_pagesel_dockable_get_type()
       sizeof (GschemPageselDockableClass),
       NULL, /* base_init */
       NULL, /* base_finalize */
-      (GClassInitFunc) pagesel_class_init,
+      pagesel_class_init_gtype_adapter,
       NULL, /* class_finalize */
       NULL, /* class_data */
       sizeof (GschemPageselDockable),
       0,    /* n_preallocs */
-      NULL  /* instance_init */
+      NULL,  /* instance_init */
+      NULL /* value_table */
     };
 		
     pagesel_type = g_type_register_static (GSCHEM_TYPE_DOCKABLE,
@@ -543,3 +555,10 @@ static void pagesel_update (GschemPageselDockable *pagesel)
   select_page (pagesel->treeview, NULL, toplevel->page_current);  
 }
 
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+pagesel_class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  pagesel_class_init (klass);
+}

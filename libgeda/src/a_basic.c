@@ -172,7 +172,7 @@ gchar *o_save_objects (const GList *object_list, gboolean save_attribs)
            *  than killing the program, which is what this used to
            *  do... */
           g_critical (_("o_save_objects: object %p has unknown type '%c'\n"),
-                      o_current, o_current->type);
+                      (void *) o_current, o_current->type);
           /* Dump string built so far */
           g_string_free (acc, TRUE);
           return NULL;
@@ -221,6 +221,9 @@ int o_save (TOPLEVEL *toplevel, const GList *object_list,
             const char *filename, GError **err)
 {
   char *buffer;
+
+  /* Kept for API compatibility; serialization uses the supplied objects. */
+  (void) toplevel;
 
   /* Check to see if real filename is writable; if file doesn't exists
      we assume all is well */

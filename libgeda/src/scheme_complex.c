@@ -27,6 +27,15 @@
 #include "libgeda_priv.h"
 #include "libgedaguile_priv.h"
 
+/* Scheme entry points are private C functions registered in this module. */
+static SCM make_complex (SCM basename_s);
+static SCM make_complex_library (SCM basename_s);
+static SCM set_complex_x (SCM complex_s, SCM x_s, SCM y_s, SCM angle_s, SCM mirror_s, SCM locked_s);
+static SCM complex_info (SCM complex_s);
+static SCM complex_contents (SCM complex_s);
+static SCM complex_append_x (SCM complex_s, SCM obj_s);
+static SCM complex_remove_x (SCM complex_s, SCM obj_s);
+
 /*! \brief Create a new complex object.
  * \par Function Description
  * Creates a new, empty complex object, with the given \a basename and
@@ -379,8 +388,11 @@ SCM_DEFINE (complex_remove_x, "%complex-remove!", 2, 0, 0,
  * be accessed using (use-modules (geda core complex)).
  */
 static void
-init_module_geda_core_complex ()
+init_module_geda_core_complex (void *unused_data)
 {
+  /* Guile supplies this argument; module registration needs no context. */
+  (void) unused_data;
+
   /* Register the functions and symbols */
   #include "scheme_complex.x"
 

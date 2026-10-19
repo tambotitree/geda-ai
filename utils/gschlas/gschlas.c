@@ -38,7 +38,7 @@
 #include "../include/prototype.h"
 
 void
-gschlas_quit(void)
+gschlas_quit()
 {
 
   s_clib_free();

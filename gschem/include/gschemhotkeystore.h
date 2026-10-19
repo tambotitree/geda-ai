@@ -1,3 +1,5 @@
+#ifndef GSCHEMHOTKEYSTORE_H
+#define GSCHEMHOTKEYSTORE_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 2013 Peter Brett <peter@peter-b.co.uk>
@@ -73,3 +75,4 @@ GschemHotkeyStore *gschem_hotkey_store_new (void) G_GNUC_WARN_UNUSED_RESULT;
 G_END_DECLS
 
 #endif /* ! __GSCHEM_HOTKEY_STORE_H__ */
+#endif /* GSCHEMHOTKEYSTORE_H */

@@ -14,7 +14,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * along with this program; write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 /*!
@@ -39,7 +39,7 @@ enum
 
 
 static void
-class_init (GschemBindingIntegerClass *klass);
+class_init (GschemBindingIntegerClass *klass, gpointer user_data);
 
 static void
 get_property (GObject    *object,
@@ -48,7 +48,7 @@ get_property (GObject    *object,
               GParamSpec *pspec);
 
 static void
-instance_init (GschemBindingInteger *swatch);
+instance_init (GschemBindingInteger *binding, gpointer klass);
 
 static void
 model_notify (GObject *object, GParamSpec *pspec, GschemBindingInteger *binding);
@@ -79,7 +79,7 @@ widget_apply (GtkWidget *widget, GschemBindingInteger *binding);
 /*! \brief Get/register GschemBindingInteger type.
  */
 GType
-gschem_binding_integer_get_type()
+gschem_binding_integer_get_type(void)
 {
   static GType type = 0;
 
@@ -94,6 +94,7 @@ gschem_binding_integer_get_type()
       sizeof(GschemBindingInteger),
       0,                                            /* n_preallocs */
       (GInstanceInitFunc) instance_init,
+      NULL                                          /* value_table */
     };
 
     type = g_type_register_static (GSCHEM_TYPE_BINDING,
@@ -128,8 +129,9 @@ gschem_binding_integer_new (const gchar *param_name, GtkWidget *widget)
  *  \param [in,out] klass The swatch cell renderer class
  */
 static void
-class_init (GschemBindingIntegerClass *klass)
+class_init (GschemBindingIntegerClass *klass, gpointer user_data)
 {
+  (void) user_data;
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
   klass->parent_class.update_model = update_model;
@@ -163,8 +165,10 @@ class_init (GschemBindingIntegerClass *klass)
  *  \param [in,out] renderer The fill swatch cell renderer
  */
 static void
-instance_init (GschemBindingInteger *binding)
+instance_init (GschemBindingInteger *binding, gpointer klass)
 {
+  (void) klass;
+  (void) binding;
 }
 
 
@@ -183,6 +187,7 @@ get_property (GObject    *object,
               GValue     *value,
               GParamSpec *pspec)
 {
+  (void) value;
   switch (param_id) {
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -202,6 +207,7 @@ get_property (GObject    *object,
 static void
 model_notify (GObject *object, GParamSpec *pspec, GschemBindingInteger *binding)
 {
+  (void) object;
   const gchar *param_name = g_intern_string (pspec->name);
 
   if (param_name == binding->model_param) {
@@ -214,9 +220,7 @@ static void
 set_model_object (GschemBindingInteger *binding, GObject *object)
 {
   if (binding->model_object != NULL) {
-    g_signal_handlers_disconnect_by_func (binding->model_object,
-                                          G_CALLBACK (model_notify),
-                                          binding);
+    gschem_signal_handlers_disconnect (binding->model_object, G_CALLBACK (model_notify), binding);
 
     g_object_unref (binding->model_object);
   }
@@ -226,7 +230,7 @@ set_model_object (GschemBindingInteger *binding, GObject *object)
   if (binding->model_object != NULL) {
     g_object_ref (binding->model_object);
 
-    g_signal_connect (binding->model_object,
+    gschem_signal_connect (binding->model_object,
                       "notify",
                       G_CALLBACK (model_notify),
                       binding);
@@ -300,7 +304,7 @@ set_widget (GschemBindingInteger *binding, GtkWidget *widget)
 
   g_object_ref (binding->widget);
 
-  g_signal_connect(G_OBJECT (binding->widget),
+  gschem_signal_connect (G_OBJECT (binding->widget),
                    "apply",
                    G_CALLBACK (widget_apply),
                    binding);
@@ -317,6 +321,7 @@ set_widget (GschemBindingInteger *binding, GtkWidget *widget)
 static gboolean
 update_model (GschemBinding *parent)
 {
+  (void) parent;
   GschemBindingInteger *binding = GSCHEM_BINDING_INTEGER (parent);
   int number;
   gboolean success = FALSE;
@@ -326,9 +331,7 @@ update_model (GschemBinding *parent)
   if (number >= 0) {
     GValue value = G_VALUE_INIT;
 
-    g_signal_handlers_block_by_func(G_OBJECT (binding->model_object),
-                                    G_CALLBACK (model_notify),
-                                    binding);
+    gschem_signal_handlers_block (G_OBJECT (binding->model_object), G_CALLBACK (model_notify), binding);
 
     g_value_init (&value, G_TYPE_INT);
     g_value_set_int (&value, number);
@@ -339,9 +342,7 @@ update_model (GschemBinding *parent)
 
     g_value_unset (&value);
 
-    g_signal_handlers_unblock_by_func(G_OBJECT (binding->model_object),
-                                      G_CALLBACK (model_notify),
-                                      binding);
+    gschem_signal_handlers_unblock (G_OBJECT (binding->model_object), G_CALLBACK (model_notify), binding);
 
     success = TRUE;
   }
@@ -376,15 +377,11 @@ update_widget (GschemBinding *parent)
     number = g_value_get_int (&value);
     g_value_unset (&value);
 
-    g_signal_handlers_block_by_func(G_OBJECT (binding->widget),
-                                    G_CALLBACK (widget_apply),
-                                    binding);
+    gschem_signal_handlers_block (G_OBJECT (binding->widget), G_CALLBACK (widget_apply), binding);
 
     gschem_integer_combo_box_set_value (binding->widget, number);
 
-    g_signal_handlers_unblock_by_func(G_OBJECT (binding->widget),
-                                      G_CALLBACK (widget_apply),
-                                      binding);
+    gschem_signal_handlers_unblock (G_OBJECT (binding->widget), G_CALLBACK (widget_apply), binding);
 
     gtk_widget_set_sensitive (binding->widget, (number != -1));
 
@@ -399,5 +396,6 @@ update_widget (GschemBinding *parent)
 static void
 widget_apply (GtkWidget *widget, GschemBindingInteger *binding)
 {
+  (void) widget;
   update_model (GSCHEM_BINDING (binding));
 }

@@ -89,6 +89,7 @@ update_spin_button (GschemOptions *options,
                     GParamSpec *pspec,
                     gpointer user_data)
 {
+  (void) pspec;
   update_spin_button_internal (GTK_SPIN_BUTTON (user_data),
                                gschem_options_get_snap_size (options));
 }
@@ -97,15 +98,14 @@ static void
 update_spin_button_internal (GtkSpinButton *spin_button,
                              gdouble value)
 {
-  g_signal_handlers_block_matched (
-    spin_button, G_SIGNAL_MATCH_FUNC, 0, 0, NULL,
-    G_CALLBACK (spin_button_value_changed), NULL);
+  GschemToplevel *w_current = g_object_get_data (G_OBJECT (spin_button), "gschem-toplevel");
+  gschem_signal_handlers_block (spin_button,
+                                G_CALLBACK (spin_button_value_changed), w_current);
 
   gtk_spin_button_set_value (spin_button, value);
 
-  g_signal_handlers_unblock_matched (
-    spin_button, G_SIGNAL_MATCH_FUNC, 0, 0, NULL,
-    G_CALLBACK (spin_button_value_changed), NULL);
+  gschem_signal_handlers_unblock (spin_button,
+                                  G_CALLBACK (spin_button_value_changed), w_current);
 }
 
 /*! \brief Create grid size spinbox.
@@ -123,7 +123,8 @@ x_grid_size_sb_new (GschemToplevel *w_current)
                             gschem_options_get_snap_size(w_current->options));
   gtk_entry_set_width_chars(GTK_ENTRY(spin_button), 5);
 
-  g_signal_connect(spin_button, "value-changed",
+  g_object_set_data (G_OBJECT (spin_button), "gschem-toplevel", w_current);
+  gschem_signal_connect(spin_button, "value-changed",
                    G_CALLBACK(spin_button_value_changed), w_current);
   g_signal_connect(w_current->options, "notify::snap-size",
                    G_CALLBACK(update_spin_button), spin_button);

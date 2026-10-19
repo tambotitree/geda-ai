@@ -61,7 +61,7 @@ static struct internal_command commands[] =
 
 /* Print help info and exit */
 static void
-usage (void)
+usage ()
 {
   printf (_("Usage: gaf [OPTION...] COMMAND [ARGS ...]\n"
 "\n"
@@ -84,7 +84,7 @@ PACKAGE_BUGREPORT);
 
 /* Print version info and exit */
 static void
-version (void)
+version ()
 {
   printf(_("gEDA/gaf %s (g%.7s)\n"
 "Copyright (C) 1998-2020 gEDA developers\n"

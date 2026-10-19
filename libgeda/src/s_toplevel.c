@@ -40,7 +40,7 @@
  *
  *  \returns the newly created TOPLEVEL.
  */
-TOPLEVEL *s_toplevel_new (void)
+TOPLEVEL *s_toplevel_new ()
 {
   TOPLEVEL *toplevel;
 

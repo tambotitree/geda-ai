@@ -32,7 +32,7 @@ G_BEGIN_DECLS
  * Sometimes, it is useful to be able to manipulate GObjects (for
  * example, GTK+ UI elements) when a Guile Scheme-level hook is run.
  * Unfortunately, this can be tricky to do directly, not least since
- * the <tt>scm_add_hook_x()</tt> procedure requires a closure as an argument.
+ * the <tt>scm_add_hook_x(void)</tt> procedure requires a closure as an argument.
  *
  * The #EdascmHookProxy makes things much easier by allowing GObjects
  * to simply connect to its \b "run" signal in order to receive a
@@ -80,7 +80,7 @@ struct _EdascmHookProxy
   EdascmHookProxyPrivate *priv;
 };
 
-GType edascm_hook_proxy_get_type (void) G_GNUC_CONST;
+GType edascm_hook_proxy_get_type(void) G_GNUC_CONST;
 
 EdascmHookProxy *edascm_hook_proxy_new_with_hook (SCM hook_s) G_GNUC_WARN_UNUSED_RESULT;
 

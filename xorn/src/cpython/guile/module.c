@@ -159,7 +159,7 @@
 	   methods
    };
    
-   PyMODINIT_FUNC PyInit_guile(void)
+   PyMODINIT_FUNC PyInit_guile()
    {
 	   if (PyType_Ready(&ProcedureType) < 0)
 		   return NULL;

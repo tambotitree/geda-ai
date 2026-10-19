@@ -1,3 +1,5 @@
+#ifndef GSCHEM_TEXT_PROPERTIES_DOCKABLE_H
+#define GSCHEM_TEXT_PROPERTIES_DOCKABLE_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 2013 Ales Hvezda
@@ -53,4 +55,5 @@ struct _GschemTextPropertiesDockable {
 };
 
 GType
-gschem_text_properties_dockable_get_type ();
+gschem_text_properties_dockable_get_type (void);
+#endif /* GSCHEM_TEXT_PROPERTIES_DOCKABLE_H */

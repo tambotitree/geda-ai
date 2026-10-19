@@ -39,12 +39,12 @@
  * Global list of all main windows (GschemToplevels).
  * Used to broadcast events or manage multi-window workflows.
  */
-extern GList *global_window_list;
+GList *global_window_list;
 
 /**
  * Recent files manager, used by the GTK file chooser.
  */
-extern GtkRecentManager *recent_manager;
+GtkRecentManager *recent_manager;
 
 /*-----------------------------------------
  * Configuration & Output
@@ -53,12 +53,12 @@ extern GtkRecentManager *recent_manager;
 /**
  * Path to an additional user-specified configuration file (via -r).
  */
-extern char *rc_filename;
+char *rc_filename;
 
 /**
  * Output file path (e.g., for printing, if -o is used).
  */
-extern char *output_filename;
+char *output_filename;
 
 /*-----------------------------------------
  * Color Definitions
@@ -82,12 +82,12 @@ extern GdkRGBA black;
  * Destination for runtime logging (e.g., console, file, window).
  * Defined as LOG_WINDOW, LOG_FILE, etc.
  */
-extern int logging_dest;
+int logging_dest;
 
 /**
  * Guile hook: invoked when the list of placeable complex components changes.
  */
-extern SCM complex_place_list_changed_hook;
+SCM complex_place_list_changed_hook;
 
 /*-----------------------------------------
  * Command-line Flags and Modes
@@ -96,7 +96,7 @@ extern SCM complex_place_list_changed_hook;
 /**
  * Quiet mode (suppress most output); set via -q.
  */
-extern int quiet_mode;
+int quiet_mode;
 
 /**
  * Verbose mode (increases runtime output); set via -v.
@@ -106,12 +106,12 @@ extern int quiet_mode;
  * Use -vvvv (4 v's) if you want to see the whole circus.
  * Use -vvvvvvvvvvv (11 v's) if you want to *run* the circus.
  */
-extern int verbose_mode;
+int verbose_mode;
 
 /**
  * If true, the main window is auto-placed at startup; set via -p.
  */
-extern int auto_place_mode;
+int auto_place_mode;
 
 /**
  * Verbosity level: incremented with each -v flag (max 11).
@@ -120,4 +120,5 @@ extern int auto_place_mode;
  * If you're at level 11 and still don’t know what's wrong—
  * it’s probably hardware.
  */
-extern int verbosity_level;
+int verbosity_level;
+

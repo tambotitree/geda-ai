@@ -44,7 +44,7 @@
 #define NUM_BEZIER_SEGMENTS 100
 
 
-PATH *s_path_new (void)
+PATH *s_path_new ()
 {
   PATH *path;
 

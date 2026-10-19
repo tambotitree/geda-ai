@@ -190,3 +190,13 @@ GList *s_weakref_add (GList *weak_refs, void (*notify_func)(void *, void *), voi
 GList *s_weakref_remove (GList *weak_refs, void (*notify_func)(void *, void *), void *user_data);
 GList *s_weakref_add_ptr (GList *weak_refs, void **weak_pointer_loc);
 GList *s_weakref_remove_ptr (GList *weak_refs, void **weak_pointer_loc);
+
+/* Path construction helpers used by the SVG path parser. */
+PATH *s_path_new (void);
+PATH *s_path_new_from (PATH_SECTION *sections);
+void s_path_free (PATH *path);
+void s_path_moveto (PATH *path, double x, double y);
+void s_path_lineto (PATH *path, double x, double y);
+void s_path_curveto (PATH *path, double x1, double y1,
+                     double x2, double y2, double x3, double y3);
+void s_path_art_finish (PATH *path);

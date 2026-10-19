@@ -45,7 +45,7 @@ static gboolean fam_read (gint fd, GIOCondition condition, gpointer user_data);
 
 
 void
-x_fam_init ()
+x_fam_init()
 {
 #ifdef HAVE_LIBFAM
   FAMConnection *new_fc = g_new0 (FAMConnection, 1);
@@ -69,7 +69,7 @@ x_fam_init ()
 }
 
 void
-x_fam_free ()
+x_fam_free()
 {
 #ifdef HAVE_LIBFAM
   if (fc == NULL)
@@ -94,6 +94,10 @@ x_fam_monitor (const gchar *path,
                                       gpointer user_data),
                gpointer user_data)
 {
+  (void) path;
+  (void) exists_event;
+  (void) regular_event;
+  (void) user_data;
 #ifdef HAVE_LIBFAM
   if (fc == NULL)
     return NULL;
@@ -118,6 +122,7 @@ x_fam_monitor (const gchar *path,
 void
 x_fam_unmonitor (gpointer handle)
 {
+  (void) handle;
 #ifdef HAVE_LIBFAM
   struct request *req = handle;
 

@@ -70,7 +70,7 @@ static COLOR default_colors[] = {
  *  At the moment, just initialises the print color map.
  */
 void
-s_color_init(void)
+s_color_init()
 {
   s_color_map_defaults (print_colors);
 }
@@ -222,7 +222,7 @@ s_color_map_from_scm (COLOR *map, SCM lst, const char *scheme_proc_name)
     int i;
     char *rgba;
     SCM s;
-    COLOR c = {0x00, 0x00, 0x00, FALSE};
+    COLOR c = {0x00, 0x00, 0x00, 0x00, FALSE};
     gboolean result;
     SCM entry = scm_car (curr);
 

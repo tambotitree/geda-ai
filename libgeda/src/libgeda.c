@@ -41,7 +41,7 @@
  *  be called before any other libgeda functions are called.
  *
  */
-void libgeda_init(void)
+void libgeda_init()
 {
 #ifdef ENABLE_NLS
   /* Initialise gettext */

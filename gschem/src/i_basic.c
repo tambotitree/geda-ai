@@ -24,7 +24,8 @@
 #endif
 
 #include "gschem.h"
-#include "actions.decl.x"
+// #include "actions.decl.x"
+#include "actions.h"
 
 /*! \brief Update status bar string
  *
@@ -226,7 +227,7 @@ void i_set_state(GschemToplevel *w_current, enum x_states newstate)
 void i_set_state_msg(GschemToplevel *w_current, enum x_states newstate,
 		     const char *message)
 {
-  if ((newstate != w_current->event_state) || (message != NULL)) {
+  if (((int) newstate != w_current->event_state) || (message != NULL)) {
     w_current->event_state = newstate;
     i_update_toolbar (w_current);
   }
@@ -595,6 +596,7 @@ i_update_grid_info (GschemToplevel *w_current)
 void
 i_update_grid_info_callback (GschemPageView *view, GschemToplevel *w_current)
 {
+  (void) view;
   i_update_grid_info (w_current);
 }
 

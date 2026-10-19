@@ -43,6 +43,8 @@
 
 #include "gschem.h"
 
+static void class_init_gtype_adapter (gpointer klass, gpointer data);
+
 #include "../include/gschem_log_dockable.h"
 
 
@@ -82,7 +84,7 @@ log_message (GschemLogDockableClass *klass, const gchar *message, const gchar *s
  * \returns the type identifier for the Log class
  */
 GType
-gschem_log_dockable_get_type ()
+gschem_log_dockable_get_type()
 {
   static GType type = 0;
 
@@ -91,12 +93,13 @@ gschem_log_dockable_get_type ()
       sizeof(GschemLogDockableClass),
       NULL,                                 /* base_init */
       NULL,                                 /* base_finalize */
-      (GClassInitFunc) class_init,
+      class_init_gtype_adapter,
       NULL,                                 /* class_finalize */
       NULL,                                 /* class_data */
       sizeof(GschemLogDockable),
       0,                                    /* n_preallocs */
       NULL,                                 /* instance_init */
+      NULL /* value_table */
     };
 
     type = g_type_register_static (GSCHEM_TYPE_DOCKABLE,
@@ -118,6 +121,7 @@ gschem_log_dockable_get_type ()
 static void
 x_log_message (const gchar *log_domain, GLogLevelFlags log_level, const gchar *message)
 {
+  (void) log_domain;
   GschemLogDockableClass *klass = GSCHEM_LOG_DOCKABLE_CLASS (g_type_class_peek_static (GSCHEM_TYPE_LOG_DOCKABLE));
   gchar *style;
 
@@ -185,6 +189,7 @@ apply_tag_cb (GtkTextBuffer *buffer, GtkTextTag *tag,
               GtkTextIter *start, GtkTextIter *end,
               GschemLogDockable *dockable)
 {
+  (void) start;
   gchar *tag_name;
 
   g_return_if_fail (buffer != NULL);
@@ -210,11 +215,11 @@ class_init (GschemLogDockableClass *klass)
   gchar *contents;
 /*   GObjectClass *gobject_class = G_OBJECT_CLASS (klass); */
 
-  klass->buffer = create_text_buffer ();
+  klass->buffer = create_text_buffer();
 
   /* make it read the content of the current log file */
   /* and add its contents to the dialog */
-  contents = s_log_read ();
+  contents = s_log_read();
 
   /* s_log_read can return NULL if the log file cannot be written to */
   if (contents != NULL) {
@@ -324,4 +329,12 @@ dispose (GObject *object)
     GSCHEM_LOG_DOCKABLE_GET_CLASS (object)->buffer, object);
 
   G_OBJECT_CLASS (parent_class)->dispose (object);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  class_init (klass);
 }

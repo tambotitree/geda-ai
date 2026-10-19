@@ -38,22 +38,39 @@
 #include "../include/struct.h"
 #include "../include/prototype.h"
 
+/*! \brief Register a Scheme procedure with a checked zero-argument signature.
+ * \param name Scheme binding to create.
+ * \param callback C implementation; only the Guile ABI boundary erases its type.
+ */
+static void
+register_subr_0 (const char *name, SCM (*callback) (void))
+{
+  scm_c_define_gsubr (name, 0, 0, 0, (scm_t_subr) callback);
+}
+
+/*! \brief Register a Scheme procedure with a checked one-argument signature.
+ * \param name Scheme binding to create.
+ * \param callback C implementation taking exactly one Scheme value.
+ */
+static void
+register_subr_1 (const char *name, SCM (*callback) (SCM))
+{
+  scm_c_define_gsubr (name, 1, 0, 0, (scm_t_subr) callback);
+}
+
+/*! \brief Register exit procedures and the RC version-check procedure. */
 void
-g_register_funcs(void)
+g_register_funcs (void)
 {
-  /* general functions */
-  scm_c_define_gsubr ("quit", 0, 0, 0, g_quit);
-  scm_c_define_gsubr ("exit", 0, 0, 0, g_quit);
-
-  /* gsymcheckrc functions */
-  scm_c_define_gsubr ("gsymcheck-version", 1, 0, 0, g_rc_gsymcheck_version);
-
+  register_subr_0 ("quit", g_quit);
+  register_subr_0 ("exit", g_quit);
+  register_subr_1 ("gsymcheck-version", g_rc_gsymcheck_version);
 }
 
+/*! \brief Release checker resources and terminate successfully. */
 SCM
-g_quit(void)
+g_quit (void)
 {
-  gsymcheck_quit();
-  exit(0);
+  gsymcheck_quit ();
+  exit (0);
 }
-

@@ -17,11 +17,17 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+#ifndef GSCHEM_TOPLEVEL_H
+#define GSCHEM_TOPLEVEL_H
 
+#include "roster.h"
+
+typedef struct _GschemPageView GschemPageView;
+struct _GschemAction;
+typedef struct _GschemAction GschemAction;
 
 /* Temporary cast until GschemToplevel becomes a class */
 #define GSCHEM_TOPLEVEL(ptr) ((GschemToplevel*)(ptr))
-
 
 struct st_gschem_toplevel {
 
@@ -58,8 +64,7 @@ struct st_gschem_toplevel {
   GtkWidget *bottom_notebook;
   GtkWidget *right_notebook;
 
-  #define GSCHEM_ROSTER_COUNT XWIN_LAST
-  GschemMainWindowRoster widget_roster[GSCHEM_ROSTER_COUNT];
+  GschemMainWindowRoster widget_roster[XWIN_LAST];
 
 
   gchar *keyaccel_string;               /* visual feedback when pressing
@@ -76,6 +81,7 @@ struct st_gschem_toplevel {
   GtkWidget *aawindow;                  /* arc attribs */
   GtkWidget *aewindow;                  /* attribute edit */
   GtkWidget *hkwindow;                  /* Help/Hotkeys... dialog*/
+  GtkWidget *ai_assist_window;          /* AI Assist dialog */
 
   /* --------- */
   /* Dockables */
@@ -272,7 +278,7 @@ TOPLEVEL*
 gschem_toplevel_get_toplevel (GschemToplevel *w_current);
 
 GschemToplevel*
-gschem_toplevel_new ();
+gschem_toplevel_new (void);
 
 void
 gschem_toplevel_notify_page_callback (GschemPageView *page_view, GParamSpec *pspec, GschemToplevel *w_current);
@@ -285,3 +291,5 @@ gschem_toplevel_set_toplevel (GschemToplevel *w_current, TOPLEVEL *toplevel);
 
 void
 gschem_toplevel_page_content_changed (GschemToplevel *w_current, PAGE *page);
+
+#endif /* GSCHEM_TOPLEVEL_H */

@@ -62,6 +62,7 @@
  */
 void o_attrib_add(TOPLEVEL *toplevel, OBJECT *object, OBJECT *item)
 {
+  (void) toplevel;
   /* Add link from item to attrib listing */
   item->attached_to = object;
   object->attribs = g_list_append (object->attribs, item);
@@ -81,6 +82,7 @@ void o_attrib_add(TOPLEVEL *toplevel, OBJECT *object, OBJECT *item)
 gboolean o_attrib_is_attached (TOPLEVEL *toplevel, 
                                OBJECT *attrib, OBJECT *object)
 {
+  (void) toplevel;
   if (attrib == NULL || object == NULL)
     return FALSE;
 
@@ -209,6 +211,7 @@ void o_attrib_print(GList *attributes)
  */
 void o_attrib_remove(TOPLEVEL *toplevel, GList **list, OBJECT *remove)
 {
+  (void) toplevel;
   g_return_if_fail (remove != NULL);
 
   remove->attached_to = NULL;

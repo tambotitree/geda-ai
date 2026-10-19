@@ -1,3 +1,5 @@
+#ifndef GSCHEM_SELECTION_ADAPTER_H
+#define GSCHEM_SELECTION_ADAPTER_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 1998-2010 Ales Hvezda
@@ -56,7 +58,7 @@ struct _GschemSelectionAdapter
 };
 
 GType
-gschem_selection_adapter_get_type();
+gschem_selection_adapter_get_type (void);
 
 int
 gschem_selection_adapter_get_cap_style (GschemSelectionAdapter *adapter);
@@ -119,7 +121,7 @@ TOPLEVEL*
 gschem_selection_adapter_get_toplevel (GschemSelectionAdapter *adapter);
 
 GschemSelectionAdapter*
-gschem_selection_adapter_new ();
+gschem_selection_adapter_new (void);
 
 void
 gschem_selection_adapter_set_cap_style (GschemSelectionAdapter *adapter, int cap_style);
@@ -180,3 +182,4 @@ gschem_selection_adapter_set_text_string (GschemSelectionAdapter *adapter, const
 
 void
 gschem_selection_adapter_set_toplevel (GschemSelectionAdapter *adapter, TOPLEVEL *toplevel);
+#endif /* GSCHEM_SELECTION_ADAPTER_H */

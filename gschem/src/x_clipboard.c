@@ -27,7 +27,8 @@
 #endif
 
 #include "gschem.h"
-#include "actions.decl.x"
+// #include "actions.decl.x"
+#include "actions.h"
 
 #define MIME_TYPE_SCHEMATIC "application/x-geda-schematic"
 #define CLIP_TYPE_SCHEMATIC 1
@@ -40,6 +41,8 @@ static void
 clip_handle_owner_change (GtkClipboard *cb, GdkEvent *event,
                           gpointer user_data)
 {
+  (void) cb;
+  (void) event;
   GschemToplevel *w_current = (GschemToplevel *) user_data;
 
   x_clipboard_update_menus (w_current);
@@ -49,6 +52,7 @@ static void
 clip_get (GtkClipboard *cb, GtkSelectionData *selection_data,
           guint info, gpointer user_data_or_owner)
 {
+  (void) cb;
   GschemToplevel *w_current = (GschemToplevel *) user_data_or_owner;
   GdkAtom type = gdk_atom_intern (MIME_TYPE_SCHEMATIC, FALSE);
   gchar *buf;
@@ -67,6 +71,7 @@ clip_get (GtkClipboard *cb, GtkSelectionData *selection_data,
 static void
 clip_clear (GtkClipboard *cb, gpointer user_data_or_owner)
 {
+  (void) cb;
   GschemToplevel *w_current = user_data_or_owner;
   TOPLEVEL *toplevel = gschem_toplevel_get_toplevel (w_current);
 
@@ -84,7 +89,7 @@ void
 x_clipboard_init (GschemToplevel *w_current)
 {
   GtkClipboard *cb = gtk_clipboard_get (GDK_SELECTION_CLIPBOARD);
-  g_signal_connect (G_OBJECT (cb),
+  gschem_signal_connect (G_OBJECT (cb),
                     "owner-change",
                     G_CALLBACK (clip_handle_owner_change),
                     w_current);
@@ -99,88 +104,70 @@ void
 x_clipboard_finish (GschemToplevel *w_current)
 {
   GtkClipboard *cb = gtk_clipboard_get (GDK_SELECTION_CLIPBOARD);
-  g_signal_handlers_disconnect_by_func (cb, clip_handle_owner_change, w_current);
+  gschem_signal_handlers_disconnect (cb, G_CALLBACK (clip_handle_owner_change), w_current);
   if (w_current->clipboard_buffer)
     gtk_clipboard_store (cb);
 }
 
-struct query_usable {
-  void (*callback) (int, void *);
-  void *userdata;
-};
+typedef struct {
+  GschemToplevel *toplevel;
+  GtkWidget *window;
+  gulong destroy_handler;
+} ClipboardQuery;
 
+/*! \brief Invalidate a pending reply before its window's C state is freed. */
+static void
+clipboard_query_window_destroyed (GtkWidget *window, gpointer user_data)
+{
+  (void) window;
+  ClipboardQuery *query = user_data;
+  query->toplevel = NULL;
+  query->window = NULL;
+}
 
-/* \brief Callback for determining if any clipboard targets are pastable
- * \par Function Description
- *
- * Checks if the clipboard targets match any format we recognise, then
- * calls back into a supplied callback function which is interested in
- * the TRUE / FALSE answer to whether we can paste from the clipboard.
+/*! \brief Update Paste sensitivity from a schematic-format clipboard reply.
+ * \param clip Clipboard whose contents were requested (borrowed).
+ * \param selection_data Borrowed reply; negative length means unavailable.
+ * \param user_data Pending query, released after delivering the reply.
+ * Requesting this one format avoids GTK Quartz's enumeration of unrelated
+ * pasteboard types, some of which it cannot convert into named GDK atoms.
  */
 static void
-query_usable_targets_cb (GtkClipboard *clip, GdkAtom *targets, gint ntargets,
-                         gpointer data)
+clipboard_contents_received (GtkClipboard *clip,
+                              GtkSelectionData *selection_data,
+                              gpointer user_data)
 {
-  struct query_usable *cbinfo = data;
-  int i;
-  int is_usable = FALSE;
+  (void) clip;
+  ClipboardQuery *query = user_data;
+  GdkAtom type = gdk_atom_intern_static_string (MIME_TYPE_SCHEMATIC);
+  gboolean usable = gtk_selection_data_get_length (selection_data) > 0 &&
+      gtk_selection_data_get_data_type (selection_data) == type;
 
-  for (i = 0; i < ntargets && !is_usable; i++) {
-    gchar *buf = gdk_atom_name (targets[i]);
-    if (strcmp (buf, MIME_TYPE_SCHEMATIC) == 0)
-      is_usable = TRUE;
-    g_free (buf);
+  if (query->window != NULL) {
+    g_signal_handler_disconnect (query->window, query->destroy_handler);
+    gschem_action_set_sensitive (action_clipboard_paste, usable, query->toplevel);
   }
-
-  cbinfo->callback (is_usable, cbinfo->userdata);
-  g_free (cbinfo);
+  g_free (query);
 }
 
-
-/* \brief Checks if the system clipboard contains schematic data.
- * \par Function Description
- * Checks whether the current owner of the system clipboard is
- * advertising gEDA schematic data.
- *
- * The check is performed asynchronously. When a response is
- * recieved, the provided callback is called with a TRUE / FALSE
- * result.
- *
- * \param [in] w_current   The current GschemToplevel.
- * \param [in] callback    The callback to recieve the response.
- * \param [in] userdata    Arbitrary data to pass the callback.
- */
-static void
-query_usable (GschemToplevel *w_current,
-              void (*callback) (int, void *), void *userdata)
-{
-  GtkClipboard *clip = gtk_clipboard_get (GDK_SELECTION_CLIPBOARD);
-  struct query_usable *cbinfo;
-
-  cbinfo = g_new (struct query_usable, 1);
-  cbinfo->callback = callback;
-  cbinfo->userdata = userdata;
-
-  gtk_clipboard_request_targets (clip, query_usable_targets_cb, cbinfo);
-}
-
-/*! \brief Asynchronous callback to update the sensitivity of the
- *         Edit/Paste menu item.
- */
-static void
-clipboard_usable_cb (int usable, void *userdata)
-{
-  GschemToplevel *w_current = GSCHEM_TOPLEVEL (userdata);
-
-  gschem_action_set_sensitive (action_clipboard_paste, usable, w_current);
-}
-
-/*! \brief Update the sensitivity of the Edit/Paste menu item.
+/*! \brief Check for usable schematic clipboard data asynchronously.
+ * \param w_current Window whose Paste action should be updated.
+ * A destroy handler prevents replies from accessing a closed window.
+ * The clipboard is read without changing its contents or ownership.
  */
 void
-x_clipboard_update_menus(GschemToplevel *w_current)
+x_clipboard_update_menus (GschemToplevel *w_current)
 {
-  query_usable (w_current, clipboard_usable_cb, w_current);
+  GtkClipboard *clipboard = gtk_clipboard_get (GDK_SELECTION_CLIPBOARD);
+  GdkAtom type = gdk_atom_intern_static_string (MIME_TYPE_SCHEMATIC);
+
+  ClipboardQuery *query = g_new0 (ClipboardQuery, 1);
+  query->toplevel = w_current;
+  query->window = w_current->main_window;
+  query->destroy_handler = g_signal_connect (query->window, "destroy",
+      G_CALLBACK (clipboard_query_window_destroyed), query);
+  gtk_clipboard_request_contents (clipboard, type, clipboard_contents_received,
+                                  query);
 }
 
 /* \brief Set the contents of the system clipboard.

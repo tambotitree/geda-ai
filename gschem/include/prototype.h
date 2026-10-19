@@ -1,3 +1,5 @@
+#ifndef PROTOTYPE_H
+#define PROTOTYPE_H
 /* $Id$ */
 
 /* a_zoom.c */
@@ -10,7 +12,7 @@ void a_zoom_box_draw_rubber(GschemToplevel *w_current, EdaRenderer *renderer);
 /* g_action.c */
 gboolean g_action_get_position (gboolean snap, int *x, int *y);
 /* g_attrib.c */
-void g_init_attrib ();
+void g_init_attrib (void);
 /* g_funcs.c */
 SCM g_funcs_pdf(SCM filename);
 SCM g_funcs_image(SCM filename);
@@ -21,7 +23,7 @@ SCM g_funcs_confirm(SCM msg);
 SCM g_funcs_filesel(SCM msg, SCM templ, SCM flags);
 SCM g_funcs_use_rc_values(void);
 /* g_hook.c */
-void g_init_hook ();
+void g_init_hook (void);
 void g_run_hook_object (GschemToplevel *w_current, const char *name, OBJECT *obj);
 void g_run_hook_object_list (GschemToplevel *w_current, const char *name, GList *obj_lst);
 void g_run_hook_page (GschemToplevel *w_current, const char *name, PAGE *page);
@@ -29,9 +31,9 @@ EdascmHookProxy *g_hook_new_proxy_by_name (const char *name);
 /* g_keys.c */
 void g_keys_reset (GschemToplevel *w_current);
 int g_keys_execute(GschemToplevel *w_current, GdkEventKey *event);
-void g_init_keys ();
+void g_init_keys (void);
 /* g_rc.c */
-void g_rc_parse_gtkrc();
+void g_rc_parse_gtkrc(void);
 SCM g_rc_gschem_version(SCM version);
 SCM g_rc_net_direction_mode(SCM mode);
 SCM g_rc_net_selection_mode(SCM mode);
@@ -91,13 +93,13 @@ SCM g_rc_display_outline_color_map (SCM scm_map);
 /* g_register.c */
 void g_register_funcs(void);
 /* g_select.c */
-void g_init_select ();
+void g_init_select (void);
 /* g_util.c */
-void g_init_util ();
+void g_init_util (void);
 /* g_window.c */
-GschemToplevel *g_current_window ();
+GschemToplevel *g_current_window (void);
 void g_dynwind_window (GschemToplevel *w_current);
-void g_init_window ();
+void g_init_window (void);
 /* globals.c */
 /* gschem.c */
 typedef void (*gschem_atexit_func)(gpointer data);
@@ -125,7 +127,7 @@ void i_buffer_cut(GschemToplevel *w_current, int n, GschemAction *action);
 void i_buffer_paste(GschemToplevel *w_current, int n, GschemAction *action);
 /* i_vars.c */
 void i_vars_set(GschemToplevel *w_current);
-void i_vars_freenames();
+void i_vars_freenames(void);
 void i_vars_init_gschem_defaults (void);
 void i_vars_atexit_save_user_config (gpointer user_data);
  /* m_basic.c */
@@ -335,7 +337,7 @@ GList *s_stretch_add(GList *list, OBJECT *object, int whichone);
 GList *s_stretch_remove(GList *list, OBJECT *object);
 void s_stretch_destroy_all(GList *list);
 /* gschem_alignment_combo.c */
-GtkWidget* gschem_alignment_combo_new ();
+GtkWidget* gschem_alignment_combo_new (void);
 int gschem_alignment_combo_get_align (GtkWidget *widget);
 void gschem_alignment_combo_set_align (GtkWidget *widget, int align);
 /* x_attribedit.c */
@@ -360,7 +362,7 @@ const GdkRGBA *x_get_color(int color);
 COLOR *x_color_lookup(int color);
 gboolean x_color_display_enabled (int index);
 /* x_colorcb.c */
-GtkWidget* x_colorcb_new ();
+GtkWidget* x_colorcb_new (void);
 int x_colorcb_get_index (GtkWidget *widget);
 void x_colorcb_set_index (GtkWidget *widget, int color_index);
 void x_colorcb_update_store (void);
@@ -375,6 +377,8 @@ void text_input_dialog(GschemToplevel *w_current);
 void arc_angle_dialog(GschemToplevel *w_current, OBJECT *arc_object);
 void slot_edit_dialog(GschemToplevel *w_current, const char *count, const char *string);
 void about_dialog(GschemToplevel *w_current);
+void ai_assist_dialog(GschemToplevel *w_current);
+void ai_assist_refresh(GschemToplevel *w_current);
 void x_dialog_hotkeys(GschemToplevel *w_current);
 void x_dialog_raise_all(GschemToplevel *w_current);
 
@@ -387,7 +391,7 @@ void show_text_dialog(GschemToplevel *w_current);
 gboolean x_dialog_close_changed_page (GschemToplevel *w_current, PAGE *page);
 gboolean x_dialog_close_window (GschemToplevel *w_current);
 int x_dialog_validate_attribute(GtkWindow* parent, char *attribute);
-gboolean x_dialog_confirm_create (GtkWindow *parent, const gchar *message, const gchar *filename);
+gboolean x_dialog_confirm_create (GtkWindow *parent, const gchar *message, ...) G_GNUC_PRINTF (2, 3);
 /* x_event.c */
 gboolean x_event_expose(GtkWidget *widget, cairo_t *cr, gpointer user_data);
 gboolean x_event_raise_dialog_boxes(GtkWidget *widget, cairo_t *cr, gpointer user_data);
@@ -414,7 +418,7 @@ void x_fileselect_open(GschemToplevel *w_current);
 gboolean x_fileselect_save(GschemToplevel *w_current);
 int x_fileselect_load_backup(void *user_data, GString *message);
 /* x_fstylecb.c */
-GtkWidget* x_fstylecb_new ();
+GtkWidget* x_fstylecb_new (void);
 int x_fstylecb_get_index (GtkWidget *widget);
 void x_fstylecb_set_index (GtkWidget *widget, int style);
 /* x_grid.c */
@@ -440,16 +444,16 @@ void x_image_lowlevel(GschemToplevel *w_current, const char* filename,
 void x_image_setup(GschemToplevel *w_current);
 GdkPixbuf *x_image_get_pixbuf (GschemToplevel *w_current, int width, int height);
 /* x_integerls.c */
-GtkListStore* x_integerls_new ();
+GtkListStore* x_integerls_new (void);
 GtkListStore* x_integerls_new_with_values (const char *value[], int count);
 void x_integerls_add_value (GtkListStore *store, const char *value);
-int x_integerls_get_value_column ();
+int x_integerls_get_value_column (void);
 /* x_linecapcb.c */
-GtkWidget* x_linecapcb_new ();
+GtkWidget* x_linecapcb_new (void);
 int x_linecapcb_get_index (GtkWidget *widget);
 void x_linecapcb_set_index (GtkWidget *widget, int index);
 /* x_linetypecb.c */
-GtkWidget* x_linetypecb_new ();
+GtkWidget* x_linetypecb_new (void);
 int x_linetypecb_get_index (GtkWidget *widget);
 void x_linetypecb_set_index (GtkWidget *widget, int index);
 /* x_lowlevel.c */
@@ -486,7 +490,7 @@ void x_print (GschemToplevel *w_current);
 /* x_rc.c */
 void x_rc_parse_gschem (TOPLEVEL *toplevel, const gchar *rcfile);
 /* x_rotatecb.c */
-GtkWidget* gschem_rotation_combo_new ();
+GtkWidget* gschem_rotation_combo_new (void);
 int gschem_rotation_combo_get_angle (GtkWidget *widget);
 void gschem_rotation_combo_set_angle (GtkWidget *widget, int angle);
 /* x_script.c */
@@ -510,3 +514,4 @@ void x_window_present (GschemToplevel *w_current);
 void x_window_set_default_icon (void);
 void x_window_init_icons (void);
 GschemToplevel* x_window_new (TOPLEVEL *toplevel);
+#endif /* PROTOTYPE_H */

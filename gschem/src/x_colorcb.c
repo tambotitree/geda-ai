@@ -62,13 +62,13 @@ static const char* get_color_name(int index);
 /*! \brief Create the GtkListStore of the avaialble colors.
  */
 static GtkListStore*
-create_color_list_store ()
+create_color_list_store()
 {
   int color_index;
   GtkTreeIter iter;
   GtkListStore *store;
 
-  store = gtk_list_store_new (COLUMN_COUNT, G_TYPE_STRING, G_TYPE_INT, GDK_TYPE_COLOR);
+  store = gtk_list_store_new (COLUMN_COUNT, G_TYPE_STRING, G_TYPE_INT, GDK_TYPE_RGBA);
 
   for (color_index = 0; color_index < MAX_OBJECT_COLORS; color_index++) {
     if (x_color_display_enabled (color_index)) {
@@ -136,7 +136,7 @@ get_color_name (int index)
  *  \return The currently selected color index
  */
 GtkWidget*
-x_colorcb_new ()
+x_colorcb_new()
 {
   GtkComboBox *combo;
   GtkCellLayout *layout;
@@ -144,7 +144,7 @@ x_colorcb_new ()
   GtkCellRenderer *color_cell;
 
   if (color_list_store == NULL) {
-    color_list_store = create_color_list_store ();
+    color_list_store = create_color_list_store();
   }
 
   combo = GTK_COMBO_BOX (gtk_combo_box_new_with_model (GTK_TREE_MODEL (color_list_store)));
@@ -152,7 +152,7 @@ x_colorcb_new ()
 
   /* Renders the color swatch. Since this won't contain text, set a
    * minimum width. */
-  color_cell = GTK_CELL_RENDERER (gschem_swatch_column_renderer_new ());
+  color_cell = GTK_CELL_RENDERER (gschem_swatch_column_renderer_new());
   g_object_set (color_cell, "width", 25, NULL);
   gtk_cell_layout_pack_start (layout, color_cell, FALSE);
   gtk_cell_layout_add_attribute (layout, color_cell, "color", COLUMN_COLOR);
@@ -226,7 +226,7 @@ x_colorcb_set_index (GtkWidget *widget, int color_index)
 /*! \brief Update the colors in the GtkListStore.
  */
 void
-x_colorcb_update_store ()
+x_colorcb_update_store()
 {
   if (color_list_store == NULL)
     return;

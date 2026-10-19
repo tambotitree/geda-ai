@@ -262,7 +262,7 @@ void m_hatch_polygon(GArray *points, gint angle, gint pitch, GArray *lines)
 
   /* build list of sweep events */
   if ( points2->len > 1 ) {
-    gint index;
+    guint index;
     sPOINT *p0 = &g_array_index(points2, sPOINT, points2->len-1);
     for (index=0; index<points2->len; index++) {
       sPOINT *p1 = &g_array_index(points2, sPOINT, index);
@@ -285,7 +285,7 @@ void m_hatch_polygon(GArray *points, gint angle, gint pitch, GArray *lines)
   sweep_y = calculate_initial_sweep(10 * pitch, bounds.min_y, bounds.max_y);
 
   while ( events->len > 0 || status->len > 0 ) {
-    gint index;
+    guint index;
 
     /* add new segments that intersect the sweep line */
     index = 0;
@@ -302,7 +302,8 @@ void m_hatch_polygon(GArray *points, gint angle, gint pitch, GArray *lines)
 
     /* remove status no longer intersecting sweep line */
     index = status->len;
-    while ( index-- > 0 ) {
+    while ( index > 0 ) {
+      index--;
       if ( sweep_y >= g_array_index(status, SWEEP_STATUS, index).y1 ) {
         g_array_remove_index_fast(status, index);
       }

@@ -53,6 +53,8 @@ static void geda_list_instance_init( GTypeInstance *instance, gpointer g_class )
 {
   GedaList *list = (GedaList *)instance;
 
+  (void) g_class;
+
   /* Strictly un-necessary, as the memory is zero'd after allocation */
   list->glist = NULL;
 }
@@ -88,6 +90,7 @@ static void geda_list_class_init( gpointer g_class, gpointer g_class_data )
 {
   GedaListClass *klass = GEDA_LIST_CLASS( g_class );
   GObjectClass *gobject_class = G_OBJECT_CLASS( klass );
+  (void) g_class_data;
   geda_list_parent_class = g_type_class_peek_parent( klass );
 
   gobject_class->finalize = geda_list_finalize;
@@ -115,7 +118,7 @@ static void geda_list_class_init( gpointer g_class, gpointer g_class_data )
  *
  *  \return the GType identifier associated with GedaList.
  */
-GType geda_list_get_type(void)
+GType geda_list_get_type()
 {
   static GType type = 0;
   if (type == 0) {
@@ -128,7 +131,8 @@ GType geda_list_get_type(void)
       NULL,                         /* class_data */
       sizeof (GedaList),
       0,                            /* n_preallocs */
-      geda_list_instance_init       /* instance_init */
+      geda_list_instance_init,      /* instance_init */
+      NULL                         /* value_table */
     };
     type = g_type_register_static (G_TYPE_OBJECT, "GedaList", &info, 0);
   }
@@ -143,7 +147,7 @@ GType geda_list_get_type(void)
  *
  *  \return pointer to the new GedaList object.
  */
-GedaList *geda_list_new( void ) {
+GedaList *geda_list_new() {
   return g_object_new( GEDA_TYPE_LIST, NULL );
 }
 

@@ -21,7 +21,8 @@
 ;;
 ;; This module is for internal use only.
 
-(define-module (geda core gettext))
+(define-module (geda core gettext)
+  #:replace (_))
 
 (define %libgeda-gettext-domain "@LIBGEDA_GETTEXT_DOMAIN@")
-(define-public (_ msg) (gettext msg %libgeda-gettext-domain))
+(define (_ msg) (gettext msg %libgeda-gettext-domain))

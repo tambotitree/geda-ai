@@ -539,6 +539,8 @@ gschem_patch_state_build (gschem_patch_state_t *st, OBJECT *o)
 static gboolean
 free_key (gpointer key, gpointer value, gpointer user_data)
 {
+  (void) value;
+  (void) user_data;
   free (key);
   return TRUE;
 }

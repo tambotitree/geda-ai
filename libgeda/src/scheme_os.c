@@ -27,6 +27,11 @@
 #include <libgeda_priv.h>
 #include <libgedaguile_priv.h>
 
+/* Scheme entry points are private C functions registered in this module. */
+static SCM platform (void);
+static SCM sys_data_dirs (void);
+static SCM sys_config_dirs (void);
+
 SCM_SYMBOL (carbon_sym , "carbon");
 SCM_SYMBOL (cygwin_sym , "cygwin");
 SCM_SYMBOL (linux_sym , "linux");
@@ -114,8 +119,11 @@ SCM_DEFINE (sys_config_dirs, "%sys-config-dirs", 0, 0, 0, (),
  * be accessed using (use-modules (geda core os)).
  */
 static void
-init_module_geda_core_os ()
+init_module_geda_core_os (void *unused_data)
 {
+  /* Guile supplies this argument; module registration needs no context. */
+  (void) unused_data;
+
   /* Register the functions and symbols */
   #include "scheme_os.x"
 

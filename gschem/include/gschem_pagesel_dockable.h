@@ -1,3 +1,5 @@
+#ifndef GSCHEM_PAGESEL_DOCKABLE_H
+#define GSCHEM_PAGESEL_DOCKABLE_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 1998-2010 Ales Hvezda
@@ -31,14 +33,22 @@ typedef struct _GschemPageselDockable      GschemPageselDockable;
 
 
 struct _GschemPageselDockableClass {
-  GschemDialogClass parent_class;
+  GschemDockableClass parent_class;
 };
 
 struct _GschemPageselDockable {
-  GschemDialog parent_instance;
+  /* This type is registered as a subclass of GschemDockable (see
+   * gschem_pagesel_dockable_get_type), so the instance and class structs must
+   * start with the GschemDockable ones.  Declaring GschemDialog here made the
+   * instance struct smaller than the parent's, and GType aborted with
+   *   specified instance size for type 'GschemPageselDockable' is smaller than
+   *   the parent type's 'GschemDockable' instance size
+   * on every start. */
+  GschemDockable parent_instance;
 
   GtkTreeView *treeview;
 };
 
 
 GType gschem_pagesel_dockable_get_type (void);
+#endif /* GSCHEM_PAGESEL_DOCKABLE_H */

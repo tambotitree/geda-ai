@@ -93,7 +93,7 @@ static int max_x = -1;
 static int max_y = -1;
 static int point_count = 0;
 
-static void init_stroke_data (void)
+static void init_stroke_data()
 {
   while (point_list_head != NULL) {
     point_list_tail = point_list_head;
@@ -103,9 +103,9 @@ static void init_stroke_data (void)
   point_list_tail = NULL;
 }
 
-void stroke_init (void)
+void stroke_init()
 {
-  init_stroke_data ();
+  init_stroke_data();
 }
 
 

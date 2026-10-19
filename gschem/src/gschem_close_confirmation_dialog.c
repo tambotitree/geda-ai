@@ -98,8 +98,8 @@ GList *close_confirmation_dialog_get_selected_pages (CloseConfirmationDialog *di
 
 
 
-GType
-close_confirmation_dialog_get_type ()
+static GType
+close_confirmation_dialog_get_type(void)
 {
   static GType close_confirmation_dialog_type = 0;
 
@@ -108,12 +108,13 @@ close_confirmation_dialog_get_type ()
       sizeof(CloseConfirmationDialogClass),
       NULL, /* base_init */
       NULL, /* base_finalize */
-      (GClassInitFunc) close_confirmation_dialog_class_init,
+      (GClassInitFunc)(void (*)(void)) close_confirmation_dialog_class_init,
       NULL, /* class_finalize */
       NULL, /* class_data */
       sizeof(CloseConfirmationDialog),
       0,    /* n_preallocs */
-      (GInstanceInitFunc) close_confirmation_dialog_init,
+      (GInstanceInitFunc)(void (*)(void)) close_confirmation_dialog_init,
+      NULL /* value_table */
     };
 
     close_confirmation_dialog_type =
@@ -246,11 +247,11 @@ get_page_name (GtkTreeModel *model, GtkTreeIter *piter)
  *  \param [in] data        .
  */
 static void
-close_confirmation_dialog_set_page_name (GtkTreeViewColumn *tree_column,
+close_confirmation_dialog_set_page_name (GtkTreeViewColumn *tree_column G_GNUC_UNUSED,
                                          GtkCellRenderer   *cell,
                                          GtkTreeModel      *tree_model,
                                          GtkTreeIter       *iter,
-                                         gpointer           data)
+                                         gpointer           data G_GNUC_UNUSED)
 {
   gchar *page_name;
 
@@ -273,7 +274,7 @@ close_confirmation_dialog_set_page_name (GtkTreeViewColumn *tree_column,
  *  \param [in] user_data     The dialog as user data.
  */
 static void
-close_confirmation_dialog_callback_renderer_toggled (GtkCellRendererToggle *cell_renderer,
+close_confirmation_dialog_callback_renderer_toggled (GtkCellRendererToggle *cell_renderer G_GNUC_UNUSED,
                                                      gchar                 *path,
                                                      gpointer               user_data)
 {
@@ -315,11 +316,7 @@ close_confirmation_dialog_build_page_list (CloseConfirmationDialog *dialog)
   const gchar *text;
 
   /* place the treeview and its caption into their own box */
-  vbox = GTK_WIDGET (g_object_new (GTK_TYPE_VBOX,
-                                   /* GtkBox */
-                                   "homogeneous", FALSE,
-                                   "spacing",     8,
-                                   NULL));
+  vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 8);
 
   /* the list of pages with changes */
   /*  - scrolled window as container for the treeview first */
@@ -337,7 +334,7 @@ close_confirmation_dialog_build_page_list (CloseConfirmationDialog *dialog)
                                        "headers-visible", FALSE,
                                        "model",           dialog->store_unsaved_pages,
                                        NULL));
-  renderer = gtk_cell_renderer_toggle_new ();
+  renderer = gtk_cell_renderer_toggle_new();
   g_signal_connect (renderer, "toggled",
                     G_CALLBACK (
                       close_confirmation_dialog_callback_renderer_toggled),
@@ -348,7 +345,7 @@ close_confirmation_dialog_build_page_list (CloseConfirmationDialog *dialog)
                                                        NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
 
-  renderer = gtk_cell_renderer_text_new ();
+  renderer = gtk_cell_renderer_text_new();
   column = GTK_TREE_VIEW_COLUMN (
     g_object_new (GTK_TYPE_TREE_VIEW_COLUMN,
                   /* GtkTreeViewColumn */
@@ -408,7 +405,7 @@ close_confirmation_dialog_constructor(GType type,
   GtkWidget *content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   gtk_box_set_spacing(GTK_BOX(content_area), 14);
 
-  GtkWidget *action_area = gtk_dialog_get_action_area(GTK_DIALOG(dialog));
+  GtkWidget *action_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   gtk_box_set_spacing(GTK_BOX(action_area), 6);
   gtk_container_set_border_width(GTK_CONTAINER(action_area), 5);
 
@@ -490,11 +487,7 @@ close_confirmation_dialog_constructor(GType type,
                          _("_Save"),                GTK_RESPONSE_YES,
                          NULL);
 
-  gtk_dialog_set_alternative_button_order(GTK_DIALOG(dialog),
-                                          GTK_RESPONSE_YES,
-                                          GTK_RESPONSE_NO,
-                                          GTK_RESPONSE_CANCEL,
-                                          -1);
+  /* gtk_dialog_set_alternative_button_order is deprecated, buttons will be added in desired order */
 
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_YES);
 
@@ -598,7 +591,7 @@ close_confirmation_dialog_get_property (GObject    *object,
  */
 static gboolean
 get_selected_pages (GtkTreeModel *model,
-                    GtkTreePath  *path,
+                    GtkTreePath  *path G_GNUC_UNUSED,
                     GtkTreeIter  *iter,
                     gpointer     data)
 {

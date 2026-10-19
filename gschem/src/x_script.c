@@ -43,17 +43,14 @@ void setup_script_selector (GschemToplevel *w_current)
     gtk_file_chooser_dialog_new (_("Execute Script..."),
 				 GTK_WINDOW(w_current->main_window),
 				 GTK_FILE_CHOOSER_ACTION_OPEN,
-				 GTK_STOCK_CANCEL, 
+				 _("_Cancel"),
 				 GTK_RESPONSE_CANCEL,
-				 GTK_STOCK_EXECUTE, 
+				 _("_Execute"),
 				 GTK_RESPONSE_ACCEPT,
 				 NULL);
 
   /* Set the alternative button order (ok, cancel, help) for other systems */
-  gtk_dialog_set_alternative_button_order(GTK_DIALOG(w_current->sowindow),
-					  GTK_RESPONSE_ACCEPT,
-					  GTK_RESPONSE_CANCEL,
-					  -1);
+  /* Buttons retain their explicitly constructed order. */
 
   if (gtk_dialog_run (GTK_DIALOG (w_current->sowindow)) == GTK_RESPONSE_ACCEPT) {
     filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (w_current->sowindow));

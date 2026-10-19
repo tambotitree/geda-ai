@@ -28,6 +28,7 @@
 
 /* Gettext translation */
 #include "gettext.h"
+#include "builtins.h"
 
 #include <libgeda/libgeda.h>
 #include <libgeda/libgedaguile.h>
@@ -41,7 +42,7 @@ static struct option shell_long_options[] =
   };
 
 static void
-shell_usage (void)
+shell_usage ()
 {
   printf (_("Usage: gaf shell [OPTION ...]\n"
 "\n"
@@ -75,6 +76,9 @@ cmd_shell_impl (void *data, int argc, char **argv)
 {
   int c, interactive = 1;
   TOPLEVEL *toplevel;
+
+  /* scm_boot_guile requires this slot; the caller passes NULL user data. */
+  (void) data;
 
   #include "shell.x"
 

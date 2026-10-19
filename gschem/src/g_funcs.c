@@ -232,6 +232,6 @@ SCM g_funcs_filesel(SCM scm_msg, SCM scm_templ, SCM scm_flags)
  */
 SCM g_funcs_use_rc_values(void)
 {
-  i_vars_set(g_current_window ());
+  i_vars_set(g_current_window());
   return SCM_BOOL_T;
 }

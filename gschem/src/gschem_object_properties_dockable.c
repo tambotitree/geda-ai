@@ -34,6 +34,8 @@
 #endif
 
 #include "gschem.h"
+
+static void class_init_gtype_adapter (gpointer klass, gpointer data);
 #include <gdk/gdkkeysyms.h>
 
 #include "../include/gschem_object_properties_dockable.h"
@@ -106,12 +108,13 @@ gschem_object_properties_dockable_get_type()
       sizeof(GschemObjectPropertiesDockableClass),
       NULL,                                   /* base_init */
       NULL,                                   /* base_finalize */
-      (GClassInitFunc) class_init,
+      class_init_gtype_adapter,
       NULL,                                   /* class_finalize */
       NULL,                                   /* class_data */
       sizeof(GschemObjectPropertiesDockable),
       0,                                      /* n_preallocs */
       NULL,                                   /* instance_init */
+      NULL /* value_table */
     };
 
     type = g_type_register_static (GSCHEM_TYPE_DOCKABLE, "GschemObjectPropertiesDockable", &info, 0);
@@ -170,12 +173,12 @@ create_fill_property_widget (GschemObjectPropertiesDockable *dialog)
   label[4] = gschem_dialog_misc_create_property_label (_("Angle 2:"));
   label[5] = gschem_dialog_misc_create_property_label (_("Pitch 2:"));
 
-  widget[0] = dialog->fstylecb = x_fstylecb_new ();
-  widget[1] = dialog->widthe = gschem_integer_combo_box_new ();
-  widget[2] = dialog->angle1e = gschem_integer_combo_box_new ();
-  widget[3] = dialog->pitch1e = gschem_integer_combo_box_new ();
-  widget[4] = dialog->angle2e = gschem_integer_combo_box_new ();
-  widget[5] = dialog->pitch2e = gschem_integer_combo_box_new ();
+  widget[0] = dialog->fstylecb = x_fstylecb_new();
+  widget[1] = dialog->widthe = gschem_integer_combo_box_new();
+  widget[2] = dialog->angle1e = gschem_integer_combo_box_new();
+  widget[3] = dialog->pitch1e = gschem_integer_combo_box_new();
+  widget[4] = dialog->angle2e = gschem_integer_combo_box_new();
+  widget[5] = dialog->pitch2e = gschem_integer_combo_box_new();
 
   table = gschem_dialog_misc_create_property_table (label, widget, 6);
 
@@ -199,31 +202,31 @@ create_fill_property_widget (GschemObjectPropertiesDockable *dialog)
                                      gschem_binding_integer_new ("fill-pitch2",
                                                                  widget[5]));
 
-  g_signal_connect (G_OBJECT (dialog->fstylecb), "changed",
+  gschem_signal_connect (G_OBJECT (dialog->fstylecb), "changed",
                     G_CALLBACK (update_fill_type_model),
                     dialog);
 
-  g_signal_connect (G_OBJECT (gschem_integer_combo_box_get_entry (dialog->widthe)),
+  gschem_signal_connect (G_OBJECT (gschem_integer_combo_box_get_entry (dialog->widthe)),
                     "activate",
                     G_CALLBACK (gschem_dialog_misc_entry_activate),
                     dialog);
 
-  g_signal_connect (G_OBJECT (gschem_integer_combo_box_get_entry (dialog->angle1e)),
+  gschem_signal_connect (G_OBJECT (gschem_integer_combo_box_get_entry (dialog->angle1e)),
                     "activate",
                     G_CALLBACK (gschem_dialog_misc_entry_activate),
                     dialog);
 
-  g_signal_connect (G_OBJECT (gschem_integer_combo_box_get_entry (dialog->pitch1e)),
+  gschem_signal_connect (G_OBJECT (gschem_integer_combo_box_get_entry (dialog->pitch1e)),
                     "activate",
                     G_CALLBACK (gschem_dialog_misc_entry_activate),
                     dialog);
 
-  g_signal_connect (G_OBJECT (gschem_integer_combo_box_get_entry (dialog->angle2e)),
+  gschem_signal_connect (G_OBJECT (gschem_integer_combo_box_get_entry (dialog->angle2e)),
                     "activate",
                     G_CALLBACK (gschem_dialog_misc_entry_activate),
                     dialog);
 
-  g_signal_connect (G_OBJECT (gschem_integer_combo_box_get_entry (dialog->pitch2e)),
+  gschem_signal_connect (G_OBJECT (gschem_integer_combo_box_get_entry (dialog->pitch2e)),
                     "activate",
                     G_CALLBACK (gschem_dialog_misc_entry_activate),
                     dialog);
@@ -248,11 +251,11 @@ create_general_property_widget (GschemObjectPropertiesDockable *dialog)
 
   label[0] = gschem_dialog_misc_create_property_label (_("Color:"));
 
-  widget[0] = dialog->colorcb = x_colorcb_new ();
+  widget[0] = dialog->colorcb = x_colorcb_new();
 
   table = gschem_dialog_misc_create_property_table (label, widget, 1);
 
-  g_signal_connect(G_OBJECT (dialog->colorcb),
+  gschem_signal_connect (G_OBJECT (dialog->colorcb),
                    "changed",
                    G_CALLBACK (update_object_color_model),
                    dialog);
@@ -281,11 +284,11 @@ create_line_property_widget (GschemObjectPropertiesDockable *dialog)
   label[3] = gschem_dialog_misc_create_property_label (_("Dash Space:"));
   label[4] = gschem_dialog_misc_create_property_label (_("Cap style:"));
 
-  widget[0] = dialog->line_type = x_linetypecb_new ();
-  widget[1] = dialog->width_entry = gschem_integer_combo_box_new ();
-  widget[2] = dialog->length_entry = gschem_integer_combo_box_new ();
-  widget[3] = dialog->space_entry = gschem_integer_combo_box_new ();
-  widget[4] = dialog->line_end = x_linecapcb_new ();
+  widget[0] = dialog->line_type = x_linetypecb_new();
+  widget[1] = dialog->width_entry = gschem_integer_combo_box_new();
+  widget[2] = dialog->length_entry = gschem_integer_combo_box_new();
+  widget[3] = dialog->space_entry = gschem_integer_combo_box_new();
+  widget[4] = dialog->line_end = x_linecapcb_new();
 
   table = gschem_dialog_misc_create_property_table (label, widget, 5);
 
@@ -301,25 +304,25 @@ create_line_property_widget (GschemObjectPropertiesDockable *dialog)
                                      gschem_binding_integer_new ("dash-space",
                                                                  widget[3]));
 
-  g_signal_connect (G_OBJECT (dialog->line_type), "changed",
+  gschem_signal_connect (G_OBJECT (dialog->line_type), "changed",
                     G_CALLBACK (update_line_type_model),
                     dialog);
 
-  g_signal_connect (G_OBJECT (dialog->line_end), "changed",
+  gschem_signal_connect (G_OBJECT (dialog->line_end), "changed",
                     G_CALLBACK (update_cap_style_model),
                     dialog);
 
-  g_signal_connect (G_OBJECT (gschem_integer_combo_box_get_entry (dialog->width_entry)),
+  gschem_signal_connect (G_OBJECT (gschem_integer_combo_box_get_entry (dialog->width_entry)),
                     "activate",
                     G_CALLBACK (gschem_dialog_misc_entry_activate),
                     dialog);
 
-  g_signal_connect (G_OBJECT (gschem_integer_combo_box_get_entry (dialog->length_entry)),
+  gschem_signal_connect (G_OBJECT (gschem_integer_combo_box_get_entry (dialog->length_entry)),
                     "activate",
                     G_CALLBACK (gschem_dialog_misc_entry_activate),
                     dialog);
 
-  g_signal_connect (G_OBJECT (gschem_integer_combo_box_get_entry (dialog->space_entry)),
+  gschem_signal_connect (G_OBJECT (gschem_integer_combo_box_get_entry (dialog->space_entry)),
                     "activate",
                     G_CALLBACK (gschem_dialog_misc_entry_activate),
                     dialog);
@@ -344,11 +347,11 @@ create_pin_property_widget (GschemObjectPropertiesDockable *dialog)
 
   label[0] = gschem_dialog_misc_create_property_label (_("Pin Type:"));
 
-  widget[0] = dialog->pin_type = gschem_pin_type_combo_new ();
+  widget[0] = dialog->pin_type = gschem_pin_type_combo_new();
 
   table = gschem_dialog_misc_create_property_table (label, widget, 1);
 
-  g_signal_connect (G_OBJECT (dialog->pin_type),
+  gschem_signal_connect (G_OBJECT (dialog->pin_type),
                     "changed",
                     G_CALLBACK (update_pin_type_model),
                     dialog);
@@ -375,8 +378,7 @@ dispose (GObject *object)
 
   set_selection_adapter (dialog, NULL);
 
-  g_slist_foreach (dialog->bindings, (GFunc) g_object_unref, NULL);
-  g_slist_free (dialog->bindings);
+  g_slist_free_full (dialog->bindings, g_object_unref);
   dialog->bindings = NULL;
 
   /* lastly, chain up to the parent dispose */
@@ -421,7 +423,7 @@ create_widget (GschemDockable *parent)
   gtk_viewport_set_shadow_type (GTK_VIEWPORT (viewport),
                                 GTK_SHADOW_NONE);
 
-  vbox = gtk_vbox_new (FALSE, DIALOG_V_SPACING);
+  vbox = g_object_new (GTK_TYPE_BOX, "orientation", GTK_ORIENTATION_VERTICAL, "homogeneous", FALSE, "spacing", DIALOG_V_SPACING, NULL);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), DIALOG_BORDER_SPACING);
   gtk_container_add (GTK_CONTAINER (viewport), vbox);
 
@@ -501,25 +503,15 @@ set_selection_adapter (GschemObjectPropertiesDockable *dialog, GschemSelectionAd
   g_return_if_fail (dialog != NULL);
 
   if (dialog->adapter != NULL) {
-    g_signal_handlers_disconnect_by_func (dialog->adapter,
-                                          G_CALLBACK (update_pin_type_widget),
-                                          dialog);
+    gschem_signal_handlers_disconnect (dialog->adapter, G_CALLBACK (update_pin_type_widget), dialog);
 
-    g_signal_handlers_disconnect_by_func (dialog->adapter,
-                                          G_CALLBACK (update_object_color_widget),
-                                          dialog);
+    gschem_signal_handlers_disconnect (dialog->adapter, G_CALLBACK (update_object_color_widget), dialog);
 
-    g_signal_handlers_disconnect_by_func (dialog->adapter,
-                                          G_CALLBACK (update_line_type_widget),
-                                          dialog);
+    gschem_signal_handlers_disconnect (dialog->adapter, G_CALLBACK (update_line_type_widget), dialog);
 
-    g_signal_handlers_disconnect_by_func (dialog->adapter,
-                                          G_CALLBACK (update_fill_type_widget),
-                                          dialog);
+    gschem_signal_handlers_disconnect (dialog->adapter, G_CALLBACK (update_fill_type_widget), dialog);
 
-    g_signal_handlers_disconnect_by_func (dialog->adapter,
-                                          G_CALLBACK (update_cap_style_widget),
-                                          dialog);
+    gschem_signal_handlers_disconnect (dialog->adapter, G_CALLBACK (update_cap_style_widget), dialog);
 
     g_object_unref (dialog->adapter);
   }
@@ -533,27 +525,27 @@ set_selection_adapter (GschemObjectPropertiesDockable *dialog, GschemSelectionAd
   if (dialog->adapter != NULL) {
     g_object_ref (dialog->adapter);
 
-    g_signal_connect_swapped (dialog->adapter,
+    gschem_signal_connect_swapped (dialog->adapter,
                               "notify::cap-style",
                               G_CALLBACK (update_cap_style_widget),
                               dialog);
 
-    g_signal_connect_swapped (dialog->adapter,
+    gschem_signal_connect_swapped (dialog->adapter,
                               "notify::fill-type",
                               G_CALLBACK (update_fill_type_widget),
                               dialog);
 
-    g_signal_connect_swapped (dialog->adapter,
+    gschem_signal_connect_swapped (dialog->adapter,
                               "notify::line-type",
                               G_CALLBACK (update_line_type_widget),
                               dialog);
 
-    g_signal_connect_swapped (dialog->adapter,
+    gschem_signal_connect_swapped (dialog->adapter,
                               "notify::object-color",
                               G_CALLBACK (update_object_color_widget),
                               dialog);
 
-    g_signal_connect_swapped (dialog->adapter,
+    gschem_signal_connect_swapped (dialog->adapter,
                               "notify::pin-type",
                               G_CALLBACK (update_pin_type_widget),
                               dialog);
@@ -617,15 +609,11 @@ update_cap_style_widget (GschemObjectPropertiesDockable *dialog)
   if (dialog->adapter != NULL) {
     int end = gschem_selection_adapter_get_cap_style (dialog->adapter);
 
-    g_signal_handlers_block_by_func (G_OBJECT (dialog->line_end),
-                                     G_CALLBACK (update_cap_style_model),
-                                     dialog);
+    gschem_signal_handlers_block (G_OBJECT (dialog->line_end), G_CALLBACK (update_cap_style_model), dialog);
 
     x_linecapcb_set_index (dialog->line_end, end);
 
-    g_signal_handlers_unblock_by_func (G_OBJECT (dialog->line_end),
-                                       G_CALLBACK (update_cap_style_model),
-                                       dialog);
+    gschem_signal_handlers_unblock (G_OBJECT (dialog->line_end), G_CALLBACK (update_cap_style_model), dialog);
 
     gtk_widget_set_sensitive (GTK_WIDGET (dialog->line_end), (end != NO_SELECTION));
   }
@@ -683,15 +671,11 @@ update_fill_type_widget (GschemObjectPropertiesDockable *dialog)
   if (dialog->adapter != NULL) {
     int index = gschem_selection_adapter_get_fill_type (dialog->adapter);
 
-    g_signal_handlers_block_by_func (G_OBJECT (dialog->fstylecb),
-                                     G_CALLBACK (update_fill_type_model),
-                                     dialog);
+    gschem_signal_handlers_block (G_OBJECT (dialog->fstylecb), G_CALLBACK (update_fill_type_model), dialog);
 
     x_fstylecb_set_index (dialog->fstylecb, index);
 
-    g_signal_handlers_unblock_by_func (G_OBJECT (dialog->fstylecb),
-                                       G_CALLBACK (update_fill_type_model),
-                                       dialog);
+    gschem_signal_handlers_unblock (G_OBJECT (dialog->fstylecb), G_CALLBACK (update_fill_type_model), dialog);
 
     gtk_widget_set_sensitive (GTK_WIDGET (dialog->fstylecb), (index != NO_SELECTION));
   }
@@ -748,15 +732,11 @@ update_line_type_widget (GschemObjectPropertiesDockable *dialog)
   if (dialog->adapter != NULL) {
     int type = gschem_selection_adapter_get_line_type (dialog->adapter);
 
-    g_signal_handlers_block_by_func (G_OBJECT (dialog->line_type),
-                                     G_CALLBACK (update_line_type_model),
-                                     dialog);
+    gschem_signal_handlers_block (G_OBJECT (dialog->line_type), G_CALLBACK (update_line_type_model), dialog);
 
     x_linetypecb_set_index (dialog->line_type, type);
 
-    g_signal_handlers_unblock_by_func (G_OBJECT (dialog->line_type),
-                                       G_CALLBACK (update_line_type_model),
-                                       dialog);
+    gschem_signal_handlers_unblock (G_OBJECT (dialog->line_type), G_CALLBACK (update_line_type_model), dialog);
 
     gtk_widget_set_sensitive (GTK_WIDGET (dialog->line_type), (type != NO_SELECTION));
   }
@@ -813,15 +793,11 @@ update_object_color_widget (GschemObjectPropertiesDockable *dialog)
   if (dialog->adapter != NULL) {
     int color = gschem_selection_adapter_get_object_color (dialog->adapter);
 
-    g_signal_handlers_block_by_func (G_OBJECT (dialog->colorcb),
-                                     G_CALLBACK (update_object_color_model),
-                                     dialog);
+    gschem_signal_handlers_block (G_OBJECT (dialog->colorcb), G_CALLBACK (update_object_color_model), dialog);
 
     x_colorcb_set_index (dialog->colorcb, color);
 
-    g_signal_handlers_unblock_by_func (G_OBJECT (dialog->colorcb),
-                                       G_CALLBACK (update_object_color_model),
-                                       dialog);
+    gschem_signal_handlers_unblock (G_OBJECT (dialog->colorcb), G_CALLBACK (update_object_color_model), dialog);
 
     gtk_widget_set_sensitive (GTK_WIDGET (dialog->colorcb), (color != NO_SELECTION));
   }
@@ -877,16 +853,20 @@ update_pin_type_widget (GschemObjectPropertiesDockable *dialog)
   if (dialog->adapter != NULL) {
     int type = gschem_selection_adapter_get_pin_type (dialog->adapter);
 
-    g_signal_handlers_block_by_func (G_OBJECT (dialog->pin_type),
-                                     G_CALLBACK (update_pin_type_model),
-                                     dialog);
+    gschem_signal_handlers_block (G_OBJECT (dialog->pin_type), G_CALLBACK (update_pin_type_model), dialog);
 
     gschem_pin_type_combo_set_index (dialog->pin_type, type);
 
-    g_signal_handlers_unblock_by_func (G_OBJECT (dialog->pin_type),
-                                       G_CALLBACK (update_pin_type_model),
-                                       dialog);
+    gschem_signal_handlers_unblock (G_OBJECT (dialog->pin_type), G_CALLBACK (update_pin_type_model), dialog);
 
     gtk_widget_set_sensitive (GTK_WIDGET (dialog->pin_type), (type != NO_SELECTION));
   }
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  class_init (klass);
 }

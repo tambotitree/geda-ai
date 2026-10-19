@@ -32,7 +32,8 @@
 #include <config.h>
 
 #include "gschem.h"
-#include "actions.decl.x"
+// #include "actions.decl.x"
+#include "actions.h"
 
 
 /*! \brief Create a new untitled page with a titleblock.
@@ -62,7 +63,7 @@ x_lowlevel_new_page (GschemToplevel *w_current, const gchar *filename)
     /* Generate untitled filename if none was specified */
     gchar *cwd, *tmp, *untitled_name;
     EdaConfig *cfg;
-    cwd = g_get_current_dir ();
+    cwd = g_get_current_dir();
     cfg = eda_config_get_context_for_path (cwd);
     untitled_name = eda_config_get_string (cfg, "gschem", "default-filename",
                                            NULL);
@@ -232,7 +233,8 @@ x_lowlevel_save_page (GschemToplevel *w_current, PAGE *page,
                       const gchar *filename)
 {
   TOPLEVEL *toplevel = gschem_toplevel_get_toplevel (w_current);
-  const gchar *log_msg, *state_msg;
+  gchar *log_msg;
+  const gchar *state_msg;
   gboolean success;
   GError *err = NULL;
 
@@ -244,7 +246,7 @@ x_lowlevel_save_page (GschemToplevel *w_current, PAGE *page,
   success = f_save (toplevel, page, filename, &err) == 1;
 
   if (!success) {
-    log_msg = _("Could NOT save page [%s]\n");
+    log_msg = g_strdup_printf (_("Could NOT save page [%s]\n"), filename);
     state_msg = _("Error while trying to save");
 
     GtkWidget *dialog;
@@ -266,9 +268,9 @@ x_lowlevel_save_page (GschemToplevel *w_current, PAGE *page,
       g_free (page->page_filename);
       page->page_filename = g_strdup (filename);
 
-      log_msg = _("Saved as [%s]\n");
+      log_msg = g_strdup_printf (_("Saved as [%s]\n"), filename);
     } else
-      log_msg = _("Saved [%s]\n");
+      log_msg = g_strdup_printf (_("Saved [%s]\n"), filename);
 
     state_msg = _("Saved");
 
@@ -292,7 +294,8 @@ x_lowlevel_save_page (GschemToplevel *w_current, PAGE *page,
   }
 
   /* log status of operation */
-  s_log_message (log_msg, filename);
+  s_log_message ("%s", log_msg);
+  g_free (log_msg);
 
   i_set_state_msg (w_current, SELECT, state_msg);
 
@@ -347,7 +350,7 @@ x_lowlevel_revert_page (GschemToplevel *w_current, PAGE *page)
   gschem_toplevel_page_changed (w_current);
 
   /* Force symbols to be re-loaded from disk */
-  s_clib_refresh ();
+  s_clib_refresh();
 
   page = x_lowlevel_open_page (w_current, filename);
   g_free (filename);

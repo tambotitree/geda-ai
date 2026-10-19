@@ -1,3 +1,5 @@
+#ifndef GSCHEM_SHOW_HIDE_TEXT_WIDGET_H
+#define GSCHEM_SHOW_HIDE_TEXT_WIDGET_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 1998-2010 Ales Hvezda
@@ -61,7 +63,7 @@ const char*
 gschem_show_hide_text_widget_get_text_string (GschemShowHideTextWidget *widget);
 
 GType
-gschem_show_hide_text_widget_get_type ();
+gschem_show_hide_text_widget_get_type (void);
 
 void
 gschem_show_hide_text_widget_set_button_text (GschemShowHideTextWidget *widget, const char *text);
@@ -71,3 +73,4 @@ gschem_show_hide_text_widget_set_label_text (GschemShowHideTextWidget *widget, c
 
 void
 gschem_show_hide_text_widget_set_text_string (GschemShowHideTextWidget *widget, const char *str);
+#endif /* GSCHEM_SHOW_HIDE_TEXT_WIDGET_H */

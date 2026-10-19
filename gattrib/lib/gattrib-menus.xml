@@ -13,6 +13,8 @@
     <menu action="edit">
       <menuitem action="edit-add-attrib" />
       <menuitem action="edit-delete-attrib" />
+      <separator/>
+      <menuitem action="edit-fetch-bom-data" />
       <!-- < menuitem action="edit-find-attrib" / > -->
       <!-- < menuitem action="edit-search-replace-attrib-value" / > -->
       <!-- < menuitem action="edit-search-for-refdes" / > -->

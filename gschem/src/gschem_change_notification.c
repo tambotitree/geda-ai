@@ -136,7 +136,7 @@ timespec_free (GschemTimespec *timespec)
 }
 
 GType
-gschem_timespec_get_type (void)
+gschem_timespec_get_type(void)
 {
   static GType type = 0;
 
@@ -154,8 +154,9 @@ gschem_timespec_get_type (void)
 
 
 static void
-response_callback (GtkWidget *info_bar, gint response_id, gpointer user_data)
+response_callback (GtkWidget *info_bar, gint response_id, gpointer user_data G_GNUC_UNUSED)
 {
+  (void) info_bar;
   g_signal_emit (GSCHEM_CHANGE_NOTIFICATION (user_data),
                  signals[RESPONSE], 0, response_id);
 }
@@ -193,8 +194,10 @@ update_visibility (GschemChangeNotification *chnot)
 
 
 static void
-fam_event (const gchar *path, unsigned int code, gpointer user_data)
+fam_event (const gchar *path G_GNUC_UNUSED, unsigned int code G_GNUC_UNUSED, gpointer user_data)
 {
+  (void) path;
+  (void) code;
   GschemChangeNotification *chnot = GSCHEM_CHANGE_NOTIFICATION (user_data);
 
   update_current_mtime (chnot);
@@ -206,7 +209,7 @@ fam_event (const gchar *path, unsigned int code, gpointer user_data)
 
 
 GType
-gschem_change_notification_get_type ()
+gschem_change_notification_get_type(void)
 {
   static GType type = 0;
 
@@ -215,12 +218,12 @@ gschem_change_notification_get_type ()
       sizeof (GschemChangeNotificationClass),
       NULL,                                     /* base_init */
       NULL,                                     /* base_finalize */
-      (GClassInitFunc) class_init,
+      (GClassInitFunc)(void (*)(void)) class_init,
       NULL,                                     /* class_finalize */
       NULL,                                     /* class_data */
       sizeof (GschemChangeNotification),
       0,                                        /* n_preallocs */
-      (GInstanceInitFunc) instance_init,
+      (GInstanceInitFunc)(void (*)(void)) instance_init,
       NULL                                      /* value_table */
     };
 
@@ -317,8 +320,9 @@ class_init (GschemChangeNotificationClass *class)
 
 
 static void
-instance_init (GschemChangeNotification *chnot)
+instance_init (GschemChangeNotification *chnot G_GNUC_UNUSED)
 {
+  (void) chnot;
 }
 
 
@@ -329,17 +333,18 @@ constructed (GObject *object)
 
   G_OBJECT_CLASS (parent_class)->constructed (object);
 
-  chnot->info_bar = gtk_info_bar_new ();
+  chnot->info_bar = gtk_info_bar_new();
   gtk_widget_set_no_show_all (chnot->info_bar, TRUE);
   g_signal_connect (chnot->info_bar, "response",
                     G_CALLBACK (response_callback), chnot);
 
-  GtkWidget *image = gtk_image_new_from_stock (GTK_STOCK_DIALOG_QUESTION,
-                                               GTK_ICON_SIZE_DIALOG);
+  GtkWidget *image = gtk_image_new_from_icon_name ("dialog-question",
+                                                   GTK_ICON_SIZE_DIALOG);
   gtk_widget_show (image);
 
   chnot->label = gtk_label_new ("");
-  gtk_misc_set_alignment (GTK_MISC (chnot->label), 0., .5);
+  gtk_widget_set_halign (chnot->label, GTK_ALIGN_START);
+  gtk_widget_set_valign (chnot->label, GTK_ALIGN_CENTER);
   gtk_widget_show (chnot->label);
 
   GtkWidget *content_area =
@@ -347,7 +352,7 @@ constructed (GObject *object)
   gtk_box_pack_start (GTK_BOX (content_area), image, FALSE, FALSE, 0);
   gtk_box_pack_start (GTK_BOX (content_area), chnot->label, TRUE, TRUE, 0);
 
-  chnot->button = gtk_button_new ();
+  chnot->button = gtk_button_new();
   gtk_button_set_use_underline (GTK_BUTTON (chnot->button), TRUE);
   gtk_widget_set_can_default (chnot->button, TRUE);
   gtk_widget_show (chnot->button);
@@ -356,7 +361,7 @@ constructed (GObject *object)
                                   GTK_RESPONSE_ACCEPT);
 
   gtk_info_bar_add_button (GTK_INFO_BAR (chnot->info_bar),
-                           GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
+                           "window-close", GTK_RESPONSE_CANCEL);
 }
 
 
@@ -435,7 +440,7 @@ set_property (GObject *object,
 
     case PROP_BUTTON_STOCK_ID:
       gtk_button_set_image (GTK_BUTTON (chnot->button),
-                            gtk_image_new_from_stock (
+                            gtk_image_new_from_icon_name (
                               g_value_get_string (value),
                               GTK_ICON_SIZE_BUTTON));
       break;

@@ -34,6 +34,9 @@
 #endif
 
 #include "gschem.h"
+
+static void gschem_main_window_class_init_gtype_adapter (gpointer klass, gpointer data);
+static void gschem_main_window_init_gtype_adapter (GTypeInstance *instance, gpointer klass);
 #include <gdk/gdkkeysyms.h>
 
 static void
@@ -60,6 +63,7 @@ set_property (GObject *object, guint param_id, const GValue *value, GParamSpec *
 static void
 get_property (GObject *object, guint param_id, GValue *value, GParamSpec *pspec)
 {
+  (void) value;
   //GschemMainWindow *window = GSCHEM_MAIN_WINDOW (object);
 
   switch (param_id) {
@@ -86,7 +90,7 @@ gschem_main_window_class_init (GschemMainWindowClass *klass)
 /*! \brief Get/register GschemSelection type.
  */
 GType
-gschem_main_window_get_type ()
+gschem_main_window_get_type()
 {
   static GType type = 0;
 
@@ -95,12 +99,13 @@ gschem_main_window_get_type ()
       sizeof(GschemMainWindowClass),
       NULL,                                                    /* base_init */
       NULL,                                                    /* base_finalize */
-      (GClassInitFunc) gschem_main_window_class_init,
+      gschem_main_window_class_init_gtype_adapter,
       NULL,                                                    /* class_finalize */
       NULL,                                                    /* class_data */
       sizeof(GschemMainWindow),
       0,                                                       /* n_preallocs */
-      (GInstanceInitFunc) gschem_main_window_init,
+      gschem_main_window_init_gtype_adapter,
+      NULL /* value_table */
     };
 
     type = g_type_register_static (GTK_TYPE_WINDOW, "GschemMainWindow", &info, 0);
@@ -118,6 +123,7 @@ gschem_main_window_get_type ()
 static void
 gschem_main_window_init (GschemMainWindow *window)
 {
+  (void) window;
 }
 
 
@@ -127,7 +133,7 @@ gschem_main_window_init (GschemMainWindow *window)
  *  \return A new instanceof the GschemMainWindow
  */
 GschemMainWindow*
-gschem_main_window_new ()
+gschem_main_window_new()
 {
   return GSCHEM_MAIN_WINDOW (g_object_new (GSCHEM_TYPE_MAIN_WINDOW,
                                            "type", GTK_WINDOW_TOPLEVEL,
@@ -146,10 +152,27 @@ gschem_main_window_new ()
 static void
 set_property (GObject *object, guint param_id, const GValue *value, GParamSpec *pspec)
 {
+  (void) value;
   //GschemMainWindow *window = GSCHEM_MAIN_WINDOW (object);
 
   switch (param_id) {
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
   }
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+gschem_main_window_class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  gschem_main_window_class_init (klass);
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+gschem_main_window_init_gtype_adapter (GTypeInstance *instance, gpointer klass)
+{
+  (void) klass;
+  gschem_main_window_init ((void *) instance);
 }

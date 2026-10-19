@@ -26,6 +26,9 @@
 #include "libgeda_priv.h"
 #include "libgedaguile_priv.h"
 
+/* Scheme entry points are private C functions registered in this module. */
+static SCM get_line_width (SCM obj_s);
+
 /*! \brief Get the width of line used to draw an object
  * \par Function Description
  * Returns the line width used to draw an object. Deprecated because
@@ -53,8 +56,11 @@ SCM_DEFINE (get_line_width, "%get-line-width", 1, 0, 0,
  * be accessed using (use-modules (geda core deprecated)).
  */
 static void
-init_module_geda_core_deprecated ()
+init_module_geda_core_deprecated (void *unused_data)
 {
+  /* Guile supplies this argument; module registration needs no context. */
+  (void) unused_data;
+
   /* Register the functions */
   #include "scheme_deprecated.x"
 

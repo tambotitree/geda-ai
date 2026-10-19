@@ -32,6 +32,7 @@
 #include <glib/gstdio.h> /* For g_build_filename */
 
 #include "gschem.h"
+#include "gschem_appearance.h"
 
 #ifdef HAVE_LOCALE_H
 #include <locale.h>
@@ -89,14 +90,14 @@ static void gschem_quit(void)
   }
   g_list_free(exit_functions);
 
-  x_controlfd_free ();
+  x_controlfd_free();
 
   s_clib_free();
   s_slib_free();
   /* o_text_freeallfonts();*/
   s_attrib_free();
-  x_fam_free ();
-  x_stroke_free ();
+  x_fam_free();
+  x_stroke_free();
   o_undo_cleanup();
   /* s_stroke_free(); no longer needed */
 
@@ -127,7 +128,7 @@ static void gschem_quit(void)
  * warn about this issue on gschem startup.
  */
 static void
-warn_if_using_invalid_config ()
+warn_if_using_invalid_config(void)
 {
   EdaConfig *cfg = eda_config_get_context_for_file (NULL);
   EdaConfig *cfg_hierarchy_traversal =
@@ -237,9 +238,11 @@ warn_if_using_invalid_config ()
  *  It handles initializing all libraries and gSchem variables
  *  and passes control to the gtk main loop.
  */
+// void main_prog(void *closure, int argc, char *argv[])
 void main_prog(void *closure, int argc, char *argv[])
 {
   int i;
+  (void) closure; /* explicitly mark unused parameter */
   char *cwd = NULL;
   GschemToplevel *w_current = NULL;
   TOPLEVEL *toplevel = NULL;
@@ -254,7 +257,7 @@ void main_prog(void *closure, int argc, char *argv[])
    * backends uses threading so we need to call g_thread_init().
    * GLib requires threading be initialised before any other GLib
    * functions are called. Do it now if its not already setup.  */
-  if (!g_thread_supported ()) g_thread_init (NULL);
+  if (!g_thread_supported()) g_thread_init (NULL);
 #endif
 
 #if ENABLE_NLS
@@ -262,23 +265,12 @@ void main_prog(void *closure, int argc, char *argv[])
   setlocale(LC_NUMERIC, "C");
 #endif
 
+  gschem_appearance_prepare ();
   gtk_init(&argc, &argv);
+  gschem_appearance_init ();
 
-    /* Add our application's icon directory to the theme search path */
-  /* This should be done after gtk_init() */
-  GtkIconTheme *icon_theme = gtk_icon_theme_get_default();
-  if (icon_theme) {
-    /* PKGDATADIR is defined in config.h, which is included via gschem.h */
-    /* It will expand to something like "$HOME/geda/share/geda-ai" */
-    gchar *app_icon_dir = g_build_filename(PKGDATADIR, "icons", NULL);
-    if (g_file_test(app_icon_dir, G_FILE_TEST_IS_DIR)) {
-      gtk_icon_theme_append_search_path(icon_theme, app_icon_dir);
-      s_log_message(_("Added icon search path: %s\n"), app_icon_dir);
-    } else {
-      s_log_message(_("Icon search path not found or not a directory: %s\n"), app_icon_dir);
-    }
-    g_free(app_icon_dir);
-  }
+  /* Register built-in icons before any configuration can create widgets. */
+  x_window_init_icons ();
 
   argv_index = parse_commandline(argc, argv);
   cwd = g_get_current_dir();
@@ -310,20 +302,20 @@ void main_prog(void *closure, int argc, char *argv[])
 
   /* register guile (scheme) functions */
   g_register_funcs();
-  g_init_window ();
-  g_init_select ();
-  g_init_hook ();
-  g_init_attrib ();
-  g_init_keys ();
-  gschem_action_init ();
-  g_init_util ();
+  g_init_window();
+  g_init_select();
+  g_init_hook();
+  g_init_attrib();
+  g_init_keys();
+  gschem_action_init();
+  g_init_util();
 
   /* initialise color map (need to do this before reading rc files */
-  x_color_init ();
+  x_color_init();
 
   o_undo_init();
 
-  if (s_path_sys_data () == NULL) {
+  if (s_path_sys_data() == NULL) {
     const gchar *message =
       _("You must set the GEDADATA environment variable!\n\n"
         "gschem cannot locate its data files. You must set the GEDADATA\n"
@@ -339,7 +331,7 @@ void main_prog(void *closure, int argc, char *argv[])
   scm_dynwind_begin (0);
 
   /* Run pre-load Scheme expressions */
-  g_scm_eval_protected (s_pre_load_expr, scm_current_module ());
+  g_scm_eval_protected (s_pre_load_expr, scm_current_module());
 
   /* By this point, libgeda should have setup the Guile load path, so
    * we can take advantage of that.  */
@@ -378,7 +370,7 @@ void main_prog(void *closure, int argc, char *argv[])
     exit (1);
   }
   input_str = scm_to_utf8_string (scm_tmp);
-  toplevel = s_toplevel_new ();
+  toplevel = s_toplevel_new();
   if (g_read_file(toplevel, input_str, NULL)) {
     s_log_message(_("Read init scm file [%s]\n"), input_str);
   } else {
@@ -391,16 +383,15 @@ void main_prog(void *closure, int argc, char *argv[])
   scm_remember_upto_here_1 (scm_tmp);
 
   /* Set up default configuration */
-  i_vars_init_gschem_defaults ();
+  i_vars_init_gschem_defaults();
   gschem_atexit (i_vars_atexit_save_user_config, NULL);
 
   /* Now read in RC files. */
   g_rc_parse_gtkrc();
   x_rc_parse_gschem (toplevel, NULL);
 
-  /* Set default icon theme and make sure we can find our own icons */
+  /* The action icons were registered immediately after gtk_init(). */
   x_window_set_default_icon();
-  x_window_init_icons ();
 
   /* At end, complete set up of window. */
   x_color_allocate();
@@ -410,8 +401,8 @@ void main_prog(void *closure, int argc, char *argv[])
 
   g_dynwind_window (w_current);
 
-  x_stroke_init ();
-  x_fam_init ();
+  x_stroke_init();
+  x_fam_init();
 
   filenames = NULL;
 
@@ -450,22 +441,22 @@ void main_prog(void *closure, int argc, char *argv[])
 #endif
 
   /* Run post-load expressions */
-  if (scm_is_false (g_scm_eval_protected (s_post_load_expr, scm_current_module ()))) {
+  if (scm_is_false (g_scm_eval_protected (s_post_load_expr, scm_current_module()))) {
     fprintf (stderr, _("ERROR: Failed to load or evaluate startup script.\n\n"
                        "The gschem log may contain more information.\n"));
     exit (1);
   }
 
-  scm_dynwind_end ();
+  scm_dynwind_end();
 
-  x_controlfd_init ();
+  x_controlfd_init();
 
-  warn_if_using_invalid_config ();
+  warn_if_using_invalid_config();
 
   /* enter main loop */
   gtk_main();
 
-  gschem_quit ();
+  gschem_quit();
 }
 
 /*! \brief Main executable entrance point.
@@ -485,7 +476,7 @@ int main (int argc, char *argv[])
   bind_textdomain_codeset("geda-gschem", "UTF-8");
 #endif
 
-  scm_boot_guile (argc, argv, main_prog, 0);
+  scm_boot_guile (argc, argv, main_prog, NULL);
 
   return 0;
 }

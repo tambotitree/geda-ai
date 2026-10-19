@@ -21,7 +21,9 @@
 #include <stdio.h>
 
 #include "gschem.h"
-#include "actions.decl.x"
+#include "actions.h"
+// #include "actions.decl.x"
+#include "actions.h"
 
 /*! \def INIT_STR(w, name, str) */
 #define INIT_STR(w, name, str) {                                        \
@@ -214,6 +216,7 @@ i_vars_init_gschem_defaults()
 void
 i_vars_atexit_save_user_config (gpointer user_data)
 {
+  (void) user_data;
   EdaConfig *cfg = eda_config_get_user_context ();
   GError *err = NULL;
 

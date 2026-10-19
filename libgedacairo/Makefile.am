@@ -1,5 +1,13 @@
 lib_LTLIBRARIES = libgedacairo.la
 
+check_PROGRAMS = test-libgedacairo
+TESTS = $(check_PROGRAMS)
+test_libgedacairo_SOURCES = $(top_srcdir)/tests/test_libgedacairo.c
+test_libgedacairo_CPPFLAGS = $(AM_CPPFLAGS)
+test_libgedacairo_LDADD = libgedacairo.la \
+                        $(top_builddir)/libgeda/src/libgeda.la \
+                        $(GUILE_LIBS) $(GLIB_LIBS) $(CAIRO_LIBS) $(PANGO_LIBS)
+
 libgedacairo_la_SOURCES = \
 	edacairo.c \
 	edapangorenderer.c \
@@ -23,7 +31,7 @@ AM_CPPFLAGS = \
 AM_CFLAGS = \
 	$(GCC_CFLAGS) $(MINGW_CFLAGS) $(GUILE_CFLAGS) $(GLIB_CFLAGS) \
 	$(GDK_CFLAGS) $(CAIRO_CFLAGS) $(PANGO_CFLAGS) $(GDK_PIXBUF_CFLAGS)
-AM_LDFLAGS = -version-info $(LIBGEDACAIRO_LT_VERSION) \
+libgedacairo_la_LDFLAGS = -version-info $(LIBGEDACAIRO_LT_VERSION) \
 	$(WINDOWS_LIBTOOL_FLAGS) $(MINGW_LDFLAGS) $(GUILE_LIBS) \
 	$(GDK_LIBS) $(GLIB_LIBS) $(CAIRO_LIBS) $(PANGO_LIBS) $(GDK_PIXBUF_LIBS)
 LIBTOOL=@LIBTOOL@ --silent

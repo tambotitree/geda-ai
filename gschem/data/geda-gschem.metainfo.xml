@@ -28,7 +28,7 @@
   </categories>
   <url type="homepage">http://geda-project.org/</url>
   <url type="help">http://wiki.geda-project.org/</url>
-  <url type="bugtracker">https://bugs.launchpad.net/geda</url>
+  <url type="bugtracker">https://github.com/tambotitree/geda-ai/issues</url>
   <launchable type="desktop-id">geda-gschem</launchable>
   <provides>
     <binary>gschem</binary>

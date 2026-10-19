@@ -4,9 +4,8 @@ noinst_HEADERS = \
 	globals.h \
 	prototype.h \
 	x_states.h \
-	gtksheet_2_2.h \
+	gattrib_sheet.h \
 	struct.h \
-	gtkextra-marshal.h \
 	gettext.h
 
 MOSTLYCLEANFILES = *.log core FILE *~ #*#

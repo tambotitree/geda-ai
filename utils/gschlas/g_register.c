@@ -46,7 +46,7 @@
  * file at the beginning of the prog which gives the library search paths.
  */
 void
-g_register_funcs(void)
+g_register_funcs()
 {
   /* general functions */
   scm_c_define_gsubr ("quit", 0, 0, 0, g_quit);
@@ -62,7 +62,7 @@ g_register_funcs(void)
  * Quit the application from within Scheme.
  */
 SCM
-g_quit(void)
+g_quit()
 {
   gschlas_quit();
   exit(0);

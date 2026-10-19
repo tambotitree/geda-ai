@@ -35,6 +35,8 @@
 
 #include "gschem.h"
 
+static void class_init_gtype_adapter (gpointer klass, gpointer data);
+
 #include "../include/gschem_options_dockable.h"
 
 
@@ -91,7 +93,7 @@ update_snap_mode_widget (GschemOptionsDockable *dockable);
 /*! \brief Get/register options dockable type.
  */
 GType
-gschem_options_dockable_get_type ()
+gschem_options_dockable_get_type()
 {
   static GType type = 0;
 
@@ -100,12 +102,13 @@ gschem_options_dockable_get_type ()
       sizeof(GschemOptionsDockableClass),
       NULL,                                       /* base_init */
       NULL,                                       /* base_finalize */
-      (GClassInitFunc) class_init,
+      class_init_gtype_adapter,
       NULL,                                       /* class_finalize */
       NULL,                                       /* class_data */
       sizeof(GschemOptionsDockable),
       0,                                          /* n_preallocs */
       NULL,                                       /* instance_init */
+      NULL /* value_table */
     };
 
     type = g_type_register_static (GSCHEM_TYPE_DOCKABLE,
@@ -156,10 +159,10 @@ create_grid_mode_widget (GschemOptionsDockable *dockable)
 
   g_return_val_if_fail (dockable != NULL, NULL);
 
-  box = gtk_hbox_new (FALSE, FALSE);
+  box = g_object_new (GTK_TYPE_BOX, "orientation", GTK_ORIENTATION_HORIZONTAL, "homogeneous", FALSE, "spacing", FALSE, NULL);
 
   for (index=0; index<GRID_MODE_COUNT; index++) {
-    dockable->grid_radio[index] = gtk_toggle_button_new ();
+    dockable->grid_radio[index] = gtk_toggle_button_new();
 
     gtk_box_pack_start (GTK_BOX (box),                           /* box     */
                         dockable->grid_radio[index],             /* child   */
@@ -169,7 +172,7 @@ create_grid_mode_widget (GschemOptionsDockable *dockable)
 
     gtk_size_group_add_widget (dockable->size_group, dockable->grid_radio[index]);
 
-    g_signal_connect_swapped (G_OBJECT (dockable->grid_radio[index]),
+    gschem_signal_connect_swapped (G_OBJECT (dockable->grid_radio[index]),
                               "clicked",
                               G_CALLBACK (update_grid_mode_model),
                               dockable);
@@ -214,12 +217,12 @@ create_net_section (GschemOptionsDockable *dockable)
 
   table = gschem_dialog_misc_create_property_table (label, editor, 2);
 
-  g_signal_connect_swapped (G_OBJECT (dockable->magnetic_net_widget),
+  gschem_signal_connect_swapped (G_OBJECT (dockable->magnetic_net_widget),
                             "toggled",
                             G_CALLBACK (update_magnetic_net_mode_model),
                             dockable);
 
-  g_signal_connect_swapped (G_OBJECT (dockable->net_rubber_band_widget),
+  gschem_signal_connect_swapped (G_OBJECT (dockable->net_rubber_band_widget),
                             "toggled",
                             G_CALLBACK (update_net_rubber_band_mode_model),
                             dockable);
@@ -270,10 +273,10 @@ create_snap_mode_widget (GschemOptionsDockable *dockable)
 
   g_return_val_if_fail (dockable != NULL, NULL);
 
-  box = gtk_hbox_new (FALSE, FALSE);
+  box = g_object_new (GTK_TYPE_BOX, "orientation", GTK_ORIENTATION_HORIZONTAL, "homogeneous", FALSE, "spacing", FALSE, NULL);
 
   for (index=0; index<SNAP_STATE_COUNT; index++) {
-    dockable->snap_radio[index] = gtk_toggle_button_new ();
+    dockable->snap_radio[index] = gtk_toggle_button_new();
 
     gtk_box_pack_start (GTK_BOX (box),                           /* box     */
                         dockable->snap_radio[index],             /* child   */
@@ -283,7 +286,7 @@ create_snap_mode_widget (GschemOptionsDockable *dockable)
 
     gtk_size_group_add_widget (dockable->size_group, dockable->snap_radio[index]);
 
-    g_signal_connect_swapped (G_OBJECT (dockable->snap_radio[index]),
+    gschem_signal_connect_swapped (G_OBJECT (dockable->snap_radio[index]),
                               "clicked",
                               G_CALLBACK (update_snap_mode_model),
                               dockable);
@@ -347,7 +350,7 @@ create_widget (GschemDockable *parent)
 
   dockable->size_group = gtk_size_group_new (GTK_SIZE_GROUP_BOTH);
 
-  vbox = gtk_vbox_new (FALSE, DIALOG_V_SPACING);
+  vbox = g_object_new (GTK_TYPE_BOX, "orientation", GTK_ORIENTATION_VERTICAL, "homogeneous", FALSE, "spacing", DIALOG_V_SPACING, NULL);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), DIALOG_BORDER_SPACING);
 
   gtk_box_pack_start (GTK_BOX (vbox),                          /* box     */
@@ -380,21 +383,13 @@ static void
 set_options (GschemOptionsDockable *dockable, GschemOptions *options)
 {
   if (dockable->options != NULL) {
-    g_signal_handlers_disconnect_by_func (dockable->options,
-                                          G_CALLBACK (update_snap_mode_widget),
-                                          dockable);
+    gschem_signal_handlers_disconnect (dockable->options, G_CALLBACK (update_snap_mode_widget), dockable);
 
-    g_signal_handlers_disconnect_by_func (dockable->options,
-                                          G_CALLBACK (update_net_rubber_band_mode_widget),
-                                          dockable);
+    gschem_signal_handlers_disconnect (dockable->options, G_CALLBACK (update_net_rubber_band_mode_widget), dockable);
 
-    g_signal_handlers_disconnect_by_func (dockable->options,
-                                          G_CALLBACK (update_magnetic_net_mode_widget),
-                                          dockable);
+    gschem_signal_handlers_disconnect (dockable->options, G_CALLBACK (update_magnetic_net_mode_widget), dockable);
 
-    g_signal_handlers_disconnect_by_func (dockable->options,
-                                          G_CALLBACK (update_grid_mode_widget),
-                                          dockable);
+    gschem_signal_handlers_disconnect (dockable->options, G_CALLBACK (update_grid_mode_widget), dockable);
 
     g_object_unref (dockable->options);
   }
@@ -404,22 +399,22 @@ set_options (GschemOptionsDockable *dockable, GschemOptions *options)
   if (dockable->options != NULL) {
     g_object_ref (dockable->options);
 
-    g_signal_connect_swapped (dockable->options,
+    gschem_signal_connect_swapped (dockable->options,
                               "notify::grid-mode",
                               G_CALLBACK (update_grid_mode_widget),
                               dockable);
 
-    g_signal_connect_swapped (dockable->options,
+    gschem_signal_connect_swapped (dockable->options,
                               "notify::magnetic-net-mode",
                               G_CALLBACK (update_magnetic_net_mode_widget),
                               dockable);
 
-    g_signal_connect_swapped (dockable->options,
+    gschem_signal_connect_swapped (dockable->options,
                               "notify::net-rubber-band-mode",
                               G_CALLBACK (update_net_rubber_band_mode_widget),
                               dockable);
 
-    g_signal_connect_swapped (dockable->options,
+    gschem_signal_connect_swapped (dockable->options,
                               "notify::snap-mode",
                               G_CALLBACK (update_snap_mode_widget),
                               dockable);
@@ -473,20 +468,16 @@ update_grid_mode_widget (GschemOptionsDockable *dockable)
     grid_mode = gschem_options_get_grid_mode (dockable->options);
 
     for (index=0; index<GRID_MODE_COUNT; index++) {
-      g_signal_handlers_block_by_func (G_OBJECT (dockable->grid_radio[index]),
-                                       G_CALLBACK (update_grid_mode_model),
-                                       dockable);
+      gschem_signal_handlers_block (G_OBJECT (dockable->grid_radio[index]), G_CALLBACK (update_grid_mode_model), dockable);
     }
 
     for (index=0; index<GRID_MODE_COUNT; index++) {
       gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (dockable->grid_radio[index]),
-                                    (grid_mode == index));
+                                    (grid_mode == (GRID_MODE) index));
     }
 
     for (index=0; index<GRID_MODE_COUNT; index++) {
-      g_signal_handlers_unblock_by_func (G_OBJECT (dockable->grid_radio[index]),
-                                         G_CALLBACK (update_grid_mode_model),
-                                         dockable);
+      gschem_signal_handlers_unblock (G_OBJECT (dockable->grid_radio[index]), G_CALLBACK (update_grid_mode_model), dockable);
     }
   }
 }
@@ -625,20 +616,24 @@ update_snap_mode_widget (GschemOptionsDockable *dockable)
     snap_mode = gschem_options_get_snap_mode (dockable->options);
 
     for (index=0; index<SNAP_STATE_COUNT; index++) {
-      g_signal_handlers_block_by_func (G_OBJECT (dockable->snap_radio[index]),
-                                       G_CALLBACK (update_snap_mode_model),
-                                       dockable);
+      gschem_signal_handlers_block (G_OBJECT (dockable->snap_radio[index]), G_CALLBACK (update_snap_mode_model), dockable);
     }
 
     for (index=0; index<SNAP_STATE_COUNT; index++) {
       gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (dockable->snap_radio[index]),
-                                    (snap_mode == index));
+                                    (snap_mode == (SNAP_STATE) index));
   }
 
     for (index=0; index<SNAP_STATE_COUNT; index++) {
-      g_signal_handlers_unblock_by_func (G_OBJECT (dockable->snap_radio[index]),
-                                         G_CALLBACK (update_snap_mode_model),
-                                         dockable);
+      gschem_signal_handlers_unblock (G_OBJECT (dockable->snap_radio[index]), G_CALLBACK (update_snap_mode_model), dockable);
     }
   }
+}
+
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  class_init (klass);
 }

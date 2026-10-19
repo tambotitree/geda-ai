@@ -388,7 +388,7 @@ gschem_bottom_widget_get_status_text (GschemBottomWidget *widget)
 /*! \brief Get/register GschemBottomWidget type.
  */
 GType
-gschem_bottom_widget_get_type ()
+gschem_bottom_widget_get_type(void)
 {
   static GType type = 0;
 
@@ -397,15 +397,15 @@ gschem_bottom_widget_get_type ()
       sizeof(GschemBottomWidgetClass),
       NULL,                                                    /* base_init */
       NULL,                                                    /* base_finalize */
-      (GClassInitFunc) gschem_bottom_widget_class_init,
+      (GClassInitFunc) (void (*)(void)) gschem_bottom_widget_class_init,
       NULL,                                                    /* class_finalize */
       NULL,                                                    /* class_data */
       sizeof(GschemBottomWidget),
       0,                                                       /* n_preallocs */
-      (GInstanceInitFunc) gschem_bottom_widget_init,
-    };
+      (GInstanceInitFunc) (void (*)(void)) gschem_bottom_widget_init,
+      NULL };
 
-    type = g_type_register_static (GTK_TYPE_HBOX, "GschemBottomWidget", &info, 0);
+    type = g_type_register_static (GTK_TYPE_BOX, "GschemBottomWidget", &info, 0);
   }
 
   return type;
@@ -425,51 +425,72 @@ gschem_bottom_widget_init (GschemBottomWidget *widget)
   g_return_if_fail (widget != NULL);
 
   widget->left_button_label = gtk_label_new (NULL);
-  gtk_misc_set_padding (GTK_MISC (widget->left_button_label), LABEL_XPAD, LABEL_YPAD);
+  gtk_widget_set_margin_start (widget->left_button_label, LABEL_XPAD);
+  gtk_widget_set_margin_end (widget->left_button_label, LABEL_XPAD);
+  gtk_widget_set_margin_top (widget->left_button_label, LABEL_YPAD);
+  gtk_widget_set_margin_bottom (widget->left_button_label, LABEL_YPAD);
   gtk_box_pack_start (GTK_BOX (widget), widget->left_button_label, FALSE, FALSE, 0);
 
-  separator = gtk_vseparator_new ();
+  separator = gtk_separator_new (GTK_ORIENTATION_VERTICAL);
   gtk_box_pack_start (GTK_BOX (widget), separator, FALSE, FALSE, 0);
 
   widget->middle_button_label = gtk_label_new (NULL);
-  gtk_misc_set_padding (GTK_MISC (widget->middle_button_label), LABEL_XPAD, LABEL_YPAD);
+  gtk_widget_set_margin_start (widget->middle_button_label, LABEL_XPAD);
+  gtk_widget_set_margin_end (widget->middle_button_label, LABEL_XPAD);
+  gtk_widget_set_margin_top (widget->middle_button_label, LABEL_YPAD);
+  gtk_widget_set_margin_bottom (widget->middle_button_label, LABEL_YPAD);
   gtk_box_pack_start (GTK_BOX (widget), widget->middle_button_label, FALSE, FALSE, 0);
 
-  separator = gtk_vseparator_new ();
+  separator = gtk_separator_new (GTK_ORIENTATION_VERTICAL);
   gtk_box_pack_start (GTK_BOX (widget), separator, FALSE, FALSE, 0);
 
   widget->right_button_label = gtk_label_new (NULL);
-  gtk_misc_set_padding (GTK_MISC (widget->right_button_label), LABEL_XPAD, LABEL_YPAD);
+  gtk_widget_set_margin_start (widget->right_button_label, LABEL_XPAD);
+  gtk_widget_set_margin_end (widget->right_button_label, LABEL_XPAD);
+  gtk_widget_set_margin_top (widget->right_button_label, LABEL_YPAD);
+  gtk_widget_set_margin_bottom (widget->right_button_label, LABEL_YPAD);
   gtk_box_pack_start (GTK_BOX (widget), widget->right_button_label, FALSE, FALSE, 0);
 
-  separator = gtk_vseparator_new ();
+  separator = gtk_separator_new (GTK_ORIENTATION_VERTICAL);
   gtk_box_pack_start (GTK_BOX (widget), separator, FALSE, FALSE, 0);
 
   widget->snap_label = gtk_label_new (NULL);
-  gtk_misc_set_padding (GTK_MISC (widget->snap_label), LABEL_XPAD, LABEL_YPAD);
+  gtk_widget_set_margin_start (widget->snap_label, LABEL_XPAD);
+  gtk_widget_set_margin_end (widget->snap_label, LABEL_XPAD);
+  gtk_widget_set_margin_top (widget->snap_label, LABEL_YPAD);
+  gtk_widget_set_margin_bottom (widget->snap_label, LABEL_YPAD);
   gtk_box_pack_start (GTK_BOX (widget), widget->snap_label, FALSE, FALSE, 0);
 
-  separator = gtk_vseparator_new ();
+  separator = gtk_separator_new (GTK_ORIENTATION_VERTICAL);
   gtk_box_pack_start (GTK_BOX (widget), separator, FALSE, FALSE, 0);
 
   widget->grid_label = gtk_label_new (NULL);
-  gtk_misc_set_padding (GTK_MISC (widget->grid_label), LABEL_XPAD, LABEL_YPAD);
+  gtk_widget_set_margin_start (widget->grid_label, LABEL_XPAD);
+  gtk_widget_set_margin_end (widget->grid_label, LABEL_XPAD);
+  gtk_widget_set_margin_top (widget->grid_label, LABEL_YPAD);
+  gtk_widget_set_margin_bottom (widget->grid_label, LABEL_YPAD);
   gtk_box_pack_start (GTK_BOX (widget), widget->grid_label, FALSE, FALSE, 0);
 
-  separator = gtk_vseparator_new ();
+  separator = gtk_separator_new (GTK_ORIENTATION_VERTICAL);
   gtk_box_pack_start (GTK_BOX (widget), separator, FALSE, FALSE, 0);
 
   widget->coord_label = gtk_label_new (NULL);
-  gtk_misc_set_padding (GTK_MISC (widget->coord_label), LABEL_XPAD, LABEL_YPAD);
+  gtk_widget_set_margin_start (widget->coord_label, LABEL_XPAD);
+  gtk_widget_set_margin_end (widget->coord_label, LABEL_XPAD);
+  gtk_widget_set_margin_top (widget->coord_label, LABEL_YPAD);
+  gtk_widget_set_margin_bottom (widget->coord_label, LABEL_YPAD);
   gtk_widget_set_no_show_all (widget->coord_label, TRUE);
   gtk_box_pack_start (GTK_BOX (widget), widget->coord_label, FALSE, FALSE, 0);
 
-  widget->coord_separator = gtk_vseparator_new ();
+  widget->coord_separator = gtk_separator_new (GTK_ORIENTATION_VERTICAL);
   gtk_widget_set_no_show_all (widget->coord_separator, TRUE);
   gtk_box_pack_start (GTK_BOX (widget), widget->coord_separator, FALSE, FALSE, 0);
 
   widget->status_label = gtk_label_new (NULL);
-  gtk_misc_set_padding (GTK_MISC (widget->status_label), LABEL_XPAD, LABEL_YPAD);
+  gtk_widget_set_margin_start (widget->status_label, LABEL_XPAD);
+  gtk_widget_set_margin_end (widget->status_label, LABEL_XPAD);
+  gtk_widget_set_margin_top (widget->status_label, LABEL_YPAD);
+  gtk_widget_set_margin_bottom (widget->status_label, LABEL_YPAD);
   gtk_box_pack_end (GTK_BOX (widget), widget->status_label, FALSE, FALSE, 0);
 
   g_signal_connect (G_OBJECT (widget),
@@ -627,18 +648,12 @@ gschem_bottom_widget_set_status_text_color (GschemBottomWidget *widget, gboolean
 {
   g_return_if_fail (widget != NULL);
 
-  GdkRGBA color;
-
+  GtkStyleContext *context = gtk_widget_get_style_context (GTK_WIDGET (widget->status_label));
   if (active) {
-    gdk_color_parse ("green", &color);
+      gtk_style_context_add_class (context, "status-active");
   } else {
-    gdk_color_parse ("black", &color);
+      gtk_style_context_remove_class (context, "status-active");
   }
-
-  // Old
-  // gtk_widget_modify_fg (GTK_WIDGET (widget->status_label), GTK_STATE_NORMAL, &color);
-  // New GTK 3
-  gtk_widget_override_background_color(widget, GTK_STATE_FLAG_NORMAL, &color);
 }
 
 
@@ -737,6 +752,8 @@ set_property (GObject *object, guint param_id, const GValue *value, GParamSpec *
 static void
 update_grid_labels (GschemBottomWidget *widget, GParamSpec *pspec, gpointer unused)
 {
+  (void) pspec;
+  (void) unused;
   if (widget->snap_label != NULL) {
     gchar *snap_text = NULL;
     gchar *label_text = NULL;

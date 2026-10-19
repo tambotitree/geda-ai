@@ -1,9 +1,9 @@
 /* g_netlist.c */
 void g_set_project_current(TOPLEVEL *pr_current);
 SCM g_scm_c_get_uref (OBJECT *object);
-SCM g_get_verbosity ();
-SCM g_get_backend_arguments ();
-SCM g_get_input_files();
+SCM g_get_verbosity (void);
+SCM g_get_backend_arguments (void);
+SCM g_get_input_files(void);
 SCM g_get_packages(SCM level);
 SCM g_get_non_unique_packages(SCM level);
 SCM g_get_pins(SCM uref);
@@ -90,10 +90,10 @@ NETLIST *s_netlist_return_head(NETLIST *tail);
 NETLIST *s_netlist_add(NETLIST *ptr);
 void s_netlist_print(NETLIST *ptr);
 void s_netlist_post_process(TOPLEVEL *pr_current, NETLIST *head);
-void s_netlist_name_named_nets (TOPLEVEL *pr_current,
+void s_netlist_name_named_nets (
 				NETLIST *named_netlist,
 				NETLIST *unnamed_netlist);
-char *s_netlist_netname_of_netid (TOPLEVEL *pr_current,
+char *s_netlist_netname_of_netid (
 				  NETLIST *netlist_head,
 				  int net_id);
 /* s_rename.c */
@@ -104,7 +104,7 @@ void s_rename_print(void);
 int s_rename_search(char *src, char *dest, int quiet_flag);
 void s_rename_add(char *src, char *dest);
 void s_rename_all_lowlevel(NETLIST *netlist_head, char *src, char *dest);
-void s_rename_all(TOPLEVEL *pr_current, NETLIST *netlist_head);
+void s_rename_all(NETLIST *netlist_head);
 SCM g_get_renamed_nets(SCM scm_level);
 /* s_traverse.c */
 void s_traverse_init(void);

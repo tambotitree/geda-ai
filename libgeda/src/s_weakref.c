@@ -113,6 +113,7 @@ s_weakref_remove (GList *weak_refs, void (*notify_func)(void *, void *),
 
 static void
 weak_ptr_notify_func (void *dead_ptr, void *user_data) {
+  (void) dead_ptr;
   void **weak_pointer_loc = (void **) user_data;
   if (weak_pointer_loc != NULL) {
     *weak_pointer_loc = NULL;

@@ -27,6 +27,9 @@
 #include "libgeda_priv.h"
 #include "libgedaguile_priv.h"
 
+/* Scheme entry points are private C functions registered in this module. */
+static SCM log_x (SCM domain_s, SCM level_s, SCM message_s);
+
 SCM_SYMBOL(error_sym, "error");
 SCM_SYMBOL(critical_sym, "critical");
 SCM_SYMBOL(warning_sym, "warning");
@@ -113,8 +116,11 @@ SCM_DEFINE (log_x, "%log!", 3, 0, 0,
  * be accessed using (use-modules (geda core log)).
  */
 static void
-init_module_geda_core_log ()
+init_module_geda_core_log (void *unused_data)
 {
+  /* Guile supplies this argument; module registration needs no context. */
+  (void) unused_data;
+
 	/* Register the functions and symbols */
 	#include "scheme_log.x"
 

@@ -180,7 +180,6 @@ s_toplevel_gtksheet_to_toplevel(TOPLEVEL *toplevel)
 void s_toplevel_add_new_attrib(gchar *new_attrib_name) {
   gint cur_page;  /* current page in notbook  */
   gint old_comp_attrib_count;
-  gint new_index;
 
   if (strcmp(new_attrib_name, N_("_cancel")) == 0) {
     return;  /* user pressed cancel or closed window with no value in entry */
@@ -215,11 +214,6 @@ void s_toplevel_add_new_attrib(gchar *new_attrib_name) {
 			   new_attrib_name);
     s_string_list_sort_master_comp_attrib_list();
 
-    /* Now, determine what index the new attrib ended up at
-     * This is necessary to tell gtk_sheet_insert_columns
-     * where the data should be shifted                    */
-    new_index = s_string_list_find_in_list(sheet_head->master_comp_attrib_list_head, 
-                                           (char*)new_attrib_name);
 
 #ifdef DEBUG
     printf("In s_toplevel_add_new_attrib, just updated comp_attrib string list.\n");
@@ -241,9 +235,9 @@ void s_toplevel_add_new_attrib(gchar *new_attrib_name) {
     printf("In s_toplevel_add_new_attrib, just resized component table.\n");
 #endif
 
-    /* Fill out new sheet with new stuff from gtksheet */
-    gtk_sheet_insert_columns(GTK_SHEET(sheets[0]), new_index, 1);
-    x_gtksheet_add_col_labels(GTK_SHEET(sheets[0]), 
+    /* Fill out new sheet with new stuff from the attribute matrix */
+    gattrib_sheet_append_columns(GATTRIB_SHEET(sheets[0]), 1, NULL);
+    x_gtksheet_add_col_labels(GATTRIB_SHEET(sheets[0]), 
 			      sheet_head->comp_attrib_count, 
 			      sheet_head->master_comp_attrib_list_head);
 
@@ -276,12 +270,12 @@ void s_toplevel_add_new_attrib(gchar *new_attrib_name) {
 void s_toplevel_delete_attrib_col() {
   gint cur_page;  /* current page in notbook  */
   gint mincol, maxcol;
-  GtkSheet *sheet;
+  GattribSheet *sheet;
   gchar *attrib_name;
 
   /* Repeat previous checks  */
   cur_page = gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook));
-  sheet = GTK_SHEET(sheets[cur_page]);
+  sheet = GATTRIB_SHEET(sheets[cur_page]);
   if (sheet == NULL) {
     return;
   }
@@ -307,8 +301,8 @@ void s_toplevel_delete_attrib_col() {
     s_table_destroy(sheet_head->component_table, 
 		    sheet_head->comp_count, sheet_head->comp_attrib_count);
 
-    /*  Get name (label) of the col to delete from the gtk sheet */
-    attrib_name = g_strdup( gtk_sheet_column_button_get_label(sheet, mincol) );
+    /*  Get name (label) of the col to delete from the sheet */
+    attrib_name = g_strdup( gattrib_sheet_get_column_label(sheet, mincol) );
     
     if (attrib_name != NULL) {
 #ifdef DEBUG
@@ -354,13 +348,13 @@ void s_toplevel_delete_attrib_col() {
   }  /* switch  */
 
 
-  /* Delete col on gtksheet  */
+  /* Delete col in the attribute matrix */
 #ifdef DEBUG
-  printf("In s_toplevel_delete_attrib_col, about to delete col in gtksheet.\n");
+  printf("In s_toplevel_delete_attrib_col, about to delete col in sheet.\n");
 #endif
-  gtk_sheet_delete_columns (sheet, mincol, 1); 
+  gattrib_sheet_delete_column (sheet, mincol); 
 #ifdef DEBUG
-  printf("In s_toplevel_delete_attrib_col, done deleting col in gtksheet.\n");
+  printf("In s_toplevel_delete_attrib_col, done deleting col in sheet.\n");
 #endif
   
   sheet_head->CHANGED = TRUE;  /* Set changed flag so user is prompted when exiting */
@@ -503,7 +497,6 @@ s_toplevel_sheetdata_to_toplevel (TOPLEVEL *toplevel, PAGE *page)
             new_pin_attrib_list =
               s_toplevel_get_pin_attribs_in_sheet (temp_uref, comp_prim_obj);
            s_toplevel_update_pin_attribs_in_toplevel (toplevel,
-                                                      temp_uref,
                                                       comp_prim_obj,
                                                       new_pin_attrib_list);
          }
@@ -826,23 +819,12 @@ s_toplevel_update_component_attribs_in_toplevel (
 /*!
  * \todo Function doesn't do anything - candidate for removal?
  */
-STRING_LIST *s_toplevel_get_net_attribs_in_sheet(char *netname)
-{
-  /* must be filled in */
-  return NULL;
-}
 
 
 /*------------------------------------------------------------------*/
 /*!
  * \todo Function doesn't do anything - candidate for removal?
  */
-void s_toplevel_update_net_attribs_in_toplevel(OBJECT *o_current, 
-				   STRING_LIST *new_net_attrib_list)
-{
-  /* must be filled in */
-  return;
-}
 
 
 /*------------------------------------------------------------------*/
@@ -953,13 +935,11 @@ STRING_LIST *s_toplevel_get_pin_attribs_in_sheet(char *refdes, OBJECT *pin)
  * -# If the attribs doesn't exist on pin, but is non-null in
  *    the name=value pair, create an attrib object and add it to the pin.
  * \param toplevel TOPLEVEL structure
- * \param refdes Unused - needs refactored out
  * \param [in,out] o_pin pin to update
  * \param [in] new_pin_attrib_list New pin attribute list to apply
  */
 void
 s_toplevel_update_pin_attribs_in_toplevel (TOPLEVEL *toplevel,
-                                           char *refdes,
                                            OBJECT *o_pin,
                                            STRING_LIST *new_pin_attrib_list)
 {

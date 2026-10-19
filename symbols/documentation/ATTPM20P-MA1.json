@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "device": "ATTPM20P",
+  "manufacturer": "Microchip",
+  "symbol": "micro/ATTPM20P-MA1-1.sym",
+  "source": {
+    "url": "https://ww1.microchip.com/downloads/en/devicedoc/attpm20p-trusted-platform-module-tpm-2.0-spi-interface-summary-data-sheet-ds40002082a.pdf",
+    "document": "DS40002082A",
+    "pages": {
+      "pinout": [
+        4,
+        5
+      ],
+      "package": [
+        13,
+        14
+      ],
+      "land_pattern": [
+        15
+      ],
+      "ordering": [
+        19
+      ]
+    },
+    "drawing": "C04-21355-Q4B Rev A"
+  },
+  "package": {
+    "code": "Q4B",
+    "ordering_package_code": "MA1",
+    "legacy_code": "YNZ",
+    "type": "UDFN",
+    "terminal_count": 8,
+    "units": "mm",
+    "body_D": {
+      "basic": 2.0
+    },
+    "body_E": {
+      "basic": 3.0
+    },
+    "height_A": {
+      "min": 0.5,
+      "nom": 0.55,
+      "max": 0.6
+    },
+    "terminal_pitch_e": {
+      "basic": 0.5
+    },
+    "terminal_width_b": {
+      "min": 0.18,
+      "nom": 0.25,
+      "max": 0.3
+    },
+    "terminal_length_L": {
+      "min": 0.35,
+      "nom": 0.4,
+      "max": 0.45
+    },
+    "exposed_pad_D2": {
+      "min": 1.4,
+      "nom": 1.5,
+      "max": 1.6
+    },
+    "exposed_pad_E2": {
+      "min": 1.2,
+      "nom": 1.3,
+      "max": 1.4
+    }
+  },
+  "land_pattern": {
+    "units": "mm",
+    "contact_pitch_E": {
+      "basic": 0.5
+    },
+    "row_center_spacing_C": {
+      "nom": 2.9
+    },
+    "contact_width_X1": {
+      "max": 0.3
+    },
+    "contact_length_Y1": {
+      "max": 0.85
+    },
+    "center_pad": {
+      "optional": true,
+      "width_X2": {
+        "max": 1.6
+      },
+      "length_Y2": {
+        "max": 1.4
+      },
+      "electrical_connection": null
+    },
+    "contact_to_center_gap_G1": {
+      "min": 0.2
+    },
+    "adjacent_contact_gap_G2": {
+      "min": 0.33
+    },
+    "thermal_via_diameter_V": {
+      "nom": 0.3
+    },
+    "thermal_via_pitch_EV": {
+      "nom": 1.0
+    },
+    "selected_center_pad": false,
+    "selected_thermal_vias": false,
+    "selected_contact_width": null,
+    "selected_contact_length": null
+  },
+  "verification": {
+    "pin_map": "verified against Figure 1-1 and Table 1-2",
+    "dimensions": "transcribed with min/nom/max/basic qualifiers; not manufacturing approval",
+    "footprint": null,
+    "footprint_status": "pad_dimensions_pending_review",
+    "notes": [
+      "At 0.50 mm pitch, a 0.30 mm contact width leaves 0.20 mm adjacent clearance, below the stated G2 minimum of 0.33 mm. Do not select all maximum dimensions together.",
+      "The gap constraint implies a contact width at most 0.17 mm; this is not an approved pad-width selection.",
+      "The center pad and thermal vias are omitted from the proposed initial variant. No extra electrical pin is inferred.",
+      "G6 ordering suffix from Nexar is not defined in the source ordering table; exact MPN and temperature grade remain unverified."
+    ]
+  }
+}

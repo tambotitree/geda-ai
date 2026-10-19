@@ -25,6 +25,8 @@
 #include <glib/gstdio.h>
 
 #include "gschem.h"
+
+static void gschem_dialog_class_init_gtype_adapter (gpointer klass, gpointer data);
 #include <gdk/gdkkeysyms.h>
 
 
@@ -39,6 +41,8 @@ gschem_marshal_VOID__POINTER_STRING (GClosure     *closure,
                                      gpointer      invocation_hint,
                                      gpointer      marshal_data)
 {
+  (void) return_value;
+  (void) invocation_hint;
   typedef void (*GMarshalFunc_VOID__POINTER_STRING) (gpointer     data1,
                                                      gpointer     arg_1,
                                                      gpointer     arg_2,
@@ -348,7 +352,7 @@ static void gschem_dialog_class_init (GschemDialogClass *klass)
  *
  *  \return the GType identifier associated with GschemDialog.
  */
-GType gschem_dialog_get_type ()
+GType gschem_dialog_get_type()
 {
   static GType gschem_dialog_type = 0;
 
@@ -357,12 +361,13 @@ GType gschem_dialog_get_type ()
       sizeof(GschemDialogClass),
       NULL, /* base_init */
       NULL, /* base_finalize */
-      (GClassInitFunc) gschem_dialog_class_init,
+      gschem_dialog_class_init_gtype_adapter,
       NULL, /* class_finalize */
       NULL, /* class_data */
       sizeof(GschemDialog),
       0,    /* n_preallocs */
       NULL, /* instance_init */
+      NULL /* value_table */
     };
 
     gschem_dialog_type = g_type_register_static (GTK_TYPE_DIALOG,
@@ -491,3 +496,10 @@ GtkWidget* gschem_dialog_new_with_buttons (const gchar *title, GtkWindow *parent
   return GTK_WIDGET (dialog);
 }
 
+/*! \brief Adapt the typed initializer to the GType callback contract. */
+static void
+gschem_dialog_class_init_gtype_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  gschem_dialog_class_init (klass);
+}

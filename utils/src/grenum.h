@@ -62,5 +62,5 @@ int get_refdes_from_file(FILE *fp,struct refdes_ *refdes, char *buff);
 int seek_value(int prefix, FILE *fp, unsigned int value, struct refdes_ *db);
 int parse_refdes(struct refdes_ *refdes, char *ref_str);
 int refdes_lookup(struct refdes_ *db, struct refdes_ *ref);
-void printhelp(void);
-void printver(void);
+void printhelp();
+void printver();

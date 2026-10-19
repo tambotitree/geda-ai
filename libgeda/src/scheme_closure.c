@@ -55,7 +55,7 @@ edascm_closure_marshal (SCM args, SCM smob) {
   EDASCM_ASSERT_SMOB_VALID (smob);
 
   SCM (*func)(SCM, gpointer) = (SCM (*)(SCM, gpointer)) SCM_SMOB_DATA (smob);
-  gpointer *user_data = (gpointer) SCM_SMOB_DATA_2 (smob);
+  gpointer user_data = (gpointer) SCM_SMOB_DATA_2 (smob);
 
   return func (args, user_data);
 }
@@ -113,8 +113,12 @@ edascm_init_closure ()
   /* Register functions and symbols */
   #include "scheme_closure.x"
 
+  /* Check the two-argument contract before Guile's generic registration API
+   * erases the function type, as it also does in SCM_DEFINE. */
+  SCM (*marshal_callback) (SCM, SCM) = edascm_closure_marshal;
+
   marshal_proc =
     scm_permanent_object (scm_c_make_gsubr ("edascm_closure_marshal",
                                             2, 0, 0,
-                                            edascm_closure_marshal));
+                                            (scm_t_subr) marshal_callback));
 }

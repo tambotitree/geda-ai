@@ -39,20 +39,20 @@ GdkRGBA black;
 GdkRGBA white;
 
 void
-x_color_init (void)
+x_color_init()
 {
   s_color_map_defaults (display_colors);
   s_color_map_defaults (display_outline_colors);
 }
 
 void
-x_color_free (void)
+x_color_free()
 {
   // Nothing to free: GdkRGBA is a value type (no allocation)
 }
 
 void
-x_color_allocate (void)
+x_color_allocate()
 {
   int i;
   COLOR c;

@@ -91,7 +91,6 @@ char *s_attrib_get_refdes(OBJECT *object)
   char *temp_uref;
   char *numslots_value;
   char *slot_value;
-  OBJECT *slot_text_object;
 
   /*------ Try to get the refdes -----*/
   temp_uref = o_attrib_search_object_attribs_by_name (object, "refdes", 0);
@@ -118,11 +117,20 @@ char *s_attrib_get_refdes(OBJECT *object)
     o_attrib_search_object_attribs_by_name (object, "numslots", 0);
   if (numslots_value != NULL) {  /* this is a slotted component; 
 				    append slot number to refdes. */
-    slot_value = s_slot_search_slot (object, &slot_text_object);
+    slot_value = s_slot_search_slot (object, NULL);
 #if DEBUG
     printf(". . .  , found slotted component with slot = %s\n", slot_value);
 #endif
-    temp_uref = g_strconcat(temp_uref, ".", slot_value, NULL);
+    /* A symbol can carry numslots=0 (capacitor-1.sym does) or omit the slot
+     * attribute altogether.  s_slot_search_slot() then returns NULL and the
+     * old code concatenated it anyway, producing "C1." with a trailing dot.
+     * Only build refdes.slot when there really is a slot to append. */
+    if (slot_value != NULL && slot_value[0] != '\0') {
+      gchar *slotted = g_strconcat (temp_uref, ".", slot_value, NULL);
+      g_free (temp_uref);
+      temp_uref = slotted;
+    }
+    g_free (slot_value);
   }
 
 #ifdef DEBUG

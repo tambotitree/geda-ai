@@ -66,8 +66,8 @@
 ;; We use a record type here in case we later want to add additional
 ;; information into the keymap (e.g. default actions, canonical
 ;; ordering, keymap names, etc).
-(define <keymap> (make-record-type "gschem-keymap" '(key-table)))
-(define %make-keymap (record-constructor <keymap> '(key-table)))
+(define <keymap> (make-record-type 'gschem-keymap '(key-table)))
+(define %make-keymap (record-constructor <keymap>))
 (define keymap-key-table (record-accessor <keymap> 'key-table))
 (define set-keymap-key-table! (record-modifier <keymap> 'key-table))
 

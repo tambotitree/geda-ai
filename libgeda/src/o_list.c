@@ -97,7 +97,7 @@ OBJECT *o_object_copy (TOPLEVEL *toplevel,
 
     default:
       g_critical ("o_list_copy_to: object %p has bad type '%c'\n",
-                  selected, selected->type);
+                  (void *) selected, selected->type);
       return NULL;
   }
 

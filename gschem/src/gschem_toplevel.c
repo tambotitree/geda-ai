@@ -429,7 +429,7 @@ gschem_toplevel_get_selection_adapter (GschemToplevel *w_current)
   g_return_val_if_fail (w_current->toplevel != NULL, NULL);
 
   if (w_current->selection_adapter == NULL) {
-    w_current->selection_adapter = gschem_selection_adapter_new ();
+    w_current->selection_adapter = gschem_selection_adapter_new();
 
     g_signal_connect_swapped (w_current->selection_adapter,
                               "handle-undo",
@@ -609,6 +609,8 @@ gschem_toplevel_get_toplevel (GschemToplevel *w_current)
 void
 gschem_toplevel_notify_page_callback (GschemPageView *page_view, GParamSpec *pspec, GschemToplevel *w_current)
 {
+  (void) page_view;
+  (void) pspec;
   g_return_if_fail (w_current != NULL);
 
   gschem_toplevel_page_changed (w_current);

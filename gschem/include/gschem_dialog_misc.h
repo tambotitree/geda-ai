@@ -1,3 +1,5 @@
+#ifndef GSCHEM_DIALOG_MISC_H
+#define GSCHEM_DIALOG_MISC_H
 /* gEDA - GPL Electronic Design Automation
  * gschem - gEDA Schematic Capture
  * Copyright (C) 1998-2010 Ales Hvezda
@@ -45,3 +47,4 @@ gschem_dialog_misc_response_non_modal (GtkDialog *dialog, gint response, gpointe
 
 void
 gschem_dialog_misc_show_non_modal (GschemToplevel *w_current, GtkWidget **widget, CreateNonModalDialog create);
+#endif /* GSCHEM_DIALOG_MISC_H */

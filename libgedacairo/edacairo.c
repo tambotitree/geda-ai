@@ -61,7 +61,7 @@ eda_cairo_set_source_color (cairo_t *cr, int color, GArray *map)
 
   g_return_if_fail (color >= 0);
   g_return_if_fail (map != NULL);
-  g_return_if_fail ((color >= 0) && (map->len > color));
+  g_return_if_fail ((color >= 0) && ((guint) color < map->len));
 
   c = g_array_index (map, COLOR, color);
 

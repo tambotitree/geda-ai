@@ -47,7 +47,7 @@ void verbose_print(char *string)
     }
 }
 
-void verbose_done(void)
+void verbose_done()
 {
     if (verbose_mode) {
 	if (char_index >= 70) {
@@ -60,7 +60,7 @@ void verbose_done(void)
     }
 }
 
-void verbose_reset_index(void)
+void verbose_reset_index()
 {
     char_index = 0;
 }

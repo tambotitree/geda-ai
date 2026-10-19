@@ -113,6 +113,7 @@ load_source (GschemToplevel *w_current, const gchar *filename,
 static GSList *
 get_source_filenames (GschemToplevel *w_current, OBJECT *object)
 {
+  (void) w_current;
   char *attrib = NULL;
   int count = 0;
   int looking_inside = FALSE;

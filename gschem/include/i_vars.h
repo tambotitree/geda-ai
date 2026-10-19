@@ -1,3 +1,5 @@
+#ifndef I_VARS_H
+#define I_VARS_H
 
 extern int default_text_size;
 extern int default_text_caps;
@@ -61,3 +63,4 @@ extern int default_keyboardpan_gain;
 extern int default_select_slack_pixels;
 extern int default_zoom_gain;
 extern int default_scrollpan_steps;
+#endif /* I_VARS_H */

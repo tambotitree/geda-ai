@@ -1,2 +1,4 @@
-# Minimal Makefile.am for the gedai Python component
-# Add rules here later if installation or other build steps are needed.
+# The native GTK chat uses this stdlib-only HTTP helper.
+aidir = $(GEDADATADIR)/ai
+ai_DATA = chat_backend.py
+EXTRA_DIST = $(ai_DATA) README.ai-assist

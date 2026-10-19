@@ -297,6 +297,7 @@ s_hierarchy_traversepages (TOPLEVEL *toplevel, PAGE *p_current, gint flags)
 gint
 s_hierarchy_print_page (PAGE *p_current, void * data)
 {
+  (void) data;
   printf("pagefilename: %s pageid: %d\n",
          p_current->page_filename, p_current->pid);
   return 0;

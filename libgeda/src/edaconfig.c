@@ -1644,6 +1644,9 @@ cclosure_marshal_VOID__STRING_STRING (GClosure *closure,
   register GCClosure *cc = (GCClosure *) closure;
   register gpointer data1, data2;
 
+  (void) return_value;
+  (void) invocation_hint;
+
   g_return_if_fail (n_param_values == 3);
   if (G_CCLOSURE_SWAP_DATA (closure)) {
     data1 = closure->data;
@@ -1673,6 +1676,9 @@ static void
 default_config_changed_handler (EdaConfig *cfg, const gchar *group,
                                 const gchar* key)
 {
+  /* Every configuration change marks the context dirty. */
+  (void) group;
+  (void) key;
   cfg->priv->changed = TRUE;
 }
 
@@ -1692,6 +1698,7 @@ static void
 parent_config_changed_handler (EdaConfig *cfg, const gchar *group,
                                const gchar* key, EdaConfig *parent)
 {
+  (void) parent;
   if (eda_config_is_inherited (cfg, group, key, NULL)) {
     g_signal_emit_by_name (cfg, "config-changed", group, key);
   }
@@ -1707,7 +1714,7 @@ parent_config_changed_handler (EdaConfig *cfg, const gchar *group,
  * \return a #GQuark representing the error domain.
  */
 GQuark
-eda_config_error_quark (void)
+eda_config_error_quark ()
 {
   return g_quark_from_static_string ("eda-config-error-quark");
 }

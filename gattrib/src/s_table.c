@@ -603,7 +603,7 @@ void s_table_gtksheet_to_all_tables() {
   STRING_LIST *master_row_list;
   STRING_LIST *master_col_list;
   TABLE **local_table;
-  GtkSheet *local_gtk_sheet;     
+  GattribSheet *local_gtk_sheet;     
 
   /* First handle component sheet */
   num_rows = sheet_head->comp_count;
@@ -671,7 +671,7 @@ void s_table_gtksheet_to_all_tables() {
  * \param num_rows Number of rows in table
  * \param num_cols Number of columns in table
  */
-void s_table_gtksheet_to_table(GtkSheet *local_gtk_sheet, STRING_LIST *master_row_list, 
+void s_table_gtksheet_to_table(GattribSheet *local_gtk_sheet, STRING_LIST *master_row_list, 
 			 STRING_LIST *master_col_list, TABLE **local_table,
 			 int num_rows, int num_cols) 
 {
@@ -699,7 +699,7 @@ void s_table_gtksheet_to_table(GtkSheet *local_gtk_sheet, STRING_LIST *master_ro
       col_title = (gchar *) g_strdup(col_list_item->data);
 
       /* get value of attrib in cell  */
-      attrib_value = (gchar *) gtk_sheet_cell_get_text(GTK_SHEET(local_gtk_sheet), row, col);
+      attrib_value = (gchar *) gattrib_sheet_get_cell_text(local_gtk_sheet, row, col);
 
 #if 0
       if (strlen(attrib_value) == 0) {
