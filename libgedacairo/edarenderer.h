@@ -83,6 +83,7 @@ GArray *eda_renderer_get_color_map (EdaRenderer *renderer);
 void eda_renderer_set_color_map (EdaRenderer *renderer, GArray *map);
 
 cairo_t *eda_renderer_get_cairo_context (EdaRenderer *renderer);
+gboolean eda_renderer_get_hinting_enabled (EdaRenderer *renderer);
 int eda_renderer_get_cairo_flags (EdaRenderer *renderer);
 
 int eda_renderer_get_user_bounds (EdaRenderer *renderer, OBJECT *object,

@@ -238,6 +238,8 @@ eda_pango_renderer_draw_rectangle (PangoRenderer *renderer,
                                    PangoRenderPart part,
                                    int x, int y, int width, int height)
 {
+  /* The caller selects the Cairo source for every render part. */
+  (void) part;
   EdaPangoRenderer *eda_renderer = EDA_PANGO_RENDERER (renderer);
   cairo_t *cr = eda_renderer->priv->cr;
 
@@ -261,16 +263,20 @@ static void
 eda_pango_renderer_part_changed (PangoRenderer *renderer,
                                  PangoRenderPart part)
 {
+  (void) renderer;
+  (void) part;
 }
 
 static void
 eda_pango_renderer_begin (PangoRenderer *renderer)
 {
+  (void) renderer;
 }
 
 static void
 eda_pango_renderer_end (PangoRenderer *renderer)
 {
+  (void) renderer;
 }
 
 static void
