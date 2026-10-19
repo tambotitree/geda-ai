@@ -97,25 +97,20 @@ embedded Scheme.  For more information about Guile, please visit
 @section Getting Additional Help
 @cindex Reporting bugs
 
-If you think you have found a bug, please file a bug report in
-Launchpad: @uref{http://bugs.launchpad.net/geda}. Please add the tag
-@samp{scheme-api}.  It will help us to fix your bug quickly if you can
+If you think you have found a bug, please file a bug report on
+GitHub: @uref{https://github.com/tambotitree/geda-ai/issues}. Please mention @samp{scheme-api} in the report.  It will help us to fix your bug quickly if you can
 describe in detail how to reproduce the bug.
 
-If you have a question about using gEDA, or about extending gEDA using
-Scheme, you may wish to send a message to one of the gEDA mailing
-lists.  You may also find additional information in the gEDA
-wiki.
-
-Both the mailing lists and wiki can be accessed from the main gEDA
-website: @uref{http://www.geda-project.org/}.
+For questions about gEDA-ai or its Scheme interface, use the project tracker:
+@uref{https://github.com/tambotitree/geda-ai/issues}.
+The maintainer is John Ryan, Aquana Press (Aqnana.net).
 
 @section We Need Feedback!
 
 If you find a typographical error in this manual, or if you have
 thought of a way to make this manual better, we would love to hear
-from you! Please submit a report in Launchpad:
-@uref{http://bugs.launchpad.net/geda}, with the tag @samp{scheme-api}.
+from you! Please submit a report on GitHub:
+@uref{https://github.com/tambotitree/geda-ai/issues}, mentioning @samp{scheme-api}.
 
 @node Schematic Document Model
 @chapter The Schematic Document Model
@@ -2533,7 +2528,7 @@ Example:
                 #:name       "Report Bug"
                 #:label      "Report Bug..."
                 #:menu-label "Report _Bug...")
-  (show-uri "http://bugs.launchpad.net/geda/+reportbug"))
+  (show-uri "https://github.com/tambotitree/geda-ai/issues"))
 @end example
 
 Since 1.10.

@@ -98,8 +98,8 @@ usage(char *cmd)
 "  -h, --help               Help; this message.\n"
 "  --                       Treat all remaining arguments as filenames.\n"
 "\n"
-"Report bugs at <https://bugs.launchpad.net/geda>\n"
-"gEDA/gaf homepage: <http://www.geda-project.org/>\n"),
+"Report bugs at <https://github.com/tambotitree/geda-ai/issues>\n"
+"gEDA-ai project: <https://github.com/tambotitree/geda-ai>\n"),
          cmd);
   exit(0);
 }

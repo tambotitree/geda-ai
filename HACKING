@@ -10,13 +10,13 @@ to contribute to gEDA.
 How to submit patches
 =====================
 
-Please submit patches to the bug tracker on Launchpad:
+Please submit patches to the gEDA-ai GitHub issue tracker:
 
-  <https://bugs.launchpad.net/geda>
+  <https://github.com/tambotitree/geda-ai/issues>
 
-Once you've submitted your patches, you may wish to also e-mail the
-`gEDA-user' mailing list [1] to announce that you've done so and to ask
-for feedback.
+For code contributions, open a pull request at:
+
+  <https://github.com/tambotitree/geda-ai/pulls>
 
 To make it easier for developers to promptly verify your patches and
 integrate them, please try to follow the following guidelines:
