@@ -69,3 +69,10 @@ __pycache__/
 .DS_Store
 \#*\#
 .env.*
+
+# Deployment state and Python caches retained from main
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+*.py[cod]
