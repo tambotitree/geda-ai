@@ -44,6 +44,57 @@ with an editable model picker. Replies are advisory: **chat does not place
 components or apply circuit changes automatically**. The selected provider
 receives the schematic and conversation when you send a message.
 
+## Future direction: trusted circuitry
+
+Our direction is **trusted circuitry**: an engineering toolchain that preserves
+how a circuit was designed, changed, simulated, built, tested and calibrated.
+The purpose is to retain evidence and engineering reasoning, even when the
+people who made the original decisions are no longer available.
+
+The proposed foundation includes:
+
+- **A per-design change journal.** Record completed manual and AI editing
+  operations, their before/after state, and explicit undo/redo events. Link
+  entries with cryptographic hashes and retain restorable checkpoints.
+- **Signed evidence.** Investigate hardware-backed checkpoint signing through
+  the Secure Enclave on Apple Silicon and TPM-backed signers on other platforms.
+  Support local evidence first, with optional anchoring of checkpoint commitments
+  to a selected blockchain. Keep detailed designs and credentials private unless
+  their publication is explicitly intended.
+- **Manufacturing and field traceability.** Link individual devices and component
+  lots to exact design, firmware, test-fixture, procedure and calibration
+  revisions. Preserve signed measurements and acceptance results, supporting
+  investigation of defects and identification of other affected units.
+
+Hashes and signatures establish evidence integrity and signing identity.
+Engineering acceptance limits, trustworthy measurements and calibrated references
+establish what a certification actually demonstrates.
+
+### SPICE integration and lambda calculus
+
+We also intend to integrate **SPICE simulation with a lambda-calculus-based
+approach to circuit and testbench composition**. Investigate a typed functional
+representation for reusable circuit blocks, parameterized component values and
+repeatable test procedures. Define its treatment of ports, connectivity, units,
+tolerances, transformations and state before choosing an implementation.
+
+These circuit/testbench functions would generate SPICE netlists and simulation
+conditions. SPICE would perform the numerical analysis. Results could then be
+checked against explicit limits across component tolerances, temperature and
+other operating conditions, and linked to the exact design checkpoint, device
+models, simulator version and settings used.
+
+This would connect design changes to reproducible simulation evidence and,
+later, physical acceptance tests. Simulation results and physical measurements
+must retain their distinct provenance and stated assumptions.
+
+**This section describes planned work.** The complete journal, hardware signing,
+blockchain anchoring and lambda-calculus/SPICE workflow are not implemented.
+Existing SPICE netlist generation is an initial building block. See the
+[secure infrastructure architecture](secure_infrastructure/README.md), its
+[implementation plan](secure_infrastructure/TODO.md), and the
+[project TODO](TODO.md).
+
 ## Build on Apple Silicon macOS
 
 The tested development environment uses Homebrew GTK 3, Guile 3, Cairo, Pango,
