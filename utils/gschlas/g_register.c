@@ -39,6 +39,20 @@
 
 
 
+/*! \brief Check zero-argument callback signatures before the Guile ABI cast. */
+static void
+register_subr_0 (const char *name, SCM (*callback)(void))
+{
+  scm_c_define_gsubr (name, 0, 0, 0, (scm_t_subr) callback);
+}
+
+/*! \brief Check one-argument callback signatures before the Guile ABI cast. */
+static void
+register_subr_1 (const char *name, SCM (*callback)(SCM))
+{
+  scm_c_define_gsubr (name, 1, 0, 0, (scm_t_subr) callback);
+}
+
 /*! \brief Register Scheme functions
  *
  * This function registers the Scheme functions required to use
@@ -46,14 +60,14 @@
  * file at the beginning of the prog which gives the library search paths.
  */
 void
-g_register_funcs()
+g_register_funcs(void)
 {
   /* general functions */
-  scm_c_define_gsubr ("quit", 0, 0, 0, g_quit);
-  scm_c_define_gsubr ("exit", 0, 0, 0, g_quit);
+  register_subr_0 ("quit", g_quit);
+  register_subr_0 ("exit", g_quit);
 
   /* gschlas functions */
-  scm_c_define_gsubr ("gschlas-version", 1, 0, 0, g_rc_gschlas_version);
+  register_subr_1 ("gschlas-version", g_rc_gschlas_version);
 
 }
 
@@ -62,7 +76,7 @@ g_register_funcs()
  * Quit the application from within Scheme.
  */
 SCM
-g_quit()
+g_quit(void)
 {
   gschlas_quit();
   exit(0);

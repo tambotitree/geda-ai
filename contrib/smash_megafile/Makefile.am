@@ -1,3 +1,6 @@
+AM_CFLAGS = $(GCC_CFLAGS) -Wall -Wextra -Werror -Wpedantic \
+  -Wstrict-prototypes -Wmissing-prototypes -Wformat=2
+
 noinst_PROGRAMS = smash_megafile
 
 smash_megafile_SOURCES = smash_megafile.c

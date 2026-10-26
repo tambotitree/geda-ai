@@ -20,15 +20,14 @@ usage() {
   echo "  desktop   - Update gEDA-AI internal desktop application entry cache."
   echo ""
   echo "TARGET_DIR is the gEDA-AI specific data directory for the given TYPE."
-  echo "           It is expected to be a path like '\$(datadir)/geda-ai/mime'"
-  echo "           (for MIME types) or '\$(datadir)/geda-ai/applications'"
-  echo "           (for desktop entries)."
+  echo "           Use '\$(DESTDIR)\$(datadir)/mime' for MIME types or"
+  echo "           '\$(DESTDIR)\$(datadir)/applications' for desktop entries."
   echo "           For 'mime', TARGET_DIR should contain a 'packages' subdirectory with XML source files."
   echo "           For 'desktop', TARGET_DIR should directly contain .desktop source files."
   exit 1
 }
 
-if [ "$1" = "--help" ]; then
+if [ "${1-}" = "--help" ]; then
   usage
 fi
 
@@ -47,23 +46,10 @@ echo "Raw Target Directory (from Makefile): ${RAW_TARGET_DIR}"
 # Determine OS
 # OS_TYPE=$(uname) # Currently unused, can be removed if not needed for future OS-specific logic.
 
-# Determine the effective gEDA-AI share directory and internal database directory.
-# RAW_TARGET_DIR is e.g. $(DESTDIR)$(prefix)/share/geda-ai/mime or $(DESTDIR)$(prefix)/share/geda/applications
-# The gEDA-AI application root directory (e.g., $(DESTDIR)$(prefix)/share/geda-ai)
-# is expected to be the parent of RAW_TARGET_DIR.
+# The Makefile supplies the actual installed directory, including DESTDIR.
+# Installation prefixes are arbitrary; no literal geda/share component is required.
+# Keep these private placeholder caches beside the supplied mime/applications dir.
 GEDA_AI_APP_ROOT=$(dirname "${RAW_TARGET_DIR}")
-
-# set our expectations to be ${GEDADATADIR} . because who knows what kind of legacy troble we could get into?
-# Flexible check: look for geda/share in path
-case "${RAW_TARGET_DIR}" in
-  */geda/share/*)
-    echo "Detected valid geda directory layout."
-    ;;
-  *)
-    echo "Error: RAW_TARGET_DIR '${RAW_TARGET_DIR}' does not appear to be under a 'geda/share/' hierarchy." >&2
-    exit 1
-    ;;
-esac
 
 GEDA_AI_INTERNAL_DB_DIR="${GEDA_AI_APP_ROOT}/db"
 mkdir -p "${GEDA_AI_INTERNAL_DB_DIR}" || { echo "Error: Could not create internal database directory ${GEDA_AI_INTERNAL_DB_DIR}" >&2; exit 1; }

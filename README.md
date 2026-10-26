@@ -79,10 +79,10 @@ make -C symbols install-data
 ```
 
 Runtime data and configuration must come from the same release. For the
-`1.1.0-20261019` configuration above:
+`1.1.1-20261026` configuration above:
 
 ```sh
-export GEDADATA=/tmp/geda-test/share/geda-ai-1.1.0-20261019
+export GEDADATA=/tmp/geda-test/share/geda-ai-1.1.1-20261026
 export GEDADATARC="$GEDADATA"
 ```
 
@@ -145,3 +145,19 @@ battery life, cryptographic firmware or a manufactured board.
 
 Please use the project tracker for current support rather than contacting
 historical authors. gEDA-ai is free software; see [COPYING](COPYING).
+
+### Window-resize regression (macOS)
+
+After building and installing runtime data, run this opt-in GUI check:
+
+```sh
+python3 tests/test_gschem_resize.py
+```
+
+It opens disposable empty/example windows with private settings and performs 16
+resize/maximize cycles per window, treating criticals as fatal. It does not modify
+schematics or user configuration. It is separate from headless `make check`.
+
+Release checkpoint `1.1.1-20261026` includes startup/resize fixes and usable
+window sizing. The full test run still reports 41 Xorn failures; this is an
+Apple Silicon development checkpoint, not an all-tests-passing release.

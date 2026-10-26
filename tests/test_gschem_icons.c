@@ -61,7 +61,9 @@ check_default_theme (void)
   GtkIconTheme *theme = gtk_icon_theme_get_default ();
   const gchar *names[] = {"geda-gschem", "dialog-warning", "dialog-error",
                           "dialog-information", "dialog-question",
-                          "image-missing", "folder", "text-x-generic"};
+                          "image-missing", "folder", "text-x-generic",
+                          "applications-science", "applications-science-ltr",
+                          "applications-science-rtl"};
   gschem_icons_init (theme);
   for (guint i = 0; i < G_N_ELEMENTS (names); i++) {
     GdkPixbuf *image = gtk_icon_theme_load_icon (theme, names[i], 24,

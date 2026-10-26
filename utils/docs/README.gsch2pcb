@@ -106,3 +106,16 @@ Caveats
 
 
 Bill Wilson    billw@wt.net
+
+Connected conversion smoke test
+-------------------------------
+From the repository root, after building gsch2pcb and gnetlist-legacy:
+
+  sh utils/examples/gsch2pcb/run-connected-test.sh
+
+This creates a fresh temporary directory, copies a two-resistor schematic,
+and uses the supplied TEST_RESISTOR footprint to create connected.pcb,
+connected.net and connected.cmd. The LINK net must contain R1-2 and R2-1.
+The test footprint is deliberately not approved for manufacturing. Missing
+footprints and an empty PCB are not a successful full conversion. An unwired
+schematic can legitimately have an empty PCB netlist.

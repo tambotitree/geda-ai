@@ -324,7 +324,7 @@ gschem_page_view_get_page_geometry (GschemPageView *view)
 {
   PAGE *page = NULL;
   GschemPageGeometry *geometry = NULL;
-  GdkWindow *window = NULL;
+  GtkAllocation allocation;
   int screen_width;
   int screen_height;
 
@@ -337,10 +337,12 @@ gschem_page_view_get_page_geometry (GschemPageView *view)
 
   geometry = g_hash_table_lookup (view->geometry_table, page);
 
-  window = gtk_widget_get_window (GTK_WIDGET (view));
-  g_return_val_if_fail (window != NULL, NULL);
-  screen_width = gdk_window_get_width (window);
-  screen_height = gdk_window_get_height (window);
+  /* Geometry is also queried during construction, before a GdkWindow exists.
+   * Use widget-local dimensions and keep transforms valid until allocation.
+   */
+  gtk_widget_get_allocation (GTK_WIDGET (view), &allocation);
+  screen_width = MAX (1, allocation.width);
+  screen_height = MAX (1, allocation.height);
 
   if (geometry == NULL) {
     geometry = gschem_page_geometry_new_with_values (screen_width,
@@ -1341,56 +1343,46 @@ gschem_page_view_zoom_text (GschemPageView *view, OBJECT *object, gboolean zoom_
 void
 gschem_page_view_redraw(GschemPageView *view, cairo_t *cr, GschemToplevel *w_current)
 {
-  g_return_if_fail(view != NULL);
-  g_return_if_fail(w_current != NULL);
+  PAGE *page;
+  GschemPageGeometry *geometry;
+  GtkAllocation allocation;
+  cairo_surface_t *frame;
+  cairo_t *frame_cr;
+  GdkRectangle rect;
+  int scale;
 
+  g_return_if_fail (view != NULL);
+  g_return_if_fail (cr != NULL);
+  g_return_if_fail (w_current != NULL);
+  page = gschem_page_view_get_page (view);
+  if (page == NULL)
+    return;
+  geometry = gschem_page_view_get_page_geometry (view);
+  gtk_widget_get_allocation (GTK_WIDGET (view), &allocation);
+  if (geometry == NULL || allocation.width <= 0 || allocation.height <= 0)
+    return;
 
-  PAGE *page = gschem_page_view_get_page(view);
+  /* Like PCB-ai, render into an application-owned surface and only present it
+   * through GTK's borrowed context. EdaRenderer/Pango retain their context
+   * between frames; they must never keep GTK's transient draw context alive.
+   * A per-frame surface also gives resize and preview widgets separate buffers.
+   */
+  scale = MAX (1, gtk_widget_get_scale_factor (GTK_WIDGET (view)));
+  frame = cairo_image_surface_create (CAIRO_FORMAT_ARGB32,
+                                      allocation.width * scale,
+                                      allocation.height * scale);
+  cairo_surface_set_device_scale (frame, scale, scale);
+  frame_cr = cairo_create (frame);
+  rect = (GdkRectangle) {0, 0, allocation.width, allocation.height};
+  o_redraw_rect (w_current, frame_cr, page, geometry, &rect);
+  cairo_destroy (frame_cr);
 
-#ifdef DEBUGGTK3MIGRATION
-  printf("DRAW EVENT\n");
-  fprintf(stderr, "==> Redraw triggered on view: %p, page: %p\n", view, page);
-
-  if (page == NULL) {
-    fprintf(stderr, "!! No page loaded. Nothing to draw.\n");
-  } else {
-    cairo_set_source_rgb(cr, 1, 1, 1); // clear to white
-    cairo_paint(cr);
-
-    cairo_set_source_rgb(cr, 0.2, 0.2, 1.0);
-    cairo_set_line_width(cr, 3.0);
-    cairo_move_to(cr, 20, 20);
-    cairo_line_to(cr, 200, 200);
-    cairo_stroke(cr);
-
-    fprintf(stderr, "-- Cairo line should be visible\n");
-  }
-#endif
-
-  if (page != NULL) {
-    GschemPageGeometry *geometry = gschem_page_view_get_page_geometry(view);
-
-    GtkAllocation allocation;
-    gtk_widget_get_allocation(GTK_WIDGET(view), &allocation);
-
-    GdkRectangle rect = {
-      .x = 0,
-      .y = 0,
-      .width = allocation.width,
-      .height = allocation.height
-    };
-#ifdef DEBUGGTK3MIGRATION
-fprintf(stderr, "📦 Calling o_redraw_rect: page=%p geometry=%p\n", page, geometry);
-if (geometry) {
-  fprintf(stderr, "📐 Geometry: width=%d height=%d\n", geometry->screen_width, geometry->screen_height);
-  fprintf(stderr, "📐 Geometry pointer is valid: %p\n", geometry);
-  fprintf(stderr, "DRAW: %p (width=%d height=%d)\n", view, allocation.width, allocation.height);
-} else {
-  fprintf(stderr, "❗ Geometry is NULL\n");
-}
-#endif
-    o_redraw_rect(w_current, cr, page, geometry, &rect);
-  }
+  /* GTK's widget offset and damage clip apply only to this final copy. */
+  cairo_save (cr);
+  cairo_set_source_surface (cr, frame, 0, 0);
+  cairo_paint (cr);
+  cairo_restore (cr);
+  cairo_surface_destroy (frame);
 }
 
 /*! \brief Adapt the typed initializer to the GType callback contract. */

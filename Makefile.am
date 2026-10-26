@@ -39,3 +39,6 @@ endif
 
 DISTCLEANFILES = 
 MAINTAINERCLEANFILES=Makefile.in aclocal.m4 config.h.in configure
+
+# Opt-in macOS GUI regression; not part of headless make check.
+EXTRA_DIST += tests/test_gschem_resize.c tests/test_gschem_resize.py

@@ -71,6 +71,9 @@ main_prog(void *closure, int argc, char *argv[])
 
   TOPLEVEL *pr_current;
 
+  /* Guile requires a context argument; the boot caller passes NULL. */
+  (void) closure;
+
   argv_index = parse_commandline(argc, argv);
   cwd = g_get_current_dir();
 

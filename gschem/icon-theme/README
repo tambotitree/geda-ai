@@ -138,3 +138,23 @@ Documentation actions in gschem/scheme/gschem/builtins.scm also need bundled
 artwork: help-browser (including GTK's -ltr/-rtl names), gtk-help, help-faq,
 and web-browser. The project SVGs cover these names. The REPL action's
 accessories-text-editor name uses the recovered gtk-edit artwork.
+
+GUI icon policy (2026-10-20)
+----------------------------
+
+The active GTK applications are gschem and gattrib. gschem embeds its action
+and application artwork; gattrib embeds its own application artwork. Both use
+the fixed appearance policy in gschem_appearance.c, with no desktop icon search
+paths. gattrib has text menus, so its commands do not require themed icons.
+Older Tk-based experimental helpers do not request desktop icon-theme names.
+
+GTK can request directional variants of action names, even when a source only
+specifies the base name. Resource aliases cover help-browser and
+applications-science, including -ltr and -rtl. The resource regression tests
+load these names with filesystem theme paths removed. Do not fix missing
+artwork by asking users to install a desktop theme: bundle the required icon
+or alias it to suitable existing project artwork and extend the tests.
+
+Checks:
+  make -C gschem/src check
+  make -C gattrib/src check

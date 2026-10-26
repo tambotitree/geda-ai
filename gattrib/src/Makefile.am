@@ -5,6 +5,8 @@ bin_PROGRAMS = gattrib
 
 ## don't forget all *.h files */
 gattrib_SOURCES = \
+		gattrib_icons.c gattrib_icons.h \
+		$(top_srcdir)/gschem/src/gschem_appearance.c \
 		gattrib_bom.c \
 		gattrib_bom_hook.c \
 		gattrib_json.c \
@@ -34,7 +36,8 @@ gattrib_SOURCES = \
 
 
 gattrib_CPPFLAGS = -I$(top_srcdir)/libgeda/include \
-	-I$(srcdir)/../include -I$(top_srcdir) -I$(includedir)
+	-I$(srcdir)/../include -I$(top_srcdir) -I$(includedir) \
+	-I$(top_srcdir)/gschem/include
 gattrib_CFLAGS = $(GCC_CFLAGS) $(GLIB_CFLAGS) $(GIO_CFLAGS) \
 	$(MINGW_CFLAGS) \
 	$(GTK_CFLAGS) $(GTHREAD_CFLAGS) $(GUILE_CFLAGS) \
@@ -83,3 +86,29 @@ MOSTLYCLEANFILES = *.log *.ps core FILE *~ #*#  test-gattrib-sheet test-gattrib-
 CLEANFILES = *.log *.ps core FILE *~ #*# test-gattrib-sheet test-gattrib-bom test-gattrib-bom-hook *.trs
 DISTCLEANFILES = *.log core FILE *~ #*#
 MAINTAINERCLEANFILES = *.log *.ps core FILE *~ Makefile.in #*#
+
+# Compile the application icon; no installed desktop theme is required.
+BUILT_SOURCES = gattrib_icon_resources.c gattrib_icon_resources.h
+CLEANFILES += $(BUILT_SOURCES)
+nodist_gattrib_SOURCES = $(BUILT_SOURCES)
+EXTRA_DIST = $(srcdir)/../data/gattrib-icons.gresource.xml
+
+gattrib_icon_resources.c: $(srcdir)/../data/gattrib-icons.gresource.xml $(srcdir)/../data/geda-gattrib-48.png
+	$(AM_V_GEN) $(GLIB_COMPILE_RESOURCES) --target=$@.tmp \
+	  --sourcedir=$(srcdir)/../data --generate-source --manual-register \
+	  --compiler=msvc --c-name=gattrib_icon_data $< && mv $@.tmp $@
+
+gattrib_icon_resources.h: $(srcdir)/../data/gattrib-icons.gresource.xml
+	$(AM_V_GEN) $(GLIB_COMPILE_RESOURCES) --target=$@.tmp \
+	  --sourcedir=$(srcdir)/../data --generate-header --manual-register \
+	  --c-name=gattrib_icon_data $< && mv $@.tmp $@
+
+check_PROGRAMS += test-gattrib-icons
+TESTS += test-gattrib-icons
+test_gattrib_icons_SOURCES = $(top_srcdir)/tests/test_gattrib_icons.c gattrib_icons.c gattrib_icons.h \
+  $(top_srcdir)/gschem/src/gschem_appearance.c
+nodist_test_gattrib_icons_SOURCES = $(BUILT_SOURCES)
+test_gattrib_icons_CPPFLAGS = -I$(srcdir) -I$(top_srcdir)/gschem/include $(GTK_CFLAGS)
+test_gattrib_icons_CFLAGS = $(GCC_CFLAGS) -Wall -Wextra -Werror -Wpedantic \
+  -Wstrict-prototypes -Wmissing-prototypes -Wformat=2
+test_gattrib_icons_LDADD = $(GTK_LIBS)

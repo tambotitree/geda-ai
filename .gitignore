@@ -48,3 +48,24 @@ __pycache__/
 # Generated embedded gschem icon resources
 /gschem/src/gschem_icon_resources.c
 /gschem/src/gschem_icon_resources.h
+
+# Generated gattrib icon resources
+/gattrib/src/gattrib_icon_resources.c
+/gattrib/src/gattrib_icon_resources.h
+
+# Independent PCB editor companion checkout (separate Git history)
+/pcb-ai/
+
+# Build products and local recovery files do not belong in source releases.
+*.o
+*.lo
+*.a
+*.la
+*.dylib
+.libs/
+.deps/
+*.trs
+*.dSYM/
+.DS_Store
+\#*\#
+.env.*

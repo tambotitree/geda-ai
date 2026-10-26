@@ -510,6 +510,36 @@ x_window_restore_all_menu_geometry(GschemToplevel *w_current)
   return FALSE;
 }
 
+/*! \brief Choose a usable startup size in GTK logical screen coordinates.
+ * Keep larger saved sizes, raise tiny ones, and fit the monitor work area.
+ */
+static void
+x_window_startup_size (GtkWindow *window, gint *width, gint *height)
+{
+  GdkDisplay *display = gtk_widget_get_display (GTK_WIDGET (window));
+  GdkMonitor *monitor = gdk_display_get_primary_monitor (display);
+  GdkRectangle work = {0, 0, 1280, 720};
+  GdkWindow *surface = gtk_widget_get_window (GTK_WIDGET (window));
+  gint minimum_width, minimum_height;
+  if (surface != NULL)
+    monitor = gdk_display_get_monitor_at_window (display, surface);
+  if (monitor == NULL && gdk_display_get_n_monitors (display) > 0)
+    monitor = gdk_display_get_monitor (display, 0);
+  if (monitor != NULL)
+    gdk_monitor_get_workarea (monitor, &work);
+  work.width = MAX (1, work.width);
+  work.height = MAX (1, work.height);
+  minimum_width = MIN (1280, work.width);
+  minimum_height = MIN (720, work.height);
+  if (*width <= 0 || *height <= 0)
+    {
+      *width = MAX (minimum_width, work.width * 2 / 3);
+      *height = MAX (minimum_height, work.height * 2 / 3);
+    }
+  *width = CLAMP (*width, minimum_width, work.width);
+  *height = CLAMP (*height, minimum_height, work.height);
+}
+
 /*!
  * \brief Restores the main window and dock area geometry from saved configuration.
  *
@@ -531,11 +561,7 @@ x_window_restore_geometry(GschemToplevel *w_current)
                              "gschem.window-geometry", "width", NULL);
   height = eda_config_get_int(eda_config_get_user_context(),
                               "gschem.window-geometry", "height", NULL);
-  if (width <= 0 || height <= 0)
-  {
-    width = 1320;
-    height = 990;
-  }
+  x_window_startup_size (GTK_WINDOW (w_current->main_window), &width, &height);
 
   g_object_set(w_current->main_window,
                "default-width", width,
@@ -565,17 +591,17 @@ x_window_restore_geometry(GschemToplevel *w_current)
   dock_size = eda_config_get_int(eda_config_get_user_context(),
                                  "gschem.dock-geometry.left", "size", NULL);
   gtk_widget_set_size_request(w_current->left_notebook,
-                              dock_size > 0 ? dock_size : 330, 0);
+                              MIN (dock_size > 0 ? dock_size : 330, width / 3), 0);
 
   dock_size = eda_config_get_int(eda_config_get_user_context(),
                                  "gschem.dock-geometry.bottom", "size", NULL);
   gtk_widget_set_size_request(w_current->bottom_notebook,
-                              0, dock_size > 0 ? dock_size : 165);
+                              0, MIN (dock_size > 0 ? dock_size : 165, height / 3));
 
   dock_size = eda_config_get_int(eda_config_get_user_context(),
                                  "gschem.dock-geometry.right", "size", NULL);
   gtk_widget_set_size_request(w_current->right_notebook,
-                              dock_size > 0 ? dock_size : 330, 0);
+                              MIN (dock_size > 0 ? dock_size : 330, width / 3), 0);
 }
 
 /*!

@@ -306,6 +306,7 @@ test_gschem_icons_LDADD = $(GTK_LIBS)
 # Focused viewport, connectivity and AI Assist regression checks.
 EXTRA_DIST += $(top_srcdir)/tests/test_viewport_rendering.py \
   $(top_srcdir)/tests/test_picker_attributes.py \
+  $(top_srcdir)/tests/test_picker_lifetime.py \
   $(top_srcdir)/tests/test_net_interaction.py \
   $(top_srcdir)/tests/test_ai_chat_backend.py \
   $(top_srcdir)/tests/test_ai_chat_ui.py \
@@ -320,3 +321,5 @@ check-local: gschem-gschem_page_geometry.o
 	$(PYTHON) $(top_srcdir)/tests/test_ai_chat_backend.py
 	GEDA_TEST_BUILD_ROOT='$(abs_top_builddir)' $(PYTHON) \
 	  $(top_srcdir)/tests/test_ai_chat_ui.py
+
+	$(PYTHON) $(top_srcdir)/tests/test_picker_lifetime.py

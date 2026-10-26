@@ -94,6 +94,9 @@
     <!-- Project SVG artwork for the remaining action names. -->
     <file alias="24x24/actions/insert-image.svg">scalable/actions/insert-image.svg</file>
     <file alias="24x24/actions/window-new.svg">scalable/actions/window-new.svg</file>
+    <file alias="applications-science.png">48x48/apps/geda-gschem.png</file>
+    <file alias="applications-science-ltr.png">48x48/apps/geda-gschem.png</file>
+    <file alias="applications-science-rtl.png">48x48/apps/geda-gschem.png</file>
     <file alias="geda-gschem.png">48x48/apps/geda-gschem.png</file>
     <!-- Scheme-defined documentation actions and GTK directional lookups. -->
     <file alias="24x24/actions/help-browser.svg">scalable/actions/help-browser.svg</file>

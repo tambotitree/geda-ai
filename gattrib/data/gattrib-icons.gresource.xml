@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/org/geda/gattrib/icons">
+    <file alias="geda-gattrib.png">geda-gattrib-48.png</file>
+  </gresource>
+</gresources>

@@ -133,7 +133,6 @@ build_and_run_command (const gchar *format, ...)
   gint i;
   gint status;
   gboolean result = FALSE;
-  gboolean spawn_result;
   gchar *standard_output = NULL;
   gchar *standard_error = NULL;
   GError * error = NULL;
@@ -383,7 +382,7 @@ fix_spaces (gchar * str)
    *   is now relative.  The hi_res mark_x,mark_y and text_x,text_y resolutions
    *   are 100x the other formats.
    */
-PcbElement *
+static PcbElement *
 pcb_element_line_parse (gchar * line)
 {
   PcbElement *el = NULL;
@@ -538,13 +537,25 @@ simple_translate (PcbElement * el)
   el->y=strdup("0");
 }
 
+/*! \brief Write a PCB element header, preserving quoted or numeric flags. */
+static void
+write_element_header (FILE *output, const PcbElement *element,
+                      const gchar *description, const gchar *refdes,
+                      const gchar *value)
+{
+  const gchar *quote = element->quoted_flags ? "\"" : "";
+  fprintf (output, "Element%c%s%s%s \"%s\" \"%s\" \"%s\" %s %s%s\n",
+           element->res_char, quote, element->flags, quote,
+           description, refdes, value, element->x, element->y, element->tail);
+}
+
 static gboolean
 insert_element (FILE * f_out, gchar * element_file,
                 gchar * footprint, gchar * refdes, gchar * value)
 {
   FILE *f_in;
   PcbElement *el;
-  gchar *fmt, *s, buf[1024];
+  gchar *s, buf[1024];
   gboolean retval = FALSE;
 
   if ((f_in = fopen (element_file, "r")) == NULL) {
@@ -557,8 +568,7 @@ insert_element (FILE * f_out, gchar * element_file,
    * layout. Assumes that a PCB layout will have a "PCB" line. */
   while ((fgets (buf, sizeof (buf), f_in)) != NULL) {
     for (s = buf; *s == ' ' || *s == '\t'; ++s);
-    s[3] = 0;                   /* Truncate line */
-    if (strncmp ("PCB", s, sizeof (buf)) == 0) {
+    if (strncmp ("PCB", s, 3) == 0) {
       printf ("Warning: %s appears to be a PCB layout file. Skipping.\n",
               element_file);
       fclose (f_in);
@@ -574,13 +584,7 @@ insert_element (FILE * f_out, gchar * element_file,
     for (s = buf; *s == ' ' || *s == '\t'; ++s);
     if ((el = pcb_element_line_parse (s)) != NULL) {
       simple_translate (el);
-      fmt = el->quoted_flags ?
-        "Element%c\"%s\" \"%s\" \"%s\" \"%s\" %s %s%s\n" :
-        "Element%c%s \"%s\" \"%s\" \"%s\" %s %s%s\n";
-
-      fprintf (f_out, fmt,
-               el->res_char, el->flags, footprint, refdes, value,
-               el->x, el->y, el->tail);
+      write_element_header (f_out, el, footprint, refdes, value);
       retval = TRUE;
     } else if (*s != '#')
       fputs (buf, f_out);
@@ -591,7 +595,7 @@ insert_element (FILE * f_out, gchar * element_file,
 }
 
 
-gchar *
+static gchar *
 find_element (gchar * dir_path, gchar * element)
 {
   GDir *dir;
@@ -637,7 +641,7 @@ find_element (gchar * dir_path, gchar * element)
   return found;
 }
 
-gchar *
+static gchar *
 search_element_directories (PcbElement * el)
 {
   GList *list;
@@ -717,7 +721,7 @@ search_element_directories (PcbElement * el)
  *      100-Pin-jack -> 100 Pin jack
  */
 static PcbElement *
-pkg_to_element (FILE * f, gchar * pkg_line)
+pkg_to_element (gchar * pkg_line)
 {
   PcbElement *el;
   gchar **args, *s;
@@ -820,7 +824,7 @@ add_elements (gchar * pcb_file)
 {
   FILE *f_in, *f_out;
   PcbElement *el = NULL;
-  gchar *command, *p, *tmp_file, *s, buf[1024];
+  gchar *p, *tmp_file, *s, buf[1024];
   gint total, paren_level = 0;
   gboolean is_m4, skipping = FALSE;
 
@@ -845,7 +849,7 @@ add_elements (gchar * pcb_file)
     if ((el = pcb_element_line_parse (s)) != NULL)
       is_m4 = TRUE;
     else
-      el = pkg_to_element (f_out, s);
+      el = pkg_to_element (s);
     if (el && pcb_element_exists (el, TRUE)) {
       skipping = is_m4;
       pcb_element_free (el);
@@ -922,7 +926,7 @@ update_element_descriptions (gchar * pcb_file, gchar * bak)
   FILE *f_in, *f_out;
   GList *list;
   PcbElement *el, *el_exists;
-  gchar *fmt, *command, *tmp, *s, buf[1024];
+  gchar *tmp, *s, buf[1024];
 
   for (list = pcb_element_list; list; list = g_list_next (list)) {
     el = (PcbElement *) list->data;
@@ -945,13 +949,8 @@ update_element_descriptions (gchar * pcb_file, gchar * bak)
     if ((el = pcb_element_line_parse (s)) != NULL
         && (el_exists = pcb_element_exists (el, FALSE)) != NULL
         && el_exists->changed_description) {
-      fmt = el->quoted_flags ?
-        "Element%c\"%s\" \"%s\" \"%s\" \"%s\" %s %s%s\n" :
-        "Element%c%s \"%s\" \"%s\" \"%s\" %s %s%s\n";
-      fprintf (f_out, fmt,
-               el->res_char,
-               el->flags, el_exists->changed_description,
-               el->refdes, el->value, el->x, el->y, el->tail);
+      write_element_header (f_out, el, el_exists->changed_description,
+                            el->refdes, el->value);
       printf ("%s: updating element Description: %s -> %s\n",
               el->refdes, el->description, el_exists->changed_description);
       el_exists->still_exists = TRUE;
@@ -977,7 +976,7 @@ prune_elements (gchar * pcb_file, gchar * bak)
   FILE *f_in, *f_out;
   GList *list;
   PcbElement *el, *el_exists;
-  gchar *fmt, *command, *tmp, *s, buf[1024];
+  gchar *tmp, *s, buf[1024];
   gint paren_level = 0;
   gboolean skipping = FALSE;
 
@@ -1026,12 +1025,8 @@ prune_elements (gchar * pcb_file, gchar * bak)
       continue;
     }
     if (el_exists && el_exists->changed_value) {
-      fmt = el->quoted_flags ?
-        "Element%c\"%s\" \"%s\" \"%s\" \"%s\" %s %s%s\n" :
-        "Element%c%s \"%s\" \"%s\" \"%s\" %s %s%s\n";
-      fprintf (f_out, fmt,
-               el->res_char, el->flags, el->description, el->refdes,
-               el_exists->changed_value, el->x, el->y, el->tail);
+      write_element_header (f_out, el, el->description, el->refdes,
+                            el_exists->changed_value);
       if (verbose)
         printf ("%s: changed element %s value: %s -> %s\n",
                 el->refdes, el->description,
@@ -1333,7 +1328,7 @@ usage ()
 static void
 get_args (gint argc, gchar ** argv)
 {
-  gchar *opt, *arg, *s;
+  gchar *opt, *arg;
   gint i, r;
 
   for (i = 1; i < argc; ++i) {

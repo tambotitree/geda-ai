@@ -1858,14 +1858,16 @@ compselect_create_widget (GschemDockable *dockable)
    * permanently NULL: gtk_expander_set_expanded() and gtk_paned_set_position()
    * in compselect_restore_internal_geometry() then raised a Gtk-CRITICAL on
    * every start, and the vertical layout could not work at all. */
-  compselect->preview_expander = gtk_expander_new (NULL);
-  compselect->attribs_expander = gtk_expander_new (NULL);
+  /* These six alternative-layout widgets may remain unparented. Own their
+   * initial floating references until dispose(), also across reparenting. */
+  compselect->preview_expander = g_object_ref_sink (gtk_expander_new (NULL));
+  compselect->attribs_expander = g_object_ref_sink (gtk_expander_new (NULL));
 
-  compselect->preview_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-  compselect->attribs_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+  compselect->preview_box = g_object_ref_sink (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
+  compselect->attribs_box = g_object_ref_sink (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
 
-  compselect->preview_paned = gtk_paned_new (GTK_ORIENTATION_VERTICAL);
-  compselect->attribs_paned = gtk_paned_new (GTK_ORIENTATION_VERTICAL);
+  compselect->preview_paned = g_object_ref_sink (gtk_paned_new (GTK_ORIENTATION_VERTICAL));
+  compselect->attribs_paned = g_object_ref_sink (gtk_paned_new (GTK_ORIENTATION_VERTICAL));
 
   /* Keep Attributes immediately below the preview's natural height.
    * Only the attribute list receives extra vertical space.

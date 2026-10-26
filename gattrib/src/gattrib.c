@@ -52,6 +52,7 @@
  *------------------------------------------------------------------*/
 #include <libgeda/libgeda.h>       /* geda library fcns  */
 #include "../include/struct.h"     /* typdef and struct declarations */
+#include "gattrib_icons.h"
 #include "../include/prototype.h"  /* function prototypes */
 #include "../include/globals.h"
 
@@ -174,7 +175,9 @@ static void gattrib_main(void *closure, int argc, char *argv[])
 
   i_vars_set(pr_current);
 
+  gattrib_icons_prepare ();
   gtk_init(&argc, &argv);
+  gattrib_icons_init ();
 
   x_window_init();
 
